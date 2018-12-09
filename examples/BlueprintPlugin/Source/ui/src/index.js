@@ -1,5 +1,6 @@
 import React from 'react';
+import Blueprint from './Blueprint';
 import ReactDOM from 'react-dom';
 import App from './App';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+Blueprint.render(<App />, document.getElementById('root'));
