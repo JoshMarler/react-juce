@@ -15,6 +15,11 @@
 BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (BlueprintPluginAudioProcessor& p)
     : AudioProcessorEditor (&p), processor (p)
 {
+    File sourceDir = (File (__FILE__)).getParentDirectory();
+
+    appRoot.setRootComponent(this);
+    appRoot.runScript(sourceDir.getChildFile("ui/build/static/js/main.js"));
+
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (400, 300);
