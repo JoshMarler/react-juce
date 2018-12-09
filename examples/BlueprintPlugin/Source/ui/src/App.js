@@ -1,24 +1,44 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this._timerId = null;
+
+    this.state = {
+      date: new Date(),
+    };
+  }
+
+  tick() {
+    this.setState({
+      date: new Date(),
+    });
+  }
+
+  componentDidMount() {
+    this._timerId = setInterval(
+      () => this.tick(),
+      1000
+    );
+  }
+
+  componentWillUnmount() {
+    clearInterval(this._timerId);
+  }
+
   render() {
+    const styleObj = {
+      'background-color': 'blue',
+      ...this.props.style,
+    };
+
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div style={styleObj}>
+        <div style={{'background-color': 'rgba(200, 200, 100, 0.5)', 'color': 'white', 'width': '50%'}}>
+          Hi! Date: {this.state.date.toLocaleTimeString()}
+        </div>
       </div>
     );
   }
