@@ -1,3 +1,5 @@
+import "@babel/polyfill";
+
 import React from 'react';
 import Blueprint from './Blueprint';
 import ReactDOM from 'react-dom';
