@@ -1,3 +1,5 @@
+/* global BlueprintBackend:false */
+
 import ReactReconciler from 'react-reconciler';
 
 const MethodTracer = {
@@ -58,7 +60,7 @@ const HostConfig = new Proxy({
    *  @param {Object} internalInstanceHandle
    */
   createInstance(elementType, props, rootContainerInstance, hostContext, internalInstanceHandle) {
-    return document.createElement(elementType);
+    return BlueprintBackend.createInstance(elementType);
   },
 
   /** Create a new text node.
@@ -69,7 +71,8 @@ const HostConfig = new Proxy({
    *  @param {Object} internalInstanceHandle
    */
   createTextInstance(text, rootContainerInstance, hostContext, internalInstanceHandle) {
-    return document.createTextNode(text);
+    return {};
+    // return document.createTextNode(text);
   },
 
   /** Mount the child to its container.
