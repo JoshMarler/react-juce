@@ -20,6 +20,17 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
     appRoot.setRootComponent(this);
     appRoot.runScript(sourceDir.getChildFile("ui/build/static/js/main.js"));
 
+    testView = std::make_unique<blueprint::View>();
+    testView2 = std::make_unique<blueprint::View>();
+    testView->setProperty("flex", 1.0);
+    testView->setProperty("debug", 1.0);
+    testView->setProperty("background-color", "ff272777");
+    testView2->setProperty("max-height", 200.0);
+    testView2->setProperty("flex", 1.0);
+    testView2->setProperty("background-color", "ff772727");
+    addAndMakeVisible(testView.get());
+    testView->appendChild(testView2.get());
+
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (400, 300);
@@ -42,6 +53,5 @@ void BlueprintPluginAudioProcessorEditor::paint (Graphics& g)
 
 void BlueprintPluginAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    testView->performLayout(getLocalBounds().toFloat());
 }

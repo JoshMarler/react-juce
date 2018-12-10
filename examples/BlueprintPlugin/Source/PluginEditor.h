@@ -31,6 +31,8 @@ private:
     // access the processor object that created it.
     BlueprintPluginAudioProcessor& processor;
     blueprint::ReactApplicationRoot appRoot;
+    std::unique_ptr<blueprint::View> testView;
+    std::unique_ptr<blueprint::View> testView2;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlueprintPluginAudioProcessorEditor)
 };
