@@ -5,4 +5,4 @@ import Blueprint from './Blueprint';
 import ReactDOM from 'react-dom';
 import App from './App';
 
-Blueprint.render(<App />, {});
+Blueprint.render(<App />, Blueprint.getRootContainer());

@@ -12,20 +12,20 @@ class App extends Component {
   }
 
   tick() {
-    this.setState({
-      date: new Date(),
-    });
+    // this.setState({
+    //   date: new Date(),
+    // });
   }
 
   componentDidMount() {
-    this._timerId = setInterval(
-      () => this.tick(),
-      1000
-    );
+    // this._timerId = setInterval(
+    //   () => this.tick(),
+    //   1000
+    // );
   }
 
   componentWillUnmount() {
-    clearInterval(this._timerId);
+    // clearInterval(this._timerId);
   }
 
   render() {
@@ -37,7 +37,6 @@ class App extends Component {
     return (
       <div style={styleObj}>
         <div style={{'background-color': 'rgba(200, 200, 100, 0.5)', 'color': 'white', 'width': '50%'}}>
-          Hi! Date: {this.state.date.toLocaleTimeString()}
         </div>
       </div>
     );
