@@ -30,13 +30,21 @@ class App extends Component {
 
   render() {
     const styleObj = {
-      'background-color': 'blue',
+      'background-color': 'ff272777',
+      'align-items': 'center',
+      'flex': 1.0,
       ...this.props.style,
     };
 
+    const childStyleObj = {
+      'background-color': '77772727',
+      'flex': 1.0,
+      'height': 200.0,
+    };
+
     return (
-      <div style={styleObj}>
-        <div style={{'background-color': 'rgba(200, 200, 100, 0.5)', 'color': 'white', 'width': '50%'}}>
+      <div {...styleObj}>
+        <div {...childStyleObj}>
         </div>
       </div>
     );

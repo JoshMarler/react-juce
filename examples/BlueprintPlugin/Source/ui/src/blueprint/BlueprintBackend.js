@@ -3,6 +3,8 @@
 let __rootViewInstance = null;
 
 if (typeof window !== 'undefined') {
+  // This is just a little shim so that I can build for web and run my renderer
+  // in the browser, which can be helpful for debugging my renderer implementation.
   window.__BlueprintNative__ = {
     appendChild(parent, child) {
       // noop
@@ -26,6 +28,10 @@ class ViewInstance {
   appendChild(childInstance) {
     return __BlueprintNative__.appendChild(this._id, childInstance._id);
   }
+
+  setProperty(propKey, value) {
+    return __BlueprintNative__.setViewProperty(this._id, propKey, value);
+  }
 }
 
 export default {
@@ -34,7 +40,7 @@ export default {
     if (__rootViewInstance !== null)
       return __rootViewInstance;
 
-    const id = __BlueprintNative__.getRootInstance();
+    const id = __BlueprintNative__.getRootInstanceId();
     __rootViewInstance = new ViewInstance(id, 'View');
 
     return __rootViewInstance;

@@ -77,16 +77,8 @@ const HostConfig = new Proxy({
    */
   finalizeInitialChildren(instance, elementType, props, rootContainerInstance) {
     Object.keys(props).forEach(function(propKey) {
-      if (propKey === 'style') {
-        let style = props[propKey];
-        let styleString = '';
-
-        Object.keys(style).forEach(function(styleKey) {
-          styleString += `${styleKey}: ${style[styleKey]}; `;
-        });
-
-        console.log('style setter got hit first');
-        // instance.setAttribute('style', styleString);
+      if (propKey !== 'children') {
+        instance.setProperty(propKey, props[propKey]);
       }
     });
   },
@@ -127,17 +119,7 @@ const HostConfig = new Proxy({
    */
   commitUpdate(instance, updatePayload, elementType, oldProps, newProps, internalInstanceHandle) {
     Object.keys(updatePayload).forEach(function(propKey) {
-      if (propKey === 'style') {
-        let style = updatePayload[propKey];
-        let styleString = '';
-
-        Object.keys(style).forEach(function(styleKey) {
-          styleString += `${styleKey}: ${style[styleKey]}; `;
-        });
-
-        console.log('style setter got hit');
-        // instance.setAttribute('style', styleString);
-      }
+      instance.setProperty(propKey, updatePayload[propKey]);
     });
   },
 

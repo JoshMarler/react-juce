@@ -25,7 +25,7 @@ namespace blueprint
         static duk_ret_t createViewInstance (duk_context *ctx);
         static duk_ret_t setViewProperty (duk_context *ctx);
         static duk_ret_t appendChild (duk_context *ctx);
-        static duk_ret_t getRootInstance (duk_context *ctx);
+        static duk_ret_t getRootInstanceId (duk_context *ctx);
     };
 
     //==============================================================================
@@ -61,7 +61,7 @@ namespace blueprint
                 { "createViewInstance", BlueprintNative::createViewInstance, 1},
                 { "setViewProperty", BlueprintNative::setViewProperty, 3},
                 { "appendChild", BlueprintNative::appendChild, 2},
-                { "getRootInstance", BlueprintNative::getRootInstance, 0},
+                { "getRootInstanceId", BlueprintNative::getRootInstanceId, 0},
                 { NULL, NULL, 0 }
             };
 
@@ -118,14 +118,11 @@ namespace blueprint
         }
 
         //==============================================================================
-        /** Returns the viewTable id of the root component (this). */
-        juce::String getRootInstance() { return getComponentID(); }
-
         /** Creates a new view instance and registers it with the view table.
 
             Returns the new view component id.
          */
-        juce::String createViewInstance()
+        View* createViewInstance()
         {
             juce::Uuid id;
             juce::String sid = id.toDashedString();
@@ -133,7 +130,20 @@ namespace blueprint
             viewTable[sid] = std::make_unique<View>();
             viewTable[sid]->setComponentID(sid);
 
-            return sid;
+            return viewTable[sid].get();
+        }
+
+        View* getViewHandle (juce::String viewId)
+        {
+            if (viewId == getComponentID())
+                return this;
+
+            if (viewTable.find(viewId) != viewTable.end())
+                return viewTable[viewId].get();
+
+            // If we get here, you asked for a view that doesn't exist by that
+            // identifier.
+            jassertfalse;
         }
 
         /** Adds a child component to a given parent component. */
