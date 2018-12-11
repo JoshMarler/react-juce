@@ -9,18 +9,31 @@
 
 #pragma once
 
+#include <map>
+
+#include "blueprint_View.h"
+
 
 namespace blueprint
 {
 
-    duk_ret_t blueprint_create_instance(duk_context *ctx);
+    /** This struct defines the set of functions that form the native interface
+        for the JavaScript evaluation context.
+     */
+    struct BlueprintNative
+    {
+        static duk_ret_t createViewInstance (duk_context *ctx);
+        static duk_ret_t setViewProperty (duk_context *ctx);
+        static duk_ret_t appendChild (duk_context *ctx);
+        static duk_ret_t getRootInstance (duk_context *ctx);
+    };
 
     //==============================================================================
     /** The ReactApplicationRoot class prepares and maintains a Duktape evaluation
         context with the relevant hooks for supporting the Blueprint render
         backend.
      */
-    class ReactApplicationRoot
+    class ReactApplicationRoot : public View
     {
     public:
         //==============================================================================
@@ -44,16 +57,25 @@ namespace blueprint
             duk_console_init(ctx, DUK_CONSOLE_FLUSH);
 
             // Register react render backend functions
-            const duk_function_list_entry my_module_funcs[] = {
-                { "createInstance", blueprint_create_instance, 1},
+            const duk_function_list_entry blueprintNativeFuncs[] = {
+                { "createViewInstance", BlueprintNative::createViewInstance, 1},
+                { "setViewProperty", BlueprintNative::setViewProperty, 3},
+                { "appendChild", BlueprintNative::appendChild, 2},
+                { "getRootInstance", BlueprintNative::getRootInstance, 0},
                 { NULL, NULL, 0 }
             };
 
             duk_push_global_object(ctx);
             duk_push_object(ctx);
-            duk_put_function_list(ctx, -1, my_module_funcs);
-            duk_put_prop_string(ctx, -2, "BlueprintBackend");
+            duk_put_function_list(ctx, -1, blueprintNativeFuncs);
+            duk_put_prop_string(ctx, -2, "__BlueprintNative__");
             duk_pop(ctx);
+
+            // Assign our own component id
+            juce::Uuid id;
+            juce::String sid = id.toDashedString();
+
+            setComponentID(sid);
         }
 
         ~ReactApplicationRoot()
@@ -62,11 +84,26 @@ namespace blueprint
         }
 
         //==============================================================================
-        void setRootComponent (juce::Component* root)
+        /** Override the default View behavior. */
+        void resized() override
         {
-            rootComponent = root;
+            // When the top level React root receives a `resized()` event, we have to
+            // recalculate the whole flex tree because of properties like flex-wrap which
+            // depend on the available parent bounds.
+            juce::Rectangle<float> bounds = getLocalBounds().toFloat();
+            const float width = bounds.getWidth();
+            const float height = bounds.getHeight();
+
+            YGNodeCalculateLayout(yogaNode, width, height, YGDirectionInherit);
+
+            // TODO: Maybe this shouldn't be View::resized() but should call its
+            // own setBounds and iterate children. That way it doesn't clobber the
+            // position assigned to it by its parent...?
+            View::resized();
         }
 
+        //==============================================================================
+        /** Reads a JavaScript bundle from file and evaluates it in the Duktape context. */
         void runScript (const juce::File& f)
         {
             auto src = f.loadFileAsString();
@@ -80,9 +117,40 @@ namespace blueprint
             duk_pop(ctx);
         }
 
+        //==============================================================================
+        /** Returns the viewTable id of the root component (this). */
+        juce::String getRootInstance() { return getComponentID(); }
+
+        /** Creates a new view instance and registers it with the view table.
+
+            Returns the new view component id.
+         */
+        juce::String createViewInstance()
+        {
+            juce::Uuid id;
+            juce::String sid = id.toDashedString();
+
+            viewTable[sid] = std::make_unique<View>();
+            viewTable[sid]->setComponentID(sid);
+
+            return sid;
+        }
+
+        /** Adds a child component to a given parent component. */
+        void appendChild(juce::String parentId, juce::String childId)
+        {
+            jassert (parentId == getComponentID() || viewTable.find(parentId) != viewTable.end());
+            jassert (viewTable.find(childId) != viewTable.end());
+
+            if (parentId == getComponentID())
+                return View::appendChild(viewTable[childId].get());
+
+            viewTable[parentId]->appendChild(viewTable[childId].get());
+        }
+
     private:
         //==============================================================================
-        juce::Component* rootComponent;
+        std::map<juce::String, std::unique_ptr<View>> viewTable;
         duk_context* ctx;
 
         //==============================================================================

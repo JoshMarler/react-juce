@@ -213,22 +213,7 @@ namespace blueprint
         resized();
     }
 
-    void View::performLayout (juce::Rectangle<float> bounds)
-    {
-        const float width = bounds.getWidth();
-        const float height = bounds.getHeight();
-
-        YGNodeCalculateLayout(yogaNode, width, height, YGDirectionInherit);
-        setBounds(getCachedFlexLayout()
-                  .withPosition(bounds.getPosition())
-                  .toNearestInt());
-    }
-
-    void View::updateLayout()
-    {
-        setBounds(getCachedFlexLayout().toNearestInt());
-    }
-
+    //==============================================================================
     juce::Rectangle<float> View::getCachedFlexLayout()
     {
         return {
@@ -266,10 +251,13 @@ namespace blueprint
                                                     | YGPrintOptionsStyle
                                                     | YGPrintOptionsChildren));
 
-        // Assign child bounds
+        // Update our own bounds
+        setBounds(getCachedFlexLayout().toNearestInt());
+
+        // Then assign child bounds
         for (int i = 0; i < getNumChildComponents(); ++i)
             if (View* v = dynamic_cast<View*>(getChildComponent(i)))
-                v->updateLayout();
+                v->resized();
     }
 
 }
