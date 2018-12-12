@@ -9,11 +9,17 @@ if (typeof window !== 'undefined') {
     appendChild(parent, child) {
       // noop
     },
-    getRootInstance() {
+    getRootInstanceId() {
       return 'rootinstanceid';
     },
     createViewInstance() {
       return 'someviewinstanceid';
+    },
+    createTextViewInstance() {
+      return 'sometextviewinstanceid';
+    },
+    setViewProperty() {
+      // Noop
     },
   };
 }
@@ -50,6 +56,11 @@ export default {
   createViewInstance(viewType, props, parentInstance) {
     const id = __BlueprintNative__.createViewInstance(viewType);
     return new ViewInstance(id, viewType);
-  }
+  },
+
+  createTextViewInstance(text) {
+    const id = __BlueprintNative__.createTextViewInstance(text);
+    return new ViewInstance(id, 'Text');
+  },
 
 };

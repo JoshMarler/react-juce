@@ -38,4 +38,5 @@ duk_double_t dummy_get_now(void) {
 #include "duktape/extras/console/duk_console.c"
 
 #include "core/blueprint_ReactApplicationRoot.cpp"
+#include "core/blueprint_TextView.cpp"
 #include "core/blueprint_View.cpp"

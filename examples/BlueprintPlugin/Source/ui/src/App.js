@@ -42,11 +42,13 @@ class App extends Component {
       'flex': 1.0,
       'height': 200.0,
       'margin-horizontal': 80.0,
+      'justify-content': 'center',
     };
 
     return (
-      <div {...styleObj}>
+      <div debug="1" {...styleObj}>
         <div {...childStyleObj}>
+          The date today is: {this.state.date.toLocaleDateString()}
         </div>
       </div>
     );

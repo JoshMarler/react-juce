@@ -36,7 +36,7 @@ namespace blueprint
 
         //==============================================================================
         /** Set a property on the nativ view. */
-        void setProperty (const juce::Identifier& name, const juce::var& newValue);
+        virtual void setProperty (const juce::Identifier& name, const juce::var& newValue);
 
         /** Adds a child component behind the existing children. */
         void appendChild (View* childView);

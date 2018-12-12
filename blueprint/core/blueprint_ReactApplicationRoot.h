@@ -11,6 +11,7 @@
 
 #include <map>
 
+#include "blueprint_TextView.h"
 #include "blueprint_View.h"
 
 
@@ -23,6 +24,7 @@ namespace blueprint
     struct BlueprintNative
     {
         static duk_ret_t createViewInstance (duk_context *ctx);
+        static duk_ret_t createTextViewInstance (duk_context *ctx);
         static duk_ret_t setViewProperty (duk_context *ctx);
         static duk_ret_t appendChild (duk_context *ctx);
         static duk_ret_t getRootInstanceId (duk_context *ctx);
@@ -59,6 +61,7 @@ namespace blueprint
             // Register react render backend functions
             const duk_function_list_entry blueprintNativeFuncs[] = {
                 { "createViewInstance", BlueprintNative::createViewInstance, 1},
+                { "createTextViewInstance", BlueprintNative::createTextViewInstance, 1},
                 { "setViewProperty", BlueprintNative::setViewProperty, 3},
                 { "appendChild", BlueprintNative::appendChild, 2},
                 { "getRootInstanceId", BlueprintNative::getRootInstanceId, 0},
@@ -118,10 +121,7 @@ namespace blueprint
         }
 
         //==============================================================================
-        /** Creates a new view instance and registers it with the view table.
-
-            Returns the new view component id.
-         */
+        /** Creates a new view instance and registers it with the view table. */
         View* createViewInstance()
         {
             juce::Uuid id;
@@ -133,6 +133,20 @@ namespace blueprint
             return viewTable[sid].get();
         }
 
+        /** Creates a new text view instance and registers it with the view table. */
+        View* createTextViewInstance(const juce::String& value)
+        {
+            juce::Uuid id;
+            juce::String sid = id.toDashedString();
+
+            viewTable[sid] = std::make_unique<TextView>();
+            viewTable[sid]->setComponentID(sid);
+            viewTable[sid]->setProperty("textValue", value);
+
+            return viewTable[sid].get();
+        }
+
+        /** Returns a pointer to the view associated to the given id. */
         View* getViewHandle (juce::String viewId)
         {
             if (viewId == getComponentID())
@@ -144,18 +158,6 @@ namespace blueprint
             // If we get here, you asked for a view that doesn't exist by that
             // identifier.
             jassertfalse;
-        }
-
-        /** Adds a child component to a given parent component. */
-        void appendChild(juce::String parentId, juce::String childId)
-        {
-            jassert (parentId == getComponentID() || viewTable.find(parentId) != viewTable.end());
-            jassert (viewTable.find(childId) != viewTable.end());
-
-            if (parentId == getComponentID())
-                return View::appendChild(viewTable[childId].get());
-
-            viewTable[parentId]->appendChild(viewTable[childId].get());
         }
 
     private:

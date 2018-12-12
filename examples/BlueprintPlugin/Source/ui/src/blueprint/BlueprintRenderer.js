@@ -53,8 +53,7 @@ const HostConfig = new Proxy({
    *  @param {Object} internalInstanceHandle
    */
   createTextInstance(text, rootContainerInstance, hostContext, internalInstanceHandle) {
-    return {};
-    // return document.createTextNode(text);
+    return BlueprintBackend.createTextViewInstance(text);
   },
 
   /** Mount the child to its container.

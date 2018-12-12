@@ -25,6 +25,19 @@ namespace blueprint
         return 1;
     };
 
+    duk_ret_t BlueprintNative::createTextViewInstance (duk_context *ctx)
+    {
+        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+        jassert (duk_is_string(ctx, 0));
+
+        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
+        juce::String textValue = duk_get_string(ctx, 0);
+        View* view = root->createTextViewInstance(textValue);
+
+        duk_push_string(ctx, view->getComponentID().toRawUTF8());
+        return 1;
+    };
+
     duk_ret_t BlueprintNative::setViewProperty (duk_context *ctx)
     {
         jassert (ReactApplicationRoot::singletonInstance != nullptr);
