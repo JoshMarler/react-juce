@@ -26,6 +26,7 @@ class ViewInstance {
   }
 
   appendChild(childInstance) {
+    this._children.push(childInstance);
     return __BlueprintNative__.appendChild(this._id, childInstance._id);
   }
 

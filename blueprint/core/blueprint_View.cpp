@@ -100,20 +100,8 @@ namespace blueprint
         auto& props = getProperties();
         props.set(name, newValue);
 
-        // assignFlexProperty<YGAlign>(layoutNode, "align-items", ValidAlignValues, YGNodeStyleSetAlignItems);
-        // assignFlexProperty<YGAlign>(layoutNode, "align-content", ValidAlignValues, YGNodeStyleSetAlignContent);
-        // assignFlexProperty<YGAlign>(layoutNode, "align-self", ValidAlignValues, YGNodeStyleSetAlignSelf);
-        // assignFlexProperty<YGPositionType>(layoutNode, "position", ValidPositionTypeValues, YGNodeStyleSetPositionType);
-        // assignFlexProperty<YGWrap>(layoutNode, "flex-wrap", ValidFlexWrapValues, YGNodeStyleSetFlexWrap);
-        // assignFlexProperty<YGOverflow>(layoutNode, "overflow", ValidOverflowValues, YGNodeStyleSetOverflow);
-
-        // Note the empty prefix for setting position properties. This allows using a property
-        // such as "left" to specify the left edge position.
-        // assignEdgeFloatProperty(layoutNode, "", YGNodeStyleSetPosition);
-        // assignEdgeFloatProperty(layoutNode, "margin", YGNodeStyleSetMargin);
-        // assignEdgeFloatProperty(layoutNode, "padding", YGNodeStyleSetPadding);
-
-        // Next, update the layout node appropriately
+        //==============================================================================
+        // Flex enums
         if (name == juce::Identifier("direction"))
         {
             jassert (validateFlexProperty(newValue, ValidDirectionValues));
@@ -132,6 +120,44 @@ namespace blueprint
             YGNodeStyleSetJustifyContent(yogaNode, ValidJustifyValues[newValue]);
         }
 
+        if (name == juce::Identifier("align-items"))
+        {
+            jassert (validateFlexProperty(newValue, ValidAlignValues));
+            YGNodeStyleSetAlignItems(yogaNode, ValidAlignValues[newValue]);
+        }
+
+        if (name == juce::Identifier("align-content"))
+        {
+            jassert (validateFlexProperty(newValue, ValidAlignValues));
+            YGNodeStyleSetAlignContent(yogaNode, ValidAlignValues[newValue]);
+        }
+
+        if (name == juce::Identifier("align-self"))
+        {
+            jassert (validateFlexProperty(newValue, ValidAlignValues));
+            YGNodeStyleSetAlignSelf(yogaNode, ValidAlignValues[newValue]);
+        }
+
+        if (name == juce::Identifier("position"))
+        {
+            jassert (validateFlexProperty(newValue, ValidPositionTypeValues));
+            YGNodeStyleSetPositionType(yogaNode, ValidPositionTypeValues[newValue]);
+        }
+
+        if (name == juce::Identifier("flex-wrap"))
+        {
+            jassert (validateFlexProperty(newValue, ValidFlexWrapValues));
+            YGNodeStyleSetFlexWrap(yogaNode, ValidFlexWrapValues[newValue]);
+        }
+
+        if (name == juce::Identifier("overflow"))
+        {
+            jassert (validateFlexProperty(newValue, ValidOverflowValues));
+            YGNodeStyleSetOverflow(yogaNode, ValidOverflowValues[newValue]);
+        }
+
+        //==============================================================================
+        // Flex floats
         if (name == juce::Identifier("flex"))
         {
             jassert (newValue.isDouble());
@@ -196,6 +222,49 @@ namespace blueprint
         {
             jassert (newValue.isDouble());
             YGNodeStyleSetAspectRatio(yogaNode, newValue);
+        }
+
+        //==============================================================================
+        // Flex position
+        for (const auto& [edgeName, enumValue] : ValidEdgeValues)
+        {
+            if (name == juce::Identifier(edgeName))
+            {
+                YGNodeStyleSetPosition(yogaNode, enumValue, newValue);
+                break;
+            }
+        }
+
+        //==============================================================================
+        // Margin & Padding
+        juce::String prefix = name.toString().upToFirstOccurrenceOf("-", false, false);
+        juce::String suffix = name.toString().fromLastOccurrenceOf("-", false, false);
+
+        if (suffix.isEmpty() || prefix == suffix)
+            suffix = "all";
+
+        if (prefix == "margin")
+        {
+            for (const auto& [edgeName, enumValue] : ValidEdgeValues)
+            {
+                if (suffix == edgeName)
+                {
+                    YGNodeStyleSetMargin(yogaNode, enumValue, newValue);
+                    break;
+                }
+            }
+        }
+
+        if (prefix == "padding")
+        {
+            for (const auto& [edgeName, enumValue] : ValidEdgeValues)
+            {
+                if (suffix == edgeName)
+                {
+                    YGNodeStyleSetPadding(yogaNode, enumValue, newValue);
+                    break;
+                }
+            }
         }
     }
 

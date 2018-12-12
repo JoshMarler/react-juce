@@ -33,6 +33,7 @@ class App extends Component {
       'background-color': 'ff272777',
       'align-items': 'center',
       'flex': 1.0,
+      'padding': 20.0,
       ...this.props.style,
     };
 
@@ -40,6 +41,7 @@ class App extends Component {
       'background-color': '77772727',
       'flex': 1.0,
       'height': 200.0,
+      'margin-horizontal': 80.0,
     };
 
     return (
