@@ -20,9 +20,13 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
     addAndMakeVisible(appRoot);
     appRoot.runScript(sourceDir.getChildFile("ui/build/static/js/main.js"));
 
+    setResizable(true, true);
+    setResizeLimits(600, 450, 1200, 900);
+    getConstrainer()->setFixedAspectRatio(600.0 / 450.0);
+
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    setSize (600, 450);
 }
 
 BlueprintPluginAudioProcessorEditor::~BlueprintPluginAudioProcessorEditor()
