@@ -30,6 +30,9 @@ namespace blueprint
         static duk_ret_t getRootInstanceId (duk_context *ctx);
     };
 
+    /** Allocates a new Duktape heap and initializes the BlueprintNative API therein. */
+    duk_context* initializeDuktapeContext();
+
     //==============================================================================
     /** The ReactApplicationRoot class prepares and maintains a Duktape evaluation
         context with the relevant hooks for supporting the Blueprint render
@@ -52,27 +55,8 @@ namespace blueprint
             jassert (singletonInstance == nullptr);
             singletonInstance = this;
 
-            // Allocate a new js heap
-            ctx = duk_create_heap_default();
-
-            // Add console.log support
-            duk_console_init(ctx, DUK_CONSOLE_FLUSH);
-
-            // Register react render backend functions
-            const duk_function_list_entry blueprintNativeFuncs[] = {
-                { "createViewInstance", BlueprintNative::createViewInstance, 1},
-                { "createTextViewInstance", BlueprintNative::createTextViewInstance, 1},
-                { "setViewProperty", BlueprintNative::setViewProperty, 3},
-                { "appendChild", BlueprintNative::appendChild, 2},
-                { "getRootInstanceId", BlueprintNative::getRootInstanceId, 0},
-                { NULL, NULL, 0 }
-            };
-
-            duk_push_global_object(ctx);
-            duk_push_object(ctx);
-            duk_put_function_list(ctx, -1, blueprintNativeFuncs);
-            duk_put_prop_string(ctx, -2, "__BlueprintNative__");
-            duk_pop(ctx);
+            // Create a duktape context
+            ctx = initializeDuktapeContext();
 
             // Assign our own component id
             juce::Uuid id;
@@ -110,6 +94,7 @@ namespace blueprint
         void runScript (const juce::File& f)
         {
             auto src = f.loadFileAsString();
+            sourceFile = f;
 
             duk_push_string(ctx, src.toRawUTF8());
 
@@ -118,6 +103,32 @@ namespace blueprint
             }
 
             duk_pop(ctx);
+        }
+
+        /** Enables keyboard focus on this component, expecting keypress events to reload
+            the javascript bundle.
+         */
+        void enableHotkeyReloading()
+        {
+            setWantsKeyboardFocus(true);
+        }
+
+        /** Rebuilds a new Duktape context, reads and executes the sourceFile. */
+        bool keyPressed (const juce::KeyPress& key) override
+        {
+            bool cmd = key.getModifiers().isCommandDown();
+            auto r = key.isKeyCode(82);
+
+            if (cmd && r)
+            {
+                duk_destroy_heap(ctx);
+                removeAllChildren();
+                viewTable.clear();
+                ctx = initializeDuktapeContext();
+                runScript(sourceFile);
+            }
+
+            return true;
         }
 
         //==============================================================================
@@ -163,6 +174,7 @@ namespace blueprint
     private:
         //==============================================================================
         std::map<juce::String, std::unique_ptr<View>> viewTable;
+        juce::File sourceFile;
         duk_context* ctx;
 
         //==============================================================================

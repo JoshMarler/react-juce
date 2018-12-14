@@ -84,4 +84,31 @@ namespace blueprint
         return 1;
     }
 
+    duk_context* initializeDuktapeContext()
+    {
+        // Allocate a new js heap
+        duk_context* ctx = duk_create_heap_default();
+
+        // Add console.log support
+        duk_console_init(ctx, DUK_CONSOLE_FLUSH);
+
+        // Register react render backend functions
+        const duk_function_list_entry blueprintNativeFuncs[] = {
+            { "createViewInstance", BlueprintNative::createViewInstance, 1},
+            { "createTextViewInstance", BlueprintNative::createTextViewInstance, 1},
+            { "setViewProperty", BlueprintNative::setViewProperty, 3},
+            { "appendChild", BlueprintNative::appendChild, 2},
+            { "getRootInstanceId", BlueprintNative::getRootInstanceId, 0},
+            { NULL, NULL, 0 }
+        };
+
+        duk_push_global_object(ctx);
+        duk_push_object(ctx);
+        duk_put_function_list(ctx, -1, blueprintNativeFuncs);
+        duk_put_prop_string(ctx, -2, "__BlueprintNative__");
+        duk_pop(ctx);
+
+        return ctx;
+    }
+
 }

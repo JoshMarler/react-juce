@@ -19,6 +19,7 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
 
     addAndMakeVisible(appRoot);
     appRoot.runScript(sourceDir.getChildFile("ui/build/js/main.js"));
+    appRoot.enableHotkeyReloading();
 
     setResizable(true, true);
     setResizeLimits(600, 450, 1200, 900);
