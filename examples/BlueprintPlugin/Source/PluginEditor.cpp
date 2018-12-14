@@ -18,7 +18,7 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
     File sourceDir = (File (__FILE__)).getParentDirectory();
 
     addAndMakeVisible(appRoot);
-    appRoot.runScript(sourceDir.getChildFile("ui/build/static/js/main.js"));
+    appRoot.runScript(sourceDir.getChildFile("ui/build/js/main.js"));
 
     setResizable(true, true);
     setResizeLimits(600, 450, 1200, 900);
