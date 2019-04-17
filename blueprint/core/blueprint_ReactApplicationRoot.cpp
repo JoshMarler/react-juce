@@ -19,9 +19,10 @@ namespace blueprint
     {
         jassert (ReactApplicationRoot::singletonInstance != nullptr);
 
-        View* view = ReactApplicationRoot::singletonInstance->createViewInstance();
-        duk_push_string(ctx, view->getComponentID().toRawUTF8());
+        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
+        ViewId viewId = root->createViewInstance();
 
+        duk_push_int(ctx, viewId);
         return 1;
     };
 
@@ -32,45 +33,40 @@ namespace blueprint
 
         ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
         juce::String textValue = duk_get_string(ctx, 0);
-        View* view = root->createTextViewInstance(textValue);
+        ViewId viewId = root->createTextViewInstance(textValue);
 
-        duk_push_string(ctx, view->getComponentID().toRawUTF8());
+        duk_push_int(ctx, viewId);
         return 1;
     };
 
     duk_ret_t BlueprintNative::setViewProperty (duk_context *ctx)
     {
         jassert (ReactApplicationRoot::singletonInstance != nullptr);
-        jassert (duk_is_string(ctx, 0) && duk_is_string(ctx, 1));
+        jassert (duk_is_number(ctx, 0) && duk_is_string(ctx, 1));
         jassert (duk_get_type_mask(ctx, 2) & (DUK_TYPE_MASK_NUMBER | DUK_TYPE_MASK_STRING));
 
         ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
 
-        juce::String instanceId = duk_get_string(ctx, 0);
+        ViewId viewId = duk_get_number(ctx, 0);
         juce::String propertyName = duk_get_string(ctx, 1);
         juce::var propertyValue = (duk_is_string(ctx, 2)
                                    ? juce::var (duk_get_string(ctx, 2))
                                    : juce::var (duk_get_number(ctx, 2)));
 
-        View* view = root->getViewHandle(instanceId);
-        view->setProperty(propertyName, propertyValue);
-
+        root->setViewProperty(viewId, propertyName, propertyValue);
         return 0;
     };
 
     duk_ret_t BlueprintNative::appendChild (duk_context *ctx)
     {
         jassert (ReactApplicationRoot::singletonInstance != nullptr);
+        jassert (duk_is_number(ctx, 0) && duk_is_number(ctx, 1));
 
         ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
+        ViewId parentId = duk_get_number(ctx, 0);
+        ViewId childId = duk_get_number(ctx, 1);
 
-        juce::String parentId = duk_get_string(ctx, 0);
-        juce::String childId = duk_get_string(ctx, 1);
-
-        View* parentView = root->getViewHandle(parentId);
-        View* childView = root->getViewHandle(childId);
-
-        parentView->appendChild(childView);
+        root->appendChild(parentId, childId);
         return 0;
     };
 
@@ -79,7 +75,7 @@ namespace blueprint
         jassert (ReactApplicationRoot::singletonInstance != nullptr);
 
         ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
-        duk_push_string(ctx, root->getComponentID().toRawUTF8());
+        duk_push_int(ctx, root->getViewId());
 
         return 1;
     }

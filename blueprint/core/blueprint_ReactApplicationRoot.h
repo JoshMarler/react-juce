@@ -11,7 +11,7 @@
 
 #include <map>
 
-#include "blueprint_TextView.h"
+#include "blueprint_ShadowView.h"
 #include "blueprint_View.h"
 
 
@@ -58,11 +58,8 @@ namespace blueprint
             // Create a duktape context
             ctx = initializeDuktapeContext();
 
-            // Assign our own component id
-            juce::Uuid id;
-            juce::String sid = id.toDashedString();
-
-            setComponentID(sid);
+            // Assign our root level shadow view
+            _shadowView = std::make_unique<ShadowView>(this);
         }
 
         ~ReactApplicationRoot()
@@ -74,19 +71,7 @@ namespace blueprint
         /** Override the default View behavior. */
         void resized() override
         {
-            // When the top level React root receives a `resized()` event, we have to
-            // recalculate the whole flex tree because of properties like flex-wrap which
-            // depend on the available parent bounds.
-            juce::Rectangle<float> bounds = getLocalBounds().toFloat();
-            const float width = bounds.getWidth();
-            const float height = bounds.getHeight();
-
-            YGNodeCalculateLayout(yogaNode, width, height, YGDirectionInherit);
-
-            // TODO: Maybe this shouldn't be View::resized() but should call its
-            // own setBounds and iterate children. That way it doesn't clobber the
-            // position assigned to it by its parent...?
-            View::resized();
+            performShadowTreeLayout();
         }
 
         //==============================================================================
@@ -124,7 +109,9 @@ namespace blueprint
                 duk_destroy_heap(ctx);
                 removeAllChildren();
                 viewTable.clear();
+                shadowViewTable.clear();
                 ctx = initializeDuktapeContext();
+                _shadowView = std::make_unique<ShadowView>(this);
                 runScript(sourceFile);
             }
 
@@ -132,48 +119,85 @@ namespace blueprint
         }
 
         //==============================================================================
+        // VIEW MANAGER STUFF: SPLIT OUT?
+
         /** Creates a new view instance and registers it with the view table. */
-        View* createViewInstance()
+        ViewId createViewInstance()
         {
-            juce::Uuid id;
-            juce::String sid = id.toDashedString();
+            std::unique_ptr<View> view = std::make_unique<View>();
+            ViewId id = view->getViewId();
 
-            viewTable[sid] = std::make_unique<View>();
-            viewTable[sid]->setComponentID(sid);
+            viewTable[id] = std::move(view);
+            shadowViewTable[id] = std::make_unique<ShadowView>(viewTable[id].get());
 
-            return viewTable[sid].get();
+            return id;
         }
 
         /** Creates a new text view instance and registers it with the view table. */
-        View* createTextViewInstance(const juce::String& value)
+        ViewId createTextViewInstance(const juce::String& value)
         {
-            juce::Uuid id;
-            juce::String sid = id.toDashedString();
-
-            viewTable[sid] = std::make_unique<TextView>();
-            viewTable[sid]->setComponentID(sid);
-            viewTable[sid]->setProperty("textValue", value);
-
-            return viewTable[sid].get();
+            // TODO: Refactor TextView/RawTextView/TextShadowView
+            return createViewInstance();
         }
 
-        /** Returns a pointer to the view associated to the given id. */
-        View* getViewHandle (juce::String viewId)
+        void setViewProperty (ViewId viewId, const juce::Identifier& name, const juce::var& value)
         {
-            if (viewId == getComponentID())
-                return this;
+            const auto& [view, shadow] = getViewHandle(viewId);
+
+            view->setProperty(name, value);
+            shadow->setProperty(name, value);
+
+            // For now, we just assume that any new property update means we
+            // need to redraw or lay out our tree again. This is an easy future
+            // optimization.
+            performShadowTreeLayout();
+            view->repaint();
+        }
+
+        void appendChild (ViewId parentId, ViewId childId)
+        {
+            const auto& [parentView, parentShadowView] = getViewHandle(parentId);
+            const auto& [childView, childShadowView] = getViewHandle(childId);
+
+            parentView->appendChild(childView);
+            parentShadowView->appendChild(childShadowView);
+
+            performShadowTreeLayout();
+        }
+
+        /** Returns a pointer pair to the view associated to the given id. */
+        std::pair<View*, ShadowView*> getViewHandle (ViewId viewId)
+        {
+            if (viewId == getViewId())
+                return {this, _shadowView.get()};
 
             if (viewTable.find(viewId) != viewTable.end())
-                return viewTable[viewId].get();
+                return {viewTable[viewId].get(), shadowViewTable[viewId].get()};
 
-            // If we get here, you asked for a view that doesn't exist by that
-            // identifier.
+            // If we land here, you asked for a view that we don't have.
             jassertfalse;
+            return {nullptr, nullptr};
+        }
+
+        /** Recursively computes the shadow tree layout, then traverses the tree
+            flushing new layout bounds to the associated view components.
+         */
+        void performShadowTreeLayout()
+        {
+            juce::Rectangle<float> bounds = getLocalBounds().toFloat();
+            const float width = bounds.getWidth();
+            const float height = bounds.getHeight();
+
+            _shadowView->computeViewLayout(width, height);
+            _shadowView->flushViewLayout();
         }
 
     private:
         //==============================================================================
-        std::map<juce::String, std::unique_ptr<View>> viewTable;
+        std::unique_ptr<ShadowView> _shadowView;
+        std::map<ViewId, std::unique_ptr<View>> viewTable;
+        std::map<ViewId, std::unique_ptr<ShadowView>> shadowViewTable;
+
         juce::File sourceFile;
         duk_context* ctx;
 
