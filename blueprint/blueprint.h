@@ -46,6 +46,9 @@ extern duk_double_t dummy_get_now(void);
 #define DUK_USE_DATE_GET_NOW(ctx) dummy_get_now()
 #define DUK_USE_DATE_GET_LOCAL_TZOFFSET(d)  0
 
+#include "core/blueprint_RawTextView.h"
 #include "core/blueprint_ReactApplicationRoot.h"
 #include "core/blueprint_ShadowView.h"
+#include "core/blueprint_TextShadowView.h"
+#include "core/blueprint_TextView.h"
 #include "core/blueprint_View.h"

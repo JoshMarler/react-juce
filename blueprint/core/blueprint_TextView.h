@@ -16,12 +16,6 @@ namespace blueprint
 {
 
     //==============================================================================
-    /** We use this method to measure the size of a given string so that the Text container
-        knows what size to take.
-     */
-    YGSize measureTextNode(YGNodeRef, float, YGMeasureMode, float, YGMeasureMode);
-
-    //==============================================================================
     /** The TextView class is a core container abstraction for declaring text components
         within Blueprint's layout system.
      */
@@ -29,33 +23,33 @@ namespace blueprint
     {
     public:
         //==============================================================================
-        TextView()
-        {
-            YGNodeSetContext(yogaNode, this);
-            YGNodeSetMeasureFunc(yogaNode, measureTextNode);
-        }
+        TextView() = default;
 
         //==============================================================================
-        void setProperty (const juce::Identifier& name, const juce::var& newValue) override
-        {
-            View::setProperty(name, newValue);
-
-            if (name == juce::Identifier("textValue"))
-                YGNodeMarkDirty(yogaNode);
-        }
-
-        //==============================================================================
+        /** Assembles a Font from the current node properties. */
         juce::Font getFont()
         {
-            auto& props = getProperties();
             float fontHeight = props.getWithDefault("font-size", 12.0f);
             return juce::Font(fontHeight);
         }
 
-        juce::String getTextValue()
+        /** Assembles an aggregate string of raw text children. */
+        juce::GlyphArrangement getGlyphArrangement()
         {
-            auto& props = getProperties();
-            return props.getWithDefault("textValue", "");
+            juce::GlyphArrangement arr;
+            juce::String text;
+            juce::Font f = getFont();
+            juce::Justification j = juce::Justification::centredLeft;
+            int maxWidth = props.getWithDefault("max-width", INT_MAX);
+
+            for (auto& c : getChildren())
+                if (RawTextView* v = dynamic_cast<RawTextView*>(c))
+                    text += v->getText();
+
+            arr.addJustifiedText(f, text, 0, f.getHeight(), maxWidth, j);
+            arr.justifyGlyphs(0, arr.getNumGlyphs(), 0, 0, getWidth(), getHeight(), j);
+
+            return arr;
         }
 
         //==============================================================================
@@ -63,14 +57,13 @@ namespace blueprint
         {
             View::paint(g);
 
-            auto& props = getProperties();
-            juce::String colorValue = props.getWithDefault("color", "ff000000");
-            juce::Colour colour = juce::Colour::fromString(colorValue);
-            juce::Justification just = juce::Justification::centredLeft;
+            juce::String hexColor = props.getWithDefault("color", "ff000000");
+            juce::Colour colour = juce::Colour::fromString(hexColor);
 
             g.setFont(getFont());
             g.setColour(colour);
-            g.drawText(getTextValue(), getLocalBounds(), just, true);
+
+            getGlyphArrangement().draw(g);
         }
 
     private:

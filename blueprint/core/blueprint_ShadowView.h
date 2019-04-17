@@ -40,13 +40,16 @@ namespace blueprint
         virtual void setProperty (const juce::Identifier& name, const juce::var& newValue);
 
         /** Adds a child component behind the existing children. */
-        void appendChild (ShadowView* childView)
+        virtual void appendChild (ShadowView* childView)
         {
             YGNodeInsertChild(yogaNode, childView->yogaNode, YGNodeGetChildCount(yogaNode));
             children.push_back(childView);
         }
 
         //==============================================================================
+        /** Returns a pointer to the View instance shadowed by this node. */
+        View* getAssociatedView() { return view; }
+
         /** Returns the layout bounds held by the internal yogaNode. */
         juce::Rectangle<float> getCachedLayoutBounds()
         {
@@ -81,12 +84,15 @@ namespace blueprint
                 child->flushViewLayout();
         }
 
+    protected:
+        //==============================================================================
+        YGNodeRef yogaNode;
+
     private:
         //==============================================================================
         View* view = nullptr;
         juce::NamedValueSet props;
 
-        YGNodeRef yogaNode;
         std::vector<ShadowView*> children;
 
         //==============================================================================

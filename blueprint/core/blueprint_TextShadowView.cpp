@@ -15,11 +15,16 @@ namespace blueprint
 
     //==============================================================================
     YGSize measureTextNode(YGNodeRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
-        TextView* context = reinterpret_cast<TextView*>(YGNodeGetContext(node));
+        TextShadowView* context = reinterpret_cast<TextShadowView*>(YGNodeGetContext(node));
+        TextView* view = dynamic_cast<TextView*>(context->getAssociatedView());
+
+        jassert (view != nullptr);
+
+        auto bounds = view->getGlyphArrangement().getBoundingBox(0, -1, true);
 
         return {
-            context->getFont().getStringWidthFloat(context->getTextValue()),
-            context->getFont().getHeight()
+            bounds.getWidth(),
+            bounds.getHeight()
         };
     }
 

@@ -18,9 +18,11 @@ namespace blueprint
     duk_ret_t BlueprintNative::createViewInstance (duk_context *ctx)
     {
         jassert (ReactApplicationRoot::singletonInstance != nullptr);
+        jassert (duk_is_string(ctx, 0));
 
         ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
-        ViewId viewId = root->createViewInstance();
+        juce::String viewType = duk_get_string(ctx, 0);
+        ViewId viewId = root->createViewInstance(viewType);
 
         duk_push_int(ctx, viewId);
         return 1;

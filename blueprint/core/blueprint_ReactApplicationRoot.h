@@ -11,7 +11,10 @@
 
 #include <map>
 
+#include "blueprint_RawTextView.h"
 #include "blueprint_ShadowView.h"
+#include "blueprint_TextShadowView.h"
+#include "blueprint_TextView.h"
 #include "blueprint_View.h"
 
 
@@ -122,22 +125,40 @@ namespace blueprint
         // VIEW MANAGER STUFF: SPLIT OUT?
 
         /** Creates a new view instance and registers it with the view table. */
-        ViewId createViewInstance()
+        ViewId createViewInstance(const juce::String& viewType)
         {
-            std::unique_ptr<View> view = std::make_unique<View>();
-            ViewId id = view->getViewId();
+            // TODO: Next up is providing dynamic view type registration, but
+            // for now we only care about View/Text.
+            if (viewType == "Text")
+            {
+                std::unique_ptr<View> view = std::make_unique<TextView>();
+                ViewId id = view->getViewId();
 
-            viewTable[id] = std::move(view);
-            shadowViewTable[id] = std::make_unique<ShadowView>(viewTable[id].get());
+                viewTable[id] = std::move(view);
+                shadowViewTable[id] = std::make_unique<TextShadowView>(viewTable[id].get());
 
-            return id;
+                return id;
+            }
+            else
+            {
+                std::unique_ptr<View> view = std::make_unique<View>();
+                ViewId id = view->getViewId();
+
+                viewTable[id] = std::move(view);
+                shadowViewTable[id] = std::make_unique<ShadowView>(viewTable[id].get());
+
+                return id;
+            }
         }
 
         /** Creates a new text view instance and registers it with the view table. */
         ViewId createTextViewInstance(const juce::String& value)
         {
-            // TODO: Refactor TextView/RawTextView/TextShadowView
-            return createViewInstance();
+            std::unique_ptr<View> view = std::make_unique<RawTextView>(value);
+            ViewId id = view->getViewId();
+
+            viewTable[id] = std::move(view);
+            return id;
         }
 
         void setViewProperty (ViewId viewId, const juce::Identifier& name, const juce::var& value)

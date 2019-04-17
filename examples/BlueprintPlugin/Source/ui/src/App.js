@@ -1,5 +1,18 @@
 import React, { Component } from 'react';
 
+
+// We'll need to wrap the default native components in stuff like this so that
+// you can use <View> in your JSX. Otherwise we need the dynamic friendliness
+// of the createElement call (note that the type is a string...);
+function View(props) {
+  return React.createElement('View', props, props.children);
+}
+
+function Text(props) {
+  return React.createElement('Text', props, props.children);
+}
+
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -45,12 +58,21 @@ class App extends Component {
       'justify-content': 'center',
     };
 
+    const styles = {
+      text: {
+        'background-color': '77aeaeae',
+        'align-self': 'auto',
+      },
+    };
+
     return (
-      <div debug="1" {...styleObj}>
-        <div {...childStyleObj}>
-          The date today is: {this.state.date.toLocaleDateString()}
-        </div>
-      </div>
+      <View debug="1" {...styleObj}>
+        <View {...childStyleObj}>
+          <Text {...styles.text}>
+            The date today is: {'\n'}{this.state.date.toLocaleDateString()}
+          </Text>
+        </View>
+      </View>
     );
   }
 }

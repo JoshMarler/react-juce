@@ -47,10 +47,13 @@ namespace blueprint
         /** Override the default Component method with default paint behaviors. */
         void paint (juce::Graphics& g) override;
 
+    protected:
+        //==============================================================================
+        juce::NamedValueSet props;
+
     private:
         //==============================================================================
         juce::Uuid _viewId;
-        juce::NamedValueSet props;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (View)

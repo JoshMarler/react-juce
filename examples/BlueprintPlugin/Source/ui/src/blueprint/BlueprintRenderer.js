@@ -1,7 +1,9 @@
-
 import MethodTracer from './MethodTracer';
 import ReactReconciler from 'react-reconciler';
 import BlueprintBackend from './BlueprintBackend';
+
+import invariant from 'invariant';
+
 
 const HostConfig = new Proxy({
   /** Time provider. */
@@ -12,12 +14,31 @@ const HostConfig = new Proxy({
    */
   supportsMutation: true,
 
-  getRootHostContext: (...args) => {
-    return {};
+  /** Provides the context for rendering the root level element.
+   *
+   *  Really only using this and `getChildHostContext` for enforcing nesting
+   *  constraints, such as that raw text content must be a child of a <Text>
+   *  element.
+   *
+   *  @param {Container} rootContainerInstance
+   */
+  getRootHostContext(rootContainerInstance) {
+    return {
+      isInTextParent: false,
+    };
   },
 
-  getChildHostContext: (...args) => {
-    return {};
+  /** Provides the context for rendering a child element.
+   *
+   *  @param {Object} parentHostContext
+   *  @param {String} elementType
+   *  @param {Container} rootContainerInstance
+   */
+  getChildHostContext(parentHostContext, elementType, rootContainerInstance) {
+    const isInTextParent = parentHostContext.isInTextParent ||
+      elementType === 'Text';
+
+    return {isInTextParent};
   },
 
   prepareForCommit: (...args) => {},
@@ -42,6 +63,11 @@ const HostConfig = new Proxy({
    *  @param {Object} internalInstanceHandle
    */
   createInstance(elementType, props, rootContainerInstance, hostContext, internalInstanceHandle) {
+    invariant(
+      !hostContext.isInTextParent,
+      'Nesting elements inside of <Text> is currently not supported.'
+    );
+
     return BlueprintBackend.createViewInstance(elementType, props, rootContainerInstance);
   },
 
@@ -53,6 +79,11 @@ const HostConfig = new Proxy({
    *  @param {Object} internalInstanceHandle
    */
   createTextInstance(text, rootContainerInstance, hostContext, internalInstanceHandle) {
+    invariant(
+      hostContext.isInTextParent,
+      'Raw text strings must be rendered within a <Text> element.'
+    );
+
     return BlueprintBackend.createTextViewInstance(text);
   },
 
@@ -130,8 +161,12 @@ const HostConfig = new Proxy({
    *  @param {String} newText
    */
   commitTextUpdate(instance, oldText, newText) {
-    console.log('noop got hit');
-    // instance.nodeValue = newText;
+    invariant(
+      false,
+      'This should never be hit; due to `shouldSetTextContent` returning ' +
+      'false, we expect to create a new RawTextView instead of updating ' +
+      'an existing one.'
+    );
   },
 
   /** TODO
