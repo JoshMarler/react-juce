@@ -1,8 +1,13 @@
 ## Minor Issues
-* Need to provide manual `Date` support (`new Date()` / `Date.now()`)
-* Need to implement timers (`setTimeout`, `setInterval`)
+* Need to provide manual `Date` support (`new Date()` / `Date.now()`) – Likely necessary for proper React batching
+* Need to implement timers (`setTimeout`, `setInterval`) – Likely necessary for proper React batching
 
 ## Major Questions
+
+### Documentation
+* I'm looking at git-storybook for docs, probably with gh-pages and a root-level docs folder per
+  their guide.
+* Need to cover both the JavaScript side and the C++/JUCE side.
 
 ### Debugging
 * As implemented, there's no debug support, which means that any issues occuring
