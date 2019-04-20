@@ -49,7 +49,7 @@ class App extends Component {
 
   render() {
     const styleObj = {
-      'background-color': 'ff272777',
+      'background-color': 'ff141414',
       'align-items': 'center',
       'flex': 1.0,
       'padding': 20.0,
@@ -58,10 +58,15 @@ class App extends Component {
 
     const childStyleObj = {
       'background-color': '77772727',
+      'border-color': 'ffa7a7a7',
+      'border-width': 2.0,
+      'border-radius': 20.0,
       'flex': 1.0,
+      'flex-direction': 'column-reverse',
       'height': 200.0,
       'margin-horizontal': 80.0,
       'justify-content': 'center',
+      'align-items': 'center',
     };
 
     const styles = {
@@ -70,6 +75,7 @@ class App extends Component {
         'align-self': 'auto',
       },
       img: {
+        'background-color': '77e7e7e7',
         'width': 52.0,
         'height': 34.0,
       },

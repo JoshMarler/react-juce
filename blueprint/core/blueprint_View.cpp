@@ -33,10 +33,30 @@ namespace blueprint
     {
         if (props.contains("background-color"))
         {
-                juce::Colour bgColour = juce::Colour::fromString(props["background-color"].toString());
+            juce::Colour c = juce::Colour::fromString(props["background-color"].toString());
 
-            if (!bgColour.isTransparent())
-                g.fillAll(bgColour);
+            if (!c.isTransparent())
+                g.fillAll(c);
+        }
+
+        if (props.contains("border-color"))
+        {
+            juce::Colour c = juce::Colour::fromString(props["border-color"].toString());
+
+            float width = props.getWithDefault("border-width", 1.f);
+            float radius = props.getWithDefault("border-radius", 0.f);
+
+            juce::Path border;
+
+            // Note this little bounds trick. When a Path is stroked, the line width extends
+            // outwards in both directions from the coordinate line. If the coordinate
+            // line is the exact bounding box then the component clipping makes the corners
+            // appear to have different radii on the interior and exterior of the box.
+            auto borderBounds = getLocalBounds().toFloat().reduced(width * 0.5);
+
+            border.addRoundedRectangle(borderBounds, radius);
+            g.setColour(c);
+            g.strokePath(border, juce::PathStrokeType(width));
         }
     }
 
