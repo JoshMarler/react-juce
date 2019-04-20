@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 
+import logo from './logo.svg';
+
+console.log(logo);
+
 
 // We'll need to wrap the default native components in stuff like this so that
 // you can use <View> in your JSX. Otherwise we need the dynamic friendliness
