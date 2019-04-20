@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 
 import logo from './logo.svg';
 
-console.log(logo);
-
 
 // We'll need to wrap the default native components in stuff like this so that
 // you can use <View> in your JSX. Otherwise we need the dynamic friendliness
@@ -14,6 +12,10 @@ function View(props) {
 
 function Text(props) {
   return React.createElement('Text', props, props.children);
+}
+
+function Image(props) {
+  return React.createElement('Image', props, props.children);
 }
 
 
@@ -67,6 +69,10 @@ class App extends Component {
         'background-color': '77aeaeae',
         'align-self': 'auto',
       },
+      img: {
+        'width': 52.0,
+        'height': 34.0,
+      },
     };
 
     return (
@@ -75,6 +81,7 @@ class App extends Component {
           <Text {...styles.text}>
             The date today is: {'\n'}{this.state.date.toLocaleDateString()}
           </Text>
+          <Image {...styles.img} source={logo} />
         </View>
       </View>
     );

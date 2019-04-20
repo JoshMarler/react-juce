@@ -11,6 +11,7 @@
 
 #include <map>
 
+#include "blueprint_ImageView.h"
 #include "blueprint_RawTextView.h"
 #include "blueprint_ShadowView.h"
 #include "blueprint_TextShadowView.h"
@@ -139,7 +140,7 @@ namespace blueprint
 
                 return id;
             }
-            else
+            if (viewType == "View")
             {
                 std::unique_ptr<View> view = std::make_unique<View>();
                 ViewId id = view->getViewId();
@@ -149,6 +150,22 @@ namespace blueprint
 
                 return id;
             }
+            if (viewType == "Image")
+            {
+                std::unique_ptr<View> view = std::make_unique<ImageView>();
+                ViewId id = view->getViewId();
+
+                // ImageView does not need a specialized shadow view, unless
+                // we want to enforce at the ShadowView level that it cannot
+                // take children.
+                viewTable[id] = std::move(view);
+                shadowViewTable[id] = std::make_unique<ShadowView>(viewTable[id].get());
+
+                return id;
+            }
+
+            jassertfalse;
+            return 1;
         }
 
         /** Creates a new text view instance and registers it with the view table. */
