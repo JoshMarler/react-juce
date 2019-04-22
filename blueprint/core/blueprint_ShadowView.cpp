@@ -40,7 +40,7 @@ switch (ygvalue.unit)                                   \
         break;                                          \
 }
 
-#define BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(setter, node, value)                    \
+#define BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(value, setter, ...)                     \
 {                                                                                   \
     YGValue ygval = { 0.0f, YGUnitUndefined };                                      \
                                                                                     \
@@ -54,10 +54,10 @@ switch (ygvalue.unit)                                   \
         ygval = { strVal.getFloatValue(), YGUnitPercent };                          \
     }                                                                               \
                                                                                     \
-    BP_SET_YGVALUE_AUTO(ygval, setter, node);                                       \
+    BP_SET_YGVALUE_AUTO(ygval, setter, __VA_ARGS__);                                \
 }
 
-#define BP_SET_FLEX_DIMENSION_PROPERTY(setter, node, value)                         \
+#define BP_SET_FLEX_DIMENSION_PROPERTY(value, setter, ...)                          \
 {                                                                                   \
     YGValue ygval = { 0.0f, YGUnitUndefined };                                      \
                                                                                     \
@@ -69,10 +69,10 @@ switch (ygvalue.unit)                                   \
         ygval = { strVal.getFloatValue(), YGUnitPercent };                          \
     }                                                                               \
                                                                                     \
-    BP_SET_YGVALUE(ygval, setter, node);                                            \
+    BP_SET_YGVALUE(ygval, setter, __VA_ARGS__);                                     \
 }
 
-#define BP_SET_FLEX_FLOAT_PROPERTY(setter, node, value) \
+#define BP_SET_FLEX_FLOAT_PROPERTY(value, setter, node) \
 {                                                       \
     if (value.isDouble())                               \
         setter(node, (float) value);                    \
@@ -227,68 +227,63 @@ namespace blueprint
         //==============================================================================
         // Flex dimensions
         if (name == juce::Identifier("flex"))
-            BP_SET_FLEX_FLOAT_PROPERTY(YGNodeStyleSetFlex, yogaNode, newValue)
+            BP_SET_FLEX_FLOAT_PROPERTY(newValue, YGNodeStyleSetFlex, yogaNode)
         if (name == juce::Identifier("flex-grow"))
-            BP_SET_FLEX_FLOAT_PROPERTY(YGNodeStyleSetFlexGrow, yogaNode, newValue)
+            BP_SET_FLEX_FLOAT_PROPERTY(newValue, YGNodeStyleSetFlexGrow, yogaNode)
         if (name == juce::Identifier("flex-shrink"))
-            BP_SET_FLEX_FLOAT_PROPERTY(YGNodeStyleSetFlexShrink, yogaNode, newValue)
+            BP_SET_FLEX_FLOAT_PROPERTY(newValue, YGNodeStyleSetFlexShrink, yogaNode)
         if (name == juce::Identifier("flex-basis"))
-            BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(YGNodeStyleSetFlexBasis, yogaNode, newValue)
+            BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(newValue, YGNodeStyleSetFlexBasis, yogaNode)
         if (name == juce::Identifier("width"))
-            BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(YGNodeStyleSetWidth, yogaNode, newValue)
+            BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(newValue, YGNodeStyleSetWidth, yogaNode)
         if (name == juce::Identifier("height"))
-            BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(YGNodeStyleSetHeight, yogaNode, newValue)
+            BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(newValue, YGNodeStyleSetHeight, yogaNode)
         if (name == juce::Identifier("min-width"))
-            BP_SET_FLEX_DIMENSION_PROPERTY(YGNodeStyleSetMinWidth, yogaNode, newValue)
+            BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetMinWidth, yogaNode)
         if (name == juce::Identifier("min-height"))
-            BP_SET_FLEX_DIMENSION_PROPERTY(YGNodeStyleSetMinHeight, yogaNode, newValue)
+            BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetMinHeight, yogaNode)
         if (name == juce::Identifier("max-width"))
-            BP_SET_FLEX_DIMENSION_PROPERTY(YGNodeStyleSetMaxWidth, yogaNode, newValue)
+            BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetMaxWidth, yogaNode)
         if (name == juce::Identifier("max-height"))
-            BP_SET_FLEX_DIMENSION_PROPERTY(YGNodeStyleSetMaxHeight, yogaNode, newValue)
+            BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetMaxHeight, yogaNode)
         if (name == juce::Identifier("aspect-ratio"))
-            BP_SET_FLEX_FLOAT_PROPERTY(YGNodeStyleSetAspectRatio, yogaNode, newValue)
+            BP_SET_FLEX_FLOAT_PROPERTY(newValue, YGNodeStyleSetAspectRatio, yogaNode)
 
         //==============================================================================
-        // Flex position
+        // Margin
+        juce::Identifier marginMetaProp ("margin");
+
+        for (const auto& [edgeName, enumValue] : ValidEdgeValues)
+        {
+            juce::Identifier propId (juce::String("margin-") + edgeName);
+
+            if (name == propId || (name == marginMetaProp && enumValue == YGEdgeAll))
+            {
+                BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(newValue, YGNodeStyleSetMargin, yogaNode, enumValue);
+            }
+        }
+
+        //==============================================================================
+        // Padding
+        juce::Identifier paddingMetaProp ("padding");
+
+        for (const auto& [edgeName, enumValue] : ValidEdgeValues)
+        {
+            juce::Identifier propId (juce::String("padding-") + edgeName);
+
+            if (name == propId || (name == paddingMetaProp && enumValue == YGEdgeAll))
+            {
+                BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetPadding, yogaNode, enumValue);
+            }
+        }
+
+        //==============================================================================
+        // Position
         for (const auto& [edgeName, enumValue] : ValidEdgeValues)
         {
             if (name == juce::Identifier(edgeName))
             {
-                YGNodeStyleSetPosition(yogaNode, enumValue, newValue);
-                break;
-            }
-        }
-
-        //==============================================================================
-        // Margin & Padding
-        juce::String prefix = name.toString().upToFirstOccurrenceOf("-", false, false);
-        juce::String suffix = name.toString().fromLastOccurrenceOf("-", false, false);
-
-        if (suffix.isEmpty() || prefix == suffix)
-            suffix = "all";
-
-        if (prefix == "margin")
-        {
-            for (const auto& [edgeName, enumValue] : ValidEdgeValues)
-            {
-                if (suffix == edgeName)
-                {
-                    YGNodeStyleSetMargin(yogaNode, enumValue, newValue);
-                    break;
-                }
-            }
-        }
-
-        if (prefix == "padding")
-        {
-            for (const auto& [edgeName, enumValue] : ValidEdgeValues)
-            {
-                if (suffix == edgeName)
-                {
-                    YGNodeStyleSetPadding(yogaNode, enumValue, newValue);
-                    break;
-                }
+                BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetPosition, yogaNode, enumValue);
             }
         }
     }

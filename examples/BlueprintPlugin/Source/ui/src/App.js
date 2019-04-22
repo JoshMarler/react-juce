@@ -67,6 +67,7 @@ class App extends Component {
       'flex-direction': 'column-reverse',
       'height': '40.0%',
       'width': '25.0%',
+      'margin': '1.0%',
       'justify-content': 'center',
       'align-items': 'center',
     };
