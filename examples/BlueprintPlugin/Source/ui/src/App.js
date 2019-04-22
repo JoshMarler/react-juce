@@ -50,9 +50,11 @@ class App extends Component {
   render() {
     const styleObj = {
       'background-color': 'ff141414',
+      'justify-content': 'center',
       'align-items': 'center',
       'flex': 1.0,
       'padding': 20.0,
+      'flex-wrap': 'wrap',
       ...this.props.style,
     };
 
@@ -61,10 +63,10 @@ class App extends Component {
       'border-color': 'ffa7a7a7',
       'border-width': 2.0,
       'border-radius': 20.0,
-      'flex': 1.0,
+      'flex': 0.0,
       'flex-direction': 'column-reverse',
-      'height': 200.0,
-      'margin-horizontal': 80.0,
+      'height': '40.0%',
+      'width': '25.0%',
       'justify-content': 'center',
       'align-items': 'center',
     };
@@ -83,6 +85,18 @@ class App extends Component {
 
     return (
       <View debug="1" {...styleObj}>
+        <View {...childStyleObj}>
+          <Text {...styles.text}>
+            The date today is: {'\n'}{this.state.date.toLocaleDateString()}
+          </Text>
+          <Image {...styles.img} source={logo} />
+        </View>
+        <View {...childStyleObj}>
+          <Text {...styles.text}>
+            The date today is: {'\n'}{this.state.date.toLocaleDateString()}
+          </Text>
+          <Image {...styles.img} source={logo} />
+        </View>
         <View {...childStyleObj}>
           <Text {...styles.text}>
             The date today is: {'\n'}{this.state.date.toLocaleDateString()}

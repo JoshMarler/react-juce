@@ -8,6 +8,76 @@
 */
 
 
+#define BP_SET_YGVALUE(ygvalue, setter, ...)            \
+switch (ygvalue.unit)                                   \
+{                                                       \
+    case YGUnitAuto:                                    \
+    case YGUnitUndefined:                               \
+        setter(__VA_ARGS__, YGUndefined);               \
+        break;                                          \
+    case YGUnitPoint:                                   \
+        setter(__VA_ARGS__, ygvalue.value);             \
+        break;                                          \
+    case YGUnitPercent:                                 \
+        setter##Percent(__VA_ARGS__, ygvalue.value);    \
+        break;                                          \
+}
+
+#define BP_SET_YGVALUE_AUTO(ygvalue, setter, ...)       \
+switch (ygvalue.unit)                                   \
+{                                                       \
+    case YGUnitAuto:                                    \
+        setter##Auto(__VA_ARGS__);                      \
+        break;                                          \
+    case YGUnitUndefined:                               \
+        setter(__VA_ARGS__, YGUndefined);               \
+        break;                                          \
+    case YGUnitPoint:                                   \
+        setter(__VA_ARGS__, ygvalue.value);             \
+        break;                                          \
+    case YGUnitPercent:                                 \
+        setter##Percent(__VA_ARGS__, ygvalue.value);    \
+        break;                                          \
+}
+
+#define BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(setter, node, value)                    \
+{                                                                                   \
+    YGValue ygval = { 0.0f, YGUnitUndefined };                                      \
+                                                                                    \
+    if (value.isDouble())                                                           \
+        ygval = { (float) value, YGUnitPoint };                                     \
+    else if (value.isString() && value.toString() == "auto")                        \
+        ygval = { 0.0f, YGUnitAuto };                                               \
+    else if (value.isString() && value.toString().trim().contains("%"))             \
+    {                                                                               \
+        juce::String strVal = value.toString().retainCharacters("-1234567890.");    \
+        ygval = { strVal.getFloatValue(), YGUnitPercent };                          \
+    }                                                                               \
+                                                                                    \
+    BP_SET_YGVALUE_AUTO(ygval, setter, node);                                       \
+}
+
+#define BP_SET_FLEX_DIMENSION_PROPERTY(setter, node, value)                         \
+{                                                                                   \
+    YGValue ygval = { 0.0f, YGUnitUndefined };                                      \
+                                                                                    \
+    if (value.isDouble())                                                           \
+        ygval = { (float) value, YGUnitPoint };                                     \
+    else if (value.isString() && value.toString().trim().contains("%"))             \
+    {                                                                               \
+        juce::String strVal = value.toString().retainCharacters("-1234567890.");    \
+        ygval = { strVal.getFloatValue(), YGUnitPercent };                          \
+    }                                                                               \
+                                                                                    \
+    BP_SET_YGVALUE(ygval, setter, node);                                            \
+}
+
+#define BP_SET_FLEX_FLOAT_PROPERTY(setter, node, value) \
+{                                                       \
+    if (value.isDouble())                               \
+        setter(node, (float) value);                    \
+}
+
 namespace blueprint
 {
 
@@ -155,72 +225,29 @@ namespace blueprint
         }
 
         //==============================================================================
-        // Flex floats
+        // Flex dimensions
         if (name == juce::Identifier("flex"))
-        {
-            jassert (newValue.isDouble());
-            YGNodeStyleSetFlex(yogaNode, newValue);
-        }
-
+            BP_SET_FLEX_FLOAT_PROPERTY(YGNodeStyleSetFlex, yogaNode, newValue)
         if (name == juce::Identifier("flex-grow"))
-        {
-            jassert (newValue.isDouble());
-            YGNodeStyleSetFlexGrow(yogaNode, newValue);
-        }
-
+            BP_SET_FLEX_FLOAT_PROPERTY(YGNodeStyleSetFlexGrow, yogaNode, newValue)
         if (name == juce::Identifier("flex-shrink"))
-        {
-            jassert (newValue.isDouble());
-            YGNodeStyleSetFlexShrink(yogaNode, newValue);
-        }
-
+            BP_SET_FLEX_FLOAT_PROPERTY(YGNodeStyleSetFlexShrink, yogaNode, newValue)
         if (name == juce::Identifier("flex-basis"))
-        {
-            jassert (newValue.isDouble());
-            YGNodeStyleSetFlexBasis(yogaNode, newValue);
-        }
-
+            BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(YGNodeStyleSetFlexBasis, yogaNode, newValue)
         if (name == juce::Identifier("width"))
-        {
-            jassert (newValue.isDouble());
-            YGNodeStyleSetWidth(yogaNode, newValue);
-        }
-
+            BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(YGNodeStyleSetWidth, yogaNode, newValue)
         if (name == juce::Identifier("height"))
-        {
-            jassert (newValue.isDouble());
-            YGNodeStyleSetHeight(yogaNode, newValue);
-        }
-
+            BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(YGNodeStyleSetHeight, yogaNode, newValue)
         if (name == juce::Identifier("min-width"))
-        {
-            jassert (newValue.isDouble());
-            YGNodeStyleSetMinWidth(yogaNode, newValue);
-        }
-
+            BP_SET_FLEX_DIMENSION_PROPERTY(YGNodeStyleSetMinWidth, yogaNode, newValue)
         if (name == juce::Identifier("min-height"))
-        {
-            jassert (newValue.isDouble());
-            YGNodeStyleSetMinHeight(yogaNode, newValue);
-        }
-
+            BP_SET_FLEX_DIMENSION_PROPERTY(YGNodeStyleSetMinHeight, yogaNode, newValue)
         if (name == juce::Identifier("max-width"))
-        {
-            jassert (newValue.isDouble());
-            YGNodeStyleSetMaxWidth(yogaNode, newValue);
-        }
-
+            BP_SET_FLEX_DIMENSION_PROPERTY(YGNodeStyleSetMaxWidth, yogaNode, newValue)
         if (name == juce::Identifier("max-height"))
-        {
-            jassert (newValue.isDouble());
-            YGNodeStyleSetMaxHeight(yogaNode, newValue);
-        }
-
+            BP_SET_FLEX_DIMENSION_PROPERTY(YGNodeStyleSetMaxHeight, yogaNode, newValue)
         if (name == juce::Identifier("aspect-ratio"))
-        {
-            jassert (newValue.isDouble());
-            YGNodeStyleSetAspectRatio(yogaNode, newValue);
-        }
+            BP_SET_FLEX_FLOAT_PROPERTY(YGNodeStyleSetAspectRatio, yogaNode, newValue)
 
         //==============================================================================
         // Flex position
