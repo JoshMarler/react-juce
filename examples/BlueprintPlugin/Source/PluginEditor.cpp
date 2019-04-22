@@ -22,12 +22,12 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
     appRoot.enableHotkeyReloading();
 
     setResizable(true, true);
-    setResizeLimits(600, 450, 1200, 900);
-    getConstrainer()->setFixedAspectRatio(600.0 / 450.0);
+    setResizeLimits(667, 375, 1334, 750);
+    getConstrainer()->setFixedAspectRatio(1334.0 / 750.0);
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (600, 450);
+    setSize (667, 375);
 }
 
 BlueprintPluginAudioProcessorEditor::~BlueprintPluginAudioProcessorEditor()

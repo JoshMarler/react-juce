@@ -54,7 +54,6 @@ class App extends Component {
       'align-items': 'center',
       'flex': 1.0,
       'padding': 20.0,
-      'flex-wrap': 'wrap',
       ...this.props.style,
     };
 
@@ -66,8 +65,8 @@ class App extends Component {
       'flex': 0.0,
       'flex-direction': 'column-reverse',
       'height': '40.0%',
-      'width': '25.0%',
-      'margin': '1.0%',
+      'width': '15.0%',
+      'margin': '0.4%',
       'justify-content': 'center',
       'align-items': 'center',
     };
@@ -86,6 +85,24 @@ class App extends Component {
 
     return (
       <View debug="1" {...styleObj}>
+        <View {...childStyleObj}>
+          <Text {...styles.text}>
+            The date today is: {'\n'}{this.state.date.toLocaleDateString()}
+          </Text>
+          <Image {...styles.img} source={logo} />
+        </View>
+        <View {...childStyleObj}>
+          <Text {...styles.text}>
+            The date today is: {'\n'}{this.state.date.toLocaleDateString()}
+          </Text>
+          <Image {...styles.img} source={logo} />
+        </View>
+        <View {...childStyleObj}>
+          <Text {...styles.text}>
+            The date today is: {'\n'}{this.state.date.toLocaleDateString()}
+          </Text>
+          <Image {...styles.img} source={logo} />
+        </View>
         <View {...childStyleObj}>
           <Text {...styles.text}>
             The date today is: {'\n'}{this.state.date.toLocaleDateString()}
