@@ -31,14 +31,6 @@ namespace blueprint
     //==============================================================================
     void View::paint (juce::Graphics& g)
     {
-        if (props.contains("background-color"))
-        {
-            juce::Colour c = juce::Colour::fromString(props["background-color"].toString());
-
-            if (!c.isTransparent())
-                g.fillAll(c);
-        }
-
         if (props.contains("border-color"))
         {
             juce::Colour c = juce::Colour::fromString(props["border-color"].toString());
@@ -57,7 +49,17 @@ namespace blueprint
             border.addRoundedRectangle(borderBounds, radius);
             g.setColour(c);
             g.strokePath(border, juce::PathStrokeType(width));
+            g.reduceClipRegion(border);
         }
+
+        if (props.contains("background-color"))
+        {
+            juce::Colour c = juce::Colour::fromString(props["background-color"].toString());
+
+            if (!c.isTransparent())
+                g.fillAll(c);
+        }
+
     }
 
 }
