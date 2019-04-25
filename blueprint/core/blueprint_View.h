@@ -44,6 +44,12 @@ namespace blueprint
         void appendChild (View* childView);
 
         //==============================================================================
+        /** Resolves a property to a specific point value or 0 if not present. */
+        float getResolvedLengthProperty (const juce::String& name, float axisLength);
+
+        /** Appends a subpath tracing the view border to the given path. */
+        void addBorderSubpath (juce::Path& p);
+
         /** Override the default Component method with default paint behaviors. */
         void paint (juce::Graphics& g) override;
 
