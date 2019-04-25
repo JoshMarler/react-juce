@@ -1,6 +1,7 @@
+import Header from './Header';
 import React, { Component } from 'react';
 
-import logo from './logo.svg';
+import logo from './icons/logo.svg';
 
 
 // We'll need to wrap the default native components in stuff like this so that
@@ -74,59 +75,76 @@ class App extends Component {
       'align-items': 'center',
     };
 
-    const styles = {
-      text: {
-        'background-color': '77aeaeae',
-        'align-self': 'auto',
-      },
-      img: {
-        'background-color': '77e7e7e7',
-        'width': 52.0,
-        'height': 34.0,
-      },
-    };
-
     return (
-      <View debug="1" {...styleObj}>
-        <View {...childStyleObj}>
-          <Text {...styles.text}>
-            The date today is: {'\n'}{this.state.date.toLocaleDateString()}
-          </Text>
-          <Image {...styles.img} source={logo} />
-        </View>
-        <View {...childStyleObj}>
-          <Text {...styles.text}>
-            The date today is: {'\n'}{this.state.date.toLocaleDateString()}
-          </Text>
-          <Image {...styles.img} source={logo} />
-        </View>
-        <View {...childStyleObj}>
-          <Text {...styles.text}>
-            The date today is: {'\n'}{this.state.date.toLocaleDateString()}
-          </Text>
-          <Image {...styles.img} source={logo} />
-        </View>
-        <View {...childStyleObj}>
-          <Text {...styles.text}>
-            The date today is: {'\n'}{this.state.date.toLocaleDateString()}
-          </Text>
-          <Image {...styles.img} source={logo} />
-        </View>
-        <View {...childStyleObj}>
-          <Text {...styles.text}>
-            The date today is: {'\n'}{this.state.date.toLocaleDateString()}
-          </Text>
-          <Image {...styles.img} source={logo} />
-        </View>
-        <View {...childStyleObj}>
-          <Text {...styles.text}>
-            The date today is: {'\n'}{this.state.date.toLocaleDateString()}
-          </Text>
-          <Image {...styles.img} source={logo} />
+      <View {...styles.container}>
+        <Header {...styles.header}/>
+        <View {...styles.content}>
+          <View {...styles.grid}>
+            <View {...styles.row}>
+              <View {...styles.cell} {...styles.notchTopRight} />
+              <View {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
+              <View {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
+              <View {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
+              <View {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
+              <View {...styles.cell} {...styles.notchTopLeft} />
+            </View>
+            <View {...styles.row}>
+              <View {...styles.cell} />
+              <View {...styles.cell} {...styles.notchBottomRight} />
+              <View {...styles.cell} {...styles.notchBottomLeft} />
+              <View {...styles.cell} {...styles.notchBottomRight} />
+              <View {...styles.cell} {...styles.notchBottomLeft} />
+              <View {...styles.cell} />
+            </View>
+          </View>
         </View>
       </View>
     );
   }
 }
+
+const Colors = {
+  BACKGROUND: 'ff17191f',
+  STROKE: 'ff626262',
+};
+
+const styles = {
+  container: {
+    'width': '100%',
+    'height': '100%',
+    'flex-direction': 'column',
+    'background-color': Colors.BACKGROUND,
+  },
+  header: {
+    'flex': 0.0,
+    'height': '13.6%',
+  },
+  content: {
+    'flex': 1.0,
+    'padding': '3.4%',
+  },
+  grid: {
+    'flex': 1.0,
+    'flex-direction': 'column',
+  },
+  row: {
+    'flex': 1.0,
+    'flex-direction': 'row',
+  },
+  cell: {
+    'flex': 1.0,
+    'margin': '0.4%',
+    'border-width': 2.0,
+    'border-color': Colors.STROKE,
+    'border-top-left-radius': '10%',
+    'border-top-right-radius': '10%',
+    'border-bottom-left-radius': '10%',
+    'border-bottom-right-radius': '10%',
+  },
+  notchTopLeft: { 'border-top-left-radius': '-26%' },
+  notchTopRight: { 'border-top-right-radius': '-26%' },
+  notchBottomLeft: { 'border-bottom-left-radius': '-26%' },
+  notchBottomRight: { 'border-bottom-right-radius': '-26%' },
+};
 
 export default App;
