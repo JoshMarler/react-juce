@@ -21,60 +21,7 @@ function Image(props) {
 
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-
-    this._timerId = null;
-
-    this.state = {
-      date: new Date(),
-    };
-  }
-
-  tick() {
-    // this.setState({
-    //   date: new Date(),
-    // });
-  }
-
-  componentDidMount() {
-    // this._timerId = setInterval(
-    //   () => this.tick(),
-    //   1000
-    // );
-  }
-
-  componentWillUnmount() {
-    // clearInterval(this._timerId);
-  }
-
   render() {
-    const styleObj = {
-      'background-color': 'ff141414',
-      'justify-content': 'center',
-      'align-items': 'center',
-      'flex': 1.0,
-      'padding': 20.0,
-      ...this.props.style,
-    };
-
-    const childStyleObj = {
-      'background-color': '77772727',
-      'border-color': 'ffa7a7a7',
-      'border-width': 2.0,
-      'border-top-left-radius': '50%',
-      'border-top-right-radius': '50%',
-      'border-bottom-right-radius': '50%',
-      'border-bottom-left-radius': '50%',
-      'flex': 0.0,
-      'flex-direction': 'column-reverse',
-      'height': '40.0%',
-      'width': '15.0%',
-      'margin': '0.4%',
-      'justify-content': 'center',
-      'align-items': 'center',
-    };
-
     return (
       <View {...styles.container}>
         <Header {...styles.header}/>
