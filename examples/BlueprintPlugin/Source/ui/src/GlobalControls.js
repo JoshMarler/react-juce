@@ -24,19 +24,29 @@ class GlobalControls extends Component {
       <View {...styles.container} {...this.props}>
         <View {...styles.inner}>
           <View {...styles.knobContainer}>
-            <View {...styles.knob} />
+            <View {...styles.knob}>
+              <Image source={require('./icons/delay.svg')} {...styles.knobIcon} />
+            </View>
           </View>
           <View {...styles.knobContainer}>
-            <View {...styles.knob} />
+            <View {...styles.knob}>
+              <Image source={require('./icons/filter.svg')} {...styles.knobIcon} />
+            </View>
           </View>
           <View {...styles.knobContainer}>
-            <View {...styles.knob} />
+            <View {...styles.knob}>
+              <Image source={require('./icons/wave.svg')} {...styles.knobIcon} />
+            </View>
           </View>
           <View {...styles.knobContainer}>
-            <View {...styles.knob} />
+            <View {...styles.knob}>
+              <Image source={require('./icons/envelope.svg')} {...styles.knobIcon} />
+            </View>
           </View>
           <View {...styles.knobContainer}>
-            <View {...styles.knob} />
+            <View {...styles.knob}>
+              <Image source={require('./icons/delay.svg')} {...styles.knobIcon} />
+            </View>
           </View>
         </View>
       </View>
@@ -70,6 +80,8 @@ const styles = {
   knob: {
     'flex': 0.0,
     'height': '100%',
+    'justify-content': 'center',
+    'align-items': 'center',
     'aspect-ratio': 1.0,
     'border-width': 2.0,
     'border-color': Colors.STROKE,
@@ -77,6 +89,11 @@ const styles = {
     'border-top-right-radius': '50%',
     'border-bottom-left-radius': '50%',
     'border-bottom-right-radius': '50%',
+  },
+  knobIcon: {
+    'flex': 0.0,
+    'width': '72%',
+    'aspect-ratio': 1.0,
   },
 };
 
