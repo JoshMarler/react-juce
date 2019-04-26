@@ -1,5 +1,7 @@
+import GlobalControls from './GlobalControls';
 import Header from './Header';
 import React, { Component } from 'react';
+import TestLayout01 from './TestLayout01';
 
 import logo from './icons/logo.svg';
 
@@ -22,10 +24,19 @@ function Image(props) {
 
 class App extends Component {
   render() {
+    if (false) {
+      return (
+        <View {...styles.container}>
+          <TestLayout01 {...styles.header} />
+        </View>
+      );
+    }
+
     return (
       <View {...styles.container}>
         <Header {...styles.header}/>
         <View {...styles.content}>
+          <GlobalControls {...styles.globals} />
           <View {...styles.grid}>
             <View {...styles.row}>
               <View {...styles.cell} {...styles.notchTopRight} />
@@ -53,6 +64,8 @@ class App extends Component {
 const Colors = {
   BACKGROUND: 'ff17191f',
   STROKE: 'ff626262',
+  DBG_RED: 'ff884848',
+  DBG_GREEN: 'ff488848',
 };
 
 const styles = {
@@ -68,11 +81,19 @@ const styles = {
   },
   content: {
     'flex': 1.0,
-    'padding': '3.4%',
+    'flex-direction': 'column',
+    'padding-left': 16,
+    'padding-right': 16,
+  },
+  globals: {
+    'flex': 0.0,
+    'height': '15%',
   },
   grid: {
     'flex': 1.0,
     'flex-direction': 'column',
+    // Ensures that the cell margin doesn't create "padding" at the grid level
+    'margin': '-0.4%',
   },
   row: {
     'flex': 1.0,
