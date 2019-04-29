@@ -49,7 +49,7 @@ namespace blueprint
             View::paint(g);
 
             float opacity = props.getWithDefault("opacity", 1.0f);
-            juce::RectanglePlacement placement (juce::RectanglePlacement::fillDestination);
+            juce::RectanglePlacement placement (juce::RectanglePlacement::centred);
 
             drawable->drawWithin(g, getLocalBounds().toFloat(), placement, opacity);
         }

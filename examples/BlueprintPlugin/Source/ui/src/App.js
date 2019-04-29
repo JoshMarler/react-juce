@@ -1,5 +1,6 @@
 import GlobalControls from './GlobalControls';
 import Header from './Header';
+import PatternView from './PatternView';
 import React, { Component } from 'react';
 import TestLayout01 from './TestLayout01';
 
@@ -49,7 +50,7 @@ class App extends Component {
           <GlobalControls {...styles.globals} />
           <View {...styles.grid}>
             <View {...styles.row}>
-              <View {...styles.cell} {...styles.notchTopRight} onMeasure={this._onMeasure} />
+              <PatternView {...styles.cell} {...styles.notchTopRight} />
               <View {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
               <View {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
               <View {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
