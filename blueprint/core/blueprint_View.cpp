@@ -154,6 +154,7 @@ namespace blueprint
 
     }
 
+    //==============================================================================
     void View::resized()
     {
         jassert (ReactApplicationRoot::singletonInstance != nullptr);
@@ -162,4 +163,11 @@ namespace blueprint
         root->dispatchViewEvent(getViewId(), "Measure", getWidth(), getHeight());
     }
 
+    void View::mouseDrag (const juce::MouseEvent& e)
+    {
+        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+
+        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
+        root->dispatchViewEvent(getViewId(), "MouseDrag", e.x, e.y, e.mouseDownPosition.getX(), e.mouseDownPosition.getY());
+    }
 }

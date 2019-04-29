@@ -53,7 +53,12 @@ namespace blueprint
         /** Override the default Component method with default paint behaviors. */
         void paint (juce::Graphics& g) override;
 
+        //==============================================================================
+        /** Dispatches a resized event to the React application. */
         void resized() override;
+
+        /** Dispatches a mouseDrag event to the React application. */
+        void mouseDrag(const juce::MouseEvent& e) override;
 
     protected:
         //==============================================================================
