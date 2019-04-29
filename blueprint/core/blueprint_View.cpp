@@ -154,4 +154,12 @@ namespace blueprint
 
     }
 
+    void View::resized()
+    {
+        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+
+        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
+        root->dispatchViewEvent(getViewId(), "Measure", getWidth(), getHeight());
+    }
+
 }

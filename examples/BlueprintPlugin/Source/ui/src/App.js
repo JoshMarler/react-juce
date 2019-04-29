@@ -23,6 +23,16 @@ function Image(props) {
 
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this._onMeasure = this._onMeasure.bind(this);
+  }
+
+  _onMeasure(width, height) {
+    console.log(width, height);
+  }
+
   render() {
     if (false) {
       return (
@@ -39,7 +49,7 @@ class App extends Component {
           <GlobalControls {...styles.globals} />
           <View {...styles.grid}>
             <View {...styles.row}>
-              <View {...styles.cell} {...styles.notchTopRight} />
+              <View {...styles.cell} {...styles.notchTopRight} onMeasure={this._onMeasure} />
               <View {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
               <View {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
               <View {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />

@@ -1,6 +1,7 @@
 /* global __BlueprintNative__:false */
 
 let __rootViewInstance = null;
+let __viewRegistry = {};
 
 if (typeof window !== 'undefined') {
   // This is just a little shim so that I can build for web and run my renderer
@@ -25,10 +26,11 @@ if (typeof window !== 'undefined') {
 }
 
 class ViewInstance {
-  constructor(id, type) {
+  constructor(id, type, props) {
     this._id = id;
     this._type = type;
     this._children = [];
+    this._props = props;
   }
 
   appendChild(childInstance) {
@@ -37,7 +39,25 @@ class ViewInstance {
   }
 
   setProperty(propKey, value) {
-    return __BlueprintNative__.setViewProperty(this._id, propKey, value);
+    this._props = Object.assign({}, this._props, {
+      [propKey]: value,
+    });
+
+    if (typeof value === 'number' || typeof value === 'string')
+      return __BlueprintNative__.setViewProperty(this._id, propKey, value);
+
+    return void 0;
+  }
+}
+
+__BlueprintNative__.dispatchEvent = function dispatchEvent(viewId, eventType, ...args) {
+  if (__viewRegistry.hasOwnProperty(viewId)) {
+    let instance = __viewRegistry[viewId];
+    let eventHandler = instance._props[`on${eventType}`];
+
+    if (typeof eventHandler === 'function') {
+      eventHandler.call(null, ...args);
+    }
   }
 }
 
@@ -55,7 +75,10 @@ export default {
 
   createViewInstance(viewType, props, parentInstance) {
     const id = __BlueprintNative__.createViewInstance(viewType);
-    return new ViewInstance(id, viewType);
+    const instance = new ViewInstance(id, viewType, props);
+
+    __viewRegistry[id] = instance;
+    return instance;
   },
 
   createTextViewInstance(text) {

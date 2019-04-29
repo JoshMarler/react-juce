@@ -217,6 +217,42 @@ namespace blueprint
             return {nullptr, nullptr};
         }
 
+        /** Dispatches an event to the React internal view registry.
+
+            If the view given by the `viewId` has a handler for the given event, it
+            will be called with the given arguments.
+         */
+        template <typename... T>
+        void dispatchViewEvent (ViewId viewId, const juce::String& eventType, T... args)
+        {
+            std::vector<juce::var> vargs { args... };
+
+            // Push the dispatchEvent function to the top of the stack
+            duk_push_global_object(ctx);
+            duk_push_string(ctx, "__BlueprintNative__");
+            duk_get_prop(ctx, -2);
+            duk_push_string(ctx, "dispatchEvent");
+            duk_get_prop(ctx, -2);
+
+            // Now push the arguments
+            duk_push_int(ctx, viewId);
+            duk_push_string(ctx, eventType.toRawUTF8());
+
+            for (auto& p : vargs)
+            {
+                if (p.isInt() || p.isInt64())
+                    duk_push_int(ctx, (int) p);
+                if (p.isDouble())
+                    duk_push_number(ctx, (double) p);
+                if (p.isString())
+                    duk_push_string(ctx, p.toString().toRawUTF8());
+            }
+
+            // Then issue the call and clear the stack
+            duk_call(ctx, 2 + static_cast<int>(vargs.size()));
+            duk_pop_n(ctx, 3);
+        }
+
         /** Recursively computes the shadow tree layout, then traverses the tree
             flushing new layout bounds to the associated view components.
          */

@@ -53,6 +53,8 @@ namespace blueprint
         /** Override the default Component method with default paint behaviors. */
         void paint (juce::Graphics& g) override;
 
+        void resized() override;
+
     protected:
         //==============================================================================
         juce::NamedValueSet props;
