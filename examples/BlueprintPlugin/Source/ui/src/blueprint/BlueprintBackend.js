@@ -43,7 +43,7 @@ class ViewInstance {
       [propKey]: value,
     });
 
-    if (typeof value === 'number' || typeof value === 'string')
+    if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean')
       return __BlueprintNative__.setViewProperty(this._id, propKey, value);
 
     return void 0;
@@ -55,6 +55,10 @@ __BlueprintNative__.dispatchEvent = function dispatchEvent(viewId, eventType, ..
     let instance = __viewRegistry[viewId];
     let eventHandler = instance._props[`on${eventType}`];
 
+    // TODO: Could do manual event bubbling here. Form an "event" object, give it to the
+    // handler, and then walk up the parent chain giving the same object to every parent
+    // callback. Would require that ViewInstance carry pointers to parents but that should
+    // be trivial...
     if (typeof eventHandler === 'function') {
       eventHandler.call(null, ...args);
     }

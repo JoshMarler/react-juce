@@ -20,6 +20,9 @@ namespace blueprint
     void View::setProperty (const juce::Identifier& name, const juce::var& value)
     {
         props.set(name, value);
+
+        if (name == juce::Identifier("interceptClickEvents"))
+            setInterceptsMouseClicks((bool) value, (bool) value);
     }
 
     void View::appendChild (View* childView)

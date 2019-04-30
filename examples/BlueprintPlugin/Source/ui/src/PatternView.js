@@ -86,12 +86,14 @@ class PatternView extends Component {
     const {value, width, height} = this.state;
 
     return (
-      <Image
-        {...this.props}
-        ref={this._ref}
-        source={this._renderVectorGraphics(value, width, height)}
-        onMeasure={this._onMeasure}
-        onMouseDrag={this._onMouseDrag} />
+      <View {...this.props} onMeasure={this._onMeasure} onMouseDrag={this._onMouseDrag} >
+        <Image
+          flex={1.0}
+          height="100%"
+          interceptClickEvents={false}
+          ref={this._ref}
+          source={this._renderVectorGraphics(value, width, height)} />
+      </View>
     );
   }
 }
