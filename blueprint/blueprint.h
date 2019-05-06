@@ -39,12 +39,6 @@
 
 #include "duktape/src-noline/duktape.h"
 #include "duktape/extras/console/duk_console.h"
-#include "duktape/src-noline/duk_config.h"
-
-extern duk_double_t dummy_get_now(void);
-
-#define DUK_USE_DATE_GET_NOW(ctx) dummy_get_now()
-#define DUK_USE_DATE_GET_LOCAL_TZOFFSET(d)  0
 
 #include "core/blueprint_ImageView.h"
 #include "core/blueprint_RawTextView.h"

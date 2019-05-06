@@ -16,6 +16,13 @@
  #error "Incorrect use of the Blueprint cpp file"
 #endif
 
+/* We're careful to include the duktape source files before the module header
+ * file because `duktape.c` sets certain preprocessor definitions that enable
+ * necessary features in the duktape header. We need those defines to preempt
+ * the loading of the duktape header.
+ */
+#include "duktape/src-noline/duktape.c"
+#include "duktape/extras/console/duk_console.c"
 
 #include "blueprint.h"
 
@@ -28,14 +35,6 @@
 #include "yoga/yoga/YGNodePrint.cpp"
 #include "yoga/yoga/YGStyle.cpp"
 #include "yoga/yoga/Yoga.cpp"
-
-duk_double_t dummy_get_now(void) {
-    /* Return a fixed time here as a dummy example. */
-    return -11504520000.0;
-}
-
-#include "duktape/src-noline/duktape.c"
-#include "duktape/extras/console/duk_console.c"
 
 #include "core/blueprint_ReactApplicationRoot.cpp"
 #include "core/blueprint_ShadowView.cpp"
