@@ -21,6 +21,23 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
     appRoot.runScript(sourceDir.getChildFile("ui/build/js/main.js"));
     appRoot.enableHotkeyReloading();
 
+    appRoot.registerNativeMethod(
+        "setParameterValueNotifyingHost",
+        [this](const juce::var::NativeFunctionArgs& args) {
+            const juce::String& paramId = args.arguments[0].toString();
+            const double value = args.arguments[1];
+
+            DBG("Setting " << paramId << " to " << value);
+
+//            if (auto* parameter = processor.getValueTreeState().getParameter(paramId))
+//            {
+//                parameter->beginChangeGesture();
+//                parameter->setValueNotifyingHost(value);
+//                parameter->endChangeGesture();
+//            }
+        }
+    );
+
     setResizable(true, true);
     setResizeLimits(667, 375, 1334, 750);
     getConstrainer()->setFixedAspectRatio(1334.0 / 750.0);

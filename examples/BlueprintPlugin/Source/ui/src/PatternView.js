@@ -10,11 +10,10 @@ function Text(props) {
   return React.createElement('Text', props, props.children);
 }
 
-class Image extends Component {
-  render() {
-    return React.createElement('Image', this.props, this.props.children);
-  }
+function Image(props) {
+  return React.createElement('Image', props, props.children);
 }
+
 
 class PatternView extends Component {
   constructor(props) {
@@ -23,7 +22,6 @@ class PatternView extends Component {
     this._onMeasure = this._onMeasure.bind(this);
     this._onMouseDrag = this._onMouseDrag.bind(this);
     this._renderVectorGraphics = this._renderVectorGraphics.bind(this);
-    this._ref = React.createRef();
 
     this.state = {
       width: 0,
@@ -47,9 +45,15 @@ class PatternView extends Component {
     // Delta
     let dm = dx + dy;
     let sensitivity = (1.0 / 400.0);
+    let value = Math.max(0.0, Math.min(1.0, this.state.value + dm * sensitivity));
+
+    // TODO: This "NativeMethods" interface is just a proxy to __BlueprintNative__
+    // to check that you've actually registered it before pushing the call.
+    // NativeMethods.setParameterValueNotifyingHost(this.props.paramId, value);
+    __BlueprintNative__.setParameterValueNotifyingHost("hay", value);
 
     this.setState({
-      value: Math.max(0.0, Math.min(1.0, this.state.value + dm * sensitivity)),
+      value: value,
     });
   }
 
@@ -91,7 +95,6 @@ class PatternView extends Component {
           flex={1.0}
           height="100%"
           interceptClickEvents={false}
-          ref={this._ref}
           source={this._renderVectorGraphics(value, width, height)} />
       </View>
     );

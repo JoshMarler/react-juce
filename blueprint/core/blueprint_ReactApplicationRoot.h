@@ -217,6 +217,67 @@ namespace blueprint
             return {nullptr, nullptr};
         }
 
+        /** Register a native method to be called from the script engine. */
+        void registerNativeMethod(const std::string& name, std::function<void(const juce::var::NativeFunctionArgs&)> fn) {
+            // Push the function into the registry and hang onto its index
+            size_t fnIndex = methodRegistry.size();
+            methodRegistry.push_back(fn);
+
+            // Pull __BlueprintNative__ onto the stack
+            duk_push_global_object(ctx);
+            duk_get_prop_string(ctx, -1, "__BlueprintNative__");
+            duk_require_object(ctx, -1);
+
+            // Push a lightfunc that can retrieve the registry index via its magic.
+            // We want the registered method to be able to capture and carry a closure,
+            // but those functions can't be converted to a standard c function pointer. We
+            // therefore hold those functions in a local registry and push a wrapper function
+            // into the script engine, where the wrapper knows which registry index to call back
+            // to via duktape's lightfunc "magic" feature.
+            duk_push_c_lightfunc(ctx, [](duk_context* ctx) -> duk_ret_t {
+                jassert (ReactApplicationRoot::singletonInstance != nullptr);
+
+                ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
+                unsigned int fnIndex = ((unsigned int) duk_get_current_magic(ctx)) & 0xffffU;
+                std::vector<juce::var> args;
+
+                // Build up the arguments vector
+                int nargs = duk_get_top(ctx);
+
+                for (int i = 0; i < nargs; ++i)
+                {
+                    switch (duk_get_type(ctx, i))
+                    {
+                        case DUK_TYPE_STRING:
+                            args.emplace_back(duk_get_string(ctx, i));
+                            break;
+                        case DUK_TYPE_NUMBER:
+                            args.emplace_back(duk_get_number(ctx, i));
+                            break;
+                        case DUK_TYPE_BOOLEAN:
+                            args.emplace_back((bool) duk_get_boolean(ctx, i));
+                            break;
+                        default:
+                            jassertfalse;
+                    }
+                }
+
+                // Dispatch to the method registry
+                root->methodRegistry[fnIndex](
+                    juce::var::NativeFunctionArgs(
+                        juce::var(),
+                        args.data(),
+                        static_cast<int>(args.size())
+                    )
+                );
+
+                return 0;
+            }, DUK_VARARGS, 0, static_cast<unsigned int>(fnIndex));
+
+            // Assign it to __BlueprintNative__
+            duk_put_prop_string(ctx, -2, name.c_str());
+        }
+
         /** Dispatches an event to the React internal view registry.
 
             If the view given by the `viewId` has a handler for the given event, it
@@ -265,6 +326,9 @@ namespace blueprint
             _shadowView->computeViewLayout(width, height);
             _shadowView->flushViewLayout();
         }
+
+        //==============================================================================
+        std::vector<std::function<void(const juce::var::NativeFunctionArgs&)>> methodRegistry;
 
     private:
         //==============================================================================
