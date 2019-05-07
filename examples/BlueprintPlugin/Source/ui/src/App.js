@@ -48,22 +48,40 @@ class App extends Component {
         <Header {...styles.header}/>
         <View {...styles.content}>
           <GlobalControls {...styles.globals} />
-          <View {...styles.grid}>
-            <View {...styles.row}>
-              <PatternView {...styles.cell} {...styles.notchTopRight} />
-              <View {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
-              <View {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
-              <View {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
-              <View {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
-              <View {...styles.cell} {...styles.notchTopLeft} />
+          <View {...styles.gridContainer}>
+            <View {...styles.gutter}>
+              <Text color={Colors.STROKE} {...{'transform-rotate': Math.PI * -0.5}}>
+                GRAIN 1
+              </Text>
+              <Text color={Colors.STROKE} {...{'transform-rotate': Math.PI * -0.5}}>
+                GRAIN 2
+              </Text>
             </View>
-            <View {...styles.row}>
-              <View {...styles.cell} />
-              <View {...styles.cell} {...styles.notchBottomRight} />
-              <View {...styles.cell} {...styles.notchBottomLeft} />
-              <View {...styles.cell} {...styles.notchBottomRight} />
-              <View {...styles.cell} {...styles.notchBottomLeft} />
-              <View {...styles.cell} />
+            <View {...styles.grid}>
+              <View {...styles.row}>
+                <PatternView {...styles.cell} {...styles.notchTopRight} {...{'transform-rotate': Math.PI * 0.25}} />
+                <View {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
+                <View {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
+                <View {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
+                <View {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
+                <View {...styles.cell} {...styles.notchTopLeft} />
+              </View>
+              <View {...styles.row}>
+                <View {...styles.cell} />
+                <View {...styles.cell} {...styles.notchBottomRight} />
+                <View {...styles.cell} {...styles.notchBottomLeft} />
+                <View {...styles.cell} {...styles.notchBottomRight} />
+                <View {...styles.cell} {...styles.notchBottomLeft} />
+                <View {...styles.cell} {...{'transform-rotate': Math.PI * 0.25}} />
+              </View>
+            </View>
+            <View {...styles.gutter}>
+              <Text color={Colors.STROKE} {...{'transform-rotate': Math.PI * 0.5}}>
+                GRAIN 1
+              </Text>
+              <Text color={Colors.STROKE} {...{'transform-rotate': Math.PI * 0.5}}>
+                GRAIN 2
+              </Text>
             </View>
           </View>
         </View>
@@ -99,6 +117,16 @@ const styles = {
   globals: {
     'flex': 0.0,
     'height': '15%',
+  },
+  gutter: {
+    'flex-direction': 'column',
+    'justify-content': 'space-around',
+    'align-items': 'center',
+    'flex': 0.0,
+    'width': 32,
+  },
+  gridContainer: {
+    'flex': 1.0,
   },
   grid: {
     'flex': 1.0,

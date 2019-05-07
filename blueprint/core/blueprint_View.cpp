@@ -160,6 +160,17 @@ namespace blueprint
     //==============================================================================
     void View::resized()
     {
+        // Update transforms
+        if (props.contains("transform-rotate"))
+        {
+            int cxRelParent = getX() + getWidth() / 2;
+            int cyRelParent = getY() + getHeight() / 2;
+            double angle = props["transform-rotate"];
+
+            setTransform(juce::AffineTransform::rotation(angle, cxRelParent, cyRelParent));
+        }
+
+        // Dispatch the Measure event to the script engine.
         jassert (ReactApplicationRoot::singletonInstance != nullptr);
 
         ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
