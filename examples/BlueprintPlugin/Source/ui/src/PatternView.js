@@ -73,6 +73,8 @@ class PatternView extends Component {
       pathData2.push(`L ${x} ${y2}`);
     }
 
+    const dashArray = [value*360, (1.0 - value) * 360];
+
     return `
       <svg
         width="${width}"
@@ -80,6 +82,7 @@ class PatternView extends Component {
         viewBox="0 0 ${width} ${height}"
         version="1.1"
         xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="80" height="100" stroke="#62E7FD" stroke-dasharray="${dashArray.join(',')}" stroke-width="2.0" fill="none" />
         <path d="${pathData.join(' ')}" stroke="#66FDCF" stroke-width="2.0" />
         <path d="${pathData2.join(' ')}" stroke="#62E7FD" stroke-width="2.0" />
       </svg>
