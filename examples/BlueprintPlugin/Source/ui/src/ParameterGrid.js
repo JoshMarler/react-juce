@@ -1,4 +1,6 @@
 import { Colors } from './Constants';
+import FloatingGlobalButtons from './FloatingGlobalButtons';
+import FloatingGlobalKnobs from './FloatingGlobalKnobs';
 import React, { Component } from 'react';
 import { View, Image, Text } from './Blueprint';
 
@@ -7,6 +9,8 @@ class ParameterGrid extends Component {
   render() {
     return (
       <View {...styles.container} {...this.props}>
+        <FloatingGlobalKnobs {...styles.contentHeader} {...styles.floatingHeader} />
+        <FloatingGlobalButtons {...styles.contentFooter} {...styles.floatingFooter} />
         <View {...styles.contentHeader}>
           <GridLabel {...styles.shiftLeft}>DELAY</GridLabel>
           <GridLabel {...styles.shiftLeft}>FILTER</GridLabel>
@@ -78,12 +82,22 @@ const styles = {
     'padding-left': 32.0,
     'padding-right': 32.0,
   },
+  floatingHeader: {
+    'position': 'absolute',
+    'top': `${100.0 / 9.0 / 2.0}%`, // Half the Chrome's header row height
+    'width': '100%',
+  },
   contentFooter: {
     'height': `${100.0 / 9.0}%`, // Equivalent to the Chrome's header row height
     'flex': 0.0,
     'justify-content': 'center',
     'padding-left': 32.0,
     'padding-right': 32.0,
+  },
+  floatingFooter: {
+    'position': 'absolute',
+    'bottom': `${100.0 / 9.0 / 2.0}%`, // Half the Chrome's header row height
+    'width': '100%',
   },
   labelContainer: {
     'flex': 0.0,
@@ -92,7 +106,7 @@ const styles = {
   },
   shiftLeft: {
     'position': 'relative',
-    'left': '-8%',
+    'left': '-7%',
   },
   grid: {
     'flex': 1.0,
