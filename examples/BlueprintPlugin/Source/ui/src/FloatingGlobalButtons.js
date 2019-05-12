@@ -49,6 +49,7 @@ const styles = {
     'flex': 0.0,
     'width': '72%',
     'aspect-ratio': 1.0,
+    'placement': Image.PlacementFlags.centred,
   },
 };
 

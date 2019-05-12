@@ -38,11 +38,13 @@ const styles = {
     'flex': 0.0,
     'height': '48%',
     'aspect-ratio': 405.0 / 28.0,
+    'placement': Image.PlacementFlags.centred,
   },
   icon: {
     'flex': 0.0,
     'height': '48%',
     'aspect-ratio': 1.0,
+    'placement': Image.PlacementFlags.centred,
   }
 };
 

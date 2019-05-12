@@ -49,7 +49,14 @@ namespace blueprint
             View::paint(g);
 
             float opacity = props.getWithDefault("opacity", 1.0f);
-            juce::RectanglePlacement placement (juce::RectanglePlacement::centred);
+
+            // Without a specified placement, we just draw the drawable.
+            if (!props.contains("placement"))
+                return drawable->draw(g, opacity);
+
+            // Otherwise we map placement strings to the appropriate flags
+            int flags = props["placement"];
+            juce::RectanglePlacement placement (flags);
 
             drawable->drawWithin(g, getLocalBounds().toFloat(), placement, opacity);
         }
