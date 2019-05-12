@@ -9,8 +9,6 @@ class ParameterGrid extends Component {
   render() {
     return (
       <View {...styles.container} {...this.props}>
-        <FloatingGlobalKnobs {...styles.contentHeader} {...styles.floatingHeader} />
-        <FloatingGlobalButtons {...styles.contentFooter} {...styles.floatingFooter} />
         <View {...styles.contentHeader}>
           <GridLabel {...styles.shiftLeft}>DELAY</GridLabel>
           <GridLabel {...styles.shiftLeft}>FILTER</GridLabel>
@@ -48,6 +46,8 @@ class ParameterGrid extends Component {
           <GridLabel>REVERSE</GridLabel>
           <GridLabel>FEEDBACK</GridLabel>
         </View>
+        <FloatingGlobalKnobs {...styles.contentHeader} {...styles.floatingHeader} />
+        <FloatingGlobalButtons {...styles.contentFooter} {...styles.floatingFooter} />
       </View>
     );
   }

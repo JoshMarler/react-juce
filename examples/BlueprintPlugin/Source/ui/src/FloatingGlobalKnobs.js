@@ -1,5 +1,6 @@
 import { Colors } from './Constants';
 import React, { Component } from 'react';
+import RotarySlider from './RotarySlider';
 import { View, Image, Text } from './Blueprint';
 
 
@@ -7,24 +8,24 @@ class FloatingGlobalKnobs extends Component {
   render() {
     return (
       <View {...this.props}>
-        <KnobCell source={require('./icons/delay.svg')} />
-        <KnobCell source={require('./icons/filter.svg')} />
-        <KnobCell source={require('./icons/wave.svg')} />
-        <KnobCell source={require('./icons/envelope.svg')} />
-        <KnobCell source={require('./icons/delay.svg')} />
+        <KnobCell paramId="delay" source={require('./icons/delay.svg')} />
+        <KnobCell paramId="filter" source={require('./icons/filter.svg')} />
+        <KnobCell paramId="warp" source={require('./icons/wave.svg')} />
+        <KnobCell paramId="env" source={require('./icons/envelope.svg')} />
+        <KnobCell paramId="mix" source={require('./icons/delay.svg')} />
       </View>
     );
   }
 }
 
 function KnobCell(props) {
-  const {source, ...other} = props;
+  const {source, paramId, ...other} = props;
 
   return (
     <View {...styles.knobContainer} {...other}>
-      <View {...styles.knob}>
-        <Image source={source} {...styles.knobIcon} />
-      </View>
+      <RotarySlider paramId={paramId} {...styles.knob}>
+        <Image source={source} interceptClickEvents={false} {...styles.knobIcon} />
+      </RotarySlider>
     </View>
   );
 }
@@ -52,6 +53,7 @@ const styles = {
     'flex': 0.0,
     'width': '72%',
     'aspect-ratio': 1.0,
+    'placement': Image.PlacementFlags.centred,
   },
 };
 
