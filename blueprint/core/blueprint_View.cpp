@@ -31,6 +31,11 @@ namespace blueprint
         addAndMakeVisible(childView);
     }
 
+    void View::setFloatBounds(juce::Rectangle<float> bounds)
+    {
+        cachedFloatBounds = bounds;
+    }
+
     //==============================================================================
     float View::getResolvedLengthProperty (const juce::String& name, float axisLength)
     {
@@ -163,8 +168,8 @@ namespace blueprint
         // Update transforms
         if (props.contains("transform-rotate"))
         {
-            int cxRelParent = getX() + getWidth() / 2;
-            int cyRelParent = getY() + getHeight() / 2;
+            float cxRelParent = cachedFloatBounds.getX() + cachedFloatBounds.getWidth() * 0.5f;
+            float cyRelParent = cachedFloatBounds.getY() + cachedFloatBounds.getHeight() * 0.5f;
             double angle = props["transform-rotate"];
 
             setTransform(juce::AffineTransform::rotation(angle, cxRelParent, cyRelParent));
@@ -174,7 +179,7 @@ namespace blueprint
         jassert (ReactApplicationRoot::singletonInstance != nullptr);
 
         ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
-        root->dispatchViewEvent(getViewId(), "Measure", getWidth(), getHeight());
+        root->dispatchViewEvent(getViewId(), "Measure", cachedFloatBounds.getWidth(), cachedFloatBounds.getHeight());
     }
 
     void View::mouseDrag (const juce::MouseEvent& e)

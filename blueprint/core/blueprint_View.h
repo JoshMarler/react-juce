@@ -43,6 +43,9 @@ namespace blueprint
         /** Adds a child component behind the existing children. */
         void appendChild (View* childView);
 
+        /** Updates the cached float layout bounds from the shadow tree. */
+        void setFloatBounds (juce::Rectangle<float> bounds);
+
         //==============================================================================
         /** Resolves a property to a specific point value or 0 if not present. */
         float getResolvedLengthProperty (const juce::String& name, float axisLength);
@@ -63,6 +66,7 @@ namespace blueprint
     protected:
         //==============================================================================
         juce::NamedValueSet props;
+        juce::Rectangle<float> cachedFloatBounds;
 
     private:
         //==============================================================================

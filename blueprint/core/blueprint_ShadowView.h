@@ -73,6 +73,7 @@ namespace blueprint
          */
         void flushViewLayout()
         {
+            view->setFloatBounds(getCachedLayoutBounds());
             view->setBounds(getCachedLayoutBounds().toNearestInt());
 
             if (props.contains("debug"))
