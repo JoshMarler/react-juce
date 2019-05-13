@@ -8,8 +8,13 @@ class RotarySlider extends Component {
     super(props);
 
     this._onMeasure = this._onMeasure.bind(this);
+    this._onMouseDown = this._onMouseDown.bind(this);
     this._onMouseDrag = this._onMouseDrag.bind(this);
     this._renderVectorGraphics = this._renderVectorGraphics.bind(this);
+
+    // During a drag, we hold the value at which the drag started here to
+    // ensure smooth behavior while the component state is being updated.
+    this._valueAtDragStart = 0.0;
 
     this.state = {
       width: 0,
@@ -25,6 +30,10 @@ class RotarySlider extends Component {
     });
   }
 
+  _onMouseDown(mouseX, mouseY) {
+    this._valueAtDragStart = this.state.value;
+  }
+
   _onMouseDrag(mouseX, mouseY, mouseDownX, mouseDownY) {
     // Component vectors
     let dx = mouseX - mouseDownX;
@@ -32,12 +41,8 @@ class RotarySlider extends Component {
 
     // Delta
     let dm = dx + dy;
-    let sensitivity = (1.0 / 400.0);
-    // TODO: This might be a little funky because the state value could update
-    // in between successive calls to this method, in which case this calculation
-    // might get nudged around weirdly. Should probably hold onto the value state
-    // at the time the drag started?
-    let value = Math.max(0.0, Math.min(1.0, this.state.value + dm * sensitivity));
+    let sensitivity = (1.0 / 200.0);
+    let value = Math.max(0.0, Math.min(1.0, this._valueAtDragStart + dm * sensitivity));
 
     // TODO: This "NativeMethods" interface is just a proxy to __BlueprintNative__
     // to check that you've actually registered it before pushing the call.
@@ -90,7 +95,7 @@ class RotarySlider extends Component {
     const {value, width, height} = this.state;
 
     return (
-      <View {...this.props} onMeasure={this._onMeasure} onMouseDrag={this._onMouseDrag}>
+      <View {...this.props} onMeasure={this._onMeasure} onMouseDown={this._onMouseDown} onMouseDrag={this._onMouseDrag}>
         <Image {...styles.canvas} source={this._renderVectorGraphics(value, width, height)} />
         {this.props.children}
       </View>
