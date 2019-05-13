@@ -3,4 +3,7 @@ export const Colors = {
   STROKE: 'ff626262',
   DBG_RED: 'ff884848',
   DBG_GREEN: 'ff488848',
+  TRANSPARENT: '00000000',
+  HIGHLIGHT: 'ff66FDCF',
+  SOFT_HIGHLIGHT: '7766FDCF',
 };
