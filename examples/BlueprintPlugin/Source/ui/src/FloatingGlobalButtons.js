@@ -1,4 +1,4 @@
-import { Colors } from './Constants';
+import { Colors, ParamIds } from './Constants';
 import ParameterToggleButton from './ParameterToggleButton';
 import React, { Component } from 'react';
 import { View, Image, Text } from './Blueprint';
@@ -8,8 +8,8 @@ class FloatingGlobalButtons extends Component {
   render() {
     return (
       <View {...this.props}>
-        <ButtonCell paramId="filterType" source={require('./icons/filter.svg')} />
-        <ButtonCell paramId="envEnable" source={require('./icons/envelope.svg')} />
+        <ButtonCell paramId={ParamIds.FILTER_TYPE} source={require('./icons/filter.svg')} />
+        <ButtonCell paramId={ParamIds.FREEZE} source={require('./icons/envelope.svg')} />
       </View>
     );
   }

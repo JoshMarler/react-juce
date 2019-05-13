@@ -33,4 +33,5 @@ export const ParamIds = {
 
   WET_AMP: 'WetAmp',
   DRY_AMP: 'DryAmp',
+  MIX: 'Mix',
 };

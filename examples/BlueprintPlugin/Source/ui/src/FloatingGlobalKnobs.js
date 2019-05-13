@@ -1,4 +1,4 @@
-import { Colors } from './Constants';
+import { Colors, ParamIds } from './Constants';
 import React, { Component } from 'react';
 import RotarySlider from './RotarySlider';
 import { View, Image, Text } from './Blueprint';
@@ -8,11 +8,11 @@ class FloatingGlobalKnobs extends Component {
   render() {
     return (
       <View {...this.props}>
-        <KnobCell paramId="delay" source={require('./icons/delay.svg')} />
-        <KnobCell paramId="filter" source={require('./icons/filter.svg')} />
-        <KnobCell paramId="warp" source={require('./icons/wave.svg')} />
-        <KnobCell paramId="env" source={require('./icons/envelope.svg')} />
-        <KnobCell paramId="mix" source={require('./icons/delay.svg')} />
+        <KnobCell paramId={ParamIds.DELAY} source={require('./icons/delay.svg')} />
+        <KnobCell paramId={ParamIds.FILTER_CUTOFF} source={require('./icons/filter.svg')} />
+        <KnobCell paramId={ParamIds.WARP} source={require('./icons/wave.svg')} />
+        <KnobCell paramId={ParamIds.ENVELOPE_THRESHOLD} source={require('./icons/envelope.svg')} />
+        <KnobCell paramId={ParamIds.MIX} source={require('./icons/delay.svg')} />
       </View>
     );
   }
