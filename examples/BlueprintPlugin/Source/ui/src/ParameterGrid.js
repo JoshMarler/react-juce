@@ -1,6 +1,7 @@
-import { Colors } from './Constants';
+import { Colors, ParamIds } from './Constants';
 import FloatingGlobalButtons from './FloatingGlobalButtons';
 import FloatingGlobalKnobs from './FloatingGlobalKnobs';
+import ParameterGridSlider from './ParameterGridSlider';
 import React, { Component } from 'react';
 import { View, Image, Text } from './Blueprint';
 
@@ -19,22 +20,22 @@ class ParameterGrid extends Component {
         <View {...styles.grid}>
           <View {...styles.row}>
             <Gutter direction={-1.0}>GRAIN 1</Gutter>
-            <View {...styles.cell} {...styles.notchTopRight} />
-            <View {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
-            <View {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
-            <View {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
-            <View {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
-            <View {...styles.cell} {...styles.notchTopLeft} />
+            <ParameterGridSlider paramId={ParamIds.GRAIN_FREQUENCY} {...styles.cell} {...styles.notchTopRight} />
+            <ParameterGridSlider paramId={ParamIds.SPRAY} {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
+            <ParameterGridSlider paramId={ParamIds.SPREAD} {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
+            <ParameterGridSlider paramId={ParamIds.PITCH} {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
+            <ParameterGridSlider paramId={ParamIds.REVERSE} {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
+            <ParameterGridSlider paramId={ParamIds.FEEDBACK_G1G2} {...styles.cell} {...styles.notchTopLeft} />
             <Gutter direction={1.0}>GRAIN 1</Gutter>
           </View>
           <View {...styles.row}>
             <Gutter direction={-1.0}>GRAIN 2</Gutter>
-            <View {...styles.cell} />
-            <View {...styles.cell} {...styles.notchBottomRight} />
-            <View {...styles.cell} {...styles.notchBottomLeft} />
-            <View {...styles.cell} {...styles.notchBottomRight} />
-            <View {...styles.cell} {...styles.notchBottomLeft} />
-            <View {...styles.cell} />
+            <ParameterGridSlider paramId={ParamIds.GRAIN_FREQUENCY_G2} {...styles.cell} />
+            <ParameterGridSlider paramId={ParamIds.SPRAY_G2} {...styles.cell} {...styles.notchBottomRight} />
+            <ParameterGridSlider paramId={ParamIds.SPREAD_G2} {...styles.cell} {...styles.notchBottomLeft} />
+            <ParameterGridSlider paramId={ParamIds.PITCH_G2} {...styles.cell} {...styles.notchBottomRight} />
+            <ParameterGridSlider paramId={ParamIds.REVERSE_G2} {...styles.cell} {...styles.notchBottomLeft} />
+            <ParameterGridSlider paramId={ParamIds.FEEDBACK_G2G1} {...styles.cell} />
             <Gutter direction={1.0}>GRAIN 2</Gutter>
           </View>
         </View>

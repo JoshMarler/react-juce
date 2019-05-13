@@ -1,27 +1,19 @@
 import React, { Component } from 'react';
-import { inspect } from 'util';
-
-// TODO: Put this inside blueprint...
-function View(props) {
-  return React.createElement('View', props, props.children);
-}
-
-function Text(props) {
-  return React.createElement('Text', props, props.children);
-}
-
-function Image(props) {
-  return React.createElement('Image', props, props.children);
-}
+import { View, Image, Text } from './Blueprint';
 
 
-class PatternView extends Component {
+class ParameterGridSlider extends Component {
   constructor(props) {
     super(props);
 
     this._onMeasure = this._onMeasure.bind(this);
+    this._onMouseDown = this._onMouseDown.bind(this);
     this._onMouseDrag = this._onMouseDrag.bind(this);
     this._renderVectorGraphics = this._renderVectorGraphics.bind(this);
+
+    // During a drag, we hold the value at which the drag started here to
+    // ensure smooth behavior while the component state is being updated.
+    this._valueAtDragStart = 0.0;
 
     this.state = {
       width: 0,
@@ -37,6 +29,10 @@ class PatternView extends Component {
     });
   }
 
+  _onMouseDown(mouseX, mouseY) {
+    this._valueAtDragStart = this.state.value;
+  }
+
   _onMouseDrag(mouseX, mouseY, mouseDownX, mouseDownY) {
     // Component vectors
     let dx = mouseX - mouseDownX;
@@ -44,13 +40,15 @@ class PatternView extends Component {
 
     // Delta
     let dm = dx + dy;
-    let sensitivity = (1.0 / 400.0);
-    let value = Math.max(0.0, Math.min(1.0, this.state.value + dm * sensitivity));
+    let sensitivity = (1.0 / 200.0);
+    let value = Math.max(0.0, Math.min(1.0, this._valueAtDragStart + dm * sensitivity));
 
     // TODO: This "NativeMethods" interface is just a proxy to __BlueprintNative__
     // to check that you've actually registered it before pushing the call.
     // NativeMethods.setParameterValueNotifyingHost(this.props.paramId, value);
-    __BlueprintNative__.setParameterValueNotifyingHost("hay", value);
+    if (typeof this.props.paramId === 'string' && this.props.paramId.length > 0) {
+      __BlueprintNative__.setParameterValueNotifyingHost(this.props.paramId, value);
+    }
 
     this.setState({
       value: value,
@@ -73,8 +71,6 @@ class PatternView extends Component {
       pathData2.push(`L ${x} ${y2}`);
     }
 
-    const dashArray = [value*360, (1.0 - value) * 360];
-
     return `
       <svg
         width="${width}"
@@ -82,7 +78,6 @@ class PatternView extends Component {
         viewBox="0 0 ${width} ${height}"
         version="1.1"
         xmlns="http://www.w3.org/2000/svg">
-        <rect x="10" y="10" width="80" height="100" stroke="#62E7FD" stroke-dasharray="${dashArray.join(',')}" stroke-width="2.0" fill="none" />
         <path d="${pathData.join(' ')}" stroke="#66FDCF" stroke-width="2.0" />
         <path d="${pathData2.join(' ')}" stroke="#62E7FD" stroke-width="2.0" />
       </svg>
@@ -104,4 +99,4 @@ class PatternView extends Component {
   }
 }
 
-export default PatternView;
+export default ParameterGridSlider;
