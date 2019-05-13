@@ -1,5 +1,5 @@
 import BlueprintBackend from './blueprint/BlueprintBackend';
-import BlueprintRenderer from './blueprint/BlueprintRenderer';
+import BlueprintRenderer, { BlueprintTracedRenderer } from './blueprint/BlueprintRenderer';
 import React, { Component } from 'react';
 
 
@@ -34,6 +34,9 @@ Image.PlacementFlags = {
 };
 
 
+let __renderStarted = false;
+let __preferredRenderer = BlueprintRenderer;
+
 export default {
 
   getRootContainer() {
@@ -45,11 +48,19 @@ export default {
 
     // Create a root Container if it doesnt exist
     if (!container._rootContainer) {
-      container._rootContainer = BlueprintRenderer.createContainer(container, false);
+      container._rootContainer = __preferredRenderer.createContainer(container, false);
     }
 
     // Update the root Container
-    return BlueprintRenderer.updateContainer(element, container._rootContainer, null, callback);
+    return __preferredRenderer.updateContainer(element, container._rootContainer, null, callback);
+  },
+
+  enableMethodTrace() {
+    if (__renderStarted) {
+      throw new Error('Cannot enable method trace after initial render.');
+    }
+
+    __preferredRenderer = BlueprintTracedRenderer;
   },
 
 };

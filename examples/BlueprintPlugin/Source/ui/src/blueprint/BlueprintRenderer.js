@@ -5,7 +5,7 @@ import BlueprintBackend from './BlueprintBackend';
 import invariant from 'invariant';
 
 
-const HostConfig = new Proxy({
+const HostConfig = {
   /** Time provider. */
   now: Date.now,
 
@@ -209,6 +209,7 @@ const HostConfig = new Proxy({
     // parentContainer.removeChild(child);
   },
 
-}, MethodTracer);
+};
 
 export default ReactReconciler(HostConfig);
+export const BlueprintTracedRenderer = ReactReconciler(new Proxy(HostConfig, MethodTracer));
