@@ -60,8 +60,14 @@ namespace blueprint
         /** Dispatches a resized event to the React application. */
         void resized() override;
 
+        /** Dispatches a mouseDown event to the React application. */
+        void mouseDown (const juce::MouseEvent& e) override;
+
+        /** Dispatches a mouseUp event to the React application. */
+        void mouseUp (const juce::MouseEvent& e) override;
+
         /** Dispatches a mouseDrag event to the React application. */
-        void mouseDrag(const juce::MouseEvent& e) override;
+        void mouseDrag (const juce::MouseEvent& e) override;
 
     protected:
         //==============================================================================

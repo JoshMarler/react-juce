@@ -1,3 +1,4 @@
+import Button from './Button';
 import { Colors } from './Constants';
 import React, { Component } from 'react';
 import { View, Image, Text } from './Blueprint';
@@ -12,9 +13,13 @@ class Chrome extends Component {
     return (
       <View {...styles.container} {...this.props}>
         <View {...styles.header}>
-          <Image {...styles.icon} source={info} />
+          <Button {...styles.button}>
+            <Image interceptClickEvents={false} {...styles.icon} source={info} />
+          </Button>
           <Image {...styles.logo} source={productLogo} />
-          <Image {...styles.icon} source={cog} />
+          <Button {...styles.button}>
+            <Image interceptClickEvents={false} {...styles.icon} source={cog} />
+          </Button>
         </View>
         {this.props.children}
       </View>
@@ -40,10 +45,14 @@ const styles = {
     'aspect-ratio': 405.0 / 28.0,
     'placement': Image.PlacementFlags.centred,
   },
-  icon: {
+  button: {
     'flex': 0.0,
     'height': '48%',
     'aspect-ratio': 1.0,
+  },
+  icon: {
+    'height': '100%',
+    'width': '100%',
     'placement': Image.PlacementFlags.centred,
   }
 };

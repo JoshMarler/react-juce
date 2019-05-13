@@ -1,3 +1,4 @@
+import Button from './Button';
 import { Colors } from './Constants';
 import React, { Component } from 'react';
 import { View, Image, Text } from './Blueprint';
@@ -19,9 +20,9 @@ function ButtonCell(props) {
 
   return (
     <View {...styles.buttonContainer} {...other}>
-      <View {...styles.button}>
-        <Image source={source} {...styles.buttonIcon} />
-      </View>
+      <Button {...styles.button}>
+        <Image interceptClickEvents={false} source={source} {...styles.buttonIcon} />
+      </Button>
     </View>
   );
 }

@@ -23,6 +23,9 @@ namespace blueprint
 
         if (name == juce::Identifier("interceptClickEvents"))
             setInterceptsMouseClicks((bool) value, (bool) value);
+
+        if (name == juce::Identifier("opacity"))
+            setAlpha((double) value);
     }
 
     void View::appendChild (View* childView)
@@ -180,6 +183,22 @@ namespace blueprint
 
         ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
         root->dispatchViewEvent(getViewId(), "Measure", cachedFloatBounds.getWidth(), cachedFloatBounds.getHeight());
+    }
+
+    void View::mouseDown (const juce::MouseEvent& e)
+    {
+        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+
+        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
+        root->dispatchViewEvent(getViewId(), "MouseDown", e.x, e.y);
+    }
+
+    void View::mouseUp (const juce::MouseEvent& e)
+    {
+        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+
+        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
+        root->dispatchViewEvent(getViewId(), "MouseUp", e.x, e.y);
     }
 
     void View::mouseDrag (const juce::MouseEvent& e)
