@@ -1,7 +1,7 @@
 import Button from './Button';
 import { Colors } from './Constants';
 import React, { Component } from 'react';
-import { View, Image, Text } from './Blueprint';
+import { View, Image, Text, NativeMethods } from './Blueprint';
 
 
 class ParameterToggleButton extends Component {
@@ -19,7 +19,7 @@ class ParameterToggleButton extends Component {
     const newValue = !this.state.toggle;
 
     if (typeof this.props.paramId === 'string' && this.props.paramId.length > 0) {
-      __BlueprintNative__.setParameterValueNotifyingHost(this.props.paramId, newValue);
+      NativeMethods.setParameterValueNotifyingHost(this.props.paramId, newValue);
     }
 
     this.setState({

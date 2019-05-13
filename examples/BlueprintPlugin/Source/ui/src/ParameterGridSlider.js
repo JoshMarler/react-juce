@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Image, Text } from './Blueprint';
+import { View, Image, Text, NativeMethods } from './Blueprint';
 
 
 class ParameterGridSlider extends Component {
@@ -43,11 +43,8 @@ class ParameterGridSlider extends Component {
     let sensitivity = (1.0 / 200.0);
     let value = Math.max(0.0, Math.min(1.0, this._valueAtDragStart + dm * sensitivity));
 
-    // TODO: This "NativeMethods" interface is just a proxy to __BlueprintNative__
-    // to check that you've actually registered it before pushing the call.
-    // NativeMethods.setParameterValueNotifyingHost(this.props.paramId, value);
     if (typeof this.props.paramId === 'string' && this.props.paramId.length > 0) {
-      __BlueprintNative__.setParameterValueNotifyingHost(this.props.paramId, value);
+      NativeMethods.setParameterValueNotifyingHost(this.props.paramId, value);
     }
 
     this.setState({

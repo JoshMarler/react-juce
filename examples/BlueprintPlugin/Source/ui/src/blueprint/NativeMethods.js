@@ -1,14 +1,13 @@
 
-export default {
+export default new Proxy(__BlueprintNative__, {
   get(target, propKey, receiver) {
-    // Everything gets assigned to this internal `__BlueprintNative__` object, so we proxy
-    // to that
-    if (__BlueprintNative__.hasOwnProperty(propKey) && typeof __BlueprintNative__[propKey] === 'function') {
+    if (target.hasOwnProperty(propKey) && typeof target[propKey] === 'function') {
       return function __nativeWrapper__(...args) {
-        __BlueprintNative__[propKey].apply(null, args);
+        target[propKey].call(null, ...args);
       }
     }
 
-    throw new Error('Attempt to access an undefined NativeMethod.');
+    console.warn('WARNING: Attempt to access an undefined NativeMethod.');
+    return function noop() {};
   }
-};
+});
