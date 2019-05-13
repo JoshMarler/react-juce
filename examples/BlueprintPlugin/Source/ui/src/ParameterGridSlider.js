@@ -85,7 +85,7 @@ class ParameterGridSlider extends Component {
     const {value, width, height} = this.state;
 
     return (
-      <View {...this.props} onMeasure={this._onMeasure} onMouseDrag={this._onMouseDrag} >
+      <View {...this.props} onMeasure={this._onMeasure} onMouseDown={this._onMouseDown} onMouseDrag={this._onMouseDrag} >
         <Image
           flex={1.0}
           height="100%"
