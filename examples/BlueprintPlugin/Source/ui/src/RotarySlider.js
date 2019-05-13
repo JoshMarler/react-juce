@@ -59,8 +59,13 @@ class RotarySlider extends Component {
   _renderVectorGraphics(value, width, height) {
     const cx = width * 0.5;
     const cy = height * 0.5;
-    const radius = Math.min(width, height) * 0.5;
     const strokeWidth = 2.0;
+
+    // Note that we nudge the radius by half the stroke width; this is because
+    // the stroke will extend outwards in both directions from the given coordinates,
+    // which gets clipped if we try to draw the circle perfectly on the edge of the
+    // image. We nudge it in so that no part of the path gets clipped.
+    const radius = (Math.min(width, height) * 0.5) - (strokeWidth / 2);
 
     // Animate the arc by stroke-dasharray, where the length of the dash is
     // related to the value property and the length of the space takes up the
@@ -68,10 +73,6 @@ class RotarySlider extends Component {
     const arcCircumference = 1.5 * Math.PI * radius;
     const dashArray = [value * arcCircumference, 2.0 * Math.PI * radius];
 
-    // Note that we nudge the radius by half the stroke width; this is because
-    // the stroke will extend outwards in both directions from the given coordinates,
-    // which gets clipped if we try to draw the circle perfectly on the edge of the
-    // image. We nudge it in so that no part of the path gets clipped.
     return `
       <svg
         width="${width}"
@@ -82,7 +83,7 @@ class RotarySlider extends Component {
         <circle
           cx="${cx}"
           cy="${cy}"
-          r="${radius - (strokeWidth / 2)}"
+          r="${radius}"
           stroke="#66FDCF"
           stroke-width="${strokeWidth}"
           stroke-dasharray="${dashArray.join(',')}"
