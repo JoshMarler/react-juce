@@ -47,6 +47,15 @@ const HostConfig = {
   /** Called to determine whether or not a new text value can be set on an
    *  existing node, or if a new text node needs to be created.
    *
+   *  This is essentially born from the fact in that in a Web DOM, there are certain
+   *  nodes, such as <textarea>, that support a `textContent` property. Setting the
+   *  node's `textContent` property is different from creating a TextNode and appending
+   *  it to the node's children array. This method signals which option to take.
+   *
+   *  In our case, we return `false` always because we have no nodes in the JUCE
+   *  backend that support this kind of behavior. All text nodes must be created as
+   *  RawTextViewInstances as children of a TextViewInstance.
+   *
    *  @param {String} elementType
    *  @param {Object} props
    */
@@ -161,12 +170,9 @@ const HostConfig = {
    *  @param {String} newText
    */
   commitTextUpdate(instance, oldText, newText) {
-    invariant(
-      false,
-      'This should never be hit; due to `shouldSetTextContent` returning ' +
-      'false, we expect to create a new RawTextView instead of updating ' +
-      'an existing one.'
-    );
+    if (typeof newText === 'string' && oldText !== newText) {
+      instance.setTextValue(newText);
+    }
   },
 
   /** TODO
@@ -199,13 +205,23 @@ const HostConfig = {
     parentContainer.appendChild(child);
   },
 
+  /** Remove a child from a parent instance.
+   *
+   *  @param {Instance} parentInstance
+   *  @Param {Instance} child
+   */
+  removeChild(parentInstance, child) {
+    console.log('TODO');
+    // parentInstance.removeChild(child);
+  },
+
   /** Remove a child from a parent container.
    *
    *  @param {Container} parentContainer
    *  @Param {Instance} child
    */
   removeChildFromContainer(parentContainer, child) {
-    console.log('noop got hit');
+    console.log('TODO');
     // parentContainer.removeChild(child);
   },
 

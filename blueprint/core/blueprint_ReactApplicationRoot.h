@@ -30,6 +30,7 @@ namespace blueprint
         static duk_ret_t createViewInstance (duk_context *ctx);
         static duk_ret_t createTextViewInstance (duk_context *ctx);
         static duk_ret_t setViewProperty (duk_context *ctx);
+        static duk_ret_t setRawTextValue (duk_context *ctx);
         static duk_ret_t appendChild (duk_context *ctx);
         static duk_ret_t getRootInstanceId (duk_context *ctx);
     };
@@ -192,13 +193,51 @@ namespace blueprint
             view->repaint();
         }
 
+        void setRawTextValue (ViewId viewId, const juce::String& value)
+        {
+            View* view = getViewHandle(viewId).first;
+
+            if (auto* rawTextView = dynamic_cast<RawTextView*>(view))
+            {
+                // Update text
+                rawTextView->setText(value);
+
+                if (auto* parent = dynamic_cast<TextView*>(getParentComponent()))
+                {
+                    // If we have a parent already, find the parent's shadow node and
+                    // mark it dirty, then we'll issue a new layout call
+                    ShadowView* parentShadowView = getViewHandle(parent->getViewId()).second;
+
+                    if (auto* textShadowView = dynamic_cast<TextShadowView*>(parentShadowView))
+                        textShadowView->markDirty();
+                }
+            }
+
+            performShadowTreeLayout();
+            view->repaint();
+        }
+
         void appendChild (ViewId parentId, ViewId childId)
         {
             const auto& [parentView, parentShadowView] = getViewHandle(parentId);
             const auto& [childView, childShadowView] = getViewHandle(childId);
 
-            parentView->appendChild(childView);
-            parentShadowView->appendChild(childShadowView);
+            if (auto* textView = dynamic_cast<TextView*>(parentView))
+            {
+                // If we're trying to append a child to a text view, it will be raw text
+                // with no accompanying shadow view, and we'll need to mark the parent
+                // TextShadowView dirty before the subsequent layout pass.
+                jassert (dynamic_cast<RawTextView*>(childView) != nullptr);
+                jassert (childShadowView == nullptr);
+
+                parentView->appendChild(childView);
+                dynamic_cast<TextShadowView*>(parentShadowView)->markDirty();
+            }
+            else
+            {
+                parentView->appendChild(childView);
+                parentShadowView->appendChild(childShadowView);
+            }
 
             performShadowTreeLayout();
         }
@@ -288,11 +327,11 @@ namespace blueprint
         {
             std::vector<juce::var> vargs { args... };
 
-            // Push the dispatchEvent function to the top of the stack
+            // Push the dispatchViewEvent function to the top of the stack
             duk_push_global_object(ctx);
             duk_push_string(ctx, "__BlueprintNative__");
             duk_get_prop(ctx, -2);
-            duk_push_string(ctx, "dispatchEvent");
+            duk_push_string(ctx, "dispatchViewEvent");
             duk_get_prop(ctx, -2);
 
             // Now push the arguments
@@ -311,6 +350,37 @@ namespace blueprint
 
             // Then issue the call and clear the stack
             duk_call(ctx, 2 + static_cast<int>(vargs.size()));
+            duk_pop_n(ctx, 3);
+        }
+
+        /** Dispatches an event through the JavaScript EventBridge. */
+        template <typename... T>
+        void dispatchEvent (const juce::String& eventType, T... args)
+        {
+            std::vector<juce::var> vargs { args... };
+
+            // Push the dispatchEvent function to the top of the stack
+            duk_push_global_object(ctx);
+            duk_push_string(ctx, "__BlueprintNative__");
+            duk_get_prop(ctx, -2);
+            duk_push_string(ctx, "dispatchEvent");
+            duk_get_prop(ctx, -2);
+
+            // Now push the arguments
+            duk_push_string(ctx, eventType.toRawUTF8());
+
+            for (auto& p : vargs)
+            {
+                if (p.isInt() || p.isInt64())
+                    duk_push_int(ctx, (int) p);
+                if (p.isDouble())
+                    duk_push_number(ctx, (double) p);
+                if (p.isString())
+                    duk_push_string(ctx, p.toString().toRawUTF8());
+            }
+
+            // Then issue the call and clear the stack
+            duk_call(ctx, 1 + static_cast<int>(vargs.size()));
             duk_pop_n(ctx, 3);
         }
 

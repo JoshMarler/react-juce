@@ -40,6 +40,10 @@ namespace blueprint
         }
 
         //==============================================================================
+        void setText (const juce::String& text) {
+            _text = text;
+        }
+
         juce::String getText()
         {
             return _text;

@@ -50,7 +50,19 @@ class ViewInstance {
   }
 }
 
-__BlueprintNative__.dispatchEvent = function dispatchEvent(viewId, eventType, ...args) {
+class RawTextViewInstance {
+  constructor(id, text) {
+    this._id = id;
+    this._text = text;
+  }
+
+  setTextValue(text) {
+    this._text = text;
+    return __BlueprintNative__.setRawTextValue(this._id, text);
+  }
+}
+
+__BlueprintNative__.dispatchViewEvent = function dispatchEvent(viewId, eventType, ...args) {
   if (__viewRegistry.hasOwnProperty(viewId)) {
     let instance = __viewRegistry[viewId];
     let eventHandler = instance._props[`on${eventType}`];
@@ -87,7 +99,7 @@ export default {
 
   createTextViewInstance(text) {
     const id = __BlueprintNative__.createTextViewInstance(text);
-    return new ViewInstance(id, 'Text');
+    return new RawTextViewInstance(id, text);
   },
 
 };

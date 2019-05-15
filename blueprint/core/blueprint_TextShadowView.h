@@ -46,7 +46,7 @@ namespace blueprint
             // For certain text properties we want Yoga to know that we need
             // to measure again. For example, changing the font size.
             if (name == juce::Identifier("font-size"))
-                YGNodeMarkDirty(yogaNode);
+                markDirty();
         }
 
         /** Override the default ShadowView behavior to explicitly error. */
@@ -56,6 +56,12 @@ namespace blueprint
             {
                 throw std::logic_error("TextShadowView cannot take children.");
             }
+        }
+
+        /** Sets a flag to indicate that this node needs to be measured at the next layout pass. */
+        void markDirty()
+        {
+            YGNodeMarkDirty(yogaNode);
         }
 
     private:

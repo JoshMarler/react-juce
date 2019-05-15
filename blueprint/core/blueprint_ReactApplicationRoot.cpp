@@ -70,6 +70,19 @@ namespace blueprint
         return 0;
     };
 
+    duk_ret_t BlueprintNative::setRawTextValue (duk_context *ctx)
+    {
+        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+        jassert (duk_is_number(ctx, 0) && duk_is_string(ctx, 1));
+
+        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
+        ViewId viewId = duk_get_number(ctx, 0);
+        juce::String value = duk_get_string(ctx, 1);
+
+        root->setRawTextValue(viewId, value);
+        return 0;
+    };
+
     duk_ret_t BlueprintNative::appendChild (duk_context *ctx)
     {
         jassert (ReactApplicationRoot::singletonInstance != nullptr);
@@ -106,6 +119,7 @@ namespace blueprint
             { "createViewInstance", BlueprintNative::createViewInstance, 1},
             { "createTextViewInstance", BlueprintNative::createTextViewInstance, 1},
             { "setViewProperty", BlueprintNative::setViewProperty, 3},
+            { "setRawTextValue", BlueprintNative::setRawTextValue, 2},
             { "appendChild", BlueprintNative::appendChild, 2},
             { "getRootInstanceId", BlueprintNative::getRootInstanceId, 0},
             { NULL, NULL, 0 }

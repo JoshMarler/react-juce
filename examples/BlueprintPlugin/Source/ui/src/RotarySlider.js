@@ -1,6 +1,12 @@
 import { Colors } from './Constants';
 import React, { Component } from 'react';
-import { View, Image, Text, NativeMethods } from './Blueprint';
+import {
+  EventBridge,
+  Image,
+  NativeMethods,
+  Text,
+  View,
+} from './Blueprint';
 
 
 class RotarySlider extends Component {
@@ -11,6 +17,9 @@ class RotarySlider extends Component {
     this._onMouseDown = this._onMouseDown.bind(this);
     this._onMouseDrag = this._onMouseDrag.bind(this);
     this._renderVectorGraphics = this._renderVectorGraphics.bind(this);
+    this._onParameterValueChange = this._onParameterValueChange.bind(this);
+
+    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
 
     // During a drag, we hold the value at which the drag started here to
     // ensure smooth behavior while the component state is being updated.
@@ -21,6 +30,10 @@ class RotarySlider extends Component {
       height: 0,
       value: 0.0,
     };
+  }
+
+  componentWillUnmount() {
+    EventBridge.removeListener('parameterValueChange', this._onParameterValueChange);
   }
 
   _onMeasure(width, height) {
@@ -47,10 +60,19 @@ class RotarySlider extends Component {
     if (typeof this.props.paramId === 'string' && this.props.paramId.length > 0) {
       NativeMethods.setParameterValueNotifyingHost(this.props.paramId, value);
     }
+  }
 
-    this.setState({
-      value: value,
-    });
+  _onParameterValueChange(index, paramId, defaultValue, currentValue, stringValue) {
+    const shouldUpdate = typeof this.props.paramId === 'string' &&
+      this.props.paramId.length > 0 &&
+      this.props.paramId === paramId;
+
+    if (shouldUpdate) {
+      this.setState({
+        defaultValue: defaultValue,
+        value: currentValue,
+      });
+    }
   }
 
   _renderVectorGraphics(value, width, height) {

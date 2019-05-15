@@ -3,19 +3,59 @@ import FloatingGlobalButtons from './FloatingGlobalButtons';
 import FloatingGlobalKnobs from './FloatingGlobalKnobs';
 import ParameterGridSlider from './ParameterGridSlider';
 import React, { Component } from 'react';
-import { View, Image, Text } from './Blueprint';
+import {
+  EventBridge,
+  Image,
+  Text,
+  View,
+} from './Blueprint';
+
+
+function getDefaultLabelState() {
+  return {
+    [ParamIds.DELAY]: 'DELAY',
+    [ParamIds.WARP]: 'WARP',
+    [ParamIds.FILTER_CUTOFF]: 'CUTOFF',
+    [ParamIds.ENVELOPE_THRESHOLD]: 'THRESHOLD',
+    [ParamIds.MIX]: 'MIX',
+  };
+}
 
 
 class ParameterGrid extends Component {
+  constructor(props) {
+    super(props);
+
+    this._onParameterValueChange = this._onParameterValueChange.bind(this);
+    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
+
+    this.state = getDefaultLabelState();
+  }
+
+  componentWillUnmount() {
+    EventBridge.removeListener('parameterValueChange', this._onParameterValueChange);
+  }
+
+  _onParameterValueChange(index, paramId, defaultValue, currentValue, stringValue) {
+    if (this.state.hasOwnProperty(paramId)) {
+      this.setState({
+        [paramId]: stringValue,
+      });
+
+      // Debounce a call to a function taht will set [paramId]: back to the value
+      // provided in getDefaultLabelState()
+    }
+  }
+
   render() {
     return (
       <View {...styles.container} {...this.props}>
         <View {...styles.contentHeader}>
-          <GridLabel {...styles.shiftLeft}>DELAY</GridLabel>
-          <GridLabel {...styles.shiftLeft}>FILTER</GridLabel>
-          <GridLabel {...styles.shiftLeft}>WARP</GridLabel>
-          <GridLabel {...styles.shiftLeft}>ENV</GridLabel>
-          <GridLabel {...styles.shiftLeft}>MIX</GridLabel>
+          <GridLabel {...styles.shiftLeft}>{this.state[ParamIds.DELAY]}</GridLabel>
+          <GridLabel {...styles.shiftLeft}>{this.state[ParamIds.FILTER_CUTOFF]}</GridLabel>
+          <GridLabel {...styles.shiftLeft}>{this.state[ParamIds.WARP]}</GridLabel>
+          <GridLabel {...styles.shiftLeft}>{this.state[ParamIds.ENVELOPE_THRESHOLD]}</GridLabel>
+          <GridLabel {...styles.shiftLeft}>{this.state[ParamIds.MIX]}</GridLabel>
         </View>
         <View {...styles.grid}>
           <View {...styles.row}>
