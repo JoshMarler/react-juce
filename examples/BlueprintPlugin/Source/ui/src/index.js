@@ -1,4 +1,4 @@
-import "@babel/polyfill";
+import "./blueprint/polyfill";
 
 import React from 'react';
 import Blueprint from './Blueprint';
