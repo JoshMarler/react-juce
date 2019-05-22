@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "core-js": "2.6.0",
+    "lodash.throttle": "^4.1.1",
     "react": "^16.6.3",
     "react-reconciler": "^0.17.2"
   }
