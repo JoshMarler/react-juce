@@ -43,7 +43,7 @@ namespace blueprint
         context with the relevant hooks for supporting the Blueprint render
         backend.
      */
-    class ReactApplicationRoot : public View
+    class ReactApplicationRoot : public View, public juce::Timer
     {
     public:
         //==============================================================================
@@ -56,6 +56,8 @@ namespace blueprint
         //==============================================================================
         ReactApplicationRoot()
         {
+            jassert (juce::MessageManager::getInstance()->isThisTheMessageThread());
+
             // See note above. Currently can only create one instance.
             jassert (singletonInstance == nullptr);
             singletonInstance = this;
@@ -69,6 +71,7 @@ namespace blueprint
 
         ~ReactApplicationRoot()
         {
+            stopTimer();
             duk_destroy_heap(ctx);
         }
 
@@ -77,6 +80,19 @@ namespace blueprint
         void resized() override
         {
             performShadowTreeLayout();
+        }
+
+        /** Implement the timer callback; only to be initiated after the bundle has
+            been evaluated.
+         */
+        void timerCallback() override
+        {
+            jassert (juce::MessageManager::getInstance()->isThisTheMessageThread());
+
+            // Push the schedulerInterrupt function to the top of the stack and call it.
+            duk_get_global_string(ctx, "__schedulerInterrupt__");
+            duk_call(ctx, 0);
+            duk_pop(ctx);
         }
 
         //==============================================================================
@@ -93,6 +109,9 @@ namespace blueprint
             }
 
             duk_pop(ctx);
+
+            // Schedule the timer...
+            startTimer(4);
         }
 
         /** Enables keyboard focus on this component, expecting keypress events to reload

@@ -8,6 +8,8 @@ import {
   View,
 } from './Blueprint';
 
+import throttle from 'lodash.throttle';
+
 
 class RotarySlider extends Component {
   constructor(props) {
@@ -19,7 +21,7 @@ class RotarySlider extends Component {
     this._renderVectorGraphics = this._renderVectorGraphics.bind(this);
     this._onParameterValueChange = this._onParameterValueChange.bind(this);
 
-    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
+    EventBridge.addListener('parameterValueChange', throttle(this._onParameterValueChange, 32));
 
     // During a drag, we hold the value at which the drag started here to
     // ensure smooth behavior while the component state is being updated.
@@ -30,6 +32,12 @@ class RotarySlider extends Component {
       height: 0,
       value: 0.0,
     };
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.state.width !== nextState.width ||
+      this.state.height !== nextState.height ||
+      this.state.value !== nextState.value;
   }
 
   componentWillUnmount() {
