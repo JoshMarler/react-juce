@@ -35,6 +35,7 @@ class RotarySlider extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    // TODO: Check props too...
     return this.state.width !== nextState.width ||
       this.state.height !== nextState.height ||
       this.state.value !== nextState.value;

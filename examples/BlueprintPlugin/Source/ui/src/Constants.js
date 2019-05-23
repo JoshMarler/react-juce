@@ -35,3 +35,11 @@ export const ParamIds = {
   DRY_AMP: 'DryAmp',
   MIX: 'Mix',
 };
+
+export const ParamLabels = {
+  [ParamIds.DELAY]: 'DELAY',
+  [ParamIds.WARP]: 'WARP',
+  [ParamIds.FILTER_CUTOFF]: 'CUTOFF',
+  [ParamIds.ENVELOPE_THRESHOLD]: 'THRESHOLD',
+  [ParamIds.MIX]: 'MIX',
+};

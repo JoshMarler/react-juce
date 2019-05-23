@@ -2,6 +2,7 @@ import { Colors, ParamIds } from './Constants';
 import FloatingGlobalButtons from './FloatingGlobalButtons';
 import FloatingGlobalKnobs from './FloatingGlobalKnobs';
 import ParameterGridSlider from './ParameterGridSlider';
+import ParameterLabel from './ParameterLabel';
 import React, { Component } from 'react';
 import {
   EventBridge,
@@ -11,51 +12,16 @@ import {
 } from './Blueprint';
 
 
-function getDefaultLabelState() {
-  return {
-    [ParamIds.DELAY]: 'DELAY',
-    [ParamIds.WARP]: 'WARP',
-    [ParamIds.FILTER_CUTOFF]: 'CUTOFF',
-    [ParamIds.ENVELOPE_THRESHOLD]: 'THRESHOLD',
-    [ParamIds.MIX]: 'MIX',
-  };
-}
-
-
 class ParameterGrid extends Component {
-  constructor(props) {
-    super(props);
-
-    this._onParameterValueChange = this._onParameterValueChange.bind(this);
-    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
-
-    this.state = getDefaultLabelState();
-  }
-
-  componentWillUnmount() {
-    EventBridge.removeListener('parameterValueChange', this._onParameterValueChange);
-  }
-
-  _onParameterValueChange(index, paramId, defaultValue, currentValue, stringValue) {
-    if (this.state.hasOwnProperty(paramId)) {
-      this.setState({
-        [paramId]: stringValue,
-      });
-
-      // Debounce a call to a function taht will set [paramId]: back to the value
-      // provided in getDefaultLabelState()
-    }
-  }
-
   render() {
     return (
       <View {...styles.container} {...this.props}>
         <View {...styles.contentHeader}>
-          <GridLabel {...styles.shiftLeft}>{this.state[ParamIds.DELAY]}</GridLabel>
-          <GridLabel {...styles.shiftLeft}>{this.state[ParamIds.FILTER_CUTOFF]}</GridLabel>
-          <GridLabel {...styles.shiftLeft}>{this.state[ParamIds.WARP]}</GridLabel>
-          <GridLabel {...styles.shiftLeft}>{this.state[ParamIds.ENVELOPE_THRESHOLD]}</GridLabel>
-          <GridLabel {...styles.shiftLeft}>{this.state[ParamIds.MIX]}</GridLabel>
+          <ParameterLabel paramId={ParamIds.DELAY} {...styles.shiftLeft} {...styles.labelContainer} />
+          <ParameterLabel paramId={ParamIds.FILTER_CUTOFF} {...styles.shiftLeft} {...styles.labelContainer} />
+          <ParameterLabel paramId={ParamIds.WARP} {...styles.shiftLeft} {...styles.labelContainer} />
+          <ParameterLabel paramId={ParamIds.ENVELOPE_THRESHOLD} {...styles.shiftLeft} {...styles.labelContainer} />
+          <ParameterLabel paramId={ParamIds.MIX} {...styles.shiftLeft} {...styles.labelContainer} />
         </View>
         <View {...styles.grid}>
           <View {...styles.row}>
@@ -80,26 +46,18 @@ class ParameterGrid extends Component {
           </View>
         </View>
         <View {...styles.contentFooter}>
-          <GridLabel>FREQUENCY</GridLabel>
-          <GridLabel>SPRAY</GridLabel>
-          <GridLabel>SPREAD</GridLabel>
-          <GridLabel>PITCH</GridLabel>
-          <GridLabel>REVERSE</GridLabel>
-          <GridLabel>FEEDBACK</GridLabel>
+          <ParameterLabel {...styles.labelContainer}>FREQUENCY</ParameterLabel>
+          <ParameterLabel {...styles.labelContainer}>SPRAY</ParameterLabel>
+          <ParameterLabel {...styles.labelContainer}>SPREAD</ParameterLabel>
+          <ParameterLabel {...styles.labelContainer}>PITCH</ParameterLabel>
+          <ParameterLabel {...styles.labelContainer}>REVERSE</ParameterLabel>
+          <ParameterLabel {...styles.labelContainer}>FEEDBACK</ParameterLabel>
         </View>
         <FloatingGlobalKnobs {...styles.contentHeader} {...styles.floatingHeader} />
         <FloatingGlobalButtons {...styles.contentFooter} {...styles.floatingFooter} />
       </View>
     );
   }
-}
-
-function GridLabel(props) {
-  return (
-    <View {...styles.labelContainer} {...props}>
-      <Text color={Colors.STROKE}>{props.children}</Text>
-    </View>
-  );
 }
 
 function Gutter(props) {
