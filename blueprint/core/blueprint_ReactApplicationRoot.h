@@ -221,7 +221,7 @@ namespace blueprint
                 // Update text
                 rawTextView->setText(value);
 
-                if (auto* parent = dynamic_cast<TextView*>(getParentComponent()))
+                if (auto* parent = dynamic_cast<TextView*>(rawTextView->getParentComponent()))
                 {
                     // If we have a parent already, find the parent's shadow node and
                     // mark it dirty, then we'll issue a new layout call
