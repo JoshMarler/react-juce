@@ -105,7 +105,7 @@ function GridLabel(props) {
 function Gutter(props) {
   return (
     <View {...styles.gutter}>
-      <Text color={Colors.STROKE} {...{'transform-rotate': Math.PI * 0.5 * props.direction}}>
+      <Text {...styles.gutterText} {...{'transform-rotate': Math.PI * 0.5 * props.direction}}>
         {props.children}
       </Text>
     </View>
@@ -158,6 +158,14 @@ const styles = {
     'width': 32.0,
     'justify-content': 'center',
     'align-items': 'center',
+  },
+  gutterText: {
+    // The internal text measureFunc doesn't care about the rotation and will
+    // clip the width of the text to the width of the parent if flex-shrink
+    // is allowed. This 0 value guarantees that our text element width will be
+    // the size of the text, then the rotation will ensure we avoid clipping.
+    'flex-shrink': 0,
+    'color': Colors.STROKE,
   },
   row: {
     'flex': 1.0,

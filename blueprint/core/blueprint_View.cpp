@@ -37,6 +37,16 @@ namespace blueprint
     void View::setFloatBounds(juce::Rectangle<float> bounds)
     {
         cachedFloatBounds = bounds;
+
+        // Update transforms
+        if (props.contains("transform-rotate"))
+        {
+            float cxRelParent = cachedFloatBounds.getX() + cachedFloatBounds.getWidth() * 0.5f;
+            float cyRelParent = cachedFloatBounds.getY() + cachedFloatBounds.getHeight() * 0.5f;
+            double angle = props["transform-rotate"];
+
+            setTransform(juce::AffineTransform::rotation(angle, cxRelParent, cyRelParent));
+        }
     }
 
     //==============================================================================
@@ -168,16 +178,6 @@ namespace blueprint
     //==============================================================================
     void View::resized()
     {
-        // Update transforms
-        if (props.contains("transform-rotate"))
-        {
-            float cxRelParent = cachedFloatBounds.getX() + cachedFloatBounds.getWidth() * 0.5f;
-            float cyRelParent = cachedFloatBounds.getY() + cachedFloatBounds.getHeight() * 0.5f;
-            double angle = props["transform-rotate"];
-
-            setTransform(juce::AffineTransform::rotation(angle, cxRelParent, cyRelParent));
-        }
-
         // Dispatch the Measure event to the script engine.
         jassert (ReactApplicationRoot::singletonInstance != nullptr);
 
