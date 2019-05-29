@@ -3,6 +3,7 @@ import FloatingGlobalButtons from './FloatingGlobalButtons';
 import FloatingGlobalKnobs from './FloatingGlobalKnobs';
 import ParameterGridSlider from './ParameterGridSlider';
 import ParameterLabel from './ParameterLabel';
+import GrainParameterLabel from './GrainParameterLabel';
 import React, { Component } from 'react';
 import {
   EventBridge,
@@ -46,12 +47,12 @@ class ParameterGrid extends Component {
           </View>
         </View>
         <View {...styles.contentFooter}>
-          <ParameterLabel {...styles.labelContainer}>FREQUENCY</ParameterLabel>
-          <ParameterLabel {...styles.labelContainer}>SPRAY</ParameterLabel>
-          <ParameterLabel {...styles.labelContainer}>SPREAD</ParameterLabel>
-          <ParameterLabel {...styles.labelContainer}>PITCH</ParameterLabel>
-          <ParameterLabel {...styles.labelContainer}>REVERSE</ParameterLabel>
-          <ParameterLabel {...styles.labelContainer}>FEEDBACK</ParameterLabel>
+          <GrainParameterLabel g1ParamId={ParamIds.GRAIN_FREQUENCY} g2ParamId={ParamIds.GRAIN_FREQUENCY_G2} {...styles.labelContainer}>FREQUENCY</GrainParameterLabel>
+          <GrainParameterLabel g1ParamId={ParamIds.SPRAY} g2ParamId={ParamIds.SPRAY_G2} {...styles.labelContainer}>SPRAY</GrainParameterLabel>
+          <GrainParameterLabel g1ParamId={ParamIds.SPREAD} g2ParamId={ParamIds.SPREAD_G2} {...styles.labelContainer}>SPREAD</GrainParameterLabel>
+          <GrainParameterLabel g1ParamId={ParamIds.PITCH} g2ParamId={ParamIds.PITCH_G2} {...styles.labelContainer}>PITCH</GrainParameterLabel>
+          <GrainParameterLabel g1ParamId={ParamIds.REVERSE} g2ParamId={ParamIds.REVERSE_G2} {...styles.labelContainer}>REVERSE</GrainParameterLabel>
+          <GrainParameterLabel g1ParamId={ParamIds.FEEDBACK_G1G2} g2ParamId={ParamIds.FEEDBACK_G2G1} {...styles.labelContainer}>FEEDBACK</GrainParameterLabel>
         </View>
         <FloatingGlobalKnobs {...styles.contentHeader} {...styles.floatingHeader} />
         <FloatingGlobalButtons {...styles.contentFooter} {...styles.floatingFooter} />
