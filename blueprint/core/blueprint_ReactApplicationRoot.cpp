@@ -13,14 +13,17 @@
 namespace blueprint
 {
 
-    ReactApplicationRoot* ReactApplicationRoot::singletonInstance = nullptr;
-
     duk_ret_t BlueprintNative::createViewInstance (duk_context *ctx)
     {
-        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+        // Retrieve the root instance pointer
+        duk_push_global_stash(ctx);
+        duk_get_prop_string(ctx, -1, "rootInstance");
+        ReactApplicationRoot* root = reinterpret_cast<ReactApplicationRoot*>(duk_get_pointer(ctx, -1));
+        duk_pop_2(ctx);
+
+        jassert (root != nullptr);
         jassert (duk_is_string(ctx, 0));
 
-        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
         juce::String viewType = duk_get_string(ctx, 0);
         ViewId viewId = root->createViewInstance(viewType);
 
@@ -30,10 +33,15 @@ namespace blueprint
 
     duk_ret_t BlueprintNative::createTextViewInstance (duk_context *ctx)
     {
-        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+        // Retrieve the root instance pointer
+        duk_push_global_stash(ctx);
+        duk_get_prop_string(ctx, -1, "rootInstance");
+        ReactApplicationRoot* root = reinterpret_cast<ReactApplicationRoot*>(duk_get_pointer(ctx, -1));
+        duk_pop_2(ctx);
+
+        jassert (root != nullptr);
         jassert (duk_is_string(ctx, 0));
 
-        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
         juce::String textValue = duk_get_string(ctx, 0);
         ViewId viewId = root->createTextViewInstance(textValue);
 
@@ -43,10 +51,15 @@ namespace blueprint
 
     duk_ret_t BlueprintNative::setViewProperty (duk_context *ctx)
     {
-        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+        // Retrieve the root instance pointer
+        duk_push_global_stash(ctx);
+        duk_get_prop_string(ctx, -1, "rootInstance");
+        ReactApplicationRoot* root = reinterpret_cast<ReactApplicationRoot*>(duk_get_pointer(ctx, -1));
+        duk_pop_2(ctx);
+
+        jassert (root != nullptr);
         jassert (duk_is_number(ctx, 0) && duk_is_string(ctx, 1));
 
-        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
         ViewId viewId = duk_get_number(ctx, 0);
         juce::String propertyName = duk_get_string(ctx, 1);
         juce::var propertyValue;
@@ -72,10 +85,15 @@ namespace blueprint
 
     duk_ret_t BlueprintNative::setRawTextValue (duk_context *ctx)
     {
-        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+        // Retrieve the root instance pointer
+        duk_push_global_stash(ctx);
+        duk_get_prop_string(ctx, -1, "rootInstance");
+        ReactApplicationRoot* root = reinterpret_cast<ReactApplicationRoot*>(duk_get_pointer(ctx, -1));
+        duk_pop_2(ctx);
+
+        jassert (root != nullptr);
         jassert (duk_is_number(ctx, 0) && duk_is_string(ctx, 1));
 
-        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
         ViewId viewId = duk_get_number(ctx, 0);
         juce::String value = duk_get_string(ctx, 1);
 
@@ -85,10 +103,15 @@ namespace blueprint
 
     duk_ret_t BlueprintNative::appendChild (duk_context *ctx)
     {
-        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+        // Retrieve the root instance pointer
+        duk_push_global_stash(ctx);
+        duk_get_prop_string(ctx, -1, "rootInstance");
+        ReactApplicationRoot* root = reinterpret_cast<ReactApplicationRoot*>(duk_get_pointer(ctx, -1));
+        duk_pop_2(ctx);
+
+        jassert (root != nullptr);
         jassert (duk_is_number(ctx, 0) && duk_is_number(ctx, 1));
 
-        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
         ViewId parentId = duk_get_number(ctx, 0);
         ViewId childId = duk_get_number(ctx, 1);
 
@@ -98,9 +121,14 @@ namespace blueprint
 
     duk_ret_t BlueprintNative::getRootInstanceId (duk_context *ctx)
     {
-        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+        // Retrieve the root instance pointer
+        duk_push_global_stash(ctx);
+        duk_get_prop_string(ctx, -1, "rootInstance");
+        ReactApplicationRoot* root = reinterpret_cast<ReactApplicationRoot*>(duk_get_pointer(ctx, -1));
+        duk_pop_2(ctx);
 
-        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
+        jassert (root != nullptr);
+
         duk_push_int(ctx, root->getViewId());
 
         return 1;

@@ -178,34 +178,31 @@ namespace blueprint
     //==============================================================================
     void View::resized()
     {
-        // Dispatch the Measure event to the script engine.
-        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+        auto w = cachedFloatBounds.getWidth();
+        auto h = cachedFloatBounds.getHeight();
 
-        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
-        root->dispatchViewEvent(getViewId(), "Measure", cachedFloatBounds.getWidth(), cachedFloatBounds.getHeight());
+        if (ReactApplicationRoot* root = findParentComponentOfClass<ReactApplicationRoot>())
+            root->dispatchViewEvent(getViewId(), "Measure", w, h);
     }
 
     void View::mouseDown (const juce::MouseEvent& e)
     {
-        jassert (ReactApplicationRoot::singletonInstance != nullptr);
-
-        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
-        root->dispatchViewEvent(getViewId(), "MouseDown", e.x, e.y);
+        if (ReactApplicationRoot* root = findParentComponentOfClass<ReactApplicationRoot>())
+            root->dispatchViewEvent(getViewId(), "MouseDown", e.x, e.y);
     }
 
     void View::mouseUp (const juce::MouseEvent& e)
     {
-        jassert (ReactApplicationRoot::singletonInstance != nullptr);
-
-        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
-        root->dispatchViewEvent(getViewId(), "MouseUp", e.x, e.y);
+        if (ReactApplicationRoot* root = findParentComponentOfClass<ReactApplicationRoot>())
+            root->dispatchViewEvent(getViewId(), "MouseUp", e.x, e.y);
     }
 
     void View::mouseDrag (const juce::MouseEvent& e)
     {
-        jassert (ReactApplicationRoot::singletonInstance != nullptr);
+        float mouseDownX = e.mouseDownPosition.getX();
+        float mouseDownY = e.mouseDownPosition.getY();
 
-        ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
-        root->dispatchViewEvent(getViewId(), "MouseDrag", e.x, e.y, e.mouseDownPosition.getX(), e.mouseDownPosition.getY());
+        if (ReactApplicationRoot* root = findParentComponentOfClass<ReactApplicationRoot>())
+            root->dispatchViewEvent(getViewId(), "MouseDrag", e.x, e.y, mouseDownX, mouseDownY);
     }
 }

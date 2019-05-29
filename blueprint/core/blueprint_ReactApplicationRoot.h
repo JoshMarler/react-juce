@@ -47,23 +47,17 @@ namespace blueprint
     {
     public:
         //==============================================================================
-        // TODO: This is a bad way to do this. Basically we either need to store a pointer
-        // to the ReactApplicationRoot instance associated with a given Duktape context
-        // either in some global static map or by storing that pointer somewhere in user
-        // data inside of the Duktape context.
-        static ReactApplicationRoot* singletonInstance;
-
-        //==============================================================================
         ReactApplicationRoot()
         {
             jassert (juce::MessageManager::getInstance()->isThisTheMessageThread());
 
-            // See note above. Currently can only create one instance.
-            jassert (singletonInstance == nullptr);
-            singletonInstance = this;
-
             // Create a duktape context
             ctx = initializeDuktapeContext();
+
+            // Push a pointer to this root instance
+            duk_push_global_stash(ctx);
+            duk_push_pointer(ctx, (void *) this);
+            duk_put_prop_string(ctx, -2, "rootInstance");
 
             // Assign our root level shadow view
             _shadowView = std::make_unique<ShadowView>(this);
@@ -293,9 +287,14 @@ namespace blueprint
             // into the script engine, where the wrapper knows which registry index to call back
             // to via duktape's lightfunc "magic" feature.
             duk_push_c_lightfunc(ctx, [](duk_context* ctx) -> duk_ret_t {
-                jassert (ReactApplicationRoot::singletonInstance != nullptr);
+                // Retrieve the root instance pointer
+                duk_push_global_stash(ctx);
+                duk_get_prop_string(ctx, -1, "rootInstance");
+                ReactApplicationRoot* root = reinterpret_cast<ReactApplicationRoot*>(duk_get_pointer(ctx, -1));
+                duk_pop_2(ctx);
 
-                ReactApplicationRoot* root = ReactApplicationRoot::singletonInstance;
+                jassert (root != nullptr);
+
                 unsigned int fnIndex = ((unsigned int) duk_get_current_magic(ctx)) & 0xffffU;
                 std::vector<juce::var> args;
 
@@ -344,6 +343,7 @@ namespace blueprint
         template <typename... T>
         void dispatchViewEvent (ViewId viewId, const juce::String& eventType, T... args)
         {
+            jassert (juce::MessageManager::getInstance()->isThisTheMessageThread());
             std::vector<juce::var> vargs { args... };
 
             // Push the dispatchViewEvent function to the top of the stack
@@ -376,6 +376,7 @@ namespace blueprint
         template <typename... T>
         void dispatchEvent (const juce::String& eventType, T... args)
         {
+            jassert (juce::MessageManager::getInstance()->isThisTheMessageThread());
             std::vector<juce::var> vargs { args... };
 
             // Push the dispatchEvent function to the top of the stack
