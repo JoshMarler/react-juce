@@ -1,14 +1,25 @@
 import Button from './Button';
 import { Colors } from './Constants';
 import React, { Component } from 'react';
-import { View, Image, Text, NativeMethods } from './Blueprint';
+import {
+  EventBridge,
+  Image,
+  NativeMethods,
+  Text,
+  View,
+} from './Blueprint';
 
+import throttle from 'lodash.throttle';
 
 class ParameterToggleButton extends Component {
   constructor(props) {
     super(props);
 
     this._onMouseUp = this._onMouseUp.bind(this);
+    this._onParameterValueChange = this._onParameterValueChange.bind(this);
+    this._throttleStateUpdate = throttle(this.setState, 32);
+
+    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
 
     this.state = {
       toggle: false,
@@ -21,10 +32,18 @@ class ParameterToggleButton extends Component {
     if (typeof this.props.paramId === 'string' && this.props.paramId.length > 0) {
       NativeMethods.setParameterValueNotifyingHost(this.props.paramId, newValue);
     }
+  }
 
-    this.setState({
-      toggle: newValue,
-    });
+  _onParameterValueChange(index, paramId, defaultValue, currentValue, stringValue) {
+    const shouldUpdate = typeof this.props.paramId === 'string' &&
+      this.props.paramId.length > 0 &&
+      this.props.paramId === paramId;
+
+    if (shouldUpdate) {
+      this._throttleStateUpdate({
+        toggle: currentValue > 0.5,
+      });
+    }
   }
 
   render() {
