@@ -11,6 +11,7 @@ import {
 
 import throttle from 'lodash.throttle';
 
+
 class ParameterToggleButton extends Component {
   constructor(props) {
     super(props);

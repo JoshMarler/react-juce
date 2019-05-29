@@ -3,7 +3,7 @@ import EventEmitter from 'events';
 
 const EventBridge = new EventEmitter();
 
-EventBridge.setMaxListeners(20);
+EventBridge.setMaxListeners(30);
 
 // An internal hook for the native side, from which we propagate events through
 // the EventEmitter interface.
