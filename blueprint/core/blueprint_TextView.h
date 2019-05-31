@@ -34,13 +34,12 @@ namespace blueprint
         }
 
         /** Assembles an aggregate string of raw text children. */
-        juce::GlyphArrangement getGlyphArrangement()
+        juce::GlyphArrangement getGlyphArrangement(float maxWidth)
         {
             juce::GlyphArrangement arr;
             juce::String text;
             juce::Font f = getFont();
             juce::Justification j = juce::Justification::centredLeft;
-            int maxWidth = props.getWithDefault("max-width", INT_MAX);
 
             for (auto& c : getChildren())
                 if (RawTextView* v = dynamic_cast<RawTextView*>(c))
@@ -63,7 +62,7 @@ namespace blueprint
             g.setFont(getFont());
             g.setColour(colour);
 
-            getGlyphArrangement().draw(g);
+            getGlyphArrangement(cachedFloatBounds.getWidth()).draw(g);
         }
 
     private:

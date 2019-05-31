@@ -20,7 +20,7 @@ namespace blueprint
 
         jassert (view != nullptr);
 
-        auto bounds = view->getGlyphArrangement().getBoundingBox(0, -1, true);
+        auto bounds = view->getGlyphArrangement(width).getBoundingBox(0, -1, true);
 
         return {
             bounds.getWidth(),
