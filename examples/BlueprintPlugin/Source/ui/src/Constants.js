@@ -19,14 +19,14 @@ export const ParamIds = {
   REVERSE: 'Reverse',
   SPREAD: 'Spread',
   PITCH: 'Pitch',
-  FEEDBACK_G1G2: 'FeedbackG1G2',
+  FEEDBACK_G1G2: 'Feedback',
 
   GRAIN_FREQUENCY_G2: 'GrainFrequencyG2',
   SPRAY_G2: 'SprayG2',
   REVERSE_G2: 'ReverseG2',
   SPREAD_G2: 'SpreadG2',
   PITCH_G2: 'PitchG2',
-  FEEDBACK_G2G1: 'FeedbackG2G1',
+  FEEDBACK_G2G1: 'FeedbackG2',
 
   FREEZE: 'Freeze',
   ENVELOPE_THRESHOLD: 'EnvelopeThreshold',
