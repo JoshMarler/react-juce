@@ -16,8 +16,6 @@ class GrainParameterLabel extends Component {
     this._onParameterValueChange = this._onParameterValueChange.bind(this);
     this._debouncedResetLabel = debounce(this._resetLabel.bind(this), 500);
 
-    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
-
     this.state = {
       label: ParamLabels[this.props.g1ParamId],
     };
@@ -27,6 +25,10 @@ class GrainParameterLabel extends Component {
     return this.state.label !== nextState.label ||
       this.props.g1ParamId !== this.props.g1ParamId ||
       this.props.g2ParamId !== this.props.g2ParamId;
+  }
+
+  componentDidMount() {
+    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
   }
 
   componentWillUnmount() {

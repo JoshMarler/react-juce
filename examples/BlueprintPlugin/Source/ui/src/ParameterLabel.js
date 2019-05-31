@@ -16,8 +16,6 @@ class ParameterLabel extends Component {
     this._onParameterValueChange = this._onParameterValueChange.bind(this);
     this._debouncedResetLabel = debounce(this._resetLabel.bind(this), 500);
 
-    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
-
     this.state = {
       label: ParamLabels[this.props.paramId],
     };
@@ -26,6 +24,10 @@ class ParameterLabel extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     // TODO: Check props too...
     return this.state.label !== nextState.label;
+  }
+
+  componentDidMount() {
+    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
   }
 
   componentWillUnmount() {

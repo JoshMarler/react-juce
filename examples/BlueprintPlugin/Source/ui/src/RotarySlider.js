@@ -22,8 +22,6 @@ class RotarySlider extends Component {
     this._onParameterValueChange = this._onParameterValueChange.bind(this);
     this._throttleStateUpdate = throttle(this.setState, 32);
 
-    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
-
     // During a drag, we hold the value at which the drag started here to
     // ensure smooth behavior while the component state is being updated.
     this._valueAtDragStart = 0.0;
@@ -40,6 +38,10 @@ class RotarySlider extends Component {
     return this.state.width !== nextState.width ||
       this.state.height !== nextState.height ||
       this.state.value !== nextState.value;
+  }
+
+  componentDidMount() {
+    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
   }
 
   componentWillUnmount() {

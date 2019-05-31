@@ -20,11 +20,17 @@ class ParameterToggleButton extends Component {
     this._onParameterValueChange = this._onParameterValueChange.bind(this);
     this._throttleStateUpdate = throttle(this.setState, 32);
 
-    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
-
     this.state = {
       toggle: false,
     };
+  }
+
+  componentDidMount() {
+    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
+  }
+
+  componentWillUnmount() {
+    EventBridge.removeListener('parameterValueChange', this._onParameterValueChange);
   }
 
   _onMouseUp(mouseX, mouseY) {

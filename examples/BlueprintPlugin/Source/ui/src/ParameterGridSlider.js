@@ -21,8 +21,6 @@ class ParameterGridSlider extends Component {
     this._onParameterValueChange = this._onParameterValueChange.bind(this);
     this._throttleStateUpdate = throttle(this.setState, 32);
 
-    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
-
     // During a drag, we hold the value at which the drag started here to
     // ensure smooth behavior while the component state is being updated.
     this._valueAtDragStart = 0.0;
@@ -32,6 +30,14 @@ class ParameterGridSlider extends Component {
       height: 0,
       value: 0.0,
     };
+  }
+
+  componentDidMount() {
+    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
+  }
+
+  componentWillUnmount() {
+    EventBridge.removeListener('parameterValueChange', this._onParameterValueChange);
   }
 
   _onMeasure(width, height) {
