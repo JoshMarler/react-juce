@@ -211,8 +211,7 @@ const HostConfig = {
    *  @Param {Instance} child
    */
   removeChild(parentInstance, child) {
-    console.log('TODO');
-    // parentInstance.removeChild(child);
+    parentInstance.removeChild(child);
   },
 
   /** Remove a child from a parent container.
@@ -221,8 +220,7 @@ const HostConfig = {
    *  @Param {Instance} child
    */
   removeChildFromContainer(parentContainer, child) {
-    console.log('TODO');
-    // parentContainer.removeChild(child);
+    parentContainer.removeChild(child);
   },
 
 };

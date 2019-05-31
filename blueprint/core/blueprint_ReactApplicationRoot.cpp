@@ -119,6 +119,24 @@ namespace blueprint
         return 0;
     };
 
+    duk_ret_t BlueprintNative::removeChild (duk_context *ctx)
+    {
+        // Retrieve the root instance pointer
+        duk_push_global_stash(ctx);
+        duk_get_prop_string(ctx, -1, "rootInstance");
+        ReactApplicationRoot* root = reinterpret_cast<ReactApplicationRoot*>(duk_get_pointer(ctx, -1));
+        duk_pop_2(ctx);
+
+        jassert (root != nullptr);
+        jassert (duk_is_number(ctx, 0) && duk_is_number(ctx, 1));
+
+        ViewId parentId = duk_get_number(ctx, 0);
+        ViewId childId = duk_get_number(ctx, 1);
+
+        root->removeChild(parentId, childId);
+        return 0;
+    };
+
     duk_ret_t BlueprintNative::getRootInstanceId (duk_context *ctx)
     {
         // Retrieve the root instance pointer
@@ -149,6 +167,7 @@ namespace blueprint
             { "setViewProperty", BlueprintNative::setViewProperty, 3},
             { "setRawTextValue", BlueprintNative::setRawTextValue, 2},
             { "appendChild", BlueprintNative::appendChild, 2},
+            { "removeChild", BlueprintNative::removeChild, 2},
             { "getRootInstanceId", BlueprintNative::getRootInstanceId, 0},
             { NULL, NULL, 0 }
         };

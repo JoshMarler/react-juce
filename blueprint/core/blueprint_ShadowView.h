@@ -46,6 +46,18 @@ namespace blueprint
             children.push_back(childView);
         }
 
+        /** Removes a child component from the children array. */
+        virtual void removeChild (ShadowView* childView)
+        {
+            auto it = std::find(children.begin(), children.end(), childView);
+
+            if (it != children.end())
+            {
+                YGNodeRemoveChild(yogaNode, childView->yogaNode);
+                children.erase(it);
+            }
+        }
+
         //==============================================================================
         /** Returns a pointer to the View instance shadowed by this node. */
         View* getAssociatedView() { return view; }

@@ -38,6 +38,15 @@ class ViewInstance {
     return __BlueprintNative__.appendChild(this._id, childInstance._id);
   }
 
+  removeChild(childInstance) {
+    const index = this._children.indexOf(childInstance);
+
+    if (index >= 0) {
+      this._children.splice(index, 1);
+      return __BlueprintNative__.removeChild(this._id, childInstance._id);
+    }
+  }
+
   setProperty(propKey, value) {
     this._props = Object.assign({}, this._props, {
       [propKey]: value,

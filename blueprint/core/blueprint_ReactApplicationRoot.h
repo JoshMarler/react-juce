@@ -32,6 +32,7 @@ namespace blueprint
         static duk_ret_t setViewProperty (duk_context *ctx);
         static duk_ret_t setRawTextValue (duk_context *ctx);
         static duk_ret_t appendChild (duk_context *ctx);
+        static duk_ret_t removeChild (duk_context *ctx);
         static duk_ret_t getRootInstanceId (duk_context *ctx);
     };
 
@@ -251,6 +252,21 @@ namespace blueprint
                 parentView->appendChild(childView);
                 parentShadowView->appendChild(childShadowView);
             }
+
+            performShadowTreeLayout();
+        }
+
+        void removeChild (ViewId parentId, ViewId childId)
+        {
+            const auto& [parentView, parentShadowView] = getViewHandle(parentId);
+            const auto& [childView, childShadowView] = getViewHandle(childId);
+
+            parentView->removeChildComponent(childView);
+
+            // We might be dealing with a text view, in which case we expect a null
+            // shadow view.
+            if (parentShadowView && childShadowView)
+                parentShadowView->removeChild(childShadowView);
 
             performShadowTreeLayout();
         }
