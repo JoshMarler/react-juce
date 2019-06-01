@@ -13,11 +13,11 @@ class Chrome extends Component {
     return (
       <View {...styles.container} {...this.props}>
         <View {...styles.header}>
-          <Button {...styles.button}>
+          <Button {...styles.button} onMouseUp={this.props.onToggleHelp}>
             <Image interceptClickEvents={false} {...styles.icon} source={info} />
           </Button>
           <Image {...styles.logo} source={productLogo} />
-          <Button {...styles.button}>
+          <Button {...styles.button} onMouseUp={this.props.onToggleSettings}>
             <Image interceptClickEvents={false} {...styles.icon} source={cog} />
           </Button>
         </View>
@@ -34,6 +34,7 @@ const styles = {
   header: {
     'height': '10%',
     'flex': 0.0,
+    'flex-shrink': 0.0,
     'justify-content': 'space-between',
     'align-items': 'center',
     'padding-left': 16.0,
