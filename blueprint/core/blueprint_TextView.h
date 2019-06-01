@@ -45,8 +45,18 @@ namespace blueprint
                 if (RawTextView* v = dynamic_cast<RawTextView*>(c))
                     text += v->getText();
 
-            arr.addJustifiedText(f, text, 0, f.getHeight(), maxWidth, j);
-            arr.justifyGlyphs(0, arr.getNumGlyphs(), 0, 0, getWidth(), getHeight(), j);
+            // TODO: Right now a <Text> element maps 1:1 to a TextView instance,
+            // and all children must be RawTextView instances, which are basically
+            // just juce::String. A much more flexible alternative would be for a <Text>
+            // element to map to a TextView and any nested raw text nodes or <Text> elements
+            // map to a juce::AttributedString and carry their own properties. This allows
+            // bolding single words inline, for example, and setting line-height, etc.
+            // Then this bit of code would accumulate the juce::AttributedText instances
+            // and use juce::TextLayout to perform the actual measurement.
+            if (props.contains("white-space") && props["white-space"] == "nowrap")
+                arr.addLineOfText(f, text, 0, f.getHeight());
+            else
+                arr.addJustifiedText(f, text, 0, f.getHeight(), maxWidth, j);
 
             return arr;
         }

@@ -125,6 +125,7 @@ const styles = {
     // the size of the text, then the rotation will ensure we avoid clipping.
     'flex-shrink': 0,
     'color': Colors.STROKE,
+    'white-space': 'nowrap',
   },
   row: {
     'flex': 1.0,

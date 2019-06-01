@@ -20,6 +20,11 @@ namespace blueprint
 
         jassert (view != nullptr);
 
+        // TODO: This is a bit of an oversimplification. We have a YGMeasureMode which
+        // is one of three things, "undefined", "exact", or "at-most." Here we're kind of
+        // just ignoring that, and in cases like `white-space: nowrap;` we want to ignore it,
+        // but it would probably be good to get specific for each case.
+        // See https://github.com/facebook/yoga/pull/576/files
         auto bounds = view->getGlyphArrangement(width).getBoundingBox(0, -1, true);
 
         return {
