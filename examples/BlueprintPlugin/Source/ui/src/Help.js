@@ -1,6 +1,6 @@
 import { Colors } from './Constants';
 import React, { Component } from 'react';
-import { View, Image, Text } from './Blueprint';
+import { View, Image, Text, ScrollView } from './Blueprint';
 
 
 function SectionHeader(props) {
@@ -17,7 +17,7 @@ class Help extends Component {
   render() {
     return (
       <View {...styles.container} {...this.props}>
-        <View {...styles.scrollView}>
+        <ScrollView {...styles.scrollView}>
           <View {...styles.scrollViewContent}>
             <SectionHeader>GLOBALS</SectionHeader>
             <SectionHeader>DELAY</SectionHeader>
@@ -72,7 +72,7 @@ class Help extends Component {
               Sets the feedback amount from one grain engine back into itself.
             </Text>
           </View>
-        </View>
+        </ScrollView>
       </View>
     );
   }

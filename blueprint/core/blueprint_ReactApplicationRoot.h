@@ -13,6 +13,7 @@
 
 #include "blueprint_ImageView.h"
 #include "blueprint_RawTextView.h"
+#include "blueprint_ScrollView.h"
 #include "blueprint_ShadowView.h"
 #include "blueprint_TextShadowView.h"
 #include "blueprint_TextView.h"
@@ -178,6 +179,16 @@ namespace blueprint
 
                 return id;
             }
+            if (viewType == "ScrollView")
+            {
+                std::unique_ptr<View> view = std::make_unique<ScrollView>();
+                ViewId id = view->getViewId();
+
+                viewTable[id] = std::move(view);
+                shadowViewTable[id] = std::make_unique<ShadowView>(viewTable[id].get());
+
+                return id;
+            }
 
             jassertfalse;
             return 1;
@@ -261,6 +272,9 @@ namespace blueprint
             const auto& [parentView, parentShadowView] = getViewHandle(parentId);
             const auto& [childView, childShadowView] = getViewHandle(childId);
 
+            // TODO: Set a View::removeChild method and call into that here. Make
+            // that method virtual so that, e.g., the scroll view can override to
+            // remove the child from its viewport
             parentView->removeChildComponent(childView);
 
             // We might be dealing with a text view, in which case we expect a null

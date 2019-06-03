@@ -21,6 +21,10 @@ export function Image(props) {
   return React.createElement('Image', props, props.children);
 }
 
+export function ScrollView(props) {
+  return React.createElement('ScrollView', props, props.children);
+}
+
 Image.PlacementFlags = {
   xLeft: 1,
   xRight: 2,

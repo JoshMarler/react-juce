@@ -41,7 +41,7 @@ namespace blueprint
         virtual void setProperty (const juce::Identifier&, const juce::var&);
 
         /** Adds a child component behind the existing children. */
-        void appendChild (View* childView);
+        virtual void appendChild (View* childView);
 
         /** Updates the cached float layout bounds from the shadow tree. */
         void setFloatBounds (juce::Rectangle<float> bounds);
