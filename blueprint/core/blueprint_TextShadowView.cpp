@@ -25,11 +25,11 @@ namespace blueprint
         // just ignoring that, and in cases like `white-space: nowrap;` we want to ignore it,
         // but it would probably be good to get specific for each case.
         // See https://github.com/facebook/yoga/pull/576/files
-        auto bounds = view->getGlyphArrangement(width).getBoundingBox(0, -1, true);
+        auto tl = view->getTextLayout(width);
 
         return {
-            bounds.getWidth(),
-            bounds.getHeight()
+            tl.getWidth(),
+            tl.getHeight()
         };
     }
 

@@ -30,20 +30,20 @@ namespace blueprint
         juce::Font getFont()
         {
             float fontHeight = props.getWithDefault("font-size", 12.0f);
+            int textStyleFlags = props.getWithDefault("font-style", 0);
+
+            if (props.contains("font-family"))
+                return juce::Font(props["font-family"], fontHeight, textStyleFlags);
+
             return juce::Font(fontHeight);
         }
 
-        /** Assembles an aggregate string of raw text children. */
-        juce::GlyphArrangement getGlyphArrangement(float maxWidth)
+        /** Constructs a TextLayout from all the children string values. */
+        juce::TextLayout getTextLayout (float maxWidth)
         {
-            juce::GlyphArrangement arr;
+            juce::String hexColor = props.getWithDefault("color", "ff000000");
+            juce::Colour colour = juce::Colour::fromString(hexColor);
             juce::String text;
-            juce::Font f = getFont();
-            juce::Justification j = juce::Justification::centredLeft;
-
-            for (auto& c : getChildren())
-                if (RawTextView* v = dynamic_cast<RawTextView*>(c))
-                    text += v->getText();
 
             // TODO: Right now a <Text> element maps 1:1 to a TextView instance,
             // and all children must be RawTextView instances, which are basically
@@ -51,28 +51,48 @@ namespace blueprint
             // element to map to a TextView and any nested raw text nodes or <Text> elements
             // map to a juce::AttributedString and carry their own properties. This allows
             // bolding single words inline, for example, and setting line-height, etc.
-            // Then this bit of code would accumulate the juce::AttributedText instances
-            // and use juce::TextLayout to perform the actual measurement.
-            if (props.contains("white-space") && props["white-space"] == "nowrap")
-                arr.addLineOfText(f, text, 0, f.getHeight());
-            else
-                arr.addJustifiedText(f, text, 0, f.getHeight(), maxWidth, j);
+            for (auto& c : getChildren())
+                if (RawTextView* v = dynamic_cast<RawTextView*>(c))
+                    text += v->getText();
 
-            return arr;
+            juce::AttributedString as (text);
+            juce::TextLayout tl;
+
+            as.setLineSpacing(props.getWithDefault("line-spacing", 1.0f));
+            as.setFont(getFont());
+            as.setColour(colour);
+
+            if (props.contains("word-wrap"))
+            {
+                int wwValue = props["word-wrap"];
+
+                switch (wwValue)
+                {
+                    case 0:
+                        as.setWordWrap(juce::AttributedString::WordWrap::none);
+                        break;
+                    case 2:
+                        as.setWordWrap(juce::AttributedString::WordWrap::byChar);
+                        break;
+                    case 1:
+                    default:
+                        as.setWordWrap(juce::AttributedString::WordWrap::byWord);
+                        break;
+
+                }
+            }
+
+            tl.createLayout(as, maxWidth);
+            return tl;
         }
 
         //==============================================================================
         void paint (juce::Graphics& g) override
         {
+            auto floatBounds = getLocalBounds().toFloat();
+
             View::paint(g);
-
-            juce::String hexColor = props.getWithDefault("color", "ff000000");
-            juce::Colour colour = juce::Colour::fromString(hexColor);
-
-            g.setFont(getFont());
-            g.setColour(colour);
-
-            getGlyphArrangement(cachedFloatBounds.getWidth()).draw(g);
+            getTextLayout(floatBounds.getWidth()).draw(g, floatBounds);
         }
 
     private:

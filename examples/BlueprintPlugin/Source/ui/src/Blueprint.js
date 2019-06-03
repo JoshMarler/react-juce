@@ -40,6 +40,18 @@ Image.PlacementFlags = {
   centred: 4 + 32,
 };
 
+Text.WordWrap = {
+  none: 0,
+  byWord: 1,
+  byChar: 2,
+};
+
+Text.FontStyleFlags = {
+  plain: 0,
+  bold: 1,
+  italic: 2,
+  underlined: 4,
+};
 
 let __renderStarted = false;
 let __preferredRenderer = BlueprintRenderer;

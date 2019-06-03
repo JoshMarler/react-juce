@@ -13,13 +13,30 @@ function SectionHeader(props) {
   );
 }
 
+function SectionTitle(props) {
+  return (
+    <View {...styles.sectionTitle} {...props}>
+      <Text {...styles.sectionTitleText}>
+        {props.children}
+      </Text>
+    </View>
+  );
+}
+
 class Help extends Component {
   render() {
     return (
       <View {...styles.container} {...this.props}>
         <ScrollView {...styles.scrollView}>
           <View {...styles.scrollViewContent}>
-            <SectionHeader>GLOBALS</SectionHeader>
+            <SectionTitle>[SIGNAL FLOW]</SectionTitle>
+            <Text {...styles.sectionBodyText}>
+              Remnant consists of two independent grain engines that read from two distinct delay lines. The input signal feeds
+              into each delay line after going through independent filters, then the grain engines produce grains from the signal
+              in its respective delay line. The output of each grain engine feeds back into itself, and feeds back into the other
+              grain engine an amount decided by the CrossTalk parameter.
+            </Text>
+            <SectionTitle {...{'margin-top': 16.0}}>[GLOBAL PARAMETERS]</SectionTitle>
             <SectionHeader>DELAY</SectionHeader>
             <Text {...styles.sectionBodyText}>
               Sets the delay time from input to output. The larger the delay time, the larger individual grains can be,
@@ -45,7 +62,7 @@ class Help extends Component {
             <Text {...styles.sectionBodyText}>
               Your standard wet/dry control. A value of 0% is just the dry input, a value of 100% is just the wet output.
             </Text>
-            <SectionHeader>GRAIN PARAMETERS</SectionHeader>
+            <SectionTitle {...{'margin-top': 16.0}}>[GRAIN PARAMETERS]</SectionTitle>
             <SectionHeader>FREQUENCY</SectionHeader>
             <Text {...styles.sectionBodyText}>
               Sets how frequently grains are emitted, and proportionally sets the length of an individual grain. Lower frequency
@@ -95,19 +112,36 @@ const styles = {
     // otherwise Yoga will attempt to squeeze it into the size of its container.
     'flex': 1.0,
     'flex-shrink': 0.0,
+    'padding-top': 16.0,
+    'padding-bottom': 16.0,
+    'padding-right': 16.0,
   },
   sectionHeader: {
-    'margin-top': 4.0,
+    'margin-top': 8.0,
     'margin-bottom': 4.0,
     'flex-shrink': 0.0,
   },
   sectionHeaderText: {
     'color': Colors.STROKE,
-    'font-size': 18.0,
+    'font-size': 20.0,
+    'font-family': 'open-sans',
+    'font-style': Text.FontStyleFlags.bold,
+  },
+  sectionTitle: {
+    'margin-top': 4.0,
+    'margin-bottom': 4.0,
+    'flex-shrink': 0.0,
+  },
+  sectionTitleText: {
+    'color': Colors.SOFT_HIGHLIGHT,
+    'font-size': 22.0,
+    'font-family': 'open-sans',
   },
   sectionBodyText: {
     'color': Colors.STROKE,
-    'font-size': 14.0,
+    'font-size': 18.0,
+    'font-family': 'open-sans',
+    'line-spacing': 1.6,
   },
 };
 
