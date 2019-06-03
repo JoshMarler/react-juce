@@ -126,6 +126,9 @@ const styles = {
     'flex-shrink': 0,
     'color': Colors.STROKE,
     'word-wrap': Text.WordWrap.none,
+    'font-size': 12.0,
+    'font-family': 'open-sans',
+    'line-spacing': 1.6,
   },
   row: {
     'flex': 1.0,

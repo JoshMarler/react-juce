@@ -54,12 +54,21 @@ class GrainParameterLabel extends Component {
   render() {
     return (
       <View {...this.props}>
-        <Text color={Colors.STROKE}>
+        <Text {...styles.labelText}>
           {this.state.label}
         </Text>
       </View>
     );
   }
 }
+
+const styles = {
+  labelText: {
+    'color': Colors.STROKE,
+    'font-size': 12.0,
+    'font-family': 'open-sans',
+    'line-spacing': 1.6,
+  },
+};
 
 export default GrainParameterLabel;
