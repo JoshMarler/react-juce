@@ -1,8 +1,8 @@
 import Button from './Button';
 import { Colors } from './Constants';
+import ParameterValueStore from './ParameterValueStore';
 import React, { Component } from 'react';
 import {
-  EventBridge,
   Image,
   NativeMethods,
   Text,
@@ -20,17 +20,27 @@ class ParameterToggleButton extends Component {
     this._onParameterValueChange = this._onParameterValueChange.bind(this);
     this._throttleStateUpdate = throttle(this.setState, 32);
 
+    const paramState = ParameterValueStore.getParameterState(this.props.paramId);
+    const initialValue = typeof paramState.currentValue === 'number' ?
+      paramState.currentValue : 0.0;
+
     this.state = {
-      toggle: false,
+      toggle: initialValue > 0.5,
     };
   }
 
   componentDidMount() {
-    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
+    ParameterValueStore.addListener(
+      ParameterValueStore.CHANGE_EVENT,
+      this._onParameterValueChange
+    );
   }
 
   componentWillUnmount() {
-    EventBridge.removeListener('parameterValueChange', this._onParameterValueChange);
+    ParameterValueStore.removeListener(
+      ParameterValueStore.CHANGE_EVENT,
+      this._onParameterValueChange
+    );
   }
 
   _onMouseUp(mouseX, mouseY) {
@@ -41,14 +51,16 @@ class ParameterToggleButton extends Component {
     }
   }
 
-  _onParameterValueChange(index, paramId, defaultValue, currentValue, stringValue) {
+  _onParameterValueChange(paramId) {
     const shouldUpdate = typeof this.props.paramId === 'string' &&
       this.props.paramId.length > 0 &&
       this.props.paramId === paramId;
 
     if (shouldUpdate) {
+      const state = ParameterValueStore.getParameterState(paramId);
+
       this._throttleStateUpdate({
-        toggle: currentValue > 0.5,
+        toggle: state.currentValue > 0.5,
       });
     }
   }

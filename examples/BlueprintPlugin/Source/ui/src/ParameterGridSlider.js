@@ -1,6 +1,6 @@
+import ParameterValueStore from './ParameterValueStore';
 import React, { Component } from 'react';
 import {
-  EventBridge,
   Image,
   NativeMethods,
   Text,
@@ -25,19 +25,29 @@ class ParameterGridSlider extends Component {
     // ensure smooth behavior while the component state is being updated.
     this._valueAtDragStart = 0.0;
 
+    const paramState = ParameterValueStore.getParameterState(this.props.paramId);
+    const initialValue = typeof paramState.currentValue === 'number' ?
+      paramState.currentValue : 0.0;
+
     this.state = {
       width: 0,
       height: 0,
-      value: 0.0,
+      value: initialValue,
     };
   }
 
   componentDidMount() {
-    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
+    ParameterValueStore.addListener(
+      ParameterValueStore.CHANGE_EVENT,
+      this._onParameterValueChange
+    );
   }
 
   componentWillUnmount() {
-    EventBridge.removeListener('parameterValueChange', this._onParameterValueChange);
+    ParameterValueStore.removeListener(
+      ParameterValueStore.CHANGE_EVENT,
+      this._onParameterValueChange
+    );
   }
 
   _onMeasure(width, height) {
@@ -66,18 +76,19 @@ class ParameterGridSlider extends Component {
     }
   }
 
-  _onParameterValueChange(index, paramId, defaultValue, currentValue, stringValue) {
+  _onParameterValueChange(paramId) {
     const shouldUpdate = typeof this.props.paramId === 'string' &&
       this.props.paramId.length > 0 &&
       this.props.paramId === paramId;
 
     if (shouldUpdate) {
+      const state = ParameterValueStore.getParameterState(paramId);
+
       this._throttleStateUpdate({
-        value: currentValue,
+        value: state.currentValue,
       });
     }
   }
-
 
   _renderVectorGraphics(value, width, height) {
     let pathData = [];
