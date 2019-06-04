@@ -32,6 +32,7 @@ class ParameterLabel extends Component {
 
   componentWillUnmount() {
     EventBridge.removeListener('parameterValueChange', this._onParameterValueChange);
+    this._debouncedResetLabel.cancel();
   }
 
   _onParameterValueChange(index, paramId, defaultValue, currentValue, stringValue) {
@@ -64,7 +65,7 @@ class ParameterLabel extends Component {
 const styles = {
   labelText: {
     'color': Colors.STROKE,
-    'font-size': 12.0,
+    'font-size': 16.0,
     'font-family': 'open-sans',
     'line-spacing': 1.6,
   },

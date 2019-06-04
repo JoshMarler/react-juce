@@ -6,7 +6,6 @@ import ParameterLabel from './ParameterLabel';
 import GrainParameterLabel from './GrainParameterLabel';
 import React, { Component } from 'react';
 import {
-  EventBridge,
   Image,
   Text,
   View,
@@ -126,7 +125,7 @@ const styles = {
     'flex-shrink': 0,
     'color': Colors.STROKE,
     'word-wrap': Text.WordWrap.none,
-    'font-size': 12.0,
+    'font-size': 16.0,
     'font-family': 'open-sans',
     'line-spacing': 1.6,
   },
