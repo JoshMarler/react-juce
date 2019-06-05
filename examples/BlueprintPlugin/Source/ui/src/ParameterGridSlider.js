@@ -8,6 +8,7 @@ import {
 } from './Blueprint';
 
 import throttle from 'lodash.throttle';
+import { drawBorderPath } from './Drawing';
 
 
 class ParameterGridSlider extends Component {
@@ -106,6 +107,19 @@ class ParameterGridSlider extends Component {
       pathData2.push(`L ${x} ${y2}`);
     }
 
+    let inverseCornerRadius = -0.26 * Math.min(width, height);
+    let cornerRadius = 0.1 * Math.min(width, height);
+
+    // These props denote "notch top left," "notch top right," etc.
+    let border = drawBorderPath(
+      width,
+      height,
+      this.props.ntl ? inverseCornerRadius : cornerRadius,
+      this.props.ntr ? inverseCornerRadius : cornerRadius,
+      this.props.nbr ? inverseCornerRadius : cornerRadius,
+      this.props.nbl ? inverseCornerRadius : cornerRadius,
+    );
+
     return `
       <svg
         width="${width}"
@@ -115,6 +129,7 @@ class ParameterGridSlider extends Component {
         xmlns="http://www.w3.org/2000/svg">
         <path d="${pathData.join(' ')}" stroke="#66FDCF" stroke-width="2.0" />
         <path d="${pathData2.join(' ')}" stroke="#62E7FD" stroke-width="2.0" />
+        <path d="${border.join(' ')}" stroke="#626262" stroke-width="2.0" fill="none" />
       </svg>
     `;
   }

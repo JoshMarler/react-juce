@@ -26,21 +26,21 @@ class ParameterGrid extends Component {
         <View {...styles.grid}>
           <View {...styles.row}>
             <Gutter direction={-1.0}>GRAIN 1</Gutter>
-            <ParameterGridSlider paramId={ParamIds.GRAIN_FREQUENCY} {...styles.cell} {...styles.notchTopRight} />
-            <ParameterGridSlider paramId={ParamIds.SPRAY} {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
-            <ParameterGridSlider paramId={ParamIds.SPREAD} {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
-            <ParameterGridSlider paramId={ParamIds.PITCH} {...styles.cell} {...styles.notchTopLeft} {...styles.notchTopRight} />
-            <ParameterGridSlider paramId={ParamIds.REVERSE} {...styles.cell} {...styles.notchTopRight} {...styles.notchTopLeft} />
-            <ParameterGridSlider paramId={ParamIds.FEEDBACK_G1G2} {...styles.cell} {...styles.notchTopLeft} />
+            <ParameterGridSlider ntr paramId={ParamIds.GRAIN_FREQUENCY} {...styles.cell} />
+            <ParameterGridSlider ntl ntr paramId={ParamIds.SPRAY} {...styles.cell} />
+            <ParameterGridSlider ntl ntr paramId={ParamIds.SPREAD} {...styles.cell} />
+            <ParameterGridSlider ntl ntr paramId={ParamIds.PITCH} {...styles.cell} />
+            <ParameterGridSlider ntl ntr paramId={ParamIds.REVERSE} {...styles.cell} />
+            <ParameterGridSlider ntl paramId={ParamIds.FEEDBACK_G1G2} {...styles.cell} />
             <Gutter direction={1.0}>GRAIN 1</Gutter>
           </View>
           <View {...styles.row}>
             <Gutter direction={-1.0}>GRAIN 2</Gutter>
             <ParameterGridSlider paramId={ParamIds.GRAIN_FREQUENCY_G2} {...styles.cell} />
-            <ParameterGridSlider paramId={ParamIds.SPRAY_G2} {...styles.cell} {...styles.notchBottomRight} />
-            <ParameterGridSlider paramId={ParamIds.SPREAD_G2} {...styles.cell} {...styles.notchBottomLeft} />
-            <ParameterGridSlider paramId={ParamIds.PITCH_G2} {...styles.cell} {...styles.notchBottomRight} />
-            <ParameterGridSlider paramId={ParamIds.REVERSE_G2} {...styles.cell} {...styles.notchBottomLeft} />
+            <ParameterGridSlider nbr paramId={ParamIds.SPRAY_G2} {...styles.cell} />
+            <ParameterGridSlider nbl paramId={ParamIds.SPREAD_G2} {...styles.cell} />
+            <ParameterGridSlider nbr paramId={ParamIds.PITCH_G2} {...styles.cell} />
+            <ParameterGridSlider nbl paramId={ParamIds.REVERSE_G2} {...styles.cell} />
             <ParameterGridSlider paramId={ParamIds.FEEDBACK_G2G1} {...styles.cell} />
             <Gutter direction={1.0}>GRAIN 2</Gutter>
           </View>
@@ -135,17 +135,8 @@ const styles = {
   },
   cell: {
     'flex': 1.0,
-    'border-width': 2.0,
-    'border-color': Colors.STROKE,
-    'border-top-left-radius': '10%',
-    'border-top-right-radius': '10%',
-    'border-bottom-left-radius': '10%',
-    'border-bottom-right-radius': '10%',
+    'margin': 2.0,
   },
-  notchTopLeft: { 'border-top-left-radius': '-26%' },
-  notchTopRight: { 'border-top-right-radius': '-26%' },
-  notchBottomLeft: { 'border-bottom-left-radius': '-26%' },
-  notchBottomRight: { 'border-bottom-right-radius': '-26%' },
 };
 
 export default ParameterGrid;
