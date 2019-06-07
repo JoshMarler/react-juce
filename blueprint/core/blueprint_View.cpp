@@ -90,6 +90,13 @@ namespace blueprint
             const float minLength = std::min(width, height);
             float borderRadius = getResolvedLengthProperty("border-radius", minLength);
 
+            // TODO: Here we have a limited mechanism for drawing a rectangular border with
+            // or without rounded corners, but there's no reason we couldn't support arbitrary
+            // border shapes with something like a "border-path" property, where the property
+            // value is a Path string (M 0 50 L 50 50...). Then we could support arbitrary border
+            // shapes while still hitting the `reduceClipRegion` for the background color fill.
+            // Could also use that Path shape for overriding the hitTest implementation so that
+            // only hits within the border path shape satisfy a "hit."
             border.addRoundedRectangle(borderBounds, borderRadius);
             g.setColour(c);
             g.strokePath(border, juce::PathStrokeType(borderWidth));
