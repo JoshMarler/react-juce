@@ -28,7 +28,8 @@ export function drawBorderPath(x1, y1, width, height, rtl, rtr, rbr, rbl) {
   let nbl = ~~(rbl >= 0.0);
 
   // Top left corner
-  dataArray.push(`M ${x1} ${y1 + artl}`);
+  dataArray.push(`M ${x1} ${y1 + (y2 - y1) * 0.5}`);
+  dataArray.push(`L ${x1} ${y1 + artl}`);
   dataArray.push(`A ${artl} ${artl} 0 0 ${ntl} ${x1 + artl} ${y1}`);
 
   // Top right corner
@@ -46,5 +47,13 @@ export function drawBorderPath(x1, y1, width, height, rtl, rtr, rbr, rbl) {
   // Close path
   dataArray.push(`Z`);
 
-  return dataArray;
+  // Path length
+  let length = 0.5 * Math.PI * (artl + artr + arbr + arbl) +
+    (width - artl - artr) + (width - arbr - arbl) +
+    (height - artr - arbr) + (height - artl - arbl);
+
+  return {
+    border: dataArray,
+    length: length,
+  };
 }

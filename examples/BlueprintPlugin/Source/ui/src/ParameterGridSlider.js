@@ -117,7 +117,7 @@ class ParameterGridSlider extends Component {
     // outwards in both directions from the coordinate line. If the coordinate
     // line is the exact bounding box then the component clipping makes the corners
     // appear to have different radii on the interior and exterior of the box.
-    let border = drawBorderPath(
+    let {border, length} = drawBorderPath(
       0 + halfStrokeWidth,
       0 + halfStrokeWidth,
       width - strokeWidth,
@@ -127,6 +127,11 @@ class ParameterGridSlider extends Component {
       this.props.nbr ? inverseCornerRadius : cornerRadius,
       this.props.nbl ? inverseCornerRadius : cornerRadius,
     );
+
+    // Animate the border by stroke-dasharray, where the length of the dash is
+    // related to the value property and the length of the space takes up the
+    // rest of the circumference.
+    const dashArray = [0.999 * value * length, length];
 
     return `
       <svg
@@ -138,6 +143,7 @@ class ParameterGridSlider extends Component {
         <path d="${pathData.join(' ')}" stroke="#66FDCF" stroke-width="${strokeWidth}" />
         <path d="${pathData2.join(' ')}" stroke="#62E7FD" stroke-width="${strokeWidth}" />
         <path d="${border.join(' ')}" stroke="#626262" stroke-width="${strokeWidth}" fill="none" />
+        <path d="${border.join(' ')}" stroke="#62E7FD" stroke-width="${strokeWidth}" fill="none" stroke-dasharray="${dashArray.join(',')}" />
       </svg>
     `;
   }
