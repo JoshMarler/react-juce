@@ -94,6 +94,8 @@ class ParameterGridSlider extends Component {
   _renderVectorGraphics(value, width, height) {
     let pathData = [];
     let pathData2 = [];
+    let strokeWidth = 2.0;
+    let halfStrokeWidth = 1.0;
 
     let cy = height * 0.5;
     pathData.push(`M 0 ${cy}`);
@@ -111,9 +113,15 @@ class ParameterGridSlider extends Component {
     let cornerRadius = 0.1 * Math.min(width, height);
 
     // These props denote "notch top left," "notch top right," etc.
+    // Note this little bounds trick. When a Path is stroked, the line width extends
+    // outwards in both directions from the coordinate line. If the coordinate
+    // line is the exact bounding box then the component clipping makes the corners
+    // appear to have different radii on the interior and exterior of the box.
     let border = drawBorderPath(
-      width,
-      height,
+      0 + halfStrokeWidth,
+      0 + halfStrokeWidth,
+      width - strokeWidth,
+      height - strokeWidth,
       this.props.ntl ? inverseCornerRadius : cornerRadius,
       this.props.ntr ? inverseCornerRadius : cornerRadius,
       this.props.nbr ? inverseCornerRadius : cornerRadius,
@@ -127,9 +135,9 @@ class ParameterGridSlider extends Component {
         viewBox="0 0 ${width} ${height}"
         version="1.1"
         xmlns="http://www.w3.org/2000/svg">
-        <path d="${pathData.join(' ')}" stroke="#66FDCF" stroke-width="2.0" />
-        <path d="${pathData2.join(' ')}" stroke="#62E7FD" stroke-width="2.0" />
-        <path d="${border.join(' ')}" stroke="#626262" stroke-width="2.0" fill="none" />
+        <path d="${pathData.join(' ')}" stroke="#66FDCF" stroke-width="${strokeWidth}" />
+        <path d="${pathData2.join(' ')}" stroke="#62E7FD" stroke-width="${strokeWidth}" />
+        <path d="${border.join(' ')}" stroke="#626262" stroke-width="${strokeWidth}" fill="none" />
       </svg>
     `;
   }

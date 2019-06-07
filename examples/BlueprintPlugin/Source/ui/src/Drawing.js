@@ -1,6 +1,8 @@
 /** Constructs and returns a Path data array for drawing a border in the given
  *  dimensions.
  *
+ *  @param {number} x1
+ *  @param {number} y1
  *  @param {number} width
  *  @param {number} height
  *  @param {number} rtl : border radius top left corner
@@ -8,10 +10,10 @@
  *  @param {number} rbr : border radius bottom right corner
  *  @param {number} rbl : border radius bottom left corner
  */
-export function drawBorderPath(width, height, rtl, rtr, rbr, rbl) {
-  // TODO: Take an x,y prop as well so that the caller can offset the border
-  // from the edges of the component if it wants (for the juce path border trick)
+export function drawBorderPath(x1, y1, width, height, rtl, rtr, rbr, rbl) {
   let dataArray = [];
+  let x2 = x1 + width;
+  let y2 = y1 + height;
 
   // Magnitudes
   let artl = Math.abs(rtl);
@@ -26,20 +28,20 @@ export function drawBorderPath(width, height, rtl, rtr, rbr, rbl) {
   let nbl = ~~(rbl >= 0.0);
 
   // Top left corner
-  dataArray.push(`M ${0} ${artl}`);
-  dataArray.push(`A ${artl} ${artl} 0 0 ${ntl} ${artl} ${0}`);
+  dataArray.push(`M ${x1} ${y1 + artl}`);
+  dataArray.push(`A ${artl} ${artl} 0 0 ${ntl} ${x1 + artl} ${y1}`);
 
   // Top right corner
-  dataArray.push(`L ${width - artr} ${0}`);
-  dataArray.push(`A ${artr} ${artr} 0 0 ${ntr} ${width} ${artr}`);
+  dataArray.push(`L ${x2 - artr} ${y1}`);
+  dataArray.push(`A ${artr} ${artr} 0 0 ${ntr} ${x2} ${y1 + artr}`);
 
   // Bottom right corner
-  dataArray.push(`L ${width} ${height - arbr}`);
-  dataArray.push(`A ${arbr} ${arbr} 0 0 ${nbr} ${width - arbr} ${height}`);
+  dataArray.push(`L ${x2} ${y2 - arbr}`);
+  dataArray.push(`A ${arbr} ${arbr} 0 0 ${nbr} ${x2 - arbr} ${y2}`);
 
   // Bottom left corner
-  dataArray.push(`L ${arbl} ${height}`);
-  dataArray.push(`A ${arbl} ${arbl} 0 0 ${nbl} ${0} ${height - arbl}`);
+  dataArray.push(`L ${x1 + arbl} ${y2}`);
+  dataArray.push(`A ${arbl} ${arbl} 0 0 ${nbl} ${x1} ${y2 - arbl}`);
 
   // Close path
   dataArray.push(`Z`);
