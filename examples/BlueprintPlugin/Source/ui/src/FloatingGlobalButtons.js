@@ -41,10 +41,7 @@ const styles = {
     'aspect-ratio': 1.0,
     'border-width': 2.0,
     'border-color': Colors.STROKE,
-    'border-top-left-radius': '50%',
-    'border-top-right-radius': '50%',
-    'border-bottom-left-radius': '50%',
-    'border-bottom-right-radius': '50%',
+    'border-radius': '50%',
   },
   buttonIcon: {
     'flex': 0.0,
