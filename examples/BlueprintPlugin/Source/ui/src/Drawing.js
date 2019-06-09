@@ -57,3 +57,134 @@ export function drawBorderPath(x1, y1, width, height, rtl, rtr, rbr, rbl) {
     length: length,
   };
 }
+
+export function drawGrainFrequencyPattern(value, width, height) {
+  let pathData = [];
+  let pathData2 = [];
+  let strokeWidth = 2.0;
+  let halfStrokeWidth = 1.0;
+
+  let cy = height * 0.5;
+  pathData.push(`M 0 ${cy}`);
+  pathData2.push(`M 0 ${cy}`);
+
+  for (let x = 0; x < width; x++) {
+    let y1 = cy + 30 * Math.sin(4.0 * value * Math.PI * (x / width));
+    let y2 = cy + 30 * Math.sin(4.0 * value * Math.PI * (0.5 + (x / width)));
+
+    pathData.push(`L ${x} ${y1}`);
+    pathData2.push(`L ${x} ${y2}`);
+  }
+
+  return `
+    <path d="${pathData.join(' ')}" stroke="#66FDCF" stroke-width="${strokeWidth}" />
+    <path d="${pathData2.join(' ')}" stroke="#62E7FD" stroke-width="${strokeWidth}" />
+  `;
+}
+
+export function drawGrainSprayPattern(value, width, height) {
+  let xStep = width / 16.0;
+  let yStep = height / 16.0;
+  let strokeWidth = 2.0;
+  let maxOffset = 8.0;
+  let pathData = [];
+
+
+  for (let x = 0; x < width; x += xStep) {
+    for (let y = 5.0 * yStep; y < 12.0 * yStep; y += yStep) {
+      let xr = x + value * Math.random() * maxOffset;
+      let yr = y + value * Math.random() * maxOffset;
+      pathData.push(`M ${xr} ${yr}`);
+      pathData.push(`L ${xr + 1.0} ${yr}`);
+    }
+  }
+
+  return `
+    <path d="${pathData.join(' ')}" stroke="#66FDCF" stroke-width="${strokeWidth}" />
+  `;
+}
+
+const spreadRand = [];
+
+export function drawGrainSpreadPattern(value, width, height) {
+  let x1 = 0.48 * width;
+  let x2 = 0.52 * width;
+  let numSteps = 16;
+  let yStep = height / numSteps;
+  let maxOffset = 16.0;
+  let strokeWidth = 2.0;
+  let pathData = [];
+
+  if (spreadRand.length !== numSteps || value < 0.001) {
+    for (let i = 0; i < numSteps; ++i) {
+      spreadRand[i] = Math.random();
+    }
+  }
+
+  for (let i = 2; i < numSteps - 2; ++i) {
+    let y = i * yStep;
+
+    pathData.push(`M ${x1 - maxOffset * value * spreadRand[i]} ${y}`);
+    pathData.push(`L ${x1 - maxOffset * value * spreadRand[i]} ${y + yStep * 0.8}`);
+    pathData.push(`M ${x2 + maxOffset * value * spreadRand[i]} ${y}`);
+    pathData.push(`L ${x2 + maxOffset * value * spreadRand[i]} ${y + yStep * 0.8}`);
+  }
+
+  return `
+    <path d="${pathData.join(' ')}" stroke="#62E7FD" stroke-width="${strokeWidth}" />
+  `;
+}
+
+export function drawGrainPitchPattern(value, width, height) {
+  let y1 = 0.48 * height;
+  let y2 = 0.52 * height;
+  let numSteps = 16;
+  let xStep = width / numSteps;
+  let maxOffset = 24.0;
+  let strokeWidth = 2.0;
+  let pathData = [];
+  let quantValue = Math.round(value * 6) / 6;
+
+  for (let i = 0; i < numSteps; ++i) {
+    let x = i * xStep;
+
+    pathData.push(`M ${x} ${y1 - quantValue * (i / numSteps) * maxOffset}`);
+    pathData.push(`L ${x + xStep * 0.8} ${y1 - quantValue * (i / numSteps * maxOffset)}`);
+    pathData.push(`M ${x} ${y2}`);
+    pathData.push(`L ${x + xStep * 0.8} ${y2}`);
+  }
+
+  return `
+    <path d="${pathData.join(' ')}" stroke="#62E7FD" stroke-width="${strokeWidth}" />
+  `;
+}
+
+export function drawGrainFeedbackPattern(value, width, height) {
+  let numRings = 8;
+  let numSteps = 32;
+  let strokeWidth = 2.0;
+  let maxOffset = 2.0;
+  let cx = width * 0.5;
+  let cy = height * 0.5;
+  let rx = Math.min(width, height) * 0.25;
+  let paths = [];
+
+  for (let i = 0; i < numRings; ++i) {
+    let pathData = [`M ${cx - rx} ${cy}`];
+
+    for (let j = 0; j < numSteps; ++j) {
+      let angle = j * 2.0 * Math.PI / numSteps;
+
+      let x = cx - Math.cos(value * angle) * rx - value * angle * Math.random() * maxOffset;
+      let y = cy - Math.sin(value * angle) * rx - value * angle * Math.random() * maxOffset;
+
+      pathData.push(`L ${x} ${y}`);
+    }
+
+    paths.push(`
+      <path d="${pathData.join(' ')}" stroke="#62E7FD" stroke-width="${strokeWidth}" stroke-opacity="${Math.random() * 0.5}"/>
+    `);
+  }
+
+  return paths.join('\n');
+}

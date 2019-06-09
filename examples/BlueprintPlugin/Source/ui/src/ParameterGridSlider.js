@@ -51,6 +51,12 @@ class ParameterGridSlider extends Component {
     );
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextState.width !== this.state.width ||
+      nextState.height !== this.state.height ||
+      nextState.value !== this.state.value;
+  }
+
   _onMeasure(width, height) {
     this.setState({
       width: width,
@@ -92,23 +98,8 @@ class ParameterGridSlider extends Component {
   }
 
   _renderVectorGraphics(value, width, height) {
-    let pathData = [];
-    let pathData2 = [];
     let strokeWidth = 2.0;
     let halfStrokeWidth = 1.0;
-
-    let cy = height * 0.5;
-    pathData.push(`M 0 ${cy}`);
-    pathData2.push(`M 0 ${cy}`);
-
-    for (let x = 0; x < width; x++) {
-      let y1 = cy + 30 * Math.sin(4.0 * value * Math.PI * (x / width));
-      let y2 = cy + 30 * Math.sin(4.0 * value * Math.PI * (0.5 + (x / width)));
-
-      pathData.push(`L ${x} ${y1}`);
-      pathData2.push(`L ${x} ${y2}`);
-    }
-
     let inverseCornerRadius = -0.26 * Math.min(width, height);
     let cornerRadius = 0.1 * Math.min(width, height);
 
@@ -140,8 +131,7 @@ class ParameterGridSlider extends Component {
         viewBox="0 0 ${width} ${height}"
         version="1.1"
         xmlns="http://www.w3.org/2000/svg">
-        <path d="${pathData.join(' ')}" stroke="#66FDCF" stroke-width="${strokeWidth}" />
-        <path d="${pathData2.join(' ')}" stroke="#62E7FD" stroke-width="${strokeWidth}" />
+        ${this.props.drawFunction(value, width, height)}
         <path d="${border.join(' ')}" stroke="#626262" stroke-width="${strokeWidth}" fill="none" />
         <path d="${border.join(' ')}" stroke="#62E7FD" stroke-width="${strokeWidth}" fill="none" stroke-dasharray="${dashArray.join(',')}" />
       </svg>
