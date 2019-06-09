@@ -68,9 +68,11 @@ export function drawGrainFrequencyPattern(value, width, height) {
   pathData.push(`M 0 ${cy}`);
   pathData2.push(`M 0 ${cy}`);
 
+  let vv = value * value * value * value * 4.0;
+
   for (let x = 0; x < width; x++) {
-    let y1 = cy + 30 * Math.sin(4.0 * value * Math.PI * (x / width));
-    let y2 = cy + 30 * Math.sin(4.0 * value * Math.PI * (0.5 + (x / width)));
+    let y1 = cy + 20 * Math.cos(4.0 * (vv + 0.12) * Math.PI * (x / width));
+    let y2 = cy + 20 * Math.cos(Math.PI + 4.0 * (vv + 0.12) * Math.PI * (x / width));
 
     pathData.push(`L ${x} ${y1}`);
     pathData2.push(`L ${x} ${y2}`);
@@ -88,7 +90,6 @@ export function drawGrainSprayPattern(value, width, height) {
   let strokeWidth = 2.0;
   let maxOffset = 8.0;
   let pathData = [];
-
 
   for (let x = 0; x < width; x += xStep) {
     for (let y = 5.0 * yStep; y < 12.0 * yStep; y += yStep) {
@@ -136,26 +137,32 @@ export function drawGrainSpreadPattern(value, width, height) {
 }
 
 export function drawGrainPitchPattern(value, width, height) {
-  let y1 = 0.48 * height;
-  let y2 = 0.52 * height;
-  let numSteps = 16;
-  let xStep = width / numSteps;
-  let maxOffset = 24.0;
+  let xStep = width / 10.0;
+  let yStep = height / 12.0;
   let strokeWidth = 2.0;
+  let maxOffset = 18.0;
   let pathData = [];
-  let quantValue = Math.round(value * 6) / 6;
+  let pathData2 = [];
+  let rand = 8.0;
 
-  for (let i = 0; i < numSteps; ++i) {
-    let x = i * xStep;
+  // Quantize the value to 24 steps, centered about zero, on the range [-1, 1]
+  let qValue = (Math.round(value * 24) / 24) * 2.0 - 1.0;
 
-    pathData.push(`M ${x} ${y1 - quantValue * (i / numSteps) * maxOffset}`);
-    pathData.push(`L ${x + xStep * 0.8} ${y1 - quantValue * (i / numSteps * maxOffset)}`);
-    pathData.push(`M ${x} ${y2}`);
-    pathData.push(`L ${x + xStep * 0.8} ${y2}`);
+  for (let x = 0; x < width; x += xStep) {
+    for (let y = 4.0 * yStep; y < 8.0 * yStep; y += yStep) {
+      let xr = x;
+      let yr = y - qValue * (x / width) * maxOffset;
+      pathData.push(`M ${xr} ${y + (yr - y) * 0.5}`);
+      pathData.push(`L ${xr + xStep * 0.8} ${yr}`);
+
+      pathData2.push(`M ${xr + rand} ${rand + y + (yr - y) * 0.5}`);
+      pathData2.push(`L ${rand + xr + xStep * 0.8} ${rand + yr}`);
+    }
   }
 
   return `
-    <path d="${pathData.join(' ')}" stroke="#62E7FD" stroke-width="${strokeWidth}" />
+    <path d="${pathData.join(' ')}" stroke="#66FDCF" stroke-width="${strokeWidth}" stroke-opacity="0.8" />
+    <path d="${pathData2.join(' ')}" stroke="#62E7FD" stroke-width="${strokeWidth}" stroke-opacity="0.5" />
   `;
 }
 
