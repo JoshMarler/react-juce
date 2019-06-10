@@ -166,6 +166,37 @@ export function drawGrainPitchPattern(value, width, height) {
   `;
 }
 
+const reverseRandCoords = [];
+
+export function drawGrainReversePattern(value, width, height) {
+  let strokeWidth = 2.0;
+  let numGrains = 32;
+  let tw = width / 16.0;
+  let th = tw;
+
+  if (reverseRandCoords.length !== numGrains) {
+    for (let i = 0; i < numGrains; ++i) {
+      reverseRandCoords.push({
+        x: Math.random(),
+        y: 0.2 + 0.6 * Math.random(),
+        opacity: Math.random(),
+        color: Math.random() < 0.5 ? "#66FDCF" : "#62E7FD",
+        r: Math.random(),
+      });
+    }
+  }
+
+  return reverseRandCoords.map(function(p) {
+    let x = p.x * width;
+    let y = p.y * height;
+    let rev = (p.r < value) ? -1 : 1;
+
+    let line = `M ${x} ${y} L ${x + rev * tw} ${y + th * 0.5} L ${x} ${y + th} Z`;
+
+    return `<path d="${line}" stroke="${p.color}" stroke-width="${strokeWidth}" stroke-opacity="${p.opacity}" />`
+  }).join('\n');
+}
+
 export function drawGrainFeedbackPattern(value, width, height) {
   let numRings = 8;
   let numSteps = 32;

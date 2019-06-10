@@ -16,7 +16,8 @@ import {
   drawGrainSprayPattern,
   drawGrainSpreadPattern,
   drawGrainPitchPattern,
-  drawGrainFeedbackPattern
+  drawGrainFeedbackPattern,
+  drawGrainReversePattern,
 } from './Drawing';
 
 
@@ -38,7 +39,7 @@ class ParameterGrid extends Component {
             <ParameterGridSlider ntl ntr paramId={ParamIds.SPRAY} {...styles.cell} drawFunction={drawGrainSprayPattern} />
             <ParameterGridSlider ntl ntr paramId={ParamIds.SPREAD} {...styles.cell} drawFunction={drawGrainSpreadPattern} />
             <ParameterGridSlider ntl ntr paramId={ParamIds.PITCH} {...styles.cell} drawFunction={drawGrainPitchPattern} />
-            <ParameterGridSlider ntl ntr paramId={ParamIds.REVERSE} {...styles.cell} drawFunction={drawGrainFrequencyPattern} />
+            <ParameterGridSlider ntl ntr paramId={ParamIds.REVERSE} {...styles.cell} drawFunction={drawGrainReversePattern} />
             <ParameterGridSlider ntl paramId={ParamIds.FEEDBACK_G1G2} {...styles.cell} drawFunction={drawGrainFeedbackPattern} />
             <Gutter direction={1.0}>GRAIN 1</Gutter>
           </View>
@@ -48,7 +49,7 @@ class ParameterGrid extends Component {
             <ParameterGridSlider nbr paramId={ParamIds.SPRAY_G2} {...styles.cell} drawFunction={drawGrainSprayPattern} />
             <ParameterGridSlider nbl paramId={ParamIds.SPREAD_G2} {...styles.cell} drawFunction={drawGrainSpreadPattern} />
             <ParameterGridSlider nbr paramId={ParamIds.PITCH_G2} {...styles.cell} drawFunction={drawGrainPitchPattern} />
-            <ParameterGridSlider nbl paramId={ParamIds.REVERSE_G2} {...styles.cell} drawFunction={drawGrainFrequencyPattern} />
+            <ParameterGridSlider nbl paramId={ParamIds.REVERSE_G2} {...styles.cell} drawFunction={drawGrainReversePattern} />
             <ParameterGridSlider paramId={ParamIds.FEEDBACK_G2G1} {...styles.cell} drawFunction={drawGrainFeedbackPattern} />
             <Gutter direction={1.0}>GRAIN 2</Gutter>
           </View>
