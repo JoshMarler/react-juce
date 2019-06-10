@@ -18,7 +18,7 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
     File sourceDir = (File (__FILE__)).getParentDirectory();
 
     addAndMakeVisible(appRoot);
-    appRoot.runScript(sourceDir.getChildFile("ui/build/js/main.js"));
+    appRoot.evalScript(sourceDir.getChildFile("ui/build/js/main.js").loadFileAsString());
     appRoot.enableHotkeyReloading();
 
     appRoot.registerNativeMethod(

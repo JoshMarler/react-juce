@@ -93,12 +93,9 @@ namespace blueprint
 
         //==============================================================================
         /** Reads a JavaScript bundle from file and evaluates it in the Duktape context. */
-        void runScript (const juce::File& f)
+        void evalScript (const juce::String& script)
         {
-            auto src = f.loadFileAsString();
-            sourceFile = f;
-
-            duk_push_string(ctx, src.toRawUTF8());
+            duk_push_string(ctx, script.toRawUTF8());
 
             if (duk_peval(ctx) != 0) {
                 printf("Script evaluation failed: %s\n", duk_safe_to_string(ctx, -1));
@@ -132,7 +129,10 @@ namespace blueprint
                 shadowViewTable.clear();
                 ctx = initializeDuktapeContext();
                 _shadowView = std::make_unique<ShadowView>(this);
-                runScript(sourceFile);
+                // TODO: Disabling this for now; need to rethink the
+                // interface and whether or not this kind of functionality
+                // belongs within the ReactApplicationRoot class.
+                // runScript(sourceFile);
             }
 
             return true;
