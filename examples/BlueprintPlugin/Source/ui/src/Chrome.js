@@ -1,7 +1,7 @@
 import Button from './Button';
 import { Colors } from './Constants';
 import React, { Component } from 'react';
-import { View, Image, Text } from './Blueprint';
+import { View, Image, Text } from 'juce-blueprint';
 
 import productLogo from './icons/product-logo.svg';
 import cog from './icons/cog.svg';

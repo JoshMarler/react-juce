@@ -9,7 +9,7 @@ import {
   Image,
   Text,
   View,
-} from './Blueprint';
+} from 'juce-blueprint';
 
 import {
   drawGrainFrequencyPattern,

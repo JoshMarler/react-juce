@@ -1,7 +1,7 @@
 import { Colors, ParamIds } from './Constants';
 import React, { Component } from 'react';
 import RotarySlider from './RotarySlider';
-import { View, Image, Text } from './Blueprint';
+import { View, Image, Text } from 'juce-blueprint';
 
 
 class FloatingGlobalKnobs extends Component {

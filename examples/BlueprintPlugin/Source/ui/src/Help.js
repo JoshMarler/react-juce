@@ -1,6 +1,6 @@
 import { Colors } from './Constants';
 import React, { Component } from 'react';
-import { View, Image, Text, ScrollView } from './Blueprint';
+import { View, Image, Text, ScrollView } from 'juce-blueprint';
 
 
 function SectionHeader(props) {

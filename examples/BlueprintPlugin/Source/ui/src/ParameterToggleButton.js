@@ -7,7 +7,7 @@ import {
   NativeMethods,
   Text,
   View,
-} from './Blueprint';
+} from 'juce-blueprint';
 
 import throttle from 'lodash.throttle';
 

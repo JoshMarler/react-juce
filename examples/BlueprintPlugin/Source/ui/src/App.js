@@ -3,7 +3,7 @@ import { Colors } from './Constants';
 import Help from './Help';
 import ParameterGrid from './ParameterGrid';
 import React, { Component } from 'react';
-import { View, Image, Text } from './Blueprint';
+import { View, Image, Text } from 'juce-blueprint';
 
 
 const ViewModes = {

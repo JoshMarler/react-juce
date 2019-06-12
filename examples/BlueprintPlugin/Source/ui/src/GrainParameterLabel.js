@@ -4,7 +4,7 @@ import {
   EventBridge,
   Text,
   View,
-} from './Blueprint';
+} from 'juce-blueprint';
 
 import debounce from 'lodash.debounce';
 

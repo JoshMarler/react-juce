@@ -1,7 +1,7 @@
 import { Colors, ParamIds } from './Constants';
 import ParameterToggleButton from './ParameterToggleButton';
 import React, { Component } from 'react';
-import { View, Image, Text } from './Blueprint';
+import { View, Image, Text } from 'juce-blueprint';
 
 
 class FloatingGlobalButtons extends Component {
