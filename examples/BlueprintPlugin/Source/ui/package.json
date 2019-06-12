@@ -23,6 +23,7 @@
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
+    "juce-blueprint": "file:../../../../packages/juce-blueprint",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
     "react": "^16.6.3"
