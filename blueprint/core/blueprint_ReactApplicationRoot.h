@@ -388,14 +388,7 @@ namespace blueprint
             duk_push_string(ctx, eventType.toRawUTF8());
 
             for (auto& p : vargs)
-            {
-                if (p.isInt() || p.isInt64())
-                    duk_push_int(ctx, (int) p);
-                if (p.isDouble())
-                    duk_push_number(ctx, (double) p);
-                if (p.isString())
-                    duk_push_string(ctx, p.toString().toRawUTF8());
-            }
+                pushVarToDukStack(p);
 
             // Then issue the call and clear the stack
             duk_call(ctx, 2 + static_cast<int>(vargs.size()));
@@ -420,18 +413,49 @@ namespace blueprint
             duk_push_string(ctx, eventType.toRawUTF8());
 
             for (auto& p : vargs)
-            {
-                if (p.isInt() || p.isInt64())
-                    duk_push_int(ctx, (int) p);
-                if (p.isDouble())
-                    duk_push_number(ctx, (double) p);
-                if (p.isString())
-                    duk_push_string(ctx, p.toString().toRawUTF8());
-            }
+                pushVarToDukStack(p);
 
             // Then issue the call and clear the stack
             duk_call(ctx, 1 + static_cast<int>(vargs.size()));
             duk_pop_n(ctx, 3);
+        }
+
+        void pushVarToDukStack (const juce::var& v)
+        {
+            if (v.isInt() || v.isInt64())
+                return duk_push_int(ctx, (int) v);
+            if (v.isDouble())
+                return duk_push_number(ctx, (double) v);
+            if (v.isString())
+                return (void) duk_push_string(ctx, v.toString().toRawUTF8());
+            if (v.isArray())
+            {
+                duk_idx_t arr_idx = duk_push_array(ctx);
+                int i = 0;
+
+                for (auto& e : *(v.getArray()))
+                {
+                    pushVarToDukStack(e);
+                    duk_put_prop_index(ctx, arr_idx, i++);
+                }
+
+                return;
+            }
+            if (v.isObject())
+            {
+                if (auto* o = v.getDynamicObject())
+                {
+                    duk_idx_t obj_idx = duk_push_object(ctx);
+
+                    for (auto& e : o->getProperties())
+                    {
+                        pushVarToDukStack(e.value);
+                        duk_put_prop_string(ctx, obj_idx, e.name.toString().toRawUTF8());
+                    }
+                }
+
+                return;
+            }
         }
 
         /** Recursively computes the shadow tree layout, then traverses the tree
