@@ -384,6 +384,8 @@ namespace blueprint
             duk_get_prop(ctx, -2);
 
             // Now push the arguments
+            int numArgs = 2 + static_cast<int>(vargs.size());
+            duk_require_stack_top(ctx, numArgs);
             duk_push_int(ctx, viewId);
             duk_push_string(ctx, eventType.toRawUTF8());
 
@@ -391,7 +393,24 @@ namespace blueprint
                 pushVarToDukStack(p);
 
             // Then issue the call and clear the stack
-            duk_call(ctx, 2 + static_cast<int>(vargs.size()));
+            if (duk_pcall(ctx, numArgs) != DUK_EXEC_SUCCESS) {
+                // If we have an error object at the top of the stack, we'll print the
+                // stack property.
+                if (duk_is_error(ctx, -1))
+                {
+                    // Accessing .stack might cause an error to be thrown, so wrap this
+                    // access in a duk_safe_call() if it matters.
+                    duk_get_prop_string(ctx, -1, "stack");
+                    DBG("Duktape call error: " << duk_safe_to_string(ctx, -1));
+                    duk_pop(ctx);
+                }
+                else
+                {
+                    // If it's not an error object we'll just coerce to string
+                    DBG("Duktape call error: " << duk_safe_to_string(ctx, -1));
+                }
+            }
+
             duk_pop_n(ctx, 3);
         }
 
@@ -410,13 +429,32 @@ namespace blueprint
             duk_get_prop(ctx, -2);
 
             // Now push the arguments
+            int numArgs = 1 + static_cast<int>(vargs.size());
+            duk_require_stack_top(ctx, numArgs);
             duk_push_string(ctx, eventType.toRawUTF8());
 
             for (auto& p : vargs)
                 pushVarToDukStack(p);
 
             // Then issue the call and clear the stack
-            duk_call(ctx, 1 + static_cast<int>(vargs.size()));
+            if (duk_pcall(ctx, numArgs) != DUK_EXEC_SUCCESS) {
+                // If we have an error object at the top of the stack, we'll print the
+                // stack property.
+                if (duk_is_error(ctx, -1))
+                {
+                    // Accessing .stack might cause an error to be thrown, so wrap this
+                    // access in a duk_safe_call() if it matters.
+                    duk_get_prop_string(ctx, -1, "stack");
+                    DBG("Duktape call error: " << duk_safe_to_string(ctx, -1));
+                    duk_pop(ctx);
+                }
+                else
+                {
+                    // If it's not an error object we'll just coerce to string
+                    DBG("Duktape call error: " << duk_safe_to_string(ctx, -1));
+                }
+            }
+
             duk_pop_n(ctx, 3);
         }
 
