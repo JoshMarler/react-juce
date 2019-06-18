@@ -205,6 +205,17 @@ const HostConfig = {
     parentContainer.appendChild(child);
   },
 
+  /** Inserts a child node into a parent's children array, just before the
+   *  second given child node.
+   *
+   *  @param {Instance} parentInstance
+   *  @Param {Instance} child
+   *  @Param {Instance} beforeChild
+   */
+  insertBefore(parentInstance, child, beforeChild) {
+    console.log('TODO');
+  },
+
   /** Remove a child from a parent instance.
    *
    *  @param {Instance} parentInstance
