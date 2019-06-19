@@ -213,7 +213,12 @@ const HostConfig = {
    *  @Param {Instance} beforeChild
    */
   insertBefore(parentInstance, child, beforeChild) {
-    console.log('TODO');
+    let index = parentInstance.getChildIndex(beforeChild);
+
+    if (index < 0)
+      throw new Error('Failed to find child instance for insertBefore operation.');
+
+    parentInstance.insertChild(child, index);
   },
 
   /** Remove a child from a parent instance.

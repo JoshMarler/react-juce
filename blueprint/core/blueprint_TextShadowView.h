@@ -50,7 +50,7 @@ namespace blueprint
         }
 
         /** Override the default ShadowView behavior to explicitly error. */
-        void appendChild (ShadowView* childView) override
+        void addChild (ShadowView* childView, int index = -1) override
         {
             if (childView != nullptr)
             {

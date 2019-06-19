@@ -32,7 +32,7 @@ namespace blueprint
         static duk_ret_t createTextViewInstance (duk_context *ctx);
         static duk_ret_t setViewProperty (duk_context *ctx);
         static duk_ret_t setRawTextValue (duk_context *ctx);
-        static duk_ret_t appendChild (duk_context *ctx);
+        static duk_ret_t addChild (duk_context *ctx);
         static duk_ret_t removeChild (duk_context *ctx);
         static duk_ret_t getRootInstanceId (duk_context *ctx);
     };
@@ -242,7 +242,7 @@ namespace blueprint
             view->repaint();
         }
 
-        void appendChild (ViewId parentId, ViewId childId)
+        void addChild (ViewId parentId, ViewId childId, int index = -1)
         {
             const auto& [parentView, parentShadowView] = getViewHandle(parentId);
             const auto& [childView, childShadowView] = getViewHandle(childId);
@@ -255,13 +255,13 @@ namespace blueprint
                 jassert (dynamic_cast<RawTextView*>(childView) != nullptr);
                 jassert (childShadowView == nullptr);
 
-                parentView->appendChild(childView);
+                parentView->addChild(childView, index);
                 dynamic_cast<TextShadowView*>(parentShadowView)->markDirty();
             }
             else
             {
-                parentView->appendChild(childView);
-                parentShadowView->appendChild(childShadowView);
+                parentView->addChild(childView, index);
+                parentShadowView->addChild(childShadowView, index);
             }
 
             performShadowTreeLayout();

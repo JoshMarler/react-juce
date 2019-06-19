@@ -28,10 +28,10 @@ namespace blueprint
             setAlpha((double) value);
     }
 
-    void View::appendChild (View* childView)
+    void View::addChild (View* childView, int index)
     {
         // Add the child view to our component heirarchy.
-        addAndMakeVisible(childView);
+        addAndMakeVisible(childView, index);
     }
 
     void View::setFloatBounds(juce::Rectangle<float> bounds)

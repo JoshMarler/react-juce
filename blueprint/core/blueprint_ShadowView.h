@@ -40,10 +40,20 @@ namespace blueprint
         virtual void setProperty (const juce::Identifier& name, const juce::var& newValue);
 
         /** Adds a child component behind the existing children. */
-        virtual void appendChild (ShadowView* childView)
+        virtual void addChild (ShadowView* childView, int index = -1)
         {
-            YGNodeInsertChild(yogaNode, childView->yogaNode, YGNodeGetChildCount(yogaNode));
-            children.push_back(childView);
+            if (index == -1)
+            {
+                YGNodeInsertChild(yogaNode, childView->yogaNode, YGNodeGetChildCount(yogaNode));
+                children.push_back(childView);
+            }
+            else
+            {
+                jassert (juce::isPositiveAndNotGreaterThan(index, YGNodeGetChildCount(yogaNode)));
+
+                YGNodeInsertChild(yogaNode, childView->yogaNode, index);
+                children.insert(children.begin() + index, childView);
+            }
         }
 
         /** Removes a child component from the children array. */

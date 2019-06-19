@@ -32,7 +32,7 @@ namespace blueprint
         }
 
         //==============================================================================
-        void appendChild (View* childView) override
+        void addChild (View* childView, int index = -1) override
         {
             jassert (viewport.getViewedComponent() == nullptr);
             viewport.setViewedComponent(childView, false);

@@ -33,9 +33,24 @@ class ViewInstance {
     this._props = props;
   }
 
+  getChildIndex(childInstance) {
+    for (let i = 0; i < this._children.length; ++i) {
+      if (this._children[i] === childInstance) {
+        return i;
+      }
+    }
+
+    return -1;
+  }
+
   appendChild(childInstance) {
     this._children.push(childInstance);
-    return __BlueprintNative__.appendChild(this._id, childInstance._id);
+    return __BlueprintNative__.addChild(this._id, childInstance._id);
+  }
+
+  insertChild(childInstance, index) {
+    this._children.splice(index, 0, childInstance);
+    return __BlueprintNative__.addChild(this._id, childInstance._id, index);
   }
 
   removeChild(childInstance) {

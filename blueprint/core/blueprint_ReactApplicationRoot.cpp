@@ -101,7 +101,7 @@ namespace blueprint
         return 0;
     };
 
-    duk_ret_t BlueprintNative::appendChild (duk_context *ctx)
+    duk_ret_t BlueprintNative::addChild (duk_context *ctx)
     {
         // Retrieve the root instance pointer
         duk_push_global_stash(ctx);
@@ -114,8 +114,12 @@ namespace blueprint
 
         ViewId parentId = duk_get_number(ctx, 0);
         ViewId childId = duk_get_number(ctx, 1);
+        int index = -1;
 
-        root->appendChild(parentId, childId);
+        if (duk_is_number(ctx, 2))
+            index = duk_get_number(ctx, 2);
+
+        root->addChild(parentId, childId, index);
         return 0;
     };
 
@@ -166,7 +170,7 @@ namespace blueprint
             { "createTextViewInstance", BlueprintNative::createTextViewInstance, 1},
             { "setViewProperty", BlueprintNative::setViewProperty, 3},
             { "setRawTextValue", BlueprintNative::setRawTextValue, 2},
-            { "appendChild", BlueprintNative::appendChild, 2},
+            { "addChild", BlueprintNative::addChild, 3},
             { "removeChild", BlueprintNative::removeChild, 2},
             { "getRootInstanceId", BlueprintNative::getRootInstanceId, 0},
             { NULL, NULL, 0 }
