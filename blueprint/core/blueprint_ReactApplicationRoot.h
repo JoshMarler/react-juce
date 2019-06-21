@@ -87,7 +87,11 @@ namespace blueprint
 
             // Push the schedulerInterrupt function to the top of the stack and call it.
             duk_get_global_string(ctx, "__schedulerInterrupt__");
-            duk_call(ctx, 0);
+            [[maybe_unused]] const duk_int_t rc = duk_pcall(ctx, 0);
+
+            if (rc != DUK_EXEC_SUCCESS)
+                DBG("Duktape scheduler interrupt error: " << duk_safe_to_string(ctx, -1));
+
             duk_pop(ctx);
         }
 
