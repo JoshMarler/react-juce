@@ -26,14 +26,15 @@
 
 #include "blueprint.h"
 
+#include "yoga/yoga/log.cpp"
 #include "yoga/yoga/Utils.cpp"
 #include "yoga/yoga/YGConfig.cpp"
 #include "yoga/yoga/YGEnums.cpp"
-#include "yoga/yoga/YGFloatOptional.cpp"
 #include "yoga/yoga/YGLayout.cpp"
 #include "yoga/yoga/YGNode.cpp"
 #include "yoga/yoga/YGNodePrint.cpp"
 #include "yoga/yoga/YGStyle.cpp"
+#include "yoga/yoga/YGValue.cpp"
 #include "yoga/yoga/Yoga.cpp"
 
 #include "core/blueprint_ReactApplicationRoot.cpp"

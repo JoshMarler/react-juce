@@ -25,15 +25,29 @@
 #include <juce_graphics/juce_graphics.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
+#include "yoga/yoga/YGMacros.h"
+
+// This is a hacky workaround for an issue introduced in the YG_ENUM_BEGIN
+// macro in YGMacros.h. When compiled on VS2017 we fall to their definition
+// of YG_ENUM_BEGIN in YGMacros.h, which runs into something like a wrap-around overflow
+// with signed types, and ends up trying to index with a garbage value into
+// an array. We overwrite the YG_ENUM_BEGIN definition here with an unsigned
+// type and everything seems to work ok.
+// See: https://github.com/facebook/yoga/issues/891
+#ifndef NS_ENUM
+#define YG_ENUM_BEGIN(name) enum name: unsigned
+#endif
+
+#include "yoga/yoga/log.h"
 #include "yoga/yoga/Utils.h"
 #include "yoga/yoga/YGConfig.h"
 #include "yoga/yoga/YGEnums.h"
 #include "yoga/yoga/YGFloatOptional.h"
 #include "yoga/yoga/YGLayout.h"
-#include "yoga/yoga/YGMacros.h"
 #include "yoga/yoga/YGNode.h"
 #include "yoga/yoga/YGNodePrint.h"
 #include "yoga/yoga/YGStyle.h"
+#include "yoga/yoga/YGValue.h"
 #include "yoga/yoga/Yoga-internal.h"
 #include "yoga/yoga/Yoga.h"
 

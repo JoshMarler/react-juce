@@ -98,10 +98,12 @@ namespace blueprint
             view->setFloatBounds(getCachedLayoutBounds());
             view->setBounds(getCachedLayoutBounds().toNearestInt());
 
+#ifdef DEBUG
             if (props.contains("debug"))
                 YGNodePrint(yogaNode, (YGPrintOptions) (YGPrintOptionsLayout
                                                         | YGPrintOptionsStyle
                                                         | YGPrintOptionsChildren));
+#endif
 
             for (auto& child : children)
                 child->flushViewLayout();
