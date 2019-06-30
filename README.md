@@ -53,5 +53,12 @@ Now Webpack will watch your JavaScript files for changes and update the bundle o
 `blueprint::ReactApplicationRoot` to your project and mount it into your editor. See the [PluginEditor.cpp](https://github.com/nick-thompson/blueprint/blob/master/examples/BlueprintPlugin/Source/PluginEditor.cpp#L18) file in the BlueprintPlugin example for how to do that.
 
 ## Contributing
+Yes, please! I would be very happy to welcome your involvement. Take a look at the [open issues](https://github.com/nick-thompson/blueprint/issues)
+or the [project tracker](https://github.com/nick-thompson/blueprint/projects/1) to see if there's outstanding work that you might
+be able to get started. Or feel free to propose an idea or offer feedback by [opening an issue](https://github.com/nick-thompson/blueprint/issues/new) as well.
+
+I don't have a formal style guide at the moment, so please try to match the present formatting in any code contributions.
 
 ## License
+
+See [LICENSE.md](https://github.com/nick-thompson/blueprint/blob/master/LICENSE.md)
