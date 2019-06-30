@@ -4,7 +4,8 @@
   "description": "BlueprintPlugin user interface in React.",
   "main": "./cjs/Blueprint.js",
   "scripts": {
-    "build": "babel esm --out-dir cjs"
+    "build": "babel esm --out-dir cjs",
+    "init": "./scripts/init.js"
   },
   "author": "Nick Thompson",
   "babel": {
@@ -17,7 +18,9 @@
     "@babel/cli": "^7.2.0",
     "@babel/core": "^7.2.0",
     "@babel/preset-env": "^7.2.0",
-    "@babel/preset-react": "^7.0.0"
+    "@babel/preset-react": "^7.0.0",
+    "chalk": "^2.4.2",
+    "fs-extra": "^8.1.0"
   },
   "dependencies": {
     "core-js": "2.6.0",
