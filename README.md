@@ -8,7 +8,7 @@ For more information, see the introductory blog post here: [Blueprint: A JUCE Re
 ## Examples
 Blueprint is a very young project, but already it provides the framework on which the entire user interface for [Creative Intent](http://creativeintent.co/)'s forthcoming plugin, Remnant, is built.
 
-(Picture of the Remnant GUI).
+![Creative Intent Remnant: Beta screenshot](https://github.com/nick-thompson/blueprint/blob/master/RemnantBeta.jpg)
 
 Besides that, you can check out the BlueprintPlugin example in the `examples/` directory. See the "Getting Started" section
 below for building and running the demo plugin.
