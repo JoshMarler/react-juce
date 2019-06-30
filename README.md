@@ -1,46 +1,57 @@
-## Minor Issues
-* Need to provide manual `Date` support (`new Date()` / `Date.now()`) – Likely necessary for proper React batching
-* Need to implement timers (`setTimeout`, `setInterval`) – Likely necessary for proper React batching
+# Blueprint
+> A JUCE rendering backend for React.js
 
-## Major Questions
+Blueprint is an experimental JavaScript/C++ framework that enables a [React.js](https://reactjs.org/) frontend for a [JUCE](http://juce.com/) application or plugin. It provides an embedded, ECMAScript-compliant JavaScript engine via [Duktape](http://duktape.org/), native hooks for rendering the React component tree via `juce::Component` instances, and a flexbox layout engine via [Yoga](https://yogalayout.com/).
 
-### Documentation
-* I'm looking at git-storybook for docs, probably with gh-pages and a root-level docs folder per
-  their guide.
-* Need to cover both the JavaScript side and the C++/JUCE side.
+For more information, see the introductory blog post here: [Blueprint: A JUCE Rendering Backend for React.js](https://nickwritesablog.com/blueprint-a-juce-rendering-backend-for-react-js)
 
-### Debugging
-* As implemented, there's no debug support, which means that any issues occuring
-  in the JavaScript bundle will be uncaught and unresolved, and largely tracked down
-  via console.log statements.
-* Duktape does provide a debugging protocl which seems easy enough to adopt. It'd
-  be nice perhaps to have a hotkey when building in Debug mode that automatically
-  attaches the debugger and opens the bundled remote debugging UI.
-* https://duktape.org/guide.html#debugger
+## Examples
+Blueprint is a very young project, but already it provides the framework on which the entire user interface for [Creative Intent](http://creativeintent.co/)'s forthcoming plugin, Remnant, is built.
 
-### Images
-* There are a couple options here. One is to load image data into the JavaScript
-  bundle and provide a default `<Image />` view type that receives a `source` property
-  containing a `data:` URI scheme, interprets it to whatever representation JUCE needs,
-  and then draws it. This seems to be roughly how React Native works.
-  Another option is to initially support JUCE's BinaryData out of the
-  box and provide a way for the `<Image />` view type to specify which data a particular
-  `source` property is referring to.
-* I'm tempted to lean on option 1 because it's a better development experience, and very
-  easy to convince webpack to bundle image data into the JavaScript bundle itself. Surely
-  this has a performance penalty for things like huge high-res knob strips, but perhaps we
-  can address a BinaryData implementation after implementing option 1: a `<BinaryData />` interface
-  introduced after the `<Image />` interface.
+(Picture of the Remnant GUI).
 
-### Events
-* React has a SyntheticEvent and an internal implementation for event bubbling through the
-  virtual DOM. It looks like that code is public on github but not quite regarded as a public
-  tool. I think it'd be unwise to mark that as a proper dependency here unless we can get the
-  React team on board with publishing a proper package and maintaining it.
-* For the time being I'm just exposing a BlueprintNative.pushEvent() interface on the C++ side
-  which fills a JavaScript object and gets pushed through the central EventBroker interface on
-  that side of things. Any JavaScript code which needs events must listen through there. That means
-  that click events are not supported via `onClick` in JSX, etc.
-* Obviously we want to get to a point where we have proper SyntheticEvents and proper bubbling through
-  the virtual DOM, but can we get that Events package published? If not, do we roll our own or consider
-  a different option (i.e. Rxjs)?
+Besides that, you can check out the BlueprintPlugin example in the `examples/` directory. See the "Getting Started" section
+below for building and running the demo plugin.
+
+## Getting Started
+First, you'll need to collect the code and its dependencies.
+
+#### Getting the code
+
+```bash
+$ git clone --recurse-submodules git@github.com:nick-thompson/blueprint.git
+```
+or
+```bash
+$ git clone git@github.com:nick-thompson/blueprint.git
+$ cd blueprint
+$ git submodule update --init --recursive
+```
+
+#### Running the examples
+```bash
+$ cd blueprint/packages/juce-blueprint
+$ npm install
+$ npm run build
+$ cd ../../examples/BlueprintPlugin/Source/ui/
+$ npm install
+$ npm run build
+```
+Then open up the appropriate exporter for your platform from the appropriate example plugin directory and build as usual.
+
+#### Starting your project
+```bash
+$ cd blueprint/packages/juce-blueprint
+$ npm install
+$ npm run build
+$ npm run init -- path/to/your/project/directory
+$ cd path/to/your/project/directory
+$ npm start
+```
+
+Now Webpack will watch your JavaScript files for changes and update the bundle on save. The last step is to add the
+`blueprint::ReactApplicationRoot` to your project and mount it into your editor. See the [PluginEditor.cpp](https://github.com/nick-thompson/blueprint/blob/master/examples/BlueprintPlugin/Source/PluginEditor.cpp#L18) file in the BlueprintPlugin example for how to do that.
+
+## Contributing
+
+## License
