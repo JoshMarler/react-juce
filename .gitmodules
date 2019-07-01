@@ -1,6 +1,6 @@
 [submodule "juce"]
 	path = ext/juce
-	url = git@github.com:WeAreROLI/JUCE.git
+	url = ../../WeAreROLI/JUCE.git
 [submodule "yoga"]
 	path = blueprint/yoga
-	url = git@github.com:facebook/yoga.git
+	url = ../../facebook/yoga.git
