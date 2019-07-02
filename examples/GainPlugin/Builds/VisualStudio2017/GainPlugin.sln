@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2017
+
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GainPlugin - Standalone Plugin", "GainPlugin_StandalonePlugin.vcxproj", "{88AADE6B-3581-6351-6B5A-EBC2871A7EFD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{335F407A-9781-1D95-9147-C671C635290C} = {335F407A-9781-1D95-9147-C671C635290C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GainPlugin - Shared Code", "GainPlugin_SharedCode.vcxproj", "{335F407A-9781-1D95-9147-C671C635290C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{88AADE6B-3581-6351-6B5A-EBC2871A7EFD}.Debug|x64.ActiveCfg = Debug|x64
+		{88AADE6B-3581-6351-6B5A-EBC2871A7EFD}.Debug|x64.Build.0 = Debug|x64
+		{88AADE6B-3581-6351-6B5A-EBC2871A7EFD}.Release|x64.ActiveCfg = Release|x64
+		{88AADE6B-3581-6351-6B5A-EBC2871A7EFD}.Release|x64.Build.0 = Release|x64
+		{335F407A-9781-1D95-9147-C671C635290C}.Debug|x64.ActiveCfg = Debug|x64
+		{335F407A-9781-1D95-9147-C671C635290C}.Debug|x64.Build.0 = Debug|x64
+		{335F407A-9781-1D95-9147-C671C635290C}.Release|x64.ActiveCfg = Release|x64
+		{335F407A-9781-1D95-9147-C671C635290C}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
