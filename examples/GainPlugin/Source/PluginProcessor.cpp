@@ -170,8 +170,7 @@ bool GainPluginAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* GainPluginAudioProcessor::createEditor()
 {
-    // return new GainPluginAudioProcessorEditor (*this);
-    return new GenericAudioProcessorEditor(this);
+    return new GainPluginAudioProcessorEditor (*this);
 }
 
 //==============================================================================

@@ -15,8 +15,19 @@
 GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioProcessor& p)
     : AudioProcessorEditor (&p), processor (p)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
+    // First thing we have to do is load our javascript bundle from the build
+    // directory so that we can evaluate it within our appRot.
+    File sourceDir = File(__FILE__).getParentDirectory();
+    File bundle = sourceDir.getChildFile("jsui/build/js/main.js");
+
+    // Sanity check
+    jassert (bundle.existsAsFile());
+
+    // Next we just add our appRoot and kick off the app bundle.
+    addAndMakeVisible(appRoot);
+    appRoot.evalScript(bundle.loadFileAsString());
+
+    // And of course set our editor size before we're done.
     setSize (400, 300);
 }
 
@@ -27,16 +38,13 @@ GainPluginAudioProcessorEditor::~GainPluginAudioProcessorEditor()
 //==============================================================================
 void GainPluginAudioProcessorEditor::paint (Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
-
-    g.setColour (Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), Justification::centred, 1);
+    // We'll do all of our drawing via the child components assembled
+    // under the appROot.
 }
 
 void GainPluginAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    // For this example we'll build the whole UI in javascript, so just
+    // let the appRoot take over the whole editor area.
+    appRoot.setBounds(getLocalBounds());
 }
