@@ -11,18 +11,33 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+
+//==============================================================================
+/** Helper function for generating the parameter layout. */
+AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+{
+    AudioProcessorValueTreeState::ParameterLayout params (
+        std::make_unique<AudioParameterFloat>(
+            "MainGain",
+            "Gain",
+            NormalisableRange<float>(0.0, 1.0),
+            0.8,
+            String(),
+            AudioProcessorParameter::genericParameter,
+            nullptr,
+            nullptr
+        )
+    );
+
+    return params;
+}
+
 //==============================================================================
 GainPluginAudioProcessor::GainPluginAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", AudioChannelSet::stereo(), true)
-                     #endif
-                       )
-#endif
+                       .withOutput ("Output", AudioChannelSet::stereo(), true)),
+       params(*this, nullptr, JucePlugin_Name, createParameterLayout())
 {
 }
 
@@ -95,8 +110,7 @@ void GainPluginAudioProcessor::changeProgramName (int index, const String& newNa
 //==============================================================================
 void GainPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    gain.reset(sampleRate, 0.02);
 }
 
 void GainPluginAudioProcessor::releaseResources()
@@ -144,18 +158,8 @@ void GainPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
-
-        // ..do something to the data...
-    }
+    gain.setValue(*params.getRawParameterValue("MainGain"));
+    gain.applyGain(buffer, buffer.getNumSamples());
 }
 
 //==============================================================================
@@ -166,7 +170,8 @@ bool GainPluginAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* GainPluginAudioProcessor::createEditor()
 {
-    return new GainPluginAudioProcessorEditor (*this);
+    // return new GainPluginAudioProcessorEditor (*this);
+    return new GenericAudioProcessorEditor(this);
 }
 
 //==============================================================================
