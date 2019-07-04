@@ -25,17 +25,33 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
 
     // Bind some native callbacks
     appRoot.registerNativeMethod(
+        "beginParameterChangeGesture",
+        [this](const juce::var::NativeFunctionArgs& args) {
+            const juce::String& paramId = args.arguments[0].toString();
+
+            if (auto* parameter = processor.getValueTreeState().getParameter(paramId))
+                parameter->beginChangeGesture();
+        }
+    );
+
+    appRoot.registerNativeMethod(
         "setParameterValueNotifyingHost",
         [this](const juce::var::NativeFunctionArgs& args) {
             const juce::String& paramId = args.arguments[0].toString();
             const double value = args.arguments[1];
 
             if (auto* parameter = processor.getValueTreeState().getParameter(paramId))
-            {
-                parameter->beginChangeGesture();
                 parameter->setValueNotifyingHost(value);
+        }
+    );
+
+    appRoot.registerNativeMethod(
+        "endParameterChangeGesture",
+        [this](const juce::var::NativeFunctionArgs& args) {
+            const juce::String& paramId = args.arguments[0].toString();
+
+            if (auto* parameter = processor.getValueTreeState().getParameter(paramId))
                 parameter->endChangeGesture();
-            }
         }
     );
 

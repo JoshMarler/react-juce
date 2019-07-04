@@ -14,6 +14,7 @@ class Slider extends Component {
 
     this._onMeasure = this._onMeasure.bind(this);
     this._onMouseDown = this._onMouseDown.bind(this);
+    this._onMouseUp = this._onMouseUp.bind(this);
     this._onMouseDrag = this._onMouseDrag.bind(this);
     this._renderVectorGraphics = this._renderVectorGraphics.bind(this);
     this._onParameterValueChange = this._onParameterValueChange.bind(this);
@@ -56,6 +57,11 @@ class Slider extends Component {
 
   _onMouseDown(mouseX, mouseY) {
     this._valueAtDragStart = this.state.value;
+    NativeMethods.beginParameterChangeGesture(this.props.paramId);
+  }
+
+  _onMouseUp(mouseX, mouseY) {
+    NativeMethods.endParameterChangeGesture(this.props.paramId);
   }
 
   _onMouseDrag(mouseX, mouseY, mouseDownX, mouseDownY) {
@@ -136,7 +142,12 @@ class Slider extends Component {
     const {value, width, height} = this.state;
 
     return (
-      <View {...this.props} onMeasure={this._onMeasure} onMouseDown={this._onMouseDown} onMouseDrag={this._onMouseDrag}>
+      <View
+        {...this.props}
+        onMeasure={this._onMeasure}
+        onMouseDown={this._onMouseDown}
+        onMouseUp={this._onMouseUp}
+        onMouseDrag={this._onMouseDrag}>
         <Image {...styles.canvas} source={this._renderVectorGraphics(value, width, height)} />
         {this.props.children}
       </View>
