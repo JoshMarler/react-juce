@@ -1,5 +1,8 @@
+import Label from './Label';
 import React, { Component } from 'react';
+import Slider from './Slider';
 import {
+  Image,
   View,
   Text,
 } from 'juce-blueprint';
@@ -10,9 +13,10 @@ class App extends Component {
     return (
       <View {...styles.container}>
         <View {...styles.content}>
-          <Text {...styles.text}>
-            Hello from React.js!
-          </Text>
+          <Image source={require('./logo.svg')} {...styles.logo} />
+          <Slider paramId="MainGain" {...styles.knob}>
+            <Label paramId="MainGain" {...styles.label} />
+          </Slider>
         </View>
       </View>
     );
@@ -27,13 +31,26 @@ const styles = {
   },
   content: {
     'flex': 1.0,
+    'flex-direction': 'column',
+    'justify-content': 'space-around',
+    'align-items': 'center',
+    'padding': 24.0,
+  },
+  logo: {
+    'width': 281.6,
+    'height': 35.0,
+    'flex': 0.0,
+    'flex-shrink': 0.0,
+  },
+  knob: {
+    'width': 100.0,
+    'height': 100.0,
+  },
+  label: {
+    'flex': 1.0,
     'justify-content': 'center',
     'align-items': 'center',
-  },
-  text: {
-    'font-size': 18.0,
-    'line-spacing': 1.6,
-    'color': 'ff626262',
+    'interceptClickEvents': false,
   },
 };
 

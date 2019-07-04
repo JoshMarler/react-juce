@@ -16,11 +16,17 @@
 //==============================================================================
 /**
 */
-class GainPluginAudioProcessorEditor  : public AudioProcessorEditor
+class GainPluginAudioProcessorEditor
+    : public AudioProcessorEditor,
+      public AudioProcessorParameter::Listener
 {
 public:
     GainPluginAudioProcessorEditor (GainPluginAudioProcessor&);
     ~GainPluginAudioProcessorEditor();
+
+    //==============================================================================
+    void parameterValueChanged (int parameterIndex, float newValue) override;
+    void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override {}
 
     //==============================================================================
     void paint (Graphics&) override;

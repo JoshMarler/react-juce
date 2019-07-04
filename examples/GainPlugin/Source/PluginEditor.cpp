@@ -23,16 +23,43 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
     // Sanity check
     jassert (bundle.existsAsFile());
 
+    // Bind some native callbacks
+    appRoot.registerNativeMethod(
+        "setParameterValueNotifyingHost",
+        [this](const juce::var::NativeFunctionArgs& args) {
+            const juce::String& paramId = args.arguments[0].toString();
+            const double value = args.arguments[1];
+
+            if (auto* parameter = processor.getValueTreeState().getParameter(paramId))
+            {
+                parameter->beginChangeGesture();
+                parameter->setValueNotifyingHost(value);
+                parameter->endChangeGesture();
+            }
+        }
+    );
+
     // Next we just add our appRoot and kick off the app bundle.
     addAndMakeVisible(appRoot);
     appRoot.evalScript(bundle.loadFileAsString());
 
+    // Now our React application is up and running, so we can start dispatching
+    // events, such as current parameter values.
+    for (auto& p : processor.getParameters())
+    {
+        p->addListener(this);
+        p->sendValueChangedMessageToListeners(p->getValue());
+    }
+
     // And of course set our editor size before we're done.
-    setSize (400, 300);
+    setSize (400, 240);
 }
 
 GainPluginAudioProcessorEditor::~GainPluginAudioProcessorEditor()
 {
+    // Tear down parameter listeners
+    for (auto& p : processor.getParameters())
+        p->removeListener(this);
 }
 
 //==============================================================================
@@ -47,4 +74,29 @@ void GainPluginAudioProcessorEditor::resized()
     // For this example we'll build the whole UI in javascript, so just
     // let the appRoot take over the whole editor area.
     appRoot.setBounds(getLocalBounds());
+}
+
+//==============================================================================
+void GainPluginAudioProcessorEditor::parameterValueChanged (int parameterIndex, float newValue)
+{
+    const auto& p = processor.getParameters()[parameterIndex];
+    juce::String id = p->getName(100);
+
+    if (auto* x = dynamic_cast<AudioProcessorParameterWithID*>(p))
+        id = x->paramID;
+
+    float defaultValue = p->getDefaultValue();
+    juce::String stringValue = p->getText(newValue, 0);
+
+    Component::SafePointer<blueprint::ReactApplicationRoot> safeAppRoot (&appRoot);
+
+    juce::MessageManager::callAsync([=]() {
+        if (blueprint::ReactApplicationRoot* root = safeAppRoot.getComponent())
+            root->dispatchEvent("parameterValueChange",
+                                parameterIndex,
+                                id,
+                                defaultValue,
+                                newValue,
+                                stringValue);
+    });
 }

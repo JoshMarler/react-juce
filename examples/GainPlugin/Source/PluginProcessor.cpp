@@ -24,7 +24,9 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
             0.8,
             String(),
             AudioProcessorParameter::genericParameter,
-            nullptr,
+            [](float value, int maxLength) {
+                return String(Decibels::gainToDecibels(value), 1) + "dB";
+            },
             nullptr
         )
     );
