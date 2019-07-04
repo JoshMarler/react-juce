@@ -1,4 +1,5 @@
 import Label from './Label';
+import Meter from './Meter';
 import React, { Component } from 'react';
 import Slider from './Slider';
 import {
@@ -17,6 +18,7 @@ class App extends Component {
           <Slider paramId="MainGain" {...styles.knob}>
             <Label paramId="MainGain" {...styles.label} />
           </Slider>
+          <Meter {...styles.meter} />
         </View>
       </View>
     );
@@ -57,6 +59,11 @@ const styles = {
     'justify-content': 'center',
     'align-items': 'center',
     'interceptClickEvents': false,
+  },
+  meter: {
+    'flex': 0.0,
+    'width': 100.0,
+    'height': 16.0,
   },
 };
 

@@ -57,11 +57,14 @@ public:
 
     //==============================================================================
     AudioProcessorValueTreeState& getValueTreeState() { return params; }
+    float getLeftChannelPeak() { return lcPeak; }
+    float getRightChannelPeak() { return rcPeak; }
 
 private:
     //==============================================================================
     AudioProcessorValueTreeState params;
     LinearSmoothedValue<float> gain;
+    std::atomic<float> lcPeak, rcPeak;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GainPluginAudioProcessor)

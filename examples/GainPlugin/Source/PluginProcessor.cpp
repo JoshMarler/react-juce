@@ -160,8 +160,16 @@ void GainPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    // Our intense dsp processing
     gain.setValue(*params.getRawParameterValue("MainGain"));
     gain.applyGain(buffer, buffer.getNumSamples());
+
+    // We'll also report peak values for our meter. This isn't an ideal way to do this
+    // as the rate between the audio processing callback and the timer on which the
+    // editor reads these values could mean missing peaks in the visual display, but
+    // this is a simple example plugin so let's not worry about it.
+    lcPeak.store(buffer.getMagnitude(0, 0, buffer.getNumSamples()));
+    rcPeak.store(buffer.getMagnitude(1, 0, buffer.getNumSamples()));
 }
 
 //==============================================================================

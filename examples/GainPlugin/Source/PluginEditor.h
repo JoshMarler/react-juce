@@ -18,7 +18,8 @@
 */
 class GainPluginAudioProcessorEditor
     : public AudioProcessorEditor,
-      public AudioProcessorParameter::Listener
+      public AudioProcessorParameter::Listener,
+      public Timer
 {
 public:
     GainPluginAudioProcessorEditor (GainPluginAudioProcessor&);
@@ -27,6 +28,7 @@ public:
     //==============================================================================
     void parameterValueChanged (int parameterIndex, float newValue) override;
     void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override {}
+    void timerCallback() override;
 
     //==============================================================================
     void paint (Graphics&) override;

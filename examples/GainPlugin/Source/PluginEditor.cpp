@@ -67,6 +67,9 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
         p->sendValueChangedMessageToListeners(p->getValue());
     }
 
+    // Lastly, start our timer for reporting meter values
+    startTimerHz(30);
+
     // And of course set our editor size before we're done.
     setResizable(true, true);
     setResizeLimits(400, 240, 400 * 2, 240 * 2);
@@ -76,6 +79,8 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
 
 GainPluginAudioProcessorEditor::~GainPluginAudioProcessorEditor()
 {
+    stopTimer();
+
     // Tear down parameter listeners
     for (auto& p : processor.getParameters())
         p->removeListener(this);
@@ -118,4 +123,13 @@ void GainPluginAudioProcessorEditor::parameterValueChanged (int parameterIndex, 
                                 newValue,
                                 stringValue);
     });
+}
+
+void GainPluginAudioProcessorEditor::timerCallback()
+{
+    appRoot.dispatchEvent(
+        "gainPeakValues",
+        processor.getLeftChannelPeak(),
+        processor.getRightChannelPeak()
+    );
 }
