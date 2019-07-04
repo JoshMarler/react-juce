@@ -68,6 +68,9 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
     }
 
     // And of course set our editor size before we're done.
+    setResizable(true, true);
+    setResizeLimits(400, 240, 400 * 2, 240 * 2);
+    getConstrainer()->setFixedAspectRatio(400.0 / 240.0);
     setSize (400, 240);
 }
 
