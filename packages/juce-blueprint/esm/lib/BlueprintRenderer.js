@@ -138,12 +138,17 @@ const HostConfig = {
     let {children: oldChildren, ...op} = oldProps;
     let {children: newChildren, ...np} = newProps;
 
-    // We construct a new payload merging the new properties into the set of
-    // remaining properties from the previous state.
-    return {
-      ...op,
-      ...np,
-    };
+    // We construct a new payload of property values that are either new or
+    // have changed for this element.
+    let payload = {};
+
+    for (let key in np) {
+      if (np.hasOwnProperty(key) && np[key] !== op[key]) {
+        payload[key] = np[key];
+      }
+    }
+
+    return payload;
   },
 
   /** Following from `prepareUpdate` above, this is our opportunity to apply
