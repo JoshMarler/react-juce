@@ -238,12 +238,16 @@ namespace blueprint
                     ShadowView* parentShadowView = getViewHandle(parent->getViewId()).second;
 
                     if (auto* textShadowView = dynamic_cast<TextShadowView*>(parentShadowView))
+                    {
                         textShadowView->markDirty();
+                        performShadowTreeLayout();
+                    }
+
+                    // Then we need to paint, but the RawTextView has no idea how to paint its text,
+                    // we need to tell the parent to repaint its children.
+                    parent->repaint();
                 }
             }
-
-            performShadowTreeLayout();
-            view->repaint();
         }
 
         void addChild (ViewId parentId, ViewId childId, int index = -1)
