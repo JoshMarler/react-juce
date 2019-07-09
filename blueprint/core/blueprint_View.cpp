@@ -143,4 +143,10 @@ namespace blueprint
         if (ReactApplicationRoot* root = findParentComponentOfClass<ReactApplicationRoot>())
             root->dispatchViewEvent(getViewId(), "MouseDrag", e.x, e.y, mouseDownX, mouseDownY);
     }
+
+    void View::mouseDoubleClick (const juce::MouseEvent& e)
+    {
+        if (ReactApplicationRoot* root = findParentComponentOfClass<ReactApplicationRoot>())
+            root->dispatchViewEvent(getViewId(), "MouseDoubleClick", e.x, e.y);
+    }
 }

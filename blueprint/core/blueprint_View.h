@@ -66,6 +66,9 @@ namespace blueprint
         /** Dispatches a mouseDrag event to the React application. */
         void mouseDrag (const juce::MouseEvent& e) override;
 
+        /** Dispatches a mouseDoubleClick event to the React application. */
+        void mouseDoubleClick (const juce::MouseEvent& e) override;
+
     protected:
         //==============================================================================
         juce::NamedValueSet props;
