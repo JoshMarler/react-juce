@@ -19,8 +19,16 @@
 /* We're careful to include the duktape source files before the module header
  * file because `duktape.c` sets certain preprocessor definitions that enable
  * necessary features in the duktape header. We need those defines to preempt
- * the loading of the duktape header.
+ * the loading of the duktape header. This also, therefore, is the place for
+ * custom preprocessor definitions.
+ *
+ * We force Duktape to use a time provider on Windows that is compatible with
+ * Windows 7 SP1. It looks like W7SP1 is quite happy with plugins built with
+ * the 8.1 SDK, but the GetSystemTimePreciseAsFileTime() call used in here is
+ * just not supported without the 8.1 dll available.
  */
+#define DUK_USE_DATE_NOW_WINDOWS 1
+
 #include "duktape/src-noline/duktape.c"
 #include "duktape/extras/console/duk_console.c"
 

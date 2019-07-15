@@ -52,12 +52,6 @@
 #include "yoga/yoga/Yoga-internal.h"
 #include "yoga/yoga/Yoga.h"
 
-// Force duktape to use a time provider on Windows that is compatible with
-// Windows 7 SP1. It looks like W7SP1 is quite happy with plugins built with
-// the 8.1 SDK, but the GetSystemTimePreciseAsFileTime() call used in here is
-// just not supported without the 8.1 dll available.
-#define DUK_USE_DATE_NOW_WINDOWS 1
-
 #include "duktape/src-noline/duktape.h"
 #include "duktape/extras/console/duk_console.h"
 
