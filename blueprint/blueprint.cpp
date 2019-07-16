@@ -27,7 +27,9 @@
  * the 8.1 SDK, but the GetSystemTimePreciseAsFileTime() call used in here is
  * just not supported without the 8.1 dll available.
  */
+#if defined (_WIN32) || defined (_WIN64)
 #define DUK_USE_DATE_NOW_WINDOWS 1
+#endif
 
 #include "duktape/src-noline/duktape.c"
 #include "duktape/extras/console/duk_console.c"
