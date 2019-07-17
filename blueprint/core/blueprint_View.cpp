@@ -74,7 +74,22 @@ namespace blueprint
 
     void View::paint (juce::Graphics& g)
     {
-        if (props.contains("border-color") && props.contains("border-width"))
+        if (props.contains("border-path"))
+        {
+            juce::Path p = juce::Drawable::parseSVGPath(props["border-path"].toString());
+
+            if (props.contains("border-color"))
+            {
+                juce::Colour c = juce::Colour::fromString(props["border-color"].toString());
+                float borderWidth = props.getWithDefault("border-width", 1.0);
+
+                g.setColour(c);
+                g.strokePath(p, juce::PathStrokeType(borderWidth));
+            }
+
+            g.reduceClipRegion(p);
+        }
+        else if (props.contains("border-color") && props.contains("border-width"))
         {
             juce::Path border;
             juce::Colour c = juce::Colour::fromString(props["border-color"].toString());
@@ -90,13 +105,6 @@ namespace blueprint
             const float minLength = std::min(width, height);
             float borderRadius = getResolvedLengthProperty("border-radius", minLength);
 
-            // TODO: Here we have a limited mechanism for drawing a rectangular border with
-            // or without rounded corners, but there's no reason we couldn't support arbitrary
-            // border shapes with something like a "border-path" property, where the property
-            // value is a Path string (M 0 50 L 50 50...). Then we could support arbitrary border
-            // shapes while still hitting the `reduceClipRegion` for the background color fill.
-            // Could also use that Path shape for overriding the hitTest implementation so that
-            // only hits within the border path shape satisfy a "hit."
             border.addRoundedRectangle(borderBounds, borderRadius);
             g.setColour(c);
             g.strokePath(border, juce::PathStrokeType(borderWidth));
