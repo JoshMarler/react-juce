@@ -93,7 +93,7 @@ namespace blueprint
         /** Recursive traversal of the shadow tree, flushing layout bounds to
             the associated view components.
          */
-        void flushViewLayout()
+        virtual void flushViewLayout()
         {
             view->setFloatBounds(getCachedLayoutBounds());
             view->setBounds(getCachedLayoutBounds().toNearestInt());
@@ -112,14 +112,12 @@ namespace blueprint
     protected:
         //==============================================================================
         YGNodeRef yogaNode;
-
-    private:
-        //==============================================================================
         View* view = nullptr;
         juce::NamedValueSet props;
 
         std::vector<ShadowView*> children;
 
+    private:
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShadowView)
     };

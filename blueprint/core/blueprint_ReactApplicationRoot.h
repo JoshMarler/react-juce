@@ -14,6 +14,7 @@
 #include "blueprint_ImageView.h"
 #include "blueprint_RawTextView.h"
 #include "blueprint_ScrollView.h"
+#include "blueprint_ScrollViewContentShadowView.h"
 #include "blueprint_ShadowView.h"
 #include "blueprint_TextShadowView.h"
 #include "blueprint_TextView.h"
@@ -190,6 +191,16 @@ namespace blueprint
 
                 viewTable[id] = std::move(view);
                 shadowViewTable[id] = std::make_unique<ShadowView>(viewTable[id].get());
+
+                return id;
+            }
+            if (viewType == "ScrollViewContentView")
+            {
+                std::unique_ptr<View> view = std::make_unique<View>();
+                ViewId id = view->getViewId();
+
+                viewTable[id] = std::move(view);
+                shadowViewTable[id] = std::make_unique<ScrollViewContentShadowView>(viewTable[id].get());
 
                 return id;
             }

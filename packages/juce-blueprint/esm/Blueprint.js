@@ -2,6 +2,7 @@ import BlueprintBackend from './lib/BlueprintBackend';
 import BlueprintRenderer, { BlueprintTracedRenderer } from './lib/BlueprintRenderer';
 import React, { Component } from 'react';
 
+import invariant from 'invariant';
 
 export { default as NativeMethods } from './lib/NativeMethods';
 export { default as EventBridge } from './lib/EventBridge';
@@ -21,9 +22,22 @@ export function Image(props) {
   return React.createElement('Image', props, props.children);
 }
 
-export function ScrollView(props) {
-  return React.createElement('ScrollView', props, props.children);
+function ScrollViewContentView(props) {
+  return React.createElement('ScrollViewContentView', props, props.children);
 }
+
+export function ScrollView(props) {
+  const child = React.Children.only(props.children);
+
+  invariant(
+    child.type === ScrollViewContentView,
+    'ScrollView must have only one child, and that child must be a ScrollView.ContentView.'
+  );
+
+  return React.createElement('ScrollView', props, child);
+}
+
+ScrollView.ContentView = ScrollViewContentView;
 
 Image.PlacementFlags = {
   xLeft: 1,
