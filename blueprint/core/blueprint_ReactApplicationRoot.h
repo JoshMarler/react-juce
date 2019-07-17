@@ -50,6 +50,13 @@ namespace blueprint
     {
     public:
         //==============================================================================
+        // We allow registering arbitrary view types with the React context by way of
+        // a "ViewFactory" here which is a user-defined function that produces a View
+        // and a corresponding ShadowView.
+        typedef std::pair<std::unique_ptr<View>, std::unique_ptr<ShadowView>> ViewPair;
+        typedef std::function<ViewPair()> ViewFactory;
+
+        //==============================================================================
         ReactApplicationRoot()
         {
             jassert (juce::MessageManager::getInstance()->isThisTheMessageThread());
@@ -64,6 +71,9 @@ namespace blueprint
 
             // Assign our root level shadow view
             _shadowView = std::make_unique<ShadowView>(this);
+
+            // And install view types
+            installNativeViewTypes();
         }
 
         ~ReactApplicationRoot()
@@ -146,67 +156,28 @@ namespace blueprint
         //==============================================================================
         // VIEW MANAGER STUFF: SPLIT OUT?
 
+        /** Registers a new dynamic view type and its associated factory. */
+        void registerViewType(const juce::String& typeId, ViewFactory f)
+        {
+            // If you hit this jassert, you're trying to register a type which
+            // has already been registered!
+            jassert (viewFactories.find(typeId) == viewFactories.end());
+            viewFactories[typeId] = f;
+        }
+
         /** Creates a new view instance and registers it with the view table. */
         ViewId createViewInstance(const juce::String& viewType)
         {
-            // TODO: Next up is providing dynamic view type registration, but
-            // for now we only care about View/Text.
-            if (viewType == "Text")
-            {
-                std::unique_ptr<View> view = std::make_unique<TextView>();
-                ViewId id = view->getViewId();
+            // We can't create a view instance of a type that hasn't been registered.
+            jassert (viewFactories.find(viewType) != viewFactories.end());
 
-                viewTable[id] = std::move(view);
-                shadowViewTable[id] = std::make_unique<TextShadowView>(viewTable[id].get());
+            auto [view, shadowView] = viewFactories[viewType]();
+            ViewId vid = view->getViewId();
 
-                return id;
-            }
-            if (viewType == "View")
-            {
-                std::unique_ptr<View> view = std::make_unique<View>();
-                ViewId id = view->getViewId();
+            viewTable[vid] = std::move(view);
+            shadowViewTable[vid] = std::move(shadowView);
 
-                viewTable[id] = std::move(view);
-                shadowViewTable[id] = std::make_unique<ShadowView>(viewTable[id].get());
-
-                return id;
-            }
-            if (viewType == "Image")
-            {
-                std::unique_ptr<View> view = std::make_unique<ImageView>();
-                ViewId id = view->getViewId();
-
-                // ImageView does not need a specialized shadow view, unless
-                // we want to enforce at the ShadowView level that it cannot
-                // take children.
-                viewTable[id] = std::move(view);
-                shadowViewTable[id] = std::make_unique<ShadowView>(viewTable[id].get());
-
-                return id;
-            }
-            if (viewType == "ScrollView")
-            {
-                std::unique_ptr<View> view = std::make_unique<ScrollView>();
-                ViewId id = view->getViewId();
-
-                viewTable[id] = std::move(view);
-                shadowViewTable[id] = std::make_unique<ShadowView>(viewTable[id].get());
-
-                return id;
-            }
-            if (viewType == "ScrollViewContentView")
-            {
-                std::unique_ptr<View> view = std::make_unique<View>();
-                ViewId id = view->getViewId();
-
-                viewTable[id] = std::move(view);
-                shadowViewTable[id] = std::make_unique<ScrollViewContentShadowView>(viewTable[id].get());
-
-                return id;
-            }
-
-            jassertfalse;
-            return 1;
+            return vid;
         }
 
         /** Creates a new text view instance and registers it with the view table. */
@@ -533,9 +504,54 @@ namespace blueprint
 
     private:
         //==============================================================================
+        /** Registers each of the natively supported view types. */
+        void installNativeViewTypes()
+        {
+            registerViewType("Text", []() -> ViewPair {
+                auto view = std::make_unique<TextView>();
+                auto shadowView = std::make_unique<TextShadowView>(view.get());
+
+                return {std::move(view), std::move(shadowView)};
+            });
+
+            registerViewType("View", []() -> ViewPair {
+                auto view = std::make_unique<View>();
+                auto shadowView = std::make_unique<ShadowView>(view.get());
+
+                return {std::move(view), std::move(shadowView)};
+            });
+
+            registerViewType("Image", []() -> ViewPair {
+                auto view = std::make_unique<ImageView>();
+
+                // ImageView does not need a specialized shadow view, unless
+                // we want to enforce at the ShadowView level that it cannot
+                // take children.
+                auto shadowView = std::make_unique<ShadowView>(view.get());
+
+                return {std::move(view), std::move(shadowView)};
+            });
+
+            registerViewType("ScrollView", []() -> ViewPair {
+                auto view = std::make_unique<ScrollView>();
+                auto shadowView = std::make_unique<ShadowView>(view.get());
+
+                return {std::move(view), std::move(shadowView)};
+            });
+
+            registerViewType("ScrollViewContentView", []() -> ViewPair {
+                auto view = std::make_unique<View>();
+                auto shadowView = std::make_unique<ScrollViewContentShadowView>(view.get());
+
+                return {std::move(view), std::move(shadowView)};
+            });
+        }
+
+        //==============================================================================
         std::unique_ptr<ShadowView> _shadowView;
         std::map<ViewId, std::unique_ptr<View>> viewTable;
         std::map<ViewId, std::unique_ptr<ShadowView>> shadowViewTable;
+        std::map<juce::String, ViewFactory> viewFactories;
 
         juce::File sourceFile;
         duk_context* ctx;
