@@ -53,6 +53,25 @@ Text.FontStyleFlags = {
   underlined: 4,
 };
 
+Text.JustificationFlags = {
+  left: 1,
+  right: 2,
+  horizontallyCentred: 4,
+  top: 8,
+  bottom: 16,
+  verticallyCentred: 32,
+  horizontallyJustified: 64,
+  centred: 36,
+  centredLeft: 33,
+  centredRight: 34,
+  centredTop: 12,
+  centredBottom: 20,
+  topLeft: 9,
+  topRight: 10,
+  bottomLeft: 17,
+  bottomRight: 18,
+};
+
 let __renderStarted = false;
 let __preferredRenderer = BlueprintRenderer;
 

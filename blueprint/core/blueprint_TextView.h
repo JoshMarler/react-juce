@@ -46,6 +46,7 @@ namespace blueprint
         {
             juce::String hexColor = props.getWithDefault("color", "ff000000");
             juce::Colour colour = juce::Colour::fromString(hexColor);
+            int just = props.getWithDefault("justification", 1);
             juce::String text;
 
             // TODO: Right now a <Text> element maps 1:1 to a TextView instance,
@@ -64,6 +65,7 @@ namespace blueprint
             as.setLineSpacing(props.getWithDefault("line-spacing", 1.0f));
             as.setFont(getFont());
             as.setColour(colour);
+            as.setJustification(just);
 
             if (props.contains("word-wrap"))
             {
