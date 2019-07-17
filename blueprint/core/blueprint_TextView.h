@@ -32,10 +32,13 @@ namespace blueprint
             float fontHeight = props.getWithDefault("font-size", 12.0f);
             int textStyleFlags = props.getWithDefault("font-style", 0);
 
-            if (props.contains("font-family"))
-                return juce::Font(props["font-family"], fontHeight, textStyleFlags);
+            juce::Font f (fontHeight);
 
-            return juce::Font(fontHeight);
+            if (props.contains("font-family"))
+                f = juce::Font (props["font-family"], fontHeight, textStyleFlags);
+
+            f.setExtraKerningFactor(props.getWithDefault("kerning-factor", 0.0));
+            return f;
         }
 
         /** Constructs a TextLayout from all the children string values. */
