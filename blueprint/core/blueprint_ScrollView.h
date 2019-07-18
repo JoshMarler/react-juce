@@ -32,6 +32,19 @@ namespace blueprint
         }
 
         //==============================================================================
+        void setProperty (const juce::Identifier& name, const juce::var& value) override
+        {
+            View::setProperty(name, value);
+
+            if (name == juce::Identifier("scrollbar-thumb-color"))
+            {
+                juce::Colour c = juce::Colour::fromString(props["scrollbar-thumb-color"].toString());
+
+                viewport.getVerticalScrollBar().setColour(juce::ScrollBar::thumbColourId, c);
+                viewport.getHorizontalScrollBar().setColour(juce::ScrollBar::thumbColourId, c);
+            }
+        }
+
         void addChild (View* childView, int index = -1) override
         {
             jassert (viewport.getViewedComponent() == nullptr);
