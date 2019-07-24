@@ -22,7 +22,25 @@ namespace blueprint
         props.set(name, value);
 
         if (name == juce::Identifier("interceptClickEvents"))
-            setInterceptsMouseClicks((bool) value, (bool) value);
+        {
+            int flag = value;
+
+            switch (flag) {
+                case 0:
+                    setInterceptsMouseClicks(false, false);
+                    break;
+                case 2:
+                    setInterceptsMouseClicks(true, false);
+                    break;
+                case 3:
+                    setInterceptsMouseClicks(false, true);
+                    break;
+                case 1:
+                default:
+                    setInterceptsMouseClicks(true, true);
+                    break;
+            }
+        }
 
         if (name == juce::Identifier("opacity"))
             setAlpha((double) value);

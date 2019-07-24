@@ -39,6 +39,13 @@ export function ScrollView(props) {
 
 ScrollView.ContentView = ScrollViewContentView;
 
+View.ClickEventFlags = {
+  disableClickEvents: 0,
+  allowClickEvents: 1,
+  allowClickEventsExcludingChildren: 2,
+  allowClickEventsOnlyOnChildren: 3,
+};
+
 Image.PlacementFlags = {
   xLeft: 1,
   xRight: 2,
