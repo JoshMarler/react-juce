@@ -153,6 +153,12 @@ namespace blueprint
             return true;
         }
 
+        /** A simple accessor for the underlying Duktape context. */
+        duk_context* getDuktapeContext()
+        {
+            return ctx;
+        }
+
         //==============================================================================
         // VIEW MANAGER STUFF: SPLIT OUT?
 
