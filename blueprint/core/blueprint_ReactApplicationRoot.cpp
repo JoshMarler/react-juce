@@ -42,7 +42,7 @@ namespace blueprint
         jassert (root != nullptr);
         jassert (duk_is_string(ctx, 0));
 
-        juce::String textValue = duk_get_string(ctx, 0);
+        juce::String textValue (juce::CharPointer_UTF8(duk_get_string(ctx, 0)));
         ViewId viewId = root->createTextViewInstance(textValue);
 
         duk_push_int(ctx, viewId);
