@@ -17,6 +17,11 @@ namespace blueprint
         return juce::DefaultHashFunctions::generateHash(_viewId, INT_MAX);
     }
 
+    juce::Identifier View::getRefId()
+    {
+        return _refId;
+    }
+
     void View::setProperty (const juce::Identifier& name, const juce::var& value)
     {
         props.set(name, value);
@@ -44,6 +49,8 @@ namespace blueprint
 
         if (name == juce::Identifier("opacity"))
             setAlpha((double) value);
+        if (name == juce::Identifier("refId"))
+            _refId = juce::Identifier(value.toString());
     }
 
     void View::addChild (View* childView, int index)

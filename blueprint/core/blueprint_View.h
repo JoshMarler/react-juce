@@ -37,6 +37,9 @@ namespace blueprint
         /** Returns this view's identifier. */
         ViewId getViewId();
 
+        /** Returns this view's reference identifier, optionally set via React props. */
+        juce::Identifier getRefId();
+
         /** Set a property on the native view. */
         virtual void setProperty (const juce::Identifier&, const juce::var&);
 
@@ -77,6 +80,7 @@ namespace blueprint
     private:
         //==============================================================================
         juce::Uuid _viewId;
+        juce::Identifier _refId;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (View)

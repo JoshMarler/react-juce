@@ -295,6 +295,25 @@ namespace blueprint
             return {nullptr, nullptr};
         }
 
+        /** Walks the view table, returning the first view with a `refId`
+         *  whose value equals the provided id.
+         */
+        View* getViewByRefId (const juce::Identifier& refId)
+        {
+            if (refId == getRefId())
+                return this;
+
+            for (auto& pair : viewTable)
+            {
+                auto* view = pair.second.get();
+
+                if (refId == view->getRefId())
+                    return view;
+            }
+
+            return nullptr;
+        }
+
         /** Register a native method to be called from the script engine. */
         void registerNativeMethod(const std::string& name, std::function<void(const juce::var::NativeFunctionArgs&)> fn) {
             // Push the function into the registry and hang onto its index
