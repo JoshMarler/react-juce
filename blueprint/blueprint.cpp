@@ -31,6 +31,16 @@
 #define DUK_USE_DATE_NOW_WINDOWS 1
 #endif
 
+// Disable compiler warnings for external source files (duktape & yoga)
+#if _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable : 4018) // signed/unsigned mismatch
+  #pragma warning(disable : 4127) // conditional expression is constant
+  #pragma warning(disable : 4505) // unreferenced local function
+  #pragma warning(disable : 4611) // object destruction is non-portable
+  #pragma warning(disable : 4702) // unreachable code
+#endif
+
 #include "duktape/src-noline/duktape.c"
 #include "duktape/extras/console/duk_console.c"
 
@@ -46,6 +56,11 @@
 #include "yoga/yoga/YGStyle.cpp"
 #include "yoga/yoga/YGValue.cpp"
 #include "yoga/yoga/Yoga.cpp"
+
+// Enable compiler warnings
+#if _MSC_VER
+ #pragma warning (pop)
+#endif
 
 #include "core/blueprint_ReactApplicationRoot.cpp"
 #include "core/blueprint_ShadowView.cpp"
