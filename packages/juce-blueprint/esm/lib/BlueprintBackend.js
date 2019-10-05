@@ -67,10 +67,7 @@ class ViewInstance {
       [propKey]: value,
     });
 
-    if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean')
-      return __BlueprintNative__.setViewProperty(this._id, propKey, value);
-
-    return void 0;
+    return __BlueprintNative__.setViewProperty(this._id, propKey, value);
   }
 }
 

@@ -62,22 +62,7 @@ namespace blueprint
 
         ViewId viewId = duk_get_number(ctx, 0);
         juce::String propertyName = duk_get_string(ctx, 1);
-        juce::var propertyValue;
-
-        switch (duk_get_type(ctx, 2))
-        {
-            case DUK_TYPE_STRING:
-                propertyValue = duk_get_string(ctx, 2);
-                break;
-            case DUK_TYPE_NUMBER:
-                propertyValue = duk_get_number(ctx, 2);
-                break;
-            case DUK_TYPE_BOOLEAN:
-                propertyValue = (bool) duk_get_boolean(ctx, 2);
-                break;
-            default:
-                jassertfalse;
-        }
+        juce::var propertyValue = ReactApplicationRoot::readVarFromDukStack(ctx, 2);
 
         root->setViewProperty(viewId, propertyName, propertyValue);
         return 0;

@@ -513,6 +513,85 @@ namespace blueprint
             }
         }
 
+        static juce::var readVarFromDukStack (duk_context* ctx, duk_idx_t idx)
+        {
+            juce::var value;
+
+            switch (duk_get_type(ctx, idx))
+            {
+                case DUK_TYPE_NULL:
+                    // It looks like juce::var doesn't have an explicit null value,
+                    // so we're just using the default empty constructor value.
+                    break;
+                case DUK_TYPE_UNDEFINED:
+                    value = juce::var::undefined();
+                    break;
+                case DUK_TYPE_BOOLEAN:
+                    value = (bool) duk_get_boolean(ctx, idx);
+                    break;
+                case DUK_TYPE_NUMBER:
+                    value = duk_get_number(ctx, idx);
+                    break;
+                case DUK_TYPE_STRING:
+                    value = duk_get_string(ctx, idx);
+                    break;
+                case DUK_TYPE_OBJECT:
+                {
+                    if (duk_is_array(ctx, idx))
+                    {
+                        duk_size_t len = duk_get_length(ctx, idx);
+                        juce::Array<juce::var> els;
+
+                        for (duk_size_t i = 0; i < len; ++i)
+                        {
+                            duk_get_prop_index(ctx, idx, i);
+                            els.add(readVarFromDukStack(ctx, -1));
+                            duk_pop(ctx);
+                        }
+
+                        value = els;
+                        break;
+                    }
+                    else
+                    {
+                        juce::DynamicObject obj;
+
+                        // Generic object enumeration; `duk_enum` pushes an enumerator
+                        // object to the top of the stack
+                        duk_enum(ctx, idx, DUK_ENUM_OWN_PROPERTIES_ONLY);
+
+                        while (duk_next(ctx, -1, 1))
+                        {
+                            // For each found key/value pair, `duk_enum` pushes the
+                            // values to the top of the stack. So here the stack top
+                            // is [ ... enum key value]. Enum is at -3, key at -2,
+                            // value at -1 from the stack top.
+                            // Note here that all keys in an ECMAScript object are of
+                            // type string, even arrays, e.g. `myArr[0]` has an implicit
+                            // conversion from number to string. Thus here, while constructing
+                            // the DynamicObject, we take the `toString()` value for the key
+                            // always.
+                            obj.setProperty(duk_to_string(ctx, -2), readVarFromDukStack(ctx, -1));
+
+                            // Clear the key/value pair from the stack
+                            duk_pop_2(ctx);
+                        }
+
+                        // Pop the enumerator from the stack
+                        duk_pop(ctx);
+
+                        value = juce::var(obj.clone());
+                        break;
+                    }
+                }
+                case DUK_TYPE_NONE:
+                default:
+                    jassertfalse;
+            }
+
+            return value;
+        }
+
         /** Recursively computes the shadow tree layout, then traverses the tree
             flushing new layout bounds to the associated view components.
          */
