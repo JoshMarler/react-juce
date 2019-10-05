@@ -475,6 +475,8 @@ namespace blueprint
 
         void pushVarToDukStack (const juce::var& v)
         {
+            if (v.isBool())
+                return duk_push_boolean(ctx, (bool) v);
             if (v.isInt() || v.isInt64())
                 return duk_push_int(ctx, (int) v);
             if (v.isDouble())
