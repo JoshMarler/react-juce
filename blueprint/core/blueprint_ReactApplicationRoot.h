@@ -272,11 +272,15 @@ namespace blueprint
             // that method virtual so that, e.g., the scroll view can override to
             // remove the child from its viewport
             parentView->removeChildComponent(childView);
+            viewTable.erase(childId);
 
             // We might be dealing with a text view, in which case we expect a null
             // shadow view.
             if (parentShadowView && childShadowView)
+            {
                 parentShadowView->removeChild(childShadowView);
+                shadowViewTable.erase(childId);
+            }
 
             performShadowTreeLayout();
         }
