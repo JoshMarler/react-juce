@@ -272,17 +272,49 @@ namespace blueprint
             // that method virtual so that, e.g., the scroll view can override to
             // remove the child from its viewport
             parentView->removeChildComponent(childView);
-            viewTable.erase(childId);
+
+            // Here we have to clear the view table of all children of this view.
+            // React may clear a whole subtree from the interface by removing a
+            // single component at the root of the tree. Because the view table
+            // is a flat map of viewId to View, if we only remove that root view
+            // from the table we leave all of its children dangling, which confuses
+            // subsequent functionality like `getViewHandle` or `getViewByRefId`
+            std::vector<ViewId> childIds;
+            enumerateChildViewIds(childIds, childView);
+
+            for (auto& id : childIds)
+                viewTable.erase(id);
 
             // We might be dealing with a text view, in which case we expect a null
             // shadow view.
             if (parentShadowView && childShadowView)
             {
                 parentShadowView->removeChild(childShadowView);
-                shadowViewTable.erase(childId);
+
+                // Then here, since we now know we have a child shadow view,
+                // we try also to remove its children from the shadowViewTable to
+                // prevent dangling children like in the viewTable above.
+                for (auto& id : childIds)
+                    shadowViewTable.erase(id);
             }
 
             performShadowTreeLayout();
+        }
+
+        void enumerateChildViewIds (std::vector<ViewId>& ids, View* v)
+        {
+            for (auto* child : v->getChildren())
+            {
+                // Some view elements may mount a plain juce::Component, such as the
+                // ScrollView mounting a juce::Viewport which is a juce::Component but
+                // not a juce::View. Such elements aren't in our table and can be skipped
+                if (auto* childView = dynamic_cast<View*>(child))
+                {
+                    enumerateChildViewIds(ids, childView);
+                }
+            }
+
+            ids.push_back(v->getViewId());
         }
 
         /** Returns a pointer pair to the view associated to the given id. */
