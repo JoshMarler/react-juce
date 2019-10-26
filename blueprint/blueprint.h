@@ -55,6 +55,7 @@
 #include "duktape/src-noline/duktape.h"
 #include "duktape/extras/console/duk_console.h"
 
+#include "core/blueprint_EcmascriptEngine.h"
 #include "core/blueprint_ImageView.h"
 #include "core/blueprint_RawTextView.h"
 #include "core/blueprint_ReactApplicationRoot.h"

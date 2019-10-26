@@ -616,7 +616,7 @@ namespace blueprint
                         // Pop the enumerator from the stack
                         duk_pop(ctx);
 
-                        value = juce::var(obj.clone());
+                        value = juce::var(&obj);
                         break;
                     }
                 }
