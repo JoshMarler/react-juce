@@ -101,7 +101,7 @@ namespace blueprint
                     }
                     else
                     {
-                        juce::DynamicObject obj;
+                        auto* obj = new juce::DynamicObject();
 
                         // Generic object enumeration; `duk_enum` pushes an enumerator
                         // object to the top of the stack
@@ -118,7 +118,7 @@ namespace blueprint
                             // conversion from number to string. Thus here, while constructing
                             // the DynamicObject, we take the `toString()` value for the key
                             // always.
-                            obj.setProperty(duk_to_string(ctx, -2), readVarFromDukStack(ctx, -1));
+                            obj->setProperty(duk_to_string(ctx, -2), readVarFromDukStack(ctx, -1));
 
                             // Clear the key/value pair from the stack
                             duk_pop_2(ctx);
@@ -127,7 +127,7 @@ namespace blueprint
                         // Pop the enumerator from the stack
                         duk_pop(ctx);
 
-                        value = juce::var(&obj);
+                        value = juce::var(obj);
                         break;
                     }
                 }
@@ -266,6 +266,50 @@ namespace blueprint
 
         // And finally we assign the function to its name in the global namespace
         duk_put_prop_string(ctx, -2, name.toRawUTF8());
+    }
+
+    //==============================================================================
+    void EcmascriptEngine::registerNativeProperty (const juce::String& name, const juce::var& value)
+    {
+        duk_push_global_object(ctx);
+        detail::pushVarToDukStack(ctx, value);
+        duk_put_prop_string(ctx, -2, name.toRawUTF8());
+    }
+
+    void EcmascriptEngine::registerNativeProperty (const juce::String& target, const juce::String& name, const juce::var& value)
+    {
+        // Evaluate the target string on the context, leaving the result on the stack
+        duk_eval_string(ctx, target.toRawUTF8());
+
+        // Then assign the property
+        detail::pushVarToDukStack(ctx, value);
+        duk_put_prop_string(ctx, -2, name.toRawUTF8());
+    }
+
+    //==============================================================================
+    template <typename... T>
+    juce::var EcmascriptEngine::invoke (const juce::String& name, T... args)
+    {
+        // Evaluate the target string on the context, leaving the result on the stack
+        duk_eval_string(ctx, name.toRawUTF8());
+
+        // Now pack the args and push them to the duktape stack top
+        std::vector<juce::var> vargs { args... };
+        auto nargs = static_cast<duk_idx_t>(vargs.size());
+
+        duk_require_stack_top(ctx, nargs);
+
+        for (auto& p : vargs)
+            detail::pushVarToDukStack(ctx, p);
+
+        // Invocation
+        duk_call(ctx, nargs);
+
+        // Collect the return value
+        auto result = detail::readVarFromDukStack(ctx, -1);
+
+        duk_pop(ctx);
+        return result;
     }
 
 }

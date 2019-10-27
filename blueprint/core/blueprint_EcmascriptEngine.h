@@ -61,7 +61,7 @@ namespace blueprint
 
         //==============================================================================
         /** Registers a native value by the given name in the global namespace. */
-        // void registerNativeProperty (const juce::String&, const juce::var&);
+        void registerNativeProperty (const juce::String&, const juce::var&);
 
         /** Registers a native value by the given name on the target object.
          *
@@ -75,7 +75,7 @@ namespace blueprint
          *  evaluate("global.hello = \"world\";");
          *  ```
          */
-        // void registerNativeProperty (const juce::String&, const juce::String&, const juce::var&);
+        void registerNativeProperty (const juce::String&, const juce::String&, const juce::var&);
 
         //==============================================================================
         /** Invokes a method with the given args inside the interpreter.
@@ -87,8 +87,8 @@ namespace blueprint
          *
          *  Returns the result of the invocation.
          */
-        // template <typename... T>
-        // juce::var invoke (const juce::String& name, T... args);
+        template <typename... T>
+        juce::var invoke (const juce::String& name, T... args);
 
     private:
         //==============================================================================
