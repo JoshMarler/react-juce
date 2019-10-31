@@ -1,10 +1,10 @@
 {
     "comment": "Metadata for Duktape sources", 
-    "duk_version_string": "2.3.0", 
+    "duk_version_string": "2.4.0", 
     "type": "duk_source_meta", 
-    "duk_version": 20300, 
+    "duk_version": 20400, 
     "git_branch": "master", 
-    "git_commit": "d7fdb67f18561a50e06bafd196c6b423af9ad6fe", 
+    "git_commit": "d4f2cff1c592d70f58bab8e1bd85705174c02a58", 
     "builtin_strings_info": [
         {
             "plain": "Undefined", 
@@ -1005,7 +1005,7 @@
         "c3RhdGlj", 
         "eWllbGQ="
     ], 
-    "git_describe": "v2.3.0", 
+    "git_describe": "v2.4.0", 
     "builtin_strings": [
         "Undefined", 
         "Null", 

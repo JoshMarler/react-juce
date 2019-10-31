@@ -271,8 +271,7 @@ EventLoop.run = function() {
         try {
             Poll.poll(poll_set, wait);
         } catch (e) {
-            // Eat errors silently.  When resizing curses window an EINTR
-            // happens now.
+            // Eat errors silently.
         }
 
         /*
@@ -355,7 +354,10 @@ EventLoop.setReader = function(fd, cb_read) {
 
 EventLoop.write = function(fd, data) {
     // This simple example doesn't have support for write blocking / draining
-    var rc = Socket.write(fd, Duktape.Buffer(data));
+    if (typeof data === 'string') {
+        data = new TextEncoder().encode(data);
+    }
+    var rc = Socket.write(fd, data);
 }
 
 /*

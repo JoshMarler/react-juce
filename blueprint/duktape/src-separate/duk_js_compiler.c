@@ -368,8 +368,8 @@ DUK_LOCAL const duk_uint8_t duk__token_lbp[] = {
 	DUK__MK_LBP(DUK__BP_MULTIPLICATIVE),                      /* DUK_TOK_DIV */
 	DUK__MK_LBP(DUK__BP_MULTIPLICATIVE),                      /* DUK_TOK_MOD */
 	DUK__MK_LBP(DUK__BP_EXPONENTIATION),                      /* DUK_TOK_EXP */
-	DUK__MK_LBP(DUK__BP_POSTFIX),                             /* DUK_TOK_INCREMENT */
-	DUK__MK_LBP(DUK__BP_POSTFIX),                             /* DUK_TOK_DECREMENT */
+	DUK__MK_LBP_FLAGS(DUK__BP_POSTFIX, DUK__TOKEN_LBP_FLAG_NO_REGEXP),  /* DUK_TOK_INCREMENT */
+	DUK__MK_LBP_FLAGS(DUK__BP_POSTFIX, DUK__TOKEN_LBP_FLAG_NO_REGEXP),  /* DUK_TOK_DECREMENT */
 	DUK__MK_LBP(DUK__BP_SHIFT),                               /* DUK_TOK_ALSHIFT */
 	DUK__MK_LBP(DUK__BP_SHIFT),                               /* DUK_TOK_ARSHIFT */
 	DUK__MK_LBP(DUK__BP_SHIFT),                               /* DUK_TOK_RSHIFT */
@@ -542,23 +542,23 @@ DUK_LOCAL void duk__init_func_valstack_slots(duk_compiler_ctx *comp_ctx) {
 	DUK_BW_INIT_PUSHBUF(thr, &func->bw_code, DUK__BC_INITIAL_INSTS * sizeof(duk_compiler_instr));
 	/* code_idx = entry_top + 0 */
 
-	duk_push_array(thr);
+	duk_push_bare_array(thr);
 	func->consts_idx = entry_top + 1;
 	func->h_consts = DUK_GET_HOBJECT_POSIDX(thr, entry_top + 1);
 	DUK_ASSERT(func->h_consts != NULL);
 
-	duk_push_array(thr);
+	duk_push_bare_array(thr);
 	func->funcs_idx = entry_top + 2;
 	func->h_funcs = DUK_GET_HOBJECT_POSIDX(thr, entry_top + 2);
 	DUK_ASSERT(func->h_funcs != NULL);
 	DUK_ASSERT(func->fnum_next == 0);
 
-	duk_push_array(thr);
+	duk_push_bare_array(thr);
 	func->decls_idx = entry_top + 3;
 	func->h_decls = DUK_GET_HOBJECT_POSIDX(thr, entry_top + 3);
 	DUK_ASSERT(func->h_decls != NULL);
 
-	duk_push_array(thr);
+	duk_push_bare_array(thr);
 	func->labelnames_idx = entry_top + 4;
 	func->h_labelnames = DUK_GET_HOBJECT_POSIDX(thr, entry_top + 4);
 	DUK_ASSERT(func->h_labelnames != NULL);
@@ -569,7 +569,7 @@ DUK_LOCAL void duk__init_func_valstack_slots(duk_compiler_ctx *comp_ctx) {
 	DUK_ASSERT(func->h_labelinfos != NULL);
 	DUK_ASSERT(DUK_HBUFFER_HAS_DYNAMIC(func->h_labelinfos) && !DUK_HBUFFER_HAS_EXTERNAL(func->h_labelinfos));
 
-	duk_push_array(thr);
+	duk_push_bare_array(thr);
 	func->argnames_idx = entry_top + 6;
 	func->h_argnames = DUK_GET_HOBJECT_POSIDX(thr, entry_top + 6);
 	DUK_ASSERT(func->h_argnames != NULL);
@@ -780,7 +780,7 @@ DUK_LOCAL void duk__convert_to_func_template(duk_compiler_ctx *comp_ctx) {
 	p_const = (duk_tval *) (void *) DUK_HBUFFER_FIXED_GET_DATA_PTR(thr->heap, h_data);
 	for (i = 0; i < consts_count; i++) {
 		DUK_ASSERT(i <= DUK_UARRIDX_MAX);  /* const limits */
-		tv = duk_hobject_find_existing_array_entry_tval_ptr(thr->heap, func->h_consts, (duk_uarridx_t) i);
+		tv = duk_hobject_find_array_entry_tval_ptr(thr->heap, func->h_consts, (duk_uarridx_t) i);
 		DUK_ASSERT(tv != NULL);
 		DUK_TVAL_SET_TVAL(p_const, tv);
 		p_const++;
@@ -794,7 +794,7 @@ DUK_LOCAL void duk__convert_to_func_template(duk_compiler_ctx *comp_ctx) {
 	for (i = 0; i < funcs_count; i++) {
 		duk_hobject *h;
 		DUK_ASSERT(i * 3 <= DUK_UARRIDX_MAX);  /* func limits */
-		tv = duk_hobject_find_existing_array_entry_tval_ptr(thr->heap, func->h_funcs, (duk_uarridx_t) (i * 3));
+		tv = duk_hobject_find_array_entry_tval_ptr(thr->heap, func->h_funcs, (duk_uarridx_t) (i * 3));
 		DUK_ASSERT(tv != NULL);
 		DUK_ASSERT(DUK_TVAL_IS_OBJECT(tv));
 		h = DUK_TVAL_GET_OBJECT(tv);
@@ -1036,7 +1036,7 @@ DUK_LOCAL void duk__convert_to_func_template(duk_compiler_ctx *comp_ctx) {
 
 		p = p_start;
 		while (p < p_end) {
-			DUK_DDD(DUK_DDDPRINT("BC %04ld: %!I        ; 0x%08lx op=%ld (%!C) a=%ld b=%ld c=%ld",
+			DUK_DDD(DUK_DDDPRINT("BC %04ld: %!I        ; 0x%08lx op=%ld (%!X) a=%ld b=%ld c=%ld",
 			                     (long) (p - p_start),
 			                     (duk_instr_t) (*p),
 			                     (unsigned long) (*p),
@@ -1586,7 +1586,7 @@ DUK_LOCAL void duk__emit_abc(duk_compiler_ctx *comp_ctx, duk_small_uint_t op, du
 		goto error_outofregs;
 	}
 	ins = DUK_ENC_OP_ABC(op, abc);
-	DUK_DDD(DUK_DDDPRINT("duk__emit_abc: 0x%08lx line=%ld pc=%ld op=%ld (%!C) abc=%ld (%!I)",
+	DUK_DDD(DUK_DDDPRINT("duk__emit_abc: 0x%08lx line=%ld pc=%ld op=%ld (%!X) abc=%ld (%!I)",
 	                     (unsigned long) ins, (long) comp_ctx->curr_token.start_line,
 	                     (long) duk__get_current_pc(comp_ctx), (long) op, (long) op,
 	                     (long) abc, (duk_instr_t) ins));

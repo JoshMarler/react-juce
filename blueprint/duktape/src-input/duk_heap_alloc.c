@@ -256,15 +256,19 @@ DUK_LOCAL void duk__free_run_finalizers(duk_heap *heap) {
 	}
 
 	/* Prevent finalize_list processing and mark-and-sweep entirely.
-	 * Setting ms_running = 1 also prevents refzero handling from moving
-	 * objects away from the heap_allocated list (the flag name is a bit
-	 * misleading here).
+	 * Setting ms_running != 0 also prevents refzero handling from moving
+	 * objects away from the heap_allocated list.  The flag name is a bit
+	 * misleading here.
+	 *
+	 * Use a distinct value for ms_running here (== 2) so that assertions
+	 * can detect this situation separate from the normal runtime
+	 * mark-and-sweep case.  This allows better assertions (GH-2030).
 	 */
 	DUK_ASSERT(heap->pf_prevent_count == 0);
-	heap->pf_prevent_count = 1;
 	DUK_ASSERT(heap->ms_running == 0);
-	heap->ms_running = 1;
 	DUK_ASSERT(heap->ms_prevent_count == 0);
+	heap->pf_prevent_count = 1;
+	heap->ms_running = 2;  /* Use distinguishable value. */
 	heap->ms_prevent_count = 1;  /* Bump, because mark-and-sweep assumes it's bumped when ms_running is set. */
 
 	curr_limit = 0;  /* suppress warning, not used */
@@ -325,9 +329,9 @@ DUK_LOCAL void duk__free_run_finalizers(duk_heap *heap) {
 		}
 	}
 
-	DUK_ASSERT(heap->ms_running == 1);
-	heap->ms_running = 0;
+	DUK_ASSERT(heap->ms_running == 2);
 	DUK_ASSERT(heap->pf_prevent_count == 1);
+	heap->ms_running = 0;
 	heap->pf_prevent_count = 0;
 }
 #endif  /* DUK_USE_FINALIZER_SUPPORT */

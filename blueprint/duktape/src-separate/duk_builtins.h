@@ -541,6 +541,7 @@ DUK_INTERNAL_DECL duk_ret_t duk_bi_global_object_parse_float(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_thread_constructor(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_pointer_constructor(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_proxy_constructor(duk_context *ctx);
+DUK_INTERNAL_DECL duk_ret_t duk_bi_symbol_constructor_shared(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_arraybuffer_constructor(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_dataview_constructor(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_typedarray_constructor(duk_context *ctx);
@@ -581,6 +582,7 @@ DUK_INTERNAL_DECL duk_ret_t duk_bi_function_prototype_to_string(duk_context *ctx
 DUK_INTERNAL_DECL duk_ret_t duk_bi_function_prototype_apply(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_function_prototype_call(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_function_prototype_bind(duk_context *ctx);
+DUK_INTERNAL_DECL duk_ret_t duk_bi_function_prototype_hasinstance(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_native_function_length(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_native_function_name(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_array_constructor_is_array(duk_context *ctx);
@@ -636,6 +638,7 @@ DUK_INTERNAL_DECL duk_ret_t duk_bi_date_prototype_get_shared(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_date_prototype_get_timezone_offset(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_date_prototype_set_time(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_date_prototype_set_shared(duk_context *ctx);
+DUK_INTERNAL_DECL duk_ret_t duk_bi_date_prototype_toprimitive(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_regexp_prototype_exec(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_regexp_prototype_test(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_regexp_prototype_tostring(duk_context *ctx);
@@ -676,6 +679,9 @@ DUK_INTERNAL_DECL duk_ret_t duk_bi_reflect_object_delete_property(duk_context *c
 DUK_INTERNAL_DECL duk_ret_t duk_bi_reflect_object_get(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_reflect_object_has(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_reflect_object_set(duk_context *ctx);
+DUK_INTERNAL_DECL duk_ret_t duk_bi_symbol_key_for(duk_context *ctx);
+DUK_INTERNAL_DECL duk_ret_t duk_bi_symbol_tostring_shared(duk_context *ctx);
+DUK_INTERNAL_DECL duk_ret_t duk_bi_symbol_toprimitive(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_arraybuffer_isview(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_typedarray_bytelength_getter(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_buffer_slice_shared(duk_context *ctx);
@@ -702,7 +708,7 @@ DUK_INTERNAL_DECL duk_ret_t duk_bi_textdecoder_prototype_shared_getter(duk_conte
 DUK_INTERNAL_DECL duk_ret_t duk_bi_textdecoder_prototype_decode(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_performance_now(duk_context *ctx);
 #if !defined(DUK_SINGLE_FILE)
-DUK_INTERNAL_DECL const duk_c_function duk_bi_native_functions[177];
+DUK_INTERNAL_DECL const duk_c_function duk_bi_native_functions[183];
 #endif  /* !DUK_SINGLE_FILE */
 #define DUK_BIDX_GLOBAL                                               0
 #define DUK_BIDX_GLOBAL_ENV                                           1
@@ -757,22 +763,22 @@ DUK_INTERNAL_DECL const duk_c_function duk_bi_native_functions[177];
 #define DUK_BIDX_NODEJS_BUFFER_PROTOTYPE                              50
 #define DUK_NUM_BUILTINS                                              51
 #define DUK_NUM_BIDX_BUILTINS                                         51
-#define DUK_NUM_ALL_BUILTINS                                          78
+#define DUK_NUM_ALL_BUILTINS                                          79
 #if defined(DUK_USE_DOUBLE_LE)
 #if !defined(DUK_SINGLE_FILE)
-DUK_INTERNAL_DECL const duk_uint8_t duk_builtins_data[4116];
+DUK_INTERNAL_DECL const duk_uint8_t duk_builtins_data[4251];
 #endif  /* !DUK_SINGLE_FILE */
-#define DUK_BUILTINS_DATA_LENGTH                                      4116
+#define DUK_BUILTINS_DATA_LENGTH                                      4251
 #elif defined(DUK_USE_DOUBLE_BE)
 #if !defined(DUK_SINGLE_FILE)
-DUK_INTERNAL_DECL const duk_uint8_t duk_builtins_data[4116];
+DUK_INTERNAL_DECL const duk_uint8_t duk_builtins_data[4251];
 #endif  /* !DUK_SINGLE_FILE */
-#define DUK_BUILTINS_DATA_LENGTH                                      4116
+#define DUK_BUILTINS_DATA_LENGTH                                      4251
 #elif defined(DUK_USE_DOUBLE_ME)
 #if !defined(DUK_SINGLE_FILE)
-DUK_INTERNAL_DECL const duk_uint8_t duk_builtins_data[4116];
+DUK_INTERNAL_DECL const duk_uint8_t duk_builtins_data[4251];
 #endif  /* !DUK_SINGLE_FILE */
-#define DUK_BUILTINS_DATA_LENGTH                                      4116
+#define DUK_BUILTINS_DATA_LENGTH                                      4251
 #else
 #error invalid endianness defines
 #endif

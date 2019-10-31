@@ -76,6 +76,9 @@ DUK_LOCAL_DECL duk_bool_t duk__handle_put_array_length(duk_hthread *thr, duk_hob
 DUK_LOCAL_DECL duk_bool_t duk__get_propdesc(duk_hthread *thr, duk_hobject *obj, duk_hstring *key, duk_propdesc *out_desc, duk_small_uint_t flags);
 DUK_LOCAL_DECL duk_bool_t duk__get_own_propdesc_raw(duk_hthread *thr, duk_hobject *obj, duk_hstring *key, duk_uint32_t arr_idx, duk_propdesc *out_desc, duk_small_uint_t flags);
 
+DUK_LOCAL_DECL void duk__abandon_array_part(duk_hthread *thr, duk_hobject *obj);
+DUK_LOCAL_DECL void duk__grow_props_for_array_item(duk_hthread *thr, duk_hobject *obj, duk_uint32_t highest_arr_idx);
+
 /*
  *  Misc helpers
  */
@@ -234,8 +237,6 @@ DUK_LOCAL duk_uint32_t duk__get_default_h_size(duk_uint32_t e_size) {
 DUK_LOCAL duk_uint32_t duk__get_min_grow_e(duk_uint32_t e_size) {
 	duk_uint32_t res;
 
-	DUK_ASSERT(e_size <= DUK_HOBJECT_MAX_PROPERTIES);
-
 	res = (e_size + DUK_USE_HOBJECT_ENTRY_MINGROW_ADD) / DUK_USE_HOBJECT_ENTRY_MINGROW_DIVISOR;
 	DUK_ASSERT(res >= 1);  /* important for callers */
 	return res;
@@ -244,8 +245,6 @@ DUK_LOCAL duk_uint32_t duk__get_min_grow_e(duk_uint32_t e_size) {
 /* Get minimum array part growth for a certain size. */
 DUK_LOCAL duk_uint32_t duk__get_min_grow_a(duk_uint32_t a_size) {
 	duk_uint32_t res;
-
-	DUK_ASSERT((duk_size_t) a_size <= DUK_HOBJECT_MAX_PROPERTIES);
 
 	res = (a_size + DUK_USE_HOBJECT_ARRAY_MINGROW_ADD) / DUK_USE_HOBJECT_ARRAY_MINGROW_DIVISOR;
 	DUK_ASSERT(res >= 1);  /* important for callers */
@@ -351,6 +350,105 @@ DUK_LOCAL duk_bool_t duk__abandon_array_slow_check_required(duk_uint32_t arr_idx
 	return (arr_idx > DUK_USE_HOBJECT_ARRAY_FAST_RESIZE_LIMIT * ((old_size + 7) >> 3));
 }
 
+DUK_LOCAL duk_bool_t duk__abandon_array_check(duk_hthread *thr, duk_uint32_t arr_idx, duk_hobject *obj) {
+	duk_uint32_t min_size;
+	duk_uint32_t old_used;
+	duk_uint32_t old_size;
+
+	if (!duk__abandon_array_slow_check_required(arr_idx, DUK_HOBJECT_GET_ASIZE(obj))) {
+		DUK_DDD(DUK_DDDPRINT("=> fast resize is OK"));
+		return 0;
+	}
+
+	duk__compute_a_stats(thr, obj, &old_used, &old_size);
+
+	DUK_DDD(DUK_DDDPRINT("abandon check, array stats: old_used=%ld, old_size=%ld, arr_idx=%ld",
+	                     (long) old_used, (long) old_size, (long) arr_idx));
+
+	min_size = arr_idx + 1;
+#if defined(DUK_USE_OBJSIZES16)
+	if (min_size > DUK_UINT16_MAX) {
+		goto do_abandon;
+	}
+#endif
+	DUK_UNREF(min_size);
+
+	/* Note: intentionally use approximations to shave a few instructions:
+	 *   a_used = old_used  (accurate: old_used + 1)
+	 *   a_size = arr_idx   (accurate: arr_idx + 1)
+	 */
+	if (duk__abandon_array_density_check(old_used, arr_idx)) {
+		DUK_DD(DUK_DDPRINT("write to new array entry beyond current length, "
+		                   "decided to abandon array part (would become too sparse)"));
+
+		/* Abandoning requires a props allocation resize and
+		 * 'rechecks' the valstack, invalidating any existing
+		 * valstack value pointers.
+		 */
+		goto do_abandon;
+	}
+
+	DUK_DDD(DUK_DDDPRINT("=> decided to keep array part"));
+	return 0;
+
+ do_abandon:
+	duk__abandon_array_part(thr, obj);
+	DUK_ASSERT(!DUK_HOBJECT_HAS_ARRAY_PART(obj));
+	return 1;
+}
+
+DUK_LOCAL duk_tval *duk__obtain_arridx_slot_slowpath(duk_hthread *thr, duk_uint32_t arr_idx, duk_hobject *obj) {
+	/*
+	 *  Array needs to grow, but we don't want it becoming too sparse.
+	 *  If it were to become sparse, abandon array part, moving all
+	 *  array entries into the entries part (for good).
+	 *
+	 *  Since we don't keep track of actual density (used vs. size) of
+	 *  the array part, we need to estimate somehow.  The check is made
+	 *  in two parts:
+	 *
+	 *    - Check whether the resize need is small compared to the
+	 *      current size (relatively); if so, resize without further
+	 *      checking (essentially we assume that the original part is
+	 *      "dense" so that the result would be dense enough).
+	 *
+	 *    - Otherwise, compute the resize using an actual density
+	 *      measurement based on counting the used array entries.
+	 */
+
+	DUK_DDD(DUK_DDDPRINT("write to new array requires array resize, decide whether to do a "
+	                     "fast resize without abandon check (arr_idx=%ld, old_size=%ld)",
+	                     (long) arr_idx, (long) DUK_HOBJECT_GET_ASIZE(obj)));
+
+	if (DUK_UNLIKELY(duk__abandon_array_check(thr, arr_idx, obj) != 0)) {
+		DUK_ASSERT(!DUK_HOBJECT_HAS_ARRAY_PART(obj));
+		return NULL;
+	}
+
+	DUK_DD(DUK_DDPRINT("write to new array entry beyond current length, "
+	                   "decided to extend current allocation"));
+
+	/* In principle it's possible to run out of memory extending the
+	 * array but with the allocation going through if we were to abandon
+	 * the array part and try again.  In practice this should be rare
+	 * because abandoned arrays have a higher per-entry footprint.
+	 */
+
+	duk__grow_props_for_array_item(thr, obj, arr_idx);
+
+	DUK_ASSERT(DUK_HOBJECT_HAS_ARRAY_PART(obj));
+	DUK_ASSERT(arr_idx < DUK_HOBJECT_GET_ASIZE(obj));
+	return DUK_HOBJECT_A_GET_VALUE_PTR(thr->heap, obj, arr_idx);
+}
+
+DUK_LOCAL DUK_INLINE duk_tval *duk__obtain_arridx_slot(duk_hthread *thr, duk_uint32_t arr_idx, duk_hobject *obj) {
+	if (DUK_LIKELY(arr_idx < DUK_HOBJECT_GET_ASIZE(obj))) {
+		return DUK_HOBJECT_A_GET_VALUE_PTR(thr->heap, obj, arr_idx);
+	} else {
+		return duk__obtain_arridx_slot_slowpath(thr, arr_idx, obj);
+	}
+}
+
 /*
  *  Proxy helpers
  */
@@ -370,7 +468,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_proxy_check(duk_hobject *obj, duk_hobject **
 		return 0;
 	}
 	h_proxy = (duk_hproxy *) obj;
-	DUK_ASSERT_HPROXY_VALID(h_proxy);
+	DUK_HPROXY_ASSERT_VALID(h_proxy);
 
 	DUK_ASSERT(h_proxy->handler != NULL);
 	DUK_ASSERT(h_proxy->target != NULL);
@@ -397,7 +495,7 @@ DUK_INTERNAL duk_hobject *duk_hobject_resolve_proxy_target(duk_hobject *obj) {
 		duk_hproxy *h_proxy;
 
 		h_proxy = (duk_hproxy *) obj;
-		DUK_ASSERT_HPROXY_VALID(h_proxy);
+		DUK_HPROXY_ASSERT_VALID(h_proxy);
 		obj = h_proxy->target;
 		DUK_ASSERT(obj != NULL);
 	}
@@ -605,6 +703,16 @@ DUK_INTERNAL void duk_hobject_realloc_props(duk_hthread *thr,
 		DUK_ERROR_ALLOC_FAILED(thr);
 		DUK_WO_NORETURN(return;);
 	}
+#if defined(DUK_USE_OBJSIZES16)
+	if (new_e_size_adjusted > DUK_UINT16_MAX || new_a_size > DUK_UINT16_MAX) {
+		/* If caller gave us sizes larger than what we can store,
+		 * fail memory safely with an internal error rather than
+		 * truncating the sizes.
+		 */
+		DUK_ERROR_INTERNAL(thr);
+		DUK_WO_NORETURN(return;);
+	}
+#endif
 
 	/*
 	 *  Compute new alloc size and alloc new area.
@@ -980,34 +1088,10 @@ DUK_INTERNAL void duk_hobject_resize_entrypart(duk_hthread *thr,
 	duk_hobject_realloc_props(thr, obj, new_e_size, new_a_size, new_h_size, 0);
 }
 
-#if 0  /*unused */
-DUK_INTERNAL void duk_hobject_resize_arraypart(duk_hthread *thr,
-                                               duk_hobject *obj,
-                                               duk_uint32_t new_a_size) {
-	duk_uint32_t old_a_size;
-	duk_uint32_t new_e_size;
-	duk_uint32_t new_h_size;
-
-	DUK_ASSERT(thr != NULL);
-	DUK_ASSERT(obj != NULL);
-
-	if (!DUK_HOBJECT_HAS_ARRAY_PART(obj)) {
-		return;
-	}
-	old_a_size = DUK_HOBJECT_GET_ASIZE(obj);
-	if (old_a_size > new_a_size) {
-		new_a_size = old_a_size;
-	}
-	new_e_size = DUK_HOBJECT_GET_ESIZE(obj);
-	new_h_size = DUK_HOBJECT_GET_HSIZE(obj);
-
-	duk_hobject_realloc_props(thr, obj, new_e_size, new_a_size, new_h_size, 0);
-}
-#endif
-
 /* Grow entry part allocation for one additional entry. */
 DUK_LOCAL void duk__grow_props_for_new_entry_item(duk_hthread *thr, duk_hobject *obj) {
 	duk_uint32_t old_e_used;  /* actually used, non-NULL entries */
+	duk_uint32_t new_e_size_minimum;
 	duk_uint32_t new_e_size;
 	duk_uint32_t new_a_size;
 	duk_uint32_t new_h_size;
@@ -1023,6 +1107,7 @@ DUK_LOCAL void duk__grow_props_for_new_entry_item(duk_hthread *thr, duk_hobject 
 	 */
 
 	old_e_used = duk__count_used_e_keys(thr, obj);
+	new_e_size_minimum = old_e_used + 1;
 	new_e_size = old_e_used + duk__get_min_grow_e(old_e_used);
 #if defined(DUK_USE_HOBJECT_HASH_PART)
 	new_h_size = duk__get_default_h_size(new_e_size);
@@ -1030,7 +1115,24 @@ DUK_LOCAL void duk__grow_props_for_new_entry_item(duk_hthread *thr, duk_hobject 
 	new_h_size = 0;
 #endif
 	new_a_size = DUK_HOBJECT_GET_ASIZE(obj);
-	DUK_ASSERT(new_e_size >= old_e_used + 1);  /* duk__get_min_grow_e() is always >= 1 */
+
+#if defined(DUK_USE_OBJSIZES16)
+	if (new_e_size > DUK_UINT16_MAX) {
+		new_e_size = DUK_UINT16_MAX;
+	}
+	if (new_h_size > DUK_UINT16_MAX) {
+		new_h_size = DUK_UINT16_MAX;
+	}
+	if (new_a_size > DUK_UINT16_MAX) {
+		new_a_size = DUK_UINT16_MAX;
+	}
+#endif
+	DUK_ASSERT(new_h_size == 0 || new_h_size >= new_e_size);
+
+	if (!(new_e_size >= new_e_size_minimum)) {
+		DUK_ERROR_ALLOC_FAILED(thr);
+		DUK_WO_NORETURN(return;);
+	}
 
 	duk_hobject_realloc_props(thr, obj, new_e_size, new_a_size, new_h_size, 0);
 }
@@ -1039,18 +1141,35 @@ DUK_LOCAL void duk__grow_props_for_new_entry_item(duk_hthread *thr, duk_hobject 
 DUK_LOCAL void duk__grow_props_for_array_item(duk_hthread *thr, duk_hobject *obj, duk_uint32_t highest_arr_idx) {
 	duk_uint32_t new_e_size;
 	duk_uint32_t new_a_size;
+	duk_uint32_t new_a_size_minimum;
 	duk_uint32_t new_h_size;
 
 	DUK_ASSERT(thr != NULL);
 	DUK_ASSERT(obj != NULL);
 	DUK_ASSERT(highest_arr_idx >= DUK_HOBJECT_GET_ASIZE(obj));
 
-	/* minimum new length is highest_arr_idx + 1 */
-
 	new_e_size = DUK_HOBJECT_GET_ESIZE(obj);
 	new_h_size = DUK_HOBJECT_GET_HSIZE(obj);
+	new_a_size_minimum = highest_arr_idx + 1;
 	new_a_size = highest_arr_idx + duk__get_min_grow_a(highest_arr_idx);
 	DUK_ASSERT(new_a_size >= highest_arr_idx + 1);  /* duk__get_min_grow_a() is always >= 1 */
+
+#if defined(DUK_USE_OBJSIZES16)
+	if (new_e_size > DUK_UINT16_MAX) {
+		new_e_size = DUK_UINT16_MAX;
+	}
+	if (new_h_size > DUK_UINT16_MAX) {
+		new_h_size = DUK_UINT16_MAX;
+	}
+	if (new_a_size > DUK_UINT16_MAX) {
+		new_a_size = DUK_UINT16_MAX;
+	}
+#endif
+
+	if (!(new_a_size >= new_a_size_minimum)) {
+		DUK_ERROR_ALLOC_FAILED(thr);
+		DUK_WO_NORETURN(return;);
+	}
 
 	duk_hobject_realloc_props(thr, obj, new_e_size, new_a_size, new_h_size, 0);
 }
@@ -1060,7 +1179,8 @@ DUK_LOCAL void duk__grow_props_for_array_item(duk_hthread *thr, duk_hobject *obj
  * We also compact the entries part while we're at it, although
  * this is not strictly required.
  */
-DUK_LOCAL void duk__abandon_array_checked(duk_hthread *thr, duk_hobject *obj) {
+DUK_LOCAL void duk__abandon_array_part(duk_hthread *thr, duk_hobject *obj) {
+	duk_uint32_t new_e_size_minimum;
 	duk_uint32_t new_e_size;
 	duk_uint32_t new_a_size;
 	duk_uint32_t new_h_size;
@@ -1080,14 +1200,31 @@ DUK_LOCAL void duk__abandon_array_checked(duk_hthread *thr, duk_hobject *obj) {
 	 *  of space right away.
 	 */
 
-	new_e_size = e_used + a_used;
-	new_e_size = new_e_size + duk__get_min_grow_e(new_e_size);
+	new_e_size_minimum = e_used + a_used;
+	new_e_size = new_e_size_minimum + duk__get_min_grow_e(new_e_size_minimum);
 	new_a_size = 0;
 #if defined(DUK_USE_HOBJECT_HASH_PART)
 	new_h_size = duk__get_default_h_size(new_e_size);
 #else
 	new_h_size = 0;
 #endif
+
+#if defined(DUK_USE_OBJSIZES16)
+	if (new_e_size > DUK_UINT16_MAX) {
+		new_e_size = DUK_UINT16_MAX;
+	}
+	if (new_h_size > DUK_UINT16_MAX) {
+		new_h_size = DUK_UINT16_MAX;
+	}
+	if (new_a_size > DUK_UINT16_MAX) {
+		new_a_size = DUK_UINT16_MAX;
+	}
+#endif
+
+	if (!(new_e_size >= new_e_size_minimum)) {
+		DUK_ERROR_ALLOC_FAILED(thr);
+		DUK_WO_NORETURN(return;);
+	}
 
 	DUK_DD(DUK_DDPRINT("abandon array part for hobject %p, "
 	                   "array stats before: e_used=%ld, a_used=%ld, a_size=%ld; "
@@ -1173,7 +1310,7 @@ DUK_INTERNAL void duk_hobject_compact_props(duk_hthread *thr, duk_hobject *obj) 
  *  but there is no hash part, h_idx is set to -1.
  */
 
-DUK_INTERNAL duk_bool_t duk_hobject_find_existing_entry(duk_heap *heap, duk_hobject *obj, duk_hstring *key, duk_int_t *e_idx, duk_int_t *h_idx) {
+DUK_INTERNAL duk_bool_t duk_hobject_find_entry(duk_heap *heap, duk_hobject *obj, duk_hstring *key, duk_int_t *e_idx, duk_int_t *h_idx) {
 	DUK_ASSERT(obj != NULL);
 	DUK_ASSERT(key != NULL);
 	DUK_ASSERT(e_idx != NULL);
@@ -1190,7 +1327,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_find_existing_entry(duk_heap *heap, duk_hobj
 		duk_uint_fast32_t i;
 		duk_uint_fast32_t n;
 		duk_hstring **h_keys_base;
-		DUK_DDD(DUK_DDDPRINT("duk_hobject_find_existing_entry() using linear scan for lookup"));
+		DUK_DDD(DUK_DDDPRINT("duk_hobject_find_entry() using linear scan for lookup"));
 
 		h_keys_base = DUK_HOBJECT_E_GET_KEY_BASE(heap, obj);
 		n = DUK_HOBJECT_GET_ENEXT(obj);
@@ -1211,7 +1348,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_find_existing_entry(duk_heap *heap, duk_hobj
 		duk_uint32_t *h_base;
 		duk_uint32_t mask;
 
-		DUK_DDD(DUK_DDDPRINT("duk_hobject_find_existing_entry() using hash part for lookup"));
+		DUK_DDD(DUK_DDDPRINT("duk_hobject_find_entry() using hash part for lookup"));
 
 		h_base = DUK_HOBJECT_H_GET_BASE(heap, obj);
 		n = DUK_HOBJECT_GET_HSIZE(obj);
@@ -1257,7 +1394,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_find_existing_entry(duk_heap *heap, duk_hobj
 }
 
 /* For internal use: get non-accessor entry value */
-DUK_INTERNAL duk_tval *duk_hobject_find_existing_entry_tval_ptr(duk_heap *heap, duk_hobject *obj, duk_hstring *key) {
+DUK_INTERNAL duk_tval *duk_hobject_find_entry_tval_ptr(duk_heap *heap, duk_hobject *obj, duk_hstring *key) {
 	duk_int_t e_idx;
 	duk_int_t h_idx;
 
@@ -1265,7 +1402,7 @@ DUK_INTERNAL duk_tval *duk_hobject_find_existing_entry_tval_ptr(duk_heap *heap, 
 	DUK_ASSERT(key != NULL);
 	DUK_UNREF(heap);
 
-	if (duk_hobject_find_existing_entry(heap, obj, key, &e_idx, &h_idx)) {
+	if (duk_hobject_find_entry(heap, obj, key, &e_idx, &h_idx)) {
 		DUK_ASSERT(e_idx >= 0);
 		if (!DUK_HOBJECT_E_SLOT_IS_ACCESSOR(heap, obj, e_idx)) {
 			return DUK_HOBJECT_E_GET_VALUE_TVAL_PTR(heap, obj, e_idx);
@@ -1274,8 +1411,12 @@ DUK_INTERNAL duk_tval *duk_hobject_find_existing_entry_tval_ptr(duk_heap *heap, 
 	return NULL;
 }
 
+DUK_INTERNAL duk_tval *duk_hobject_find_entry_tval_ptr_stridx(duk_heap *heap, duk_hobject *obj, duk_small_uint_t stridx) {
+	return duk_hobject_find_entry_tval_ptr(heap, obj, DUK_HEAP_GET_STRING(heap, stridx));
+}
+
 /* For internal use: get non-accessor entry value and attributes */
-DUK_INTERNAL duk_tval *duk_hobject_find_existing_entry_tval_ptr_and_attrs(duk_heap *heap, duk_hobject *obj, duk_hstring *key, duk_uint_t *out_attrs) {
+DUK_INTERNAL duk_tval *duk_hobject_find_entry_tval_ptr_and_attrs(duk_heap *heap, duk_hobject *obj, duk_hstring *key, duk_uint_t *out_attrs) {
 	duk_int_t e_idx;
 	duk_int_t h_idx;
 
@@ -1284,7 +1425,7 @@ DUK_INTERNAL duk_tval *duk_hobject_find_existing_entry_tval_ptr_and_attrs(duk_he
 	DUK_ASSERT(out_attrs != NULL);
 	DUK_UNREF(heap);
 
-	if (duk_hobject_find_existing_entry(heap, obj, key, &e_idx, &h_idx)) {
+	if (duk_hobject_find_entry(heap, obj, key, &e_idx, &h_idx)) {
 		DUK_ASSERT(e_idx >= 0);
 		if (!DUK_HOBJECT_E_SLOT_IS_ACCESSOR(heap, obj, e_idx)) {
 			*out_attrs = DUK_HOBJECT_E_GET_FLAGS(heap, obj, e_idx);
@@ -1296,7 +1437,7 @@ DUK_INTERNAL duk_tval *duk_hobject_find_existing_entry_tval_ptr_and_attrs(duk_he
 }
 
 /* For internal use: get array part value */
-DUK_INTERNAL duk_tval *duk_hobject_find_existing_array_entry_tval_ptr(duk_heap *heap, duk_hobject *obj, duk_uarridx_t i) {
+DUK_INTERNAL duk_tval *duk_hobject_find_array_entry_tval_ptr(duk_heap *heap, duk_hobject *obj, duk_uarridx_t i) {
 	duk_tval *tv;
 
 	DUK_ASSERT(obj != NULL);
@@ -1399,45 +1540,65 @@ DUK_LOCAL duk_int_t duk__hobject_alloc_entry_checked(duk_hthread *thr, duk_hobje
  *  to incref OR decref.  No proxies or accessors are invoked, no prototype walk.
  */
 
-DUK_INTERNAL duk_bool_t duk_hobject_get_internal_value(duk_heap *heap, duk_hobject *obj, duk_tval *tv_out) {
-	duk_int_t e_idx;
-	duk_int_t h_idx;
-
-	DUK_ASSERT(heap != NULL);
-	DUK_ASSERT(obj != NULL);
-	DUK_ASSERT(tv_out != NULL);
-
-	/* Always in entry part, no need to look up parents etc. */
-	if (duk_hobject_find_existing_entry(heap, obj, DUK_HEAP_STRING_INT_VALUE(heap), &e_idx, &h_idx)) {
-		DUK_ASSERT(e_idx >= 0);
-		DUK_ASSERT(!DUK_HOBJECT_E_SLOT_IS_ACCESSOR(heap, obj, e_idx));
-		DUK_TVAL_SET_TVAL(tv_out, DUK_HOBJECT_E_GET_VALUE_TVAL_PTR(heap, obj, e_idx));
-		return 1;
-	}
-	DUK_TVAL_SET_UNDEFINED(tv_out);
-	return 0;
+DUK_INTERNAL duk_tval *duk_hobject_get_internal_value_tval_ptr(duk_heap *heap, duk_hobject *obj) {
+	return duk_hobject_find_entry_tval_ptr_stridx(heap, obj, DUK_STRIDX_INT_VALUE);
 }
 
-DUK_INTERNAL duk_hstring *duk_hobject_get_internal_value_string(duk_heap *heap, duk_hobject *obj) {
-	duk_tval tv;
+DUK_LOCAL duk_heaphdr *duk_hobject_get_internal_value_heaphdr(duk_heap *heap, duk_hobject *obj) {
+	duk_tval *tv;
 
 	DUK_ASSERT(heap != NULL);
 	DUK_ASSERT(obj != NULL);
 
-	/* This is not strictly necessary, but avoids compiler warnings; e.g.
-	 * gcc won't reliably detect that no uninitialized data is read below.
-	 */
-	duk_memzero((void *) &tv, sizeof(duk_tval));
-
-	if (duk_hobject_get_internal_value(heap, obj, &tv)) {
-		duk_hstring *h;
-		DUK_ASSERT(DUK_TVAL_IS_STRING(&tv));
-		h = DUK_TVAL_GET_STRING(&tv);
-		/* No explicit check for string vs. symbol, accept both. */
+	tv = duk_hobject_get_internal_value_tval_ptr(heap, obj);
+	if (tv != NULL) {
+		duk_heaphdr *h = DUK_TVAL_GET_HEAPHDR(tv);
+		DUK_ASSERT(h != NULL);
 		return h;
 	}
 
 	return NULL;
+}
+
+DUK_INTERNAL duk_hstring *duk_hobject_get_internal_value_string(duk_heap *heap, duk_hobject *obj) {
+	duk_hstring *h;
+
+	h = (duk_hstring *) duk_hobject_get_internal_value_heaphdr(heap, obj);
+	if (h != NULL) {
+		DUK_ASSERT(DUK_HEAPHDR_IS_STRING((duk_heaphdr *) h));
+	}
+	return h;
+}
+
+DUK_LOCAL duk_hobject *duk__hobject_get_entry_object_stridx(duk_heap *heap, duk_hobject *obj, duk_small_uint_t stridx) {
+	duk_tval *tv;
+	duk_hobject *h;
+
+	tv = duk_hobject_find_entry_tval_ptr_stridx(heap, obj, stridx);
+	if (tv != NULL && DUK_TVAL_IS_OBJECT(tv)) {
+		h = DUK_TVAL_GET_OBJECT(tv);
+		DUK_ASSERT(h != NULL);
+		return h;
+	}
+	return NULL;
+}
+
+DUK_INTERNAL duk_harray *duk_hobject_get_formals(duk_hthread *thr, duk_hobject *obj) {
+	duk_harray *h;
+
+	h = (duk_harray *) duk__hobject_get_entry_object_stridx(thr->heap, obj, DUK_STRIDX_INT_FORMALS);
+	if (h != NULL) {
+		DUK_ASSERT(DUK_HOBJECT_IS_ARRAY((duk_hobject *) h));
+		DUK_ASSERT(h->length <= DUK_HOBJECT_GET_ASIZE((duk_hobject *) h));
+	}
+	return h;
+}
+
+DUK_INTERNAL duk_hobject *duk_hobject_get_varmap(duk_hthread *thr, duk_hobject *obj) {
+	duk_hobject *h;
+
+	h = duk__hobject_get_entry_object_stridx(thr->heap, obj, DUK_STRIDX_INT_VARMAP);
+	return h;
 }
 
 /*
@@ -1694,7 +1855,7 @@ DUK_LOCAL duk_bool_t duk__get_own_propdesc_raw(duk_hthread *thr, duk_hobject *ob
 	 *  same keys so the entry part vs. array part order doesn't matter.
 	 */
 
-	if (duk_hobject_find_existing_entry(thr->heap, obj, key, &out_desc->e_idx, &out_desc->h_idx)) {
+	if (duk_hobject_find_entry(thr->heap, obj, key, &out_desc->e_idx, &out_desc->h_idx)) {
 		duk_int_t e_idx = out_desc->e_idx;
 		DUK_ASSERT(out_desc->e_idx >= 0);
 		out_desc->a_idx = -1;
@@ -1765,7 +1926,7 @@ DUK_LOCAL duk_bool_t duk__get_own_propdesc_raw(duk_hthread *thr, duk_hobject *ob
 		                     (duk_heaphdr *) key, (long) arr_idx));
 
 		a = (duk_harray *) obj;
-		DUK_ASSERT_HARRAY_VALID(a);
+		DUK_HARRAY_ASSERT_VALID(a);
 
 		if (key == DUK_HTHREAD_STRING_LENGTH(thr)) {
 			DUK_DDD(DUK_DDDPRINT("-> found, key is 'length', length exotic behavior"));
@@ -1847,7 +2008,7 @@ DUK_LOCAL duk_bool_t duk__get_own_propdesc_raw(duk_hthread *thr, duk_hobject *ob
 		duk_small_uint_t elem_size;
 
 		h_bufobj = (duk_hbufobj *) obj;
-		DUK_ASSERT_HBUFOBJ_VALID(h_bufobj);
+		DUK_HBUFOBJ_ASSERT_VALID(h_bufobj);
 		DUK_DDD(DUK_DDDPRINT("bufobj property get for key: %!O, arr_idx: %ld",
 		                     (duk_heaphdr *) key, (long) arr_idx));
 
@@ -2158,7 +2319,7 @@ DUK_LOCAL duk_bool_t duk__putprop_shallow_fastpath_array_tval(duk_hthread *thr, 
 	DUK_ASSERT(!DUK_HEAPHDR_HAS_READONLY((duk_heaphdr *) obj));  /* caller ensures */
 
 	a = (duk_harray *) obj;
-	DUK_ASSERT_HARRAY_VALID(a);
+	DUK_HARRAY_ASSERT_VALID(a);
 
 #if defined(DUK_USE_FASTINT)
 	if (DUK_TVAL_IS_FASTINT(tv_key)) {
@@ -3248,7 +3409,7 @@ DUK_LOCAL duk_bool_t duk__handle_put_array_length(duk_hthread *thr, duk_hobject 
 	DUK_ASSERT(DUK_HOBJECT_HAS_EXOTIC_ARRAY(obj));
 	DUK_ASSERT(DUK_HOBJECT_IS_ARRAY(obj));
 	a = (duk_harray *) obj;
-	DUK_ASSERT_HARRAY_VALID(a);
+	DUK_HARRAY_ASSERT_VALID(a);
 
 	DUK_ASSERT(duk_is_valid_index(thr, -1));
 
@@ -3778,7 +3939,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_putprop(duk_hthread *thr, duk_tval *tv_obj, 
 					duk_small_uint_t elem_size;
 
 					h_bufobj = (duk_hbufobj *) curr;
-					DUK_ASSERT_HBUFOBJ_VALID(h_bufobj);
+					DUK_HBUFOBJ_ASSERT_VALID(h_bufobj);
 
 					DUK_DD(DUK_DDPRINT("writable virtual property is in buffer object"));
 
@@ -3950,7 +4111,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_putprop(duk_hthread *thr, duk_tval *tv_obj, 
 		duk_harray *a;
 
 		a = (duk_harray *) orig;
-		DUK_ASSERT_HARRAY_VALID(a);
+		DUK_HARRAY_ASSERT_VALID(a);
 
 		old_len = a->length;
 
@@ -3990,84 +4151,13 @@ DUK_INTERNAL duk_bool_t duk_hobject_putprop(duk_hthread *thr, duk_tval *tv_obj, 
 	 *  tv_obj, tv_key, and tv_val are copies of the original inputs.
 	 */
 
-	if (arr_idx != DUK__NO_ARRAY_INDEX &&
-	    DUK_HOBJECT_HAS_ARRAY_PART(orig)) {
-		if (arr_idx < DUK_HOBJECT_GET_ASIZE(orig)) {
-			goto no_array_growth;
+	if (arr_idx != DUK__NO_ARRAY_INDEX && DUK_HOBJECT_HAS_ARRAY_PART(orig)) {
+		tv = duk__obtain_arridx_slot(thr, arr_idx, orig);
+		if (tv == NULL) {
+			DUK_ASSERT(!DUK_HOBJECT_HAS_ARRAY_PART(orig));
+			goto write_to_entry_part;
 		}
 
-		/*
-		 *  Array needs to grow, but we don't want it becoming too sparse.
-		 *  If it were to become sparse, abandon array part, moving all
-		 *  array entries into the entries part (for good).
-		 *
-		 *  Since we don't keep track of actual density (used vs. size) of
-		 *  the array part, we need to estimate somehow.  The check is made
-		 *  in two parts:
-		 *
-		 *    - Check whether the resize need is small compared to the
-		 *      current size (relatively); if so, resize without further
-		 *      checking (essentially we assume that the original part is
-		 *      "dense" so that the result would be dense enough).
-		 *
-		 *    - Otherwise, compute the resize using an actual density
-		 *      measurement based on counting the used array entries.
-		 */
-
-		DUK_DDD(DUK_DDDPRINT("write to new array requires array resize, decide whether to do a "
-		                     "fast resize without abandon check (arr_idx=%ld, old_size=%ld)",
-		                     (long) arr_idx, (long) DUK_HOBJECT_GET_ASIZE(orig)));
-
-		if (duk__abandon_array_slow_check_required(arr_idx, DUK_HOBJECT_GET_ASIZE(orig))) {
-			duk_uint32_t old_used;
-			duk_uint32_t old_size;
-
-			DUK_DDD(DUK_DDDPRINT("=> fast check is NOT OK, do slow check for array abandon"));
-
-			duk__compute_a_stats(thr, orig, &old_used, &old_size);
-
-			DUK_DDD(DUK_DDDPRINT("abandon check, array stats: old_used=%ld, old_size=%ld, arr_idx=%ld",
-			                     (long) old_used, (long) old_size, (long) arr_idx));
-
-			/* Note: intentionally use approximations to shave a few instructions:
-			 *   a_used = old_used  (accurate: old_used + 1)
-			 *   a_size = arr_idx   (accurate: arr_idx + 1)
-			 */
-			if (duk__abandon_array_density_check(old_used, arr_idx)) {
-				DUK_DD(DUK_DDPRINT("write to new array entry beyond current length, "
-				                   "decided to abandon array part (would become too sparse)"));
-
-				/* abandoning requires a props allocation resize and
-				 * 'rechecks' the valstack, invalidating any existing
-				 * valstack value pointers!
-				 */
-				duk__abandon_array_checked(thr, orig);
-				DUK_ASSERT(!DUK_HOBJECT_HAS_ARRAY_PART(orig));
-
-				goto write_to_entry_part;
-			}
-
-			DUK_DDD(DUK_DDDPRINT("=> decided to keep array part"));
-		} else {
-			DUK_DDD(DUK_DDDPRINT("=> fast resize is OK"));
-		}
-
-		DUK_DD(DUK_DDPRINT("write to new array entry beyond current length, "
-		                   "decided to extend current allocation"));
-
-		duk__grow_props_for_array_item(thr, orig, arr_idx);
-
-	 no_array_growth:
-
-		/* Note: assume array part is comprehensive, so that either
-		 * the write goes to the array part, or we've abandoned the
-		 * array above (and will not come here).
-		 */
-
-		DUK_ASSERT(DUK_HOBJECT_HAS_ARRAY_PART(orig));
-		DUK_ASSERT(arr_idx < DUK_HOBJECT_GET_ASIZE(orig));
-
-		tv = DUK_HOBJECT_A_GET_VALUE_PTR(thr->heap, orig, arr_idx);
 		/* prev value must be unused, no decref */
 		DUK_ASSERT(DUK_TVAL_IS_UNUSED(tv));
 		DUK_TVAL_SET_TVAL(tv, tv_val);
@@ -4680,8 +4770,8 @@ DUK_INTERNAL void duk_hobject_define_property_internal(duk_hthread *thr, duk_hob
 #endif
 				new_len = duk__to_new_array_length_checked(thr, DUK_GET_TVAL_NEGIDX(thr, -1));
 				((duk_harray *) obj)->length = new_len;
-				DUK_D(DUK_DPRINT("internal define property for array .length: %ld -> %ld",
-				                 (long) prev_len, (long) ((duk_harray *) obj)->length));
+				DUK_DD(DUK_DDPRINT("internal define property for array .length: %ld -> %ld",
+				                   (long) prev_len, (long) ((duk_harray *) obj)->length));
 				goto pop_exit;
 			}
 			DUK_DD(DUK_DDPRINT("property already exists but is virtual -> failure"));
@@ -4696,17 +4786,18 @@ DUK_INTERNAL void duk_hobject_define_property_internal(duk_hthread *thr, duk_hob
 			DUK_DDD(DUK_DDDPRINT("property does not exist, object has array part -> possibly extend array part and write value (assert attributes)"));
 			DUK_ASSERT(propflags == DUK_PROPDESC_FLAGS_WEC);
 
-			/* always grow the array, no sparse / abandon support here */
-			if (arr_idx >= DUK_HOBJECT_GET_ASIZE(obj)) {
-				duk__grow_props_for_array_item(thr, obj, arr_idx);
+			tv1 = duk__obtain_arridx_slot(thr, arr_idx, obj);
+			if (tv1 == NULL) {
+				DUK_ASSERT(!DUK_HOBJECT_HAS_ARRAY_PART(obj));
+				goto write_to_entry_part;
 			}
 
-			DUK_ASSERT(arr_idx < DUK_HOBJECT_GET_ASIZE(obj));
 			tv1 = DUK_HOBJECT_A_GET_VALUE_PTR(thr->heap, obj, arr_idx);
 			goto write_value;
 		}
 	}
 
+ write_to_entry_part:
 	DUK_DDD(DUK_DDDPRINT("property does not exist, object belongs in entry part -> allocate new entry and write value and attributes"));
 	e_idx = duk__hobject_alloc_entry_checked(thr, obj, key);  /* increases key refcount */
 	DUK_ASSERT(e_idx >= 0);
@@ -4763,13 +4854,11 @@ DUK_INTERNAL void duk_hobject_define_property_internal_arridx(duk_hthread *thr, 
 
 		DUK_DDD(DUK_DDDPRINT("define property to array part (property may or may not exist yet)"));
 
-		/* always grow the array, no sparse / abandon support here */
-		if (arr_idx >= DUK_HOBJECT_GET_ASIZE(obj)) {
-			duk__grow_props_for_array_item(thr, obj, arr_idx);
+		tv1 = duk__obtain_arridx_slot(thr, arr_idx, obj);
+		if (tv1 == NULL) {
+			DUK_ASSERT(!DUK_HOBJECT_HAS_ARRAY_PART(obj));
+			goto write_slow;
 		}
-
-		DUK_ASSERT(arr_idx < DUK_HOBJECT_GET_ASIZE(obj));
-		tv1 = DUK_HOBJECT_A_GET_VALUE_PTR(thr->heap, obj, arr_idx);
 		tv2 = duk_require_tval(thr, -1);
 
 		DUK_TVAL_SET_TVAL_UPDREF(thr, tv1, tv2);  /* side effects */
@@ -4778,6 +4867,7 @@ DUK_INTERNAL void duk_hobject_define_property_internal_arridx(duk_hthread *thr, 
 		return;
 	}
 
+ write_slow:
 	DUK_DDD(DUK_DDDPRINT("define property fast path didn't work, use slow path"));
 
 	key = duk_push_uint_to_hstring(thr, (duk_uint_t) arr_idx);
@@ -4796,7 +4886,7 @@ DUK_INTERNAL void duk_hobject_define_property_internal_arridx(duk_hthread *thr, 
 DUK_INTERNAL duk_size_t duk_hobject_get_length(duk_hthread *thr, duk_hobject *obj) {
 	duk_double_t val;
 
-	DUK_ASSERT_CTX_VALID(thr);
+	DUK_CTX_ASSERT_VALID(thr);
 	DUK_ASSERT(obj != NULL);
 
 	/* Fast path for Arrays. */
@@ -5175,7 +5265,7 @@ duk_bool_t duk_hobject_define_property_helper(duk_hthread *thr,
 		 */
 
 		a = (duk_harray *) obj;
-		DUK_ASSERT_HARRAY_VALID(a);
+		DUK_HARRAY_ASSERT_VALID(a);
 		arrlen_old_len = a->length;
 
 		DUK_ASSERT(idx_value >= 0);
@@ -5216,7 +5306,7 @@ duk_bool_t duk_hobject_define_property_helper(duk_hthread *thr,
 		duk_harray *a;
 
 		a = (duk_harray *) obj;
-		DUK_ASSERT_HARRAY_VALID(a);
+		DUK_HARRAY_ASSERT_VALID(a);
 
 		old_len = a->length;
 
@@ -5306,7 +5396,7 @@ duk_bool_t duk_hobject_define_property_helper(duk_hthread *thr,
 
 			if (arr_idx != DUK__NO_ARRAY_INDEX && DUK_HOBJECT_HAS_ARRAY_PART(obj)) {
 				DUK_DDD(DUK_DDDPRINT("accessor cannot go to array part, abandon array"));
-				duk__abandon_array_checked(thr, obj);
+				duk__abandon_array_part(thr, obj);
 			}
 
 			/* write to entry part */
@@ -5348,17 +5438,22 @@ duk_bool_t duk_hobject_define_property_helper(duk_hthread *thr,
 
 			if (arr_idx != DUK__NO_ARRAY_INDEX && DUK_HOBJECT_HAS_ARRAY_PART(obj)) {
 				if (new_flags == DUK_PROPDESC_FLAGS_WEC) {
-#if 0
 					DUK_DDD(DUK_DDDPRINT("new data property attributes match array defaults, attempt to write to array part"));
-					/* may become sparse...*/
-#endif
-					/* XXX: handling for array part missing now; this doesn't affect
-					 * compliance but causes array entry writes using defineProperty()
-					 * to always abandon array part.
-					 */
+					tv2 = duk__obtain_arridx_slot(thr, arr_idx, obj);
+					if (tv2 == NULL) {
+						DUK_DDD(DUK_DDDPRINT("failed writing to array part, abandoned array"));
+					} else {
+						DUK_DDD(DUK_DDDPRINT("success in writing to array part"));
+						DUK_ASSERT(DUK_HOBJECT_HAS_ARRAY_PART(obj));
+						DUK_ASSERT(DUK_TVAL_IS_UNUSED(tv2));
+						DUK_TVAL_SET_TVAL(tv2, &tv);
+						DUK_TVAL_INCREF(thr, tv2);
+						goto success_exotics;
+					}
+				} else {
+					DUK_DDD(DUK_DDDPRINT("new data property cannot go to array part, abandon array"));
+					duk__abandon_array_part(thr, obj);
 				}
-				DUK_DDD(DUK_DDDPRINT("new data property cannot go to array part, abandon array"));
-				duk__abandon_array_checked(thr, obj);
 				/* fall through */
 			}
 
@@ -5535,7 +5630,7 @@ duk_bool_t duk_hobject_define_property_helper(duk_hthread *thr,
 			DUK_DDD(DUK_DDDPRINT("convert property to accessor property"));
 			if (curr.a_idx >= 0) {
 				DUK_DDD(DUK_DDDPRINT("property to convert is stored in an array entry, abandon array and re-lookup"));
-				duk__abandon_array_checked(thr, obj);
+				duk__abandon_array_part(thr, obj);
 				duk_pop_unsafe(thr);  /* remove old value */
 				rc = duk__get_own_propdesc_raw(thr, obj, key, arr_idx, &curr, DUK_GETDESC_FLAG_PUSH_VALUE);
 				DUK_UNREF(rc);
@@ -5691,7 +5786,7 @@ duk_bool_t duk_hobject_define_property_helper(duk_hthread *thr,
 		}
 
 		DUK_DDD(DUK_DDDPRINT("array index, new property attributes do not match array defaults, abandon array and re-lookup"));
-		duk__abandon_array_checked(thr, obj);
+		duk__abandon_array_part(thr, obj);
 		duk_pop_unsafe(thr);  /* remove old value */
 		rc = duk__get_own_propdesc_raw(thr, obj, key, arr_idx, &curr, DUK_GETDESC_FLAG_PUSH_VALUE);
 		DUK_UNREF(rc);
@@ -5717,7 +5812,7 @@ duk_bool_t duk_hobject_define_property_helper(duk_hthread *thr,
 			duk_harray *a;
 			a = (duk_harray *) obj;
 			DUK_DD(DUK_DDPRINT("Object.defineProperty() attribute update for duk_harray .length -> %02lx", (unsigned long) new_flags));
-			DUK_ASSERT_HARRAY_VALID(a);
+			DUK_HARRAY_ASSERT_VALID(a);
 			if ((new_flags & DUK_PROPDESC_FLAGS_EC) != (curr.flags & DUK_PROPDESC_FLAGS_EC)) {
 				DUK_D(DUK_DPRINT("Object.defineProperty() attempt to change virtual array .length enumerable or configurable attribute, fail"));
 				goto fail_virtual;
@@ -5786,7 +5881,7 @@ duk_bool_t duk_hobject_define_property_helper(duk_hthread *thr,
 				duk_harray *a;
 				a = (duk_harray *) obj;
 				DUK_DD(DUK_DDPRINT("Object.defineProperty() value update for duk_harray .length -> %ld", (long) arrlen_new_len));
-				DUK_ASSERT_HARRAY_VALID(a);
+				DUK_HARRAY_ASSERT_VALID(a);
 				a->length = arrlen_new_len;
 			} else {
 				goto fail_virtual;  /* should not happen */
@@ -5818,7 +5913,7 @@ duk_bool_t duk_hobject_define_property_helper(duk_hthread *thr,
 		duk_harray *a;
 
 		a = (duk_harray *) obj;
-		DUK_ASSERT_HARRAY_VALID(a);
+		DUK_HARRAY_ASSERT_VALID(a);
 
 		if (arridx_new_array_length > 0) {
 			/*
@@ -6012,13 +6107,13 @@ DUK_INTERNAL void duk_hobject_object_seal_freeze_helper(duk_hthread *thr, duk_ho
 	 *  for the same object; not likely).
 	 */
 
-	duk__abandon_array_checked(thr, obj);
+	duk__abandon_array_part(thr, obj);
 	DUK_ASSERT(DUK_HOBJECT_GET_ASIZE(obj) == 0);
 
 	for (i = 0; i < DUK_HOBJECT_GET_ENEXT(obj); i++) {
 		duk_uint8_t *fp;
 
-		/* since duk__abandon_array_checked() causes a resize, there should be no gaps in keys */
+		/* since duk__abandon_array_part() causes a resize, there should be no gaps in keys */
 		DUK_ASSERT(DUK_HOBJECT_E_GET_KEY(thr->heap, obj, i) != NULL);
 
 		/* avoid multiple computations of flags address; bypasses macros */
@@ -6032,7 +6127,7 @@ DUK_INTERNAL void duk_hobject_object_seal_freeze_helper(duk_hthread *thr, duk_ho
 
 	DUK_HOBJECT_CLEAR_EXTENSIBLE(obj);
 
-	/* no need to compact since we already did that in duk__abandon_array_checked()
+	/* no need to compact since we already did that in duk__abandon_array_part()
 	 * (regardless of whether an array part existed or not.
 	 */
 

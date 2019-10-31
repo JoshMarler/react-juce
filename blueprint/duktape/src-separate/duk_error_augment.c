@@ -93,9 +93,9 @@ DUK_LOCAL void duk__err_augment_user(duk_hthread *thr, duk_small_uint_t stridx_c
 		DUK_DD(DUK_DDPRINT("error occurred when DUK_BIDX_DUKTAPE is NULL, ignoring"));
 		return;
 	}
-	tv_hnd = duk_hobject_find_existing_entry_tval_ptr(thr->heap,
-	                                                  thr->builtins[DUK_BIDX_DUKTAPE],
-	                                                  DUK_HTHREAD_GET_STRING(thr, stridx_cb));
+	tv_hnd = duk_hobject_find_entry_tval_ptr_stridx(thr->heap,
+	                                                thr->builtins[DUK_BIDX_DUKTAPE],
+	                                                stridx_cb);
 	if (tv_hnd == NULL) {
 		DUK_DD(DUK_DDPRINT("error handler does not exist or is not a plain value: %!T",
 		                   (duk_tval *) tv_hnd));
@@ -194,9 +194,13 @@ DUK_LOCAL void duk__add_traceback(duk_hthread *thr, duk_hthread *thr_callstack, 
 		arr_size += 2;
 	}
 
-	/* XXX: uninitialized would be OK */
+	/* XXX: Uninitialized would be OK.  Maybe add internal primitive to
+	 * push bare duk_harray with size?
+	 */
 	DUK_D(DUK_DPRINT("preallocated _Tracedata to %ld items", (long) arr_size));
 	tv = duk_push_harray_with_size_outptr(thr, (duk_uint32_t) arr_size);
+	duk_clear_prototype(thr, -1);
+	DUK_ASSERT(duk_is_bare_object(thr, -1));
 	DUK_ASSERT(arr_size == 0 || tv != NULL);
 
 	/* Compiler SyntaxErrors (and other errors) come first, and are
@@ -273,6 +277,7 @@ DUK_LOCAL void duk__add_traceback(duk_hthread *thr, duk_hthread *thr_callstack, 
 		DUK_ASSERT(a != NULL);
 		DUK_ASSERT((duk_uint32_t) (tv - DUK_HOBJECT_A_GET_BASE(thr->heap, (duk_hobject *) a)) == a->length);
 		DUK_ASSERT(a->length == (duk_uint32_t) arr_size);
+		DUK_ASSERT(duk_is_bare_object(thr, -1));
 	}
 #endif
 
@@ -463,9 +468,9 @@ DUK_LOCAL void duk__err_augment_builtin_create(duk_hthread *thr, duk_hthread *th
 #if defined(DUK_USE_TRACEBACKS)
 	/* If tracebacks are enabled, the '_Tracedata' property is the only
 	 * thing we need: 'fileName' and 'lineNumber' are virtual properties
-	 * which use '_Tracedata'.
+	 * which use '_Tracedata'.  (Check _Tracedata only as own property.)
 	 */
-	if (duk_hobject_hasprop_raw(thr, obj, DUK_HTHREAD_STRING_INT_TRACEDATA(thr))) {
+	if (duk_hobject_find_entry_tval_ptr_stridx(thr->heap, obj, DUK_STRIDX_INT_TRACEDATA) != NULL) {
 		DUK_DDD(DUK_DDDPRINT("error value already has a '_Tracedata' property, not modifying it"));
 	} else {
 		duk__add_traceback(thr, thr_callstack, c_filename, c_line, flags);

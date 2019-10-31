@@ -1,7 +1,8 @@
 /*
  *  Command line execution tool.  Useful for test cases and manual testing.
+ *  Also demonstrates some basic integration techniques.
  *
- *  Optional features:
+ *  Optional features include:
  *
  *  - To enable print()/alert() bindings, define DUK_CMDLINE_PRINTALERT_SUPPORT
  *    and add extras/print-alert/duk_print_alert.c to compilation.
@@ -44,6 +45,11 @@
  */
 #define snprintf _snprintf
 #endif
+#endif
+
+#if defined(DUK_CMDLINE_PTHREAD_STACK_CHECK)
+#define _GNU_SOURCE
+#include <pthread.h>
 #endif
 
 #include <stdio.h>
@@ -108,9 +114,15 @@
 static int main_argc = 0;
 static char **main_argv = NULL;
 static int interactive_mode = 0;
+static int allow_bytecode = 0;
 #if defined(DUK_CMDLINE_DEBUGGER_SUPPORT)
 static int debugger_reattach = 0;
 #endif
+#if defined(DUK_CMDLINE_LINENOISE_COMPLETION)
+static int no_auto_complete = 0;
+#endif
+
+int duk_cmdline_stack_check(void);
 
 /*
  *  Misc helpers
@@ -180,33 +192,9 @@ static void cmdline_fatal_handler(void *udata, const char *msg) {
 	abort();
 }
 
-static duk_ret_t get_stack_raw(duk_context *ctx, void *udata) {
-	(void) udata;
-
-	if (!duk_is_object(ctx, -1)) {
-		return 1;
-	}
-	if (!duk_has_prop_string(ctx, -1, "stack")) {
-		return 1;
-	}
-	if (!duk_is_error(ctx, -1)) {
-		/* Not an Error instance, don't read "stack". */
-		return 1;
-	}
-
-	duk_get_prop_string(ctx, -1, "stack");  /* caller coerces */
-	duk_remove(ctx, -2);
-	return 1;
-}
-
 /* Print error to stderr and pop error. */
 static void print_pop_error(duk_context *ctx, FILE *f) {
-	/* Print error objects with a stack trace specially.
-	 * Note that getting the stack trace may throw an error
-	 * so this also needs to be safe call wrapped.
-	 */
-	(void) duk_safe_call(ctx, get_stack_raw, NULL /*udata*/, 1 /*nargs*/, 1 /*nrets*/);
-	fprintf(f, "%s\n", duk_safe_to_string(ctx, -1));
+	fprintf(f, "%s\n", duk_safe_to_stacktrace(ctx, -1));
 	fflush(f);
 	duk_pop(ctx);
 }
@@ -235,10 +223,14 @@ static duk_ret_t wrapped_compile_execute(duk_context *ctx, void *udata) {
 
 	if (src_data != NULL && src_len >= 1 && src_data[0] == (char) 0xbf) {
 		/* Bytecode. */
-		void *buf;
-		buf = duk_push_fixed_buffer(ctx, src_len);
-		memcpy(buf, (const void *) src_data, src_len);
-		duk_load_function(ctx);
+		if (allow_bytecode) {
+			void *buf;
+			buf = duk_push_fixed_buffer(ctx, src_len);
+			memcpy(buf, (const void *) src_data, src_len);
+			duk_load_function(ctx);
+		} else {
+			(void) duk_type_error(ctx, "bytecode input rejected (use -b to allow bytecode inputs)");
+		}
 	} else {
 		/* Source code. */
 		comp_flags = DUK_COMPILE_SHEBANG;
@@ -258,7 +250,7 @@ static duk_ret_t wrapped_compile_execute(duk_context *ctx, void *udata) {
 
 		duk_dup_top(ctx);
 		duk_dump_function(ctx);
-		bc_ptr = duk_require_buffer(ctx, -1, &bc_len);
+		bc_ptr = duk_require_buffer_data(ctx, -1, &bc_len);
 		filename = duk_require_string(ctx, -5);
 #if defined(EMSCRIPTEN)
 		if (filename[0] == '/') {
@@ -348,7 +340,6 @@ static duk_ret_t wrapped_compile_execute(duk_context *ctx, void *udata) {
 
 #if defined(DUK_CMDLINE_LINENOISE_COMPLETION)
 static duk_context *completion_ctx;
-
 
 static const char *linenoise_completion_script =
 	"(function linenoiseCompletion(input, addCompletion) {\n"
@@ -733,15 +724,17 @@ static int handle_interactive(duk_context *ctx) {
 	linenoiseSetMultiLine(1);
 	linenoiseHistorySetMaxLen(64);
 #if defined(DUK_CMDLINE_LINENOISE_COMPLETION)
-	linenoiseSetCompletionCallback(linenoise_completion);
-	linenoiseSetHintsCallback(linenoise_hints);
-	linenoiseSetFreeHintsCallback(linenoise_freehints);
-	duk_push_global_stash(ctx);
-	duk_eval_string(ctx, linenoise_completion_script);
-	duk_put_prop_string(ctx, -2, "linenoiseCompletion");
-	duk_eval_string(ctx, linenoise_hints_script);
-	duk_put_prop_string(ctx, -2, "linenoiseHints");
-	duk_pop(ctx);
+	if (!no_auto_complete) {
+		linenoiseSetCompletionCallback(linenoise_completion);
+		linenoiseSetHintsCallback(linenoise_hints);
+		linenoiseSetFreeHintsCallback(linenoise_freehints);
+		duk_push_global_stash(ctx);
+		duk_eval_string(ctx, linenoise_completion_script);
+		duk_put_prop_string(ctx, -2, "linenoiseCompletion");
+		duk_eval_string(ctx, linenoise_hints_script);
+		duk_put_prop_string(ctx, -2, "linenoiseHints");
+		duk_pop(ctx);
+	}
 #endif
 
 	for (;;) {
@@ -944,7 +937,7 @@ static duk_ret_t fileio_write_file(duk_context *ctx) {
 	}
 
 	len = 0;
-	buf = (char *) duk_to_buffer(ctx, 1, &len);
+	buf = (char *) duk_require_buffer_data(ctx, 1, &len);
 	for (off = 0; off < len;) {
 		size_t got;
 		got = fwrite((const void *) (buf + off), 1, len - off, f);
@@ -1157,7 +1150,7 @@ static duk_context *create_duktape_heap(int alloc_provider, int debugger, int lo
 
 	/* Register console object. */
 #if defined(DUK_CMDLINE_CONSOLE_SUPPORT)
-	duk_console_init(ctx, DUK_CONSOLE_PROXY_WRAPPER | DUK_CONSOLE_FLUSH /*flags*/);
+	duk_console_init(ctx, DUK_CONSOLE_FLUSH /*flags*/);
 #endif
 
 	/* Register Duktape.Logger (removed in Duktape 2.x). */
@@ -1363,6 +1356,8 @@ int main(int argc, char *argv[]) {
 			memlimit_high = 0;
 		} else if (strcmp(arg, "-i") == 0) {
 			interactive = 1;
+		} else if (strcmp(arg, "-b") == 0) {
+			allow_bytecode = 1;
 		} else if (strcmp(arg, "-c") == 0) {
 			if (i == argc - 1) {
 				goto usage;
@@ -1397,6 +1392,10 @@ int main(int argc, char *argv[]) {
 			recreate_heap = 1;
 		} else if (strcmp(arg, "--no-heap-destroy") == 0) {
 			no_heap_destroy = 1;
+		} else if (strcmp(arg, "--no-auto-complete") == 0) {
+#if defined(DUK_CMDLINE_LINENOISE_COMPLETION)
+			no_auto_complete = 1;
+#endif
 		} else if (strcmp(arg, "--verbose") == 0) {
 			verbose = 1;
 		} else if (strcmp(arg, "--run-stdin") == 0) {
@@ -1540,9 +1539,10 @@ int main(int argc, char *argv[]) {
 	                "\n"
 	                "   -i                 enter interactive mode after executing argument file(s) / eval code\n"
 	                "   -e CODE            evaluate code\n"
-			"   -c FILE            compile into bytecode (use with only one file argument)\n"
-			"   --run-stdin        treat stdin like a file, i.e. compile full input (not line by line)\n"
-			"   --verbose          verbose messages to stderr\n"
+	                "   -c FILE            compile into bytecode and write to FILE (use with only one file argument)\n"
+	                "   -b                 allow bytecode input files (memory unsafe for invalid bytecode)\n"
+	                "   --run-stdin        treat stdin like a file, i.e. compile full input (not line by line)\n"
+	                "   --verbose          verbose messages to stderr\n"
 	                "   --restrict-memory  use lower memory limit (used by test runner)\n"
 	                "   --alloc-default    use Duktape default allocator\n"
 #if defined(DUK_CMDLINE_ALLOC_LOGGING)
@@ -1559,18 +1559,68 @@ int main(int argc, char *argv[]) {
 	                "   --lowmem-log       write alloc log to /tmp/lowmem-alloc-log.txt\n"
 #endif
 #if defined(DUK_CMDLINE_DEBUGGER_SUPPORT)
-			"   --debugger         start example debugger\n"
-			"   --reattach         automatically reattach debugger on detach\n"
+	                "   --debugger         start example debugger\n"
+	                "   --reattach         automatically reattach debugger on detach\n"
 #endif
-			"   --recreate-heap    recreate heap after every file\n"
-			"   --no-heap-destroy  force GC, but don't destroy heap at end (leak testing)\n"
+	                "   --recreate-heap    recreate heap after every file\n"
+	                "   --no-heap-destroy  force GC, but don't destroy heap at end (leak testing)\n"
+#if defined(DUK_CMDLINE_LINENOISE_COMPLETION)
+	                "   --no-auto-complete disable linenoise auto completion\n"
+#else
+	                "   --no-auto-complete disable linenoise auto completion [ignored, not supported]\n"
+#endif
 	                "\n"
 	                "If <filename> is omitted, interactive mode is started automatically.\n"
-			"\n"
-	                "Input files can be either Ecmascript source files or bytecode files.\n"
-	                "Bytecode files are not validated prior to loading, so that incompatible\n"
-			"or crafted files can cause memory unsafe behavior.  See discussion in\n"
-			"https://github.com/svaarala/duktape/blob/master/doc/bytecode.rst#memory-safety-and-bytecode-validation.\n");
+	                "\n"
+	                "Input files can be either ECMAScript source files or bytecode files\n"
+	                "(if -b is given).  Bytecode files are not validated prior to loading,\n"
+	                "so that incompatible or crafted files can cause memory unsafe behavior.\n"
+	                "See discussion in\n"
+	                "https://github.com/svaarala/duktape/blob/master/doc/bytecode.rst#memory-safety-and-bytecode-validation.\n");
 	fflush(stderr);
 	exit(1);
 }
+
+/* Example of how a native stack check can be implemented in a platform
+ * specific manner for DUK_USE_NATIVE_STACK_CHECK().  This example is for
+ * (Linux) pthreads, and rejects further native recursion if less than
+ * 16kB stack is left (conservative).
+ */
+#if defined(DUK_CMDLINE_PTHREAD_STACK_CHECK)
+int duk_cmdline_stack_check(void) {
+	pthread_attr_t attr;
+	void *stackaddr;
+	size_t stacksize;
+	char *ptr;
+	char *ptr_base;
+	ptrdiff_t remain;
+
+	(void) pthread_getattr_np(pthread_self(), &attr);
+	(void) pthread_attr_getstack(&attr, &stackaddr, &stacksize);
+	ptr = (char *) &stacksize;  /* Rough estimate of current stack pointer. */
+	ptr_base = (char *) stackaddr;
+	remain = ptr - ptr_base;
+
+	/* HIGH ADDR   -----  stackaddr + stacksize
+	 *               |
+	 *               |  stack growth direction
+	 *               v -- ptr, approximate used size
+	 *
+	 * LOW ADDR    -----  ptr_base, end of stack (lowest address)
+	 */
+
+#if 0
+	fprintf(stderr, "STACK CHECK: stackaddr=%p, stacksize=%ld, ptr=%p, remain=%ld\n",
+	        stackaddr, (long) stacksize, (void *) ptr, (long) remain);
+	fflush(stderr);
+#endif
+	if (remain < 16384) {
+		return 1;
+	}
+	return 0;  /* 0: no error, != 0: throw RangeError */
+}
+#else
+int duk_cmdline_stack_check(void) {
+	return 0;
+}
+#endif

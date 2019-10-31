@@ -124,7 +124,7 @@ DUK_INTERNAL void duk_hobject_refcount_finalize_norz(duk_heap *heap, duk_hobject
 		duk_tval *tv, *tv_end;
 		duk_hobject **funcs, **funcs_end;
 
-		DUK_ASSERT_HCOMPFUNC_VALID(f);
+		DUK_HCOMPFUNC_ASSERT_VALID(f);
 
 		if (DUK_LIKELY(DUK_HCOMPFUNC_GET_DATA(heap, f) != NULL)) {
 			tv = DUK_HCOMPFUNC_GET_CONSTS_BASE(heap, f);
@@ -154,31 +154,31 @@ DUK_INTERNAL void duk_hobject_refcount_finalize_norz(duk_heap *heap, duk_hobject
 		DUK_HEAPHDR_DECREF_ALLOWNULL(thr, (duk_hbuffer *) DUK_HCOMPFUNC_GET_DATA(heap, f));
 	} else if (DUK_HOBJECT_IS_DECENV(h)) {
 		duk_hdecenv *e = (duk_hdecenv *) h;
-		DUK_ASSERT_HDECENV_VALID(e);
+		DUK_HDECENV_ASSERT_VALID(e);
 		DUK_HTHREAD_DECREF_NORZ_ALLOWNULL(thr, e->thread);
 		DUK_HOBJECT_DECREF_NORZ_ALLOWNULL(thr, e->varmap);
 	} else if (DUK_HOBJECT_IS_OBJENV(h)) {
 		duk_hobjenv *e = (duk_hobjenv *) h;
-		DUK_ASSERT_HOBJENV_VALID(e);
+		DUK_HOBJENV_ASSERT_VALID(e);
 		DUK_ASSERT(e->target != NULL);  /* Required for object environments. */
 		DUK_HOBJECT_DECREF_NORZ(thr, e->target);
 #if defined(DUK_USE_BUFFEROBJECT_SUPPORT)
 	} else if (DUK_HOBJECT_IS_BUFOBJ(h)) {
 		duk_hbufobj *b = (duk_hbufobj *) h;
-		DUK_ASSERT_HBUFOBJ_VALID(b);
+		DUK_HBUFOBJ_ASSERT_VALID(b);
 		DUK_HBUFFER_DECREF_NORZ_ALLOWNULL(thr, (duk_hbuffer *) b->buf);
 		DUK_HOBJECT_DECREF_NORZ_ALLOWNULL(thr, (duk_hobject *) b->buf_prop);
 #endif  /* DUK_USE_BUFFEROBJECT_SUPPORT */
 	} else if (DUK_HOBJECT_IS_BOUNDFUNC(h)) {
 		duk_hboundfunc *f = (duk_hboundfunc *) (void *) h;
-		DUK_ASSERT_HBOUNDFUNC_VALID(f);
+		DUK_HBOUNDFUNC_ASSERT_VALID(f);
 		DUK_TVAL_DECREF_NORZ(thr, &f->target);
 		DUK_TVAL_DECREF_NORZ(thr, &f->this_binding);
 		duk__decref_tvals_norz(thr, f->args, f->nargs);
 #if defined(DUK_USE_ES6_PROXY)
 	} else if (DUK_HOBJECT_IS_PROXY(h)) {
 		duk_hproxy *p = (duk_hproxy *) h;
-		DUK_ASSERT_HPROXY_VALID(p);
+		DUK_HPROXY_ASSERT_VALID(p);
 		DUK_HOBJECT_DECREF_NORZ(thr, p->target);
 		DUK_HOBJECT_DECREF_NORZ(thr, p->handler);
 #endif  /* DUK_USE_ES6_PROXY */
@@ -187,7 +187,7 @@ DUK_INTERNAL void duk_hobject_refcount_finalize_norz(duk_heap *heap, duk_hobject
 		duk_activation *act;
 		duk_tval *tv;
 
-		DUK_ASSERT_HTHREAD_VALID(t);
+		DUK_HTHREAD_ASSERT_VALID(t);
 
 		tv = t->valstack;
 		while (tv < t->valstack_top) {
@@ -521,11 +521,14 @@ DUK_LOCAL DUK_INLINE void duk__refcount_refzero_hbuffer(duk_heap *heap, duk_hbuf
 		DUK_ASSERT(thr->heap != NULL); \
 		/* When mark-and-sweep runs, heap_thread must exist. */ \
 		DUK_ASSERT(thr->heap->ms_running == 0 || thr->heap->heap_thread != NULL); \
-		/* When mark-and-sweep runs, the 'thr' argument always matches heap_thread. \
-		 * This could be used to e.g. suppress check against 'thr' directly (and \
-		 * knowing it would be heap_thread); not really used now. \
+		/* In normal operation finalizers are executed with ms_running == 0 \
+		 * so we should never see ms_running == 1 and thr != heap_thread. \
+		 * In heap destruction finalizers are executed with ms_running != 0 \
+		 * to e.g. prevent refzero; a special value ms_running == 2 is used \
+		 * in that case so it can be distinguished from the normal runtime \
+		 * case, and allows a stronger assertion here (GH-2030). \
 		 */ \
-		DUK_ASSERT(thr->heap->ms_running == 0 || thr == thr->heap->heap_thread); \
+		DUK_ASSERT(!(thr->heap->ms_running == 1 && thr != thr->heap->heap_thread)); \
 		/* We may be called when the heap is initializing and we process \
 		 * refzeros normally, but mark-and-sweep and finalizers are prevented \
 		 * if that's the case. \
@@ -613,6 +616,7 @@ DUK_LOCAL DUK__RZ_INLINE void duk__heaphdr_refzero_helper(duk_hthread *thr, duk_
 	heap = thr->heap;
 
 	htype = (duk_small_uint_t) DUK_HEAPHDR_GET_TYPE(h);
+	DUK_DDD(DUK_DDDPRINT("ms_running=%ld, heap_thread=%p", (long) thr->heap->ms_running, thr->heap->heap_thread));
 	DUK__RZ_SUPPRESS_CHECK();
 
 	switch (htype) {

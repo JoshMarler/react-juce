@@ -118,11 +118,11 @@ You can find release notes at:
 * https://github.com/svaarala/duktape/blob/master/RELEASES.rst
   (summary of all versions)
 
-* https://github.com/svaarala/duktape/blob/master/doc/release-notes-v2-3.rst
+* https://github.com/svaarala/duktape/blob/master/doc/release-notes-v2-4.rst
   (more detailed notes for this version)
 
-This distributable contains Duktape version 2.3.0, created from git
-commit d7fdb67f18561a50e06bafd196c6b423af9ad6fe (v2.3.0).
+This distributable contains Duktape version 2.4.0, created from git
+commit d4f2cff1c592d70f58bab8e1bd85705174c02a58 (v2.4.0).
 
 Duktape is copyrighted by its authors (see ``AUTHORS.rst``) and licensed
 under the MIT license (see ``LICENSE.txt``).  String hashing algorithms are

@@ -217,11 +217,11 @@ DUK_INTERNAL void duk_hobject_enumerator_create(duk_hthread *thr, duk_small_uint
 	 * real object to check against.
 	 */
 	duk_push_hobject(thr, enum_target);
-	duk_put_prop_stridx_short(thr, -2, DUK_STRIDX_INT_TARGET);
+	duk_put_prop_stridx_short(thr, -2, DUK_STRIDX_INT_TARGET);  /* Target is bare, plain put OK. */
 
 	/* Initialize index so that we skip internal control keys. */
 	duk_push_int(thr, DUK__ENUM_START_INDEX);
-	duk_put_prop_stridx_short(thr, -2, DUK_STRIDX_INT_NEXT);
+	duk_put_prop_stridx_short(thr, -2, DUK_STRIDX_INT_NEXT);  /* Target is bare, plain put OK. */
 
 	/*
 	 *  Proxy object handling
@@ -255,7 +255,7 @@ DUK_INTERNAL void duk_hobject_enumerator_create(duk_hthread *thr, duk_small_uint
 		enum_target = h_proxy_target;
 
 		duk_push_hobject(thr, enum_target);  /* -> [ ... enum_target res handler undefined target ] */
-		duk_put_prop_stridx_short(thr, -4, DUK_STRIDX_INT_TARGET);
+		duk_put_prop_stridx_short(thr, -4, DUK_STRIDX_INT_TARGET);  /* Target is bare, plain put OK. */
 
 		duk_pop_2(thr);  /* -> [ ... enum_target res ] */
 		goto skip_proxy;
@@ -309,6 +309,7 @@ DUK_INTERNAL void duk_hobject_enumerator_create(duk_hthread *thr, duk_small_uint
 #if !defined(DUK_USE_PREFER_SIZE)
 		duk_bool_t need_sort = 0;
 #endif
+		duk_bool_t cond;
 
 		/* Enumeration proceeds by inheritance level.  Virtual
 		 * properties need to be handled specially, followed by
@@ -335,10 +336,12 @@ DUK_INTERNAL void duk_hobject_enumerator_create(duk_hthread *thr, duk_small_uint
 		 */
 
 #if defined(DUK_USE_BUFFEROBJECT_SUPPORT)
-		if (DUK_HOBJECT_HAS_EXOTIC_STRINGOBJ(curr) || DUK_HOBJECT_IS_BUFOBJ(curr)) {
+		cond = DUK_HOBJECT_HAS_EXOTIC_STRINGOBJ(curr) || DUK_HOBJECT_IS_BUFOBJ(curr);
 #else
-		if (DUK_HOBJECT_HAS_EXOTIC_STRINGOBJ(curr)) {
+		cond = DUK_HOBJECT_HAS_EXOTIC_STRINGOBJ(curr);
 #endif
+		cond = cond && !(enum_flags & DUK_ENUM_EXCLUDE_STRINGS);
+		if (cond) {
 			duk_bool_t have_length = 1;
 
 			/* String and buffer enumeration behavior is identical now,
@@ -400,26 +403,29 @@ DUK_INTERNAL void duk_hobject_enumerator_create(duk_hthread *thr, duk_small_uint
 		 *  Array part
 		 */
 
-		for (i = 0; i < (duk_uint_fast32_t) DUK_HOBJECT_GET_ASIZE(curr); i++) {
-			duk_hstring *k;
-			duk_tval *tv;
+		cond = !(enum_flags & DUK_ENUM_EXCLUDE_STRINGS);
+		if (cond) {
+			for (i = 0; i < (duk_uint_fast32_t) DUK_HOBJECT_GET_ASIZE(curr); i++) {
+				duk_hstring *k;
+				duk_tval *tv;
 
-			tv = DUK_HOBJECT_A_GET_VALUE_PTR(thr->heap, curr, i);
-			if (DUK_TVAL_IS_UNUSED(tv)) {
-				continue;
+				tv = DUK_HOBJECT_A_GET_VALUE_PTR(thr->heap, curr, i);
+				if (DUK_TVAL_IS_UNUSED(tv)) {
+					continue;
+				}
+				k = duk_heap_strtable_intern_u32_checked(thr, (duk_uint32_t) i);  /* Fragile reachability. */
+				DUK_ASSERT(k);
+
+				duk__add_enum_key(thr, k);
+
+				/* [enum_target res] */
 			}
-			k = duk_heap_strtable_intern_u32_checked(thr, (duk_uint32_t) i);  /* Fragile reachability. */
-			DUK_ASSERT(k);
 
-			duk__add_enum_key(thr, k);
-
-			/* [enum_target res] */
-		}
-
-		if (DUK_HOBJECT_HAS_EXOTIC_ARRAY(curr)) {
-			/* Array .length comes after numeric indices. */
-			if (enum_flags & DUK_ENUM_INCLUDE_NONENUMERABLE) {
-				duk__add_enum_key_stridx(thr, DUK_STRIDX_LENGTH);
+			if (DUK_HOBJECT_HAS_EXOTIC_ARRAY(curr)) {
+				/* Array .length comes after numeric indices. */
+				if (enum_flags & DUK_ENUM_INCLUDE_NONENUMERABLE) {
+					duk__add_enum_key_stridx(thr, DUK_STRIDX_LENGTH);
+				}
 			}
 		}
 
@@ -576,7 +582,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_enumerator_next(duk_hthread *thr, duk_bool_t
 	 * be the proxy, and checking key existence against the proxy is not
 	 * required (or sensible, as the keys may be fully virtual).
 	 */
-	duk_get_prop_stridx_short(thr, -1, DUK_STRIDX_INT_TARGET);
+	duk_xget_owndataprop_stridx_short(thr, -1, DUK_STRIDX_INT_TARGET);
 	enum_target = duk_require_hobject(thr, -1);
 	DUK_ASSERT(enum_target != NULL);
 #if defined(DUK_USE_ES6_PROXY)
@@ -673,6 +679,7 @@ DUK_INTERNAL duk_ret_t duk_hobject_get_enumerated_keys(duk_hthread *thr, duk_sma
 	/* XXX: uninit would be OK */
 	tv = duk_push_harray_with_size_outptr(thr, (duk_uint32_t) count);
 	DUK_ASSERT(count == 0 || tv != NULL);
+	DUK_ASSERT(!duk_is_bare_object(thr, -1));
 
 	/* Fill result array, no side effects. */
 

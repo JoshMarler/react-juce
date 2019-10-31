@@ -1515,18 +1515,25 @@ DUK_LOCAL void duk__debug_handle_get_locals(duk_hthread *thr, duk_heap *heap) {
 	 *   - If side effects are possible, add error catching
 	 */
 
-	duk_push_tval(thr, &act->tv_func);
-	duk_get_prop_stridx_short(thr, -1, DUK_STRIDX_INT_VARMAP);
-	if (duk_is_object(thr, -1)) {
-		duk_enum(thr, -1, 0 /*enum_flags*/);
-		while (duk_next(thr, -1 /*enum_index*/, 0 /*get_value*/)) {
-			varname = duk_known_hstring(thr, -1);
+	if (DUK_TVAL_IS_OBJECT(&act->tv_func)) {
+		duk_hobject *h_func = DUK_TVAL_GET_OBJECT(&act->tv_func);
+		duk_hobject *h_varmap;
 
-			duk_js_getvar_activation(thr, act, varname, 0 /*throw_flag*/);
-			/* [ ... func varmap enum key value this ] */
-			duk_debug_write_hstring(thr, duk_get_hstring(thr, -3));
-			duk_debug_write_tval(thr, duk_get_tval(thr, -2));
-			duk_pop_3(thr);  /* -> [ ... func varmap enum ] */
+		h_varmap = duk_hobject_get_varmap(thr, h_func);
+		if (h_varmap != NULL) {
+			duk_push_hobject(thr, h_varmap);
+			duk_enum(thr, -1, 0 /*enum_flags*/);
+			while (duk_next(thr, -1 /*enum_index*/, 0 /*get_value*/)) {
+				varname = duk_known_hstring(thr, -1);
+
+				duk_js_getvar_activation(thr, act, varname, 0 /*throw_flag*/);
+				/* [ ... func varmap enum key value this ] */
+				duk_debug_write_hstring(thr, duk_get_hstring(thr, -3));
+				duk_debug_write_tval(thr, duk_get_tval(thr, -2));
+				duk_pop_3(thr);  /* -> [ ... func varmap enum ] */
+			}
+		} else {
+			DUK_D(DUK_DPRINT("varmap missing in GetLocals, ignore"));
 		}
 	} else {
 		DUK_D(DUK_DPRINT("varmap is not an object in GetLocals, ignore"));
@@ -2867,7 +2874,7 @@ DUK_INTERNAL void duk_debug_set_paused(duk_heap *heap) {
 		heap->dbg_state_dirty = 1;
 		duk_debug_clear_pause_state(heap);
 		DUK_ASSERT(heap->ms_running == 0);  /* debugger can't be triggered within mark-and-sweep */
-		heap->ms_running = 1;  /* prevent mark-and-sweep, prevent refzero queueing */
+		heap->ms_running = 2;  /* prevent mark-and-sweep, prevent refzero queueing */
 		heap->ms_prevent_count++;
 		DUK_ASSERT(heap->ms_prevent_count != 0);  /* Wrap. */
 		DUK_ASSERT(heap->heap_thread != NULL);
@@ -2879,7 +2886,7 @@ DUK_INTERNAL void duk_debug_clear_paused(duk_heap *heap) {
 		DUK_HEAP_CLEAR_DEBUGGER_PAUSED(heap);
 		heap->dbg_state_dirty = 1;
 		duk_debug_clear_pause_state(heap);
-		DUK_ASSERT(heap->ms_running == 1);
+		DUK_ASSERT(heap->ms_running == 2);
 		DUK_ASSERT(heap->ms_prevent_count > 0);
 		heap->ms_prevent_count--;
 		heap->ms_running = 0;

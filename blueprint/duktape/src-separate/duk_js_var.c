@@ -127,6 +127,7 @@ void duk_js_push_closure(duk_hthread *thr,
                          duk_hobject *outer_lex_env,
                          duk_bool_t add_auto_proto) {
 	duk_hcompfunc *fun_clos;
+	duk_harray *formals;
 	duk_small_uint_t i;
 	duk_uint_t len_value;
 
@@ -137,6 +138,8 @@ void duk_js_push_closure(duk_hthread *thr,
 	DUK_ASSERT(outer_var_env != NULL);
 	DUK_ASSERT(outer_lex_env != NULL);
 	DUK_UNREF(len_value);
+
+	DUK_STATS_INC(thr->heap, stats_envrec_pushclosure);
 
 	fun_clos = duk_push_hcompfunc(thr);
 	DUK_ASSERT(fun_clos != NULL);
@@ -333,6 +336,11 @@ void duk_js_push_closure(duk_hthread *thr,
 	 *
 	 *  The properties will be non-writable and non-enumerable, but
 	 *  configurable.
+	 *
+	 *  Function templates are bare objects, so inheritance of internal
+	 *  Symbols is not an issue here even when using ordinary property
+	 *  reads.  The function instance created is not bare, so internal
+	 *  Symbols must be defined without inheritance checks.
 	 */
 
 	/* [ ... closure template ] */
@@ -343,7 +351,7 @@ void duk_js_push_closure(duk_hthread *thr,
 
 	for (i = 0; i < (duk_small_uint_t) (sizeof(duk__closure_copy_proplist) / sizeof(duk_uint16_t)); i++) {
 		duk_small_int_t stridx = (duk_small_int_t) duk__closure_copy_proplist[i];
-		if (duk_get_prop_stridx_short(thr, -1, stridx)) {
+		if (duk_xget_owndataprop_stridx_short(thr, -1, stridx)) {
 			/* [ ... closure template val ] */
 			DUK_DDD(DUK_DDDPRINT("copying property, stridx=%ld -> found", (long) stridx));
 			duk_xdef_prop_stridx_short(thr, -3, stridx, DUK_PROPDESC_FLAGS_C);
@@ -362,18 +370,14 @@ void duk_js_push_closure(duk_hthread *thr,
 
 	/* [ ... closure template ] */
 
-	/* XXX: these lookups should be just own property lookups instead of
-	 * looking up the inheritance chain.
-	 */
-	if (duk_get_prop_stridx_short(thr, -1, DUK_STRIDX_INT_FORMALS)) {
-		/* [ ... closure template formals ] */
-		len_value = (duk_uint_t) duk_get_length(thr, -1);  /* could access duk_harray directly, not important */
+	formals = duk_hobject_get_formals(thr, (duk_hobject *) fun_temp);
+	if (formals) {
+		len_value = (duk_uint_t) formals->length;
 		DUK_DD(DUK_DDPRINT("closure length from _Formals -> %ld", (long) len_value));
 	} else {
 		len_value = fun_temp->nargs;
 		DUK_DD(DUK_DDPRINT("closure length defaulted from nargs -> %ld", (long) len_value));
 	}
-	duk_pop_unsafe(thr);
 
 	duk_push_uint(thr, len_value);  /* [ ... closure template len_value ] */
 	duk_xdef_prop_stridx_short(thr, -3, DUK_STRIDX_LENGTH, DUK_PROPDESC_FLAGS_C);
@@ -499,6 +503,29 @@ void duk_js_push_closure(duk_hthread *thr,
  *  The non-delayed initialization is handled by duk_handle_call().
  */
 
+DUK_LOCAL void duk__preallocate_env_entries(duk_hthread *thr, duk_hobject *varmap, duk_hobject *env) {
+	duk_uint_fast32_t i;
+
+	for (i = 0; i < (duk_uint_fast32_t) DUK_HOBJECT_GET_ENEXT(varmap); i++) {
+		duk_hstring *key;
+
+		key = DUK_HOBJECT_E_GET_KEY(thr->heap, varmap, i);
+		DUK_ASSERT(key != NULL);   /* assume keys are compact in _Varmap */
+		DUK_ASSERT(!DUK_HOBJECT_E_SLOT_IS_ACCESSOR(thr->heap, varmap, i));  /* assume plain values */
+
+		/* Predefine as 'undefined' to reserve a property slot.
+		 * This makes the unwind process (where register values
+		 * are copied to the env object) safe against throwing.
+		 *
+		 * XXX: This could be made much faster by creating the
+		 * property table directly.
+		 */
+		duk_push_undefined(thr);
+		DUK_DDD(DUK_DDDPRINT("preallocate env entry for key %!O", key));
+		duk_hobject_define_property_internal(thr, env, key, DUK_PROPDESC_FLAGS_WE);
+	}
+}
+
 /* shared helper */
 DUK_INTERNAL
 duk_hobject *duk_create_activation_environment_record(duk_hthread *thr,
@@ -510,6 +537,8 @@ duk_hobject *duk_create_activation_environment_record(duk_hthread *thr,
 
 	DUK_ASSERT(thr != NULL);
 	DUK_ASSERT(func != NULL);
+
+	DUK_STATS_INC(thr->heap, stats_envrec_create);
 
 	f = (duk_hcompfunc *) func;
 	parent = DUK_HCOMPFUNC_GET_LEXENV(thr->heap, f);
@@ -534,18 +563,19 @@ duk_hobject *duk_create_activation_environment_record(duk_hthread *thr,
 	DUK_ASSERT(env->regbase_byteoff == 0);
 	if (DUK_HOBJECT_IS_COMPFUNC(func)) {
 		duk_hobject *varmap;
-		duk_tval *tv;
 
-		tv = duk_hobject_find_existing_entry_tval_ptr(thr->heap, func, DUK_HTHREAD_STRING_INT_VARMAP(thr));
-		if (tv != NULL && DUK_TVAL_IS_OBJECT(tv)) {
-			DUK_ASSERT(DUK_TVAL_IS_OBJECT(tv));
-			varmap = DUK_TVAL_GET_OBJECT(tv);
-			DUK_ASSERT(varmap != NULL);
+		varmap = duk_hobject_get_varmap(thr, func);
+		if (varmap != NULL) {
 			env->varmap = varmap;
 			DUK_HOBJECT_INCREF(thr, varmap);
 			env->thread = thr;
 			DUK_HTHREAD_INCREF(thr, thr);
 			env->regbase_byteoff = bottom_byteoff;
+
+			/* Preallocate env property table to avoid potential
+			 * for out-of-memory on unwind when the env is closed.
+			 */
+			duk__preallocate_env_entries(thr, varmap, (duk_hobject *) env);
 		} else {
 			/* If function has no _Varmap, leave the environment closed. */
 			DUK_ASSERT(env->thread == NULL);
@@ -575,6 +605,8 @@ void duk_js_init_activation_environment_records_delayed(duk_hthread *thr,
 	DUK_ASSERT(DUK_HOBJECT_HAS_NEWENV(func));
 	DUK_ASSERT(act->lex_env == NULL);
 	DUK_ASSERT(act->var_env == NULL);
+
+	DUK_STATS_INC(thr->heap, stats_envrec_delayedcreate);
 
 	env = duk_create_activation_environment_record(thr, func, act->bottom_byteoff);
 	DUK_ASSERT(env != NULL);
@@ -629,7 +661,7 @@ DUK_INTERNAL void duk_js_close_environment_record(duk_hthread *thr, duk_hobject 
 		return;
 	}
 	DUK_ASSERT(((duk_hdecenv *) env)->thread != NULL);
-	DUK_ASSERT_HDECENV_VALID((duk_hdecenv *) env);
+	DUK_HDECENV_ASSERT_VALID((duk_hdecenv *) env);
 
 	DUK_DDD(DUK_DDDPRINT("closing env: %!iO", (duk_heaphdr *) env));
 	DUK_DDD(DUK_DDDPRINT("varmap: %!O", (duk_heaphdr *) varmap));
@@ -680,9 +712,17 @@ DUK_INTERNAL void duk_js_close_environment_record(duk_hthread *thr, duk_hobject 
 		DUK_ASSERT((duk_uint8_t *) thr->valstack + regbase_byteoff + sizeof(duk_tval) * regnum >= (duk_uint8_t *) thr->valstack);
 		DUK_ASSERT((duk_uint8_t *) thr->valstack + regbase_byteoff + sizeof(duk_tval) * regnum < (duk_uint8_t *) thr->valstack_top);
 
-		/* If property already exists, overwrites silently.
+		/* Write register value into env as named properties.
+		 * If property already exists, overwrites silently.
 		 * Property is writable, but not deletable (not configurable
 		 * in terms of property attributes).
+		 *
+		 * This property write must not throw because we're unwinding
+		 * and unwind code is not allowed to throw at present.  The
+		 * call itself has no such guarantees, but we've preallocated
+		 * entries for each property when the env was created, so no
+		 * out-of-memory error should be possible.  If this guarantee
+		 * is not provided, problems like GH-476 may happen.
 		 */
 		duk_push_tval(thr, (duk_tval *) (void *) ((duk_uint8_t *) thr->valstack + regbase_byteoff + sizeof(duk_tval) * regnum));
 		DUK_DDD(DUK_DDDPRINT("closing identifier %!O -> reg %ld, value %!T",
@@ -739,7 +779,7 @@ duk_bool_t duk__getid_open_decl_env_regs(duk_hthread *thr,
 	DUK_ASSERT(out != NULL);
 
 	DUK_ASSERT(DUK_HOBJECT_IS_DECENV((duk_hobject *) env));
-	DUK_ASSERT_HDECENV_VALID(env);
+	DUK_HDECENV_ASSERT_VALID(env);
 
 	if (env->thread == NULL) {
 		/* already closed */
@@ -747,7 +787,7 @@ duk_bool_t duk__getid_open_decl_env_regs(duk_hthread *thr,
 	}
 	DUK_ASSERT(env->varmap != NULL);
 
-	tv = duk_hobject_find_existing_entry_tval_ptr(thr->heap, env->varmap, name);
+	tv = duk_hobject_find_entry_tval_ptr(thr->heap, env->varmap, name);
 	if (DUK_UNLIKELY(tv == NULL)) {
 		return 0;
 	}
@@ -797,16 +837,13 @@ duk_bool_t duk__getid_activation_regs(duk_hthread *thr,
 		return 0;
 	}
 
-	/* XXX: move varmap to duk_hcompfunc struct field. */
-	tv = duk_hobject_find_existing_entry_tval_ptr(thr->heap, func, DUK_HTHREAD_STRING_INT_VARMAP(thr));
-	if (!tv) {
+	/* XXX: move varmap to duk_hcompfunc struct field? */
+	varmap = duk_hobject_get_varmap(thr, func);
+	if (!varmap) {
 		return 0;
 	}
-	DUK_ASSERT(DUK_TVAL_IS_OBJECT(tv));
-	varmap = DUK_TVAL_GET_OBJECT(tv);
-	DUK_ASSERT(varmap != NULL);
 
-	tv = duk_hobject_find_existing_entry_tval_ptr(thr->heap, varmap, name);
+	tv = duk_hobject_find_entry_tval_ptr(thr->heap, varmap, name);
 	if (!tv) {
 		return 0;
 	}
@@ -953,7 +990,7 @@ duk_bool_t duk__get_identifier_reference(duk_hthread *thr,
 			 *  register-bound variables.
 			 */
 
-			DUK_ASSERT_HDECENV_VALID((duk_hdecenv *) env);
+			DUK_HDECENV_ASSERT_VALID((duk_hdecenv *) env);
 			if (duk__getid_open_decl_env_regs(thr, name, (duk_hdecenv *) env, out)) {
 				DUK_DDD(DUK_DDDPRINT("duk__get_identifier_reference successful: "
 				                     "name=%!O -> value=%!T, attrs=%ld, has_this=%ld, env=%!O, holder=%!O "
@@ -964,7 +1001,7 @@ duk_bool_t duk__get_identifier_reference(duk_hthread *thr,
 				return 1;
 			}
 
-			tv = duk_hobject_find_existing_entry_tval_ptr_and_attrs(thr->heap, env, name, &attrs);
+			tv = duk_hobject_find_entry_tval_ptr_and_attrs(thr->heap, env, name, &attrs);
 			if (tv) {
 				out->value = tv;
 				out->attrs = attrs;
@@ -999,7 +1036,7 @@ duk_bool_t duk__get_identifier_reference(duk_hthread *thr,
 			duk_bool_t found;
 
 			DUK_ASSERT(cl == DUK_HOBJECT_CLASS_OBJENV);
-			DUK_ASSERT_HOBJENV_VALID((duk_hobjenv *) env);
+			DUK_HOBJENV_ASSERT_VALID((duk_hobjenv *) env);
 
 			target = ((duk_hobjenv *) env)->target;
 			DUK_ASSERT(target != NULL);
@@ -1582,7 +1619,7 @@ duk_bool_t duk__declvar_helper(duk_hthread *thr,
 		/* must be found: was found earlier, and cannot be inherited */
 		for (;;) {
 			DUK_ASSERT(holder != NULL);
-			if (duk_hobject_find_existing_entry(thr->heap, holder, name, &e_idx, &h_idx)) {
+			if (duk_hobject_find_entry(thr->heap, holder, name, &e_idx, &h_idx)) {
 				DUK_ASSERT(e_idx >= 0);
 				break;
 			}
@@ -1679,10 +1716,10 @@ duk_bool_t duk__declvar_helper(duk_hthread *thr,
 	 */
 
 	if (DUK_HOBJECT_IS_DECENV(env)) {
-		DUK_ASSERT_HDECENV_VALID((duk_hdecenv *) env);
+		DUK_HDECENV_ASSERT_VALID((duk_hdecenv *) env);
 		holder = env;
 	} else {
-		DUK_ASSERT_HOBJENV_VALID((duk_hobjenv *) env);
+		DUK_HOBJENV_ASSERT_VALID((duk_hobjenv *) env);
 		holder = ((duk_hobjenv *) env)->target;
 		DUK_ASSERT(holder != NULL);
 	}

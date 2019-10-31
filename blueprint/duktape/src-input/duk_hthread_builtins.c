@@ -121,7 +121,7 @@ DUK_LOCAL void duk__duplicate_ram_global_object(duk_hthread *thr) {
 	DUK_HOBJECT_INCREF(thr, h_objenv);
 	DUK_D(DUK_DPRINT("duplicated global env: %!O", h_objenv));
 
-	DUK_ASSERT_HOBJENV_VALID((duk_hobjenv *) h_objenv);
+	DUK_HOBJENV_ASSERT_VALID((duk_hobjenv *) h_objenv);
 
 	duk_pop_2(thr);  /* Pop global object and global env. */
 }
@@ -307,7 +307,7 @@ DUK_INTERNAL void duk_hthread_create_builtin_objects(duk_hthread *thr) {
 			DUK_HOBJECT_INCREF(thr, global);
 			DUK_ASSERT(env->has_this == 0);
 
-			DUK_ASSERT_HOBJENV_VALID(env);
+			DUK_HOBJENV_ASSERT_VALID(env);
 		} else {
 			DUK_ASSERT(class_num != DUK_HOBJECT_CLASS_DECENV);
 
@@ -362,6 +362,7 @@ DUK_INTERNAL void duk_hthread_create_builtin_objects(duk_hthread *thr) {
 		DUK_ASSERT(!DUK_HOBJECT_HAS_COMPFUNC(h));
 		/* DUK_HOBJECT_FLAG_NATFUNC varies */
 		DUK_ASSERT(!DUK_HOBJECT_IS_THREAD(h));
+		DUK_ASSERT(!DUK_HOBJECT_IS_PROXY(h));
 		DUK_ASSERT(!DUK_HOBJECT_HAS_ARRAY_PART(h) || class_num == DUK_HOBJECT_CLASS_ARRAY);
 		/* DUK_HOBJECT_FLAG_STRICT varies */
 		DUK_ASSERT(!DUK_HOBJECT_HAS_NATFUNC(h) ||  /* all native functions have NEWENV */
@@ -845,7 +846,7 @@ DUK_INTERNAL void duk_hthread_create_builtin_objects(duk_hthread *thr) {
 #if defined(DUK_USE_DEBUG_LEVEL) && (DUK_USE_DEBUG_LEVEL >= 1)
 	for (i = 0; i < DUK_NUM_ALL_BUILTINS; i++) {
 		DUK_DD(DUK_DDPRINT("built-in object %ld after initialization and compacting: %!@iO",
-		                   (long) i, (duk_heaphdr *) duk_require_hobject(thr, i)));
+		                   (long) i, (duk_heaphdr *) duk_require_hobject(thr, (duk_idx_t) i)));
 	}
 #endif
 
