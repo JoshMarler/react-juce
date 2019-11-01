@@ -80,7 +80,7 @@ namespace blueprint
                     value = duk_get_number(ctx, idx);
                     break;
                 case DUK_TYPE_STRING:
-                    value = duk_get_string(ctx, idx);
+                    value = juce::String(juce::CharPointer_UTF8(duk_get_string(ctx, idx)));
                     break;
                 case DUK_TYPE_OBJECT:
                 {
@@ -287,16 +287,14 @@ namespace blueprint
     }
 
     //==============================================================================
-    template <typename... T>
-    juce::var EcmascriptEngine::invoke (const juce::String& name, T... args)
+    juce::var EcmascriptEngine::invoke (const juce::String& name, const std::vector<juce::var>& vargs)
     {
         // Evaluate the target string on the context, leaving the result on the stack
         duk_eval_string(ctx, name.toRawUTF8());
+        duk_require_function(ctx, -1);
 
-        // Now pack the args and push them to the duktape stack top
-        std::vector<juce::var> vargs { args... };
+        // Push the args to the duktape stack
         auto nargs = static_cast<duk_idx_t>(vargs.size());
-
         duk_require_stack_top(ctx, nargs);
 
         for (auto& p : vargs)

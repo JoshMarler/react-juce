@@ -78,10 +78,23 @@ namespace blueprint
         void registerNativeProperty (const juce::String&, const juce::String&, const juce::var&);
 
         //==============================================================================
+        /** Invokes a method, applying the given args, inside the interpreter.
+         *
+         *  This is similar in function to `Function.prototype.apply()`. The provided
+         *  method name may be any expression that leaves the target function on the
+         *  top of the stack. For example:
+         *
+         *  `invoke("BlueprintNative.dispatchViewEvent", args);`
+         *
+         *  Returns the result of the invocation.
+         */
+        juce::var invoke (const juce::String& name, const std::vector<juce::var>& vargs);
+
         /** Invokes a method with the given args inside the interpreter.
          *
-         *  The provided method name may be any expression that leaves the target
-         *  function on the top of the stack. For example:
+         *  This is similar in function to `Function.prototype.call()`. The provided
+         *  method name may be any expression that leaves the target function on the
+         *  top of the stack. For example:
          *
          *  `invoke("BlueprintNative.dispatchViewEvent", "click");`
          *
@@ -97,5 +110,14 @@ namespace blueprint
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EcmascriptEngine)
     };
+
+    //==============================================================================
+    template <typename... T>
+    juce::var EcmascriptEngine::invoke (const juce::String& name, T... args)
+    {
+        // Pack the args and push them to the alternate `invoke` implementation
+        std::vector<juce::var> vargs { args... };
+        return invoke(name, vargs);
+    }
 
 }

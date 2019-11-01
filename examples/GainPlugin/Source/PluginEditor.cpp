@@ -24,40 +24,52 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
     jassert (bundle.existsAsFile());
 
     // Bind some native callbacks
-    appRoot.registerNativeMethod(
+    appRoot.engine.registerNativeMethod(
         "beginParameterChangeGesture",
-        [this](const juce::var::NativeFunctionArgs& args) {
+        [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            auto* self = reinterpret_cast<GainPluginAudioProcessorEditor*>(stash);
             const juce::String& paramId = args.arguments[0].toString();
 
-            if (auto* parameter = processor.getValueTreeState().getParameter(paramId))
+            if (auto* parameter = self->processor.getValueTreeState().getParameter(paramId))
                 parameter->beginChangeGesture();
-        }
+
+            return juce::var::undefined();
+        },
+        (void *) this
     );
 
-    appRoot.registerNativeMethod(
+    appRoot.engine.registerNativeMethod(
         "setParameterValueNotifyingHost",
-        [this](const juce::var::NativeFunctionArgs& args) {
+        [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            auto* self = reinterpret_cast<GainPluginAudioProcessorEditor*>(stash);
             const juce::String& paramId = args.arguments[0].toString();
             const double value = args.arguments[1];
 
-            if (auto* parameter = processor.getValueTreeState().getParameter(paramId))
+            if (auto* parameter = self->processor.getValueTreeState().getParameter(paramId))
                 parameter->setValueNotifyingHost(value);
-        }
+
+            return juce::var::undefined();
+        },
+        (void *) this
     );
 
-    appRoot.registerNativeMethod(
+    appRoot.engine.registerNativeMethod(
         "endParameterChangeGesture",
-        [this](const juce::var::NativeFunctionArgs& args) {
+        [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            auto* self = reinterpret_cast<GainPluginAudioProcessorEditor*>(stash);
             const juce::String& paramId = args.arguments[0].toString();
 
-            if (auto* parameter = processor.getValueTreeState().getParameter(paramId))
+            if (auto* parameter = self->processor.getValueTreeState().getParameter(paramId))
                 parameter->endChangeGesture();
-        }
+
+            return juce::var::undefined();
+        },
+        (void *) this
     );
 
     // Next we just add our appRoot and kick off the app bundle.
     addAndMakeVisible(appRoot);
-    appRoot.evalScript(bundle.loadFileAsString());
+    appRoot.evaluate(bundle.loadFileAsString());
 
     // Now our React application is up and running, so we can start dispatching
     // events, such as current parameter values.

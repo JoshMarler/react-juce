@@ -2,7 +2,6 @@ import ParameterValueStore from './ParameterValueStore';
 import React, { Component } from 'react';
 import {
   Image,
-  NativeMethods,
   Text,
   View,
 } from 'juce-blueprint';
@@ -57,11 +56,11 @@ class Slider extends Component {
 
   _onMouseDown(mouseX, mouseY) {
     this._valueAtDragStart = this.state.value;
-    NativeMethods.beginParameterChangeGesture(this.props.paramId);
+    global.beginParameterChangeGesture(this.props.paramId);
   }
 
   _onMouseUp(mouseX, mouseY) {
-    NativeMethods.endParameterChangeGesture(this.props.paramId);
+    global.endParameterChangeGesture(this.props.paramId);
   }
 
   _onMouseDrag(mouseX, mouseY, mouseDownX, mouseDownY) {
@@ -75,7 +74,7 @@ class Slider extends Component {
     let value = Math.max(0.0, Math.min(1.0, this._valueAtDragStart + dm * sensitivity));
 
     if (typeof this.props.paramId === 'string' && this.props.paramId.length > 0) {
-      NativeMethods.setParameterValueNotifyingHost(this.props.paramId, value);
+      global.setParameterValueNotifyingHost(this.props.paramId, value);
     }
   }
 
