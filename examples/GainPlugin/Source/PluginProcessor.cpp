@@ -180,7 +180,31 @@ bool GainPluginAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* GainPluginAudioProcessor::createEditor()
 {
-    return new GainPluginAudioProcessorEditor (*this);
+    // The GainPlugin example has two different editors available to demonstrate
+    // different approaches. The first is a familiar approach using the
+    // AudioProcessorEditor file that the Projucer scaffolding tool sets up for you,
+    // with some manual effort to load the javascript bundle and install some custom
+    // hooks for the plugin (such as reporting gain meter values). Uncomment the line
+    // below to enable that approach.
+    // return new GainPluginAudioProcessorEditor (*this);
+
+    // The second example uses the BlueprintGenericEditor, which is a default
+    // AudioProcessorEditor included in Blueprint that will automatically bootstrap
+    // your React root, install some native method hooks for parameter interaction
+    // if you provide an AudioProcessorValueTreeState, and manage hot reloading
+    // of the source bundle. You can always start with the BlueprintGenericEditor
+    // then switch to a custom editor when you need more explicit control.
+    File sourceDir = File(__FILE__).getParentDirectory();
+    File bundle = sourceDir.getChildFile("jsui/build/js/main.js");
+
+    auto* editor = new blueprint::BlueprintGenericEditor(this, bundle, &params);
+
+    editor->setResizable(true, true);
+    editor->setResizeLimits(400, 240, 400 * 2, 240 * 2);
+    editor->getConstrainer()->setFixedAspectRatio(400.0 / 240.0);
+    editor->setSize (400, 240);
+
+    return editor;
 }
 
 //==============================================================================
