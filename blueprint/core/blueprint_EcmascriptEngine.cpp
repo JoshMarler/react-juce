@@ -187,13 +187,46 @@ namespace blueprint
             return 1;
         }
 
+        static void fatalErrorHandler (void* udata, const char* msg)
+        {
+            (void) udata;  // Ignored in this case, silence warning
+
+            DBG("**Blueprint Fatal Error:** " << msg);
+            DBG("It is now unsafe to execute further code in the EcmascriptEngine.");
+
+            throw std::runtime_error(msg);
+        }
+
+        template <typename T>
+        static bool safeEvalString(duk_context* ctx, const juce::String& s, T&& callback)
+        {
+            if (duk_peval_string(ctx, s.toRawUTF8()) != 0)
+            {
+                if (callback != nullptr)
+                {
+                    const juce::String trace = duk_safe_to_stacktrace(ctx, -1);
+                    const juce::String msg = duk_safe_to_string(ctx, -1);
+
+                    // Call the user provided error handler
+                    std::invoke(callback, msg, trace);
+
+                    // Indicate failure
+                    return false;
+                }
+
+                duk_throw(ctx);
+            }
+
+            // Indicate success
+            return true;
+        }
     }
 
     //==============================================================================
     EcmascriptEngine::EcmascriptEngine()
     {
         // Allocate a new js heap
-        ctx = duk_create_heap_default();
+        ctx = duk_create_heap(NULL, NULL, NULL, NULL, detail::fatalErrorHandler);
 
         // Add console.log support
         duk_console_init(ctx, DUK_CONSOLE_FLUSH);
@@ -205,24 +238,10 @@ namespace blueprint
     }
 
     //==============================================================================
-    juce::Result EcmascriptEngine::execute (const juce::String& code)
-    {
-        duk_push_string(ctx, code.toRawUTF8());
-
-        const duk_int_t rc = duk_peval(ctx);
-
-        auto result = rc == 0
-            ? juce::Result::ok()
-            : juce::Result::fail(duk_safe_to_string(ctx, -1));
-
-        duk_pop(ctx);
-        return result;
-    }
-
     juce::var EcmascriptEngine::evaluate (const juce::String& code)
     {
-        duk_push_string(ctx, code.toRawUTF8());
-        duk_eval(ctx);
+        if (!detail::safeEvalString(ctx, code, onUncaughtError))
+            return juce::var::undefined();
 
         auto result = detail::readVarFromDukStack(ctx, -1);
 
@@ -252,7 +271,8 @@ namespace blueprint
     void EcmascriptEngine::registerNativeMethod (const juce::String& target, const juce::String& name, NativeFunction fn, void* stash)
     {
         // Evaluate the target string on the context, leaving the result on the stack
-        duk_eval_string(ctx, target.toRawUTF8());
+        if (!detail::safeEvalString(ctx, target, onUncaughtError))
+            return;
 
         // We wrap the native function to provide a helper layer storing and retrieving the
         // stash, and marshalling between the Duktape C interface and the NativeFunction interface
@@ -279,7 +299,8 @@ namespace blueprint
     void EcmascriptEngine::registerNativeProperty (const juce::String& target, const juce::String& name, const juce::var& value)
     {
         // Evaluate the target string on the context, leaving the result on the stack
-        duk_eval_string(ctx, target.toRawUTF8());
+        if (!detail::safeEvalString(ctx, target, onUncaughtError))
+            return;
 
         // Then assign the property
         detail::pushVarToDukStack(ctx, value);
@@ -290,7 +311,9 @@ namespace blueprint
     juce::var EcmascriptEngine::invoke (const juce::String& name, const std::vector<juce::var>& vargs)
     {
         // Evaluate the target string on the context, leaving the result on the stack
-        duk_eval_string(ctx, name.toRawUTF8());
+        if (!detail::safeEvalString(ctx, name, onUncaughtError))
+            return juce::var::undefined();
+
         duk_require_function(ctx, -1);
 
         // Push the args to the duktape stack
@@ -301,7 +324,21 @@ namespace blueprint
             detail::pushVarToDukStack(ctx, p);
 
         // Invocation
-        duk_call(ctx, nargs);
+        if (duk_pcall(ctx, nargs) != DUK_EXEC_SUCCESS)
+        {
+            if (onUncaughtError != nullptr)
+            {
+                const juce::String trace = duk_safe_to_stacktrace(ctx, -1);
+                const juce::String msg = duk_safe_to_string(ctx, -1);
+
+                // Call the user provided error handler
+                std::invoke(onUncaughtError, msg, trace);
+
+                return juce::var::undefined();
+            }
+
+            duk_throw(ctx);
+        }
 
         // Collect the return value
         auto result = detail::readVarFromDukStack(ctx, -1);

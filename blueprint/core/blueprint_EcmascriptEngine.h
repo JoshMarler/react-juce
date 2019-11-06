@@ -30,11 +30,6 @@ namespace blueprint
         ~EcmascriptEngine();
 
         //==============================================================================
-        /** Evaluates the given code in the interpreter, ignoring the result but indicating
-         *  success or failure via the returned Result.
-         */
-        juce::Result execute (const juce::String& code);
-
         /** Evaluates the given code in the interpreter, returning the result. */
         juce::var evaluate (const juce::String& code);
 
@@ -102,6 +97,16 @@ namespace blueprint
          */
         template <typename... T>
         juce::var invoke (const juce::String& name, T... args);
+
+        //==============================================================================
+        /** A public member which can be assigned a callback for delegating fatal error
+         *  handling to user code.
+         *
+         *  Upon returning, your callback should have ceased further execution of code
+         *  in this EcmascriptEngine. You will need to create and initialize a new one
+         *  to proceed safely.
+         */
+        std::function<void(const juce::String& msg, const juce::String& trace)> onUncaughtError;
 
     private:
         //==============================================================================

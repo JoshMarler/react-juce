@@ -56,8 +56,8 @@ public:
         expect (4 == (int) engine.evaluate("this.myMultiply(2, 2);"));
 
         beginTest ("Namespaced function");
-        expect (engine.execute("this.Blueprint = {};").wasOk());
 
+        engine.registerNativeProperty("Blueprint", juce::JSON::parse("{}"));
         engine.registerNativeMethod("Blueprint", "squareIt", [](void* stash, const juce::var::NativeFunctionArgs& args) {
             EcmascriptEngineNativeFunctionTest* self = reinterpret_cast<EcmascriptEngineNativeFunctionTest*>(stash);
 
@@ -142,9 +142,63 @@ public:
     }
 };
 
+class EcmascriptEngineErrorHandlerTest  : public juce::UnitTest
+{
+public:
+    EcmascriptEngineErrorHandlerTest()
+        : juce::UnitTest ("Testing error handler interface") {}
+
+    template <typename T, typename... Args>
+    void testUncaughtError(T&& fn, Args... args)
+    {
+        blueprint::EcmascriptEngine engine;
+        bool didThrow = false;
+
+        try {
+            std::invoke(fn, engine, std::forward<Args>(args)...);
+        } catch (const std::runtime_error& e) {
+            didThrow = true;
+        }
+
+        expect(didThrow);
+    }
+
+    template <typename T, typename... Args>
+    void testCaughtError(T&& fn, Args... args)
+    {
+        blueprint::EcmascriptEngine engine;
+        bool didThrow = false;
+
+        engine.onUncaughtError = [&didThrow](const juce::String& msg, const juce::String& trace) {
+            didThrow = true;
+        };
+
+        std::invoke(fn, engine, std::forward<Args>(args)...);
+        expect(didThrow);
+    }
+
+    void runTest() override
+    {
+        beginTest("Parse errors");
+        testUncaughtError(&blueprint::EcmascriptEngine::evaluate, "1 + 2 + ");
+        testCaughtError(&blueprint::EcmascriptEngine::evaluate, "1 + 2 + ");
+        testUncaughtError(&blueprint::EcmascriptEngine::invoke<int>, "Blueprint.1+", 1);
+        testCaughtError(&blueprint::EcmascriptEngine::invoke<int>, "Blueprint.1+", 1);
+        // TODO: Test property/method registration
+
+        beginTest("Runtime errors");
+        testUncaughtError(&blueprint::EcmascriptEngine::evaluate, "doesNotExist();");
+        testCaughtError(&blueprint::EcmascriptEngine::evaluate, "doesNotExist();");
+        testUncaughtError(&blueprint::EcmascriptEngine::invoke<int>, "Blueprint[doesNotExist()]", 1);
+        testCaughtError(&blueprint::EcmascriptEngine::invoke<int>, "Blueprint[doesNotExist()]", 1);
+        // TODO: Test property/method registration
+    }
+};
+
 // Create static instances to register it with the array run by
 // UnitTestRunner::runAllTests()
 static EcmascriptEngineEvaluateTest evTest;
 static EcmascriptEngineNativeFunctionTest fnTest;
 static EcmascriptEngineNativePropertyTest propTest;
 static EcmascriptEngineInvokeTest invTest;
+static EcmascriptEngineErrorHandlerTest errTest;
