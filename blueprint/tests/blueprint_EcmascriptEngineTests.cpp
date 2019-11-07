@@ -184,14 +184,56 @@ public:
         testCaughtError(&blueprint::EcmascriptEngine::evaluate, "1 + 2 + ");
         testUncaughtError(&blueprint::EcmascriptEngine::invoke<int>, "Blueprint.1+", 1);
         testCaughtError(&blueprint::EcmascriptEngine::invoke<int>, "Blueprint.1+", 1);
-        // TODO: Test property/method registration
+
+        testUncaughtError([](blueprint::EcmascriptEngine& engine) {
+            engine.registerNativeMethod("global[1 + 2 +]", "Noop", [](void *, const juce::var::NativeFunctionArgs&) {
+                // Noop
+                return juce::var::undefined();
+            }, nullptr);
+        });
+
+        testCaughtError([](blueprint::EcmascriptEngine& engine) {
+            engine.registerNativeMethod("global[1 + 2 +]", "Noop", [](void *, const juce::var::NativeFunctionArgs&) {
+                // Noop
+                return juce::var::undefined();
+            }, nullptr);
+        });
+
+        testUncaughtError([](blueprint::EcmascriptEngine& engine) {
+            engine.registerNativeProperty("global[1 + 2 +]", "Noop", 42);
+        });
+
+        testCaughtError([](blueprint::EcmascriptEngine& engine) {
+            engine.registerNativeProperty("global[1 + 2 +]", "Noop", 42);
+        });
 
         beginTest("Runtime errors");
         testUncaughtError(&blueprint::EcmascriptEngine::evaluate, "doesNotExist();");
         testCaughtError(&blueprint::EcmascriptEngine::evaluate, "doesNotExist();");
         testUncaughtError(&blueprint::EcmascriptEngine::invoke<int>, "Blueprint[doesNotExist()]", 1);
         testCaughtError(&blueprint::EcmascriptEngine::invoke<int>, "Blueprint[doesNotExist()]", 1);
-        // TODO: Test property/method registration
+
+        testUncaughtError([](blueprint::EcmascriptEngine& engine) {
+            engine.registerNativeMethod("global[doesNotExist()]", "Noop", [](void *, const juce::var::NativeFunctionArgs&) {
+                // Noop
+                return juce::var::undefined();
+            }, nullptr);
+        });
+
+        testCaughtError([](blueprint::EcmascriptEngine& engine) {
+            engine.registerNativeMethod("global[doesNotExist()]", "Noop", [](void *, const juce::var::NativeFunctionArgs&) {
+                // Noop
+                return juce::var::undefined();
+            }, nullptr);
+        });
+
+        testUncaughtError([](blueprint::EcmascriptEngine& engine) {
+            engine.registerNativeProperty("global[doesNotExist()]", "Noop", 42);
+        });
+
+        testCaughtError([](blueprint::EcmascriptEngine& engine) {
+            engine.registerNativeProperty("global[doesNotExist()]", "Noop", 42);
+        });
     }
 };
 
