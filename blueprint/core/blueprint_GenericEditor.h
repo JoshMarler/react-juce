@@ -45,15 +45,25 @@ namespace blueprint
         /** Implement the timer interface. */
         void timerCallback() override;
 
-        /** Installs the parameter methods. */
-        void registerParameterMethods(const juce::AudioProcessorValueTreeState*);
-
         /** Override the component interface. */
         void resized() override;
+        void paint (juce::Graphics&) override;
 
     private:
         //==============================================================================
+        /** Provisions and assigns a new ReactApplicationRoot. */
+        void assignNewAppRoot(const juce::String&);
+
+        /** Called for an uncaught error in the script engine.
+         *
+         *  Tears down an existing appRoot and paints the screen red with the
+         *  stack trace printed.
+         */
+        void showError(const juce::String& trace);
+
+        //==============================================================================
         std::unique_ptr<ReactApplicationRoot> appRoot;
+        std::unique_ptr<juce::AttributedString> errorText;
         juce::AudioProcessorValueTreeState* valueTreeState;
         juce::File bundleFile;
         juce::Time lastModifiedTime;

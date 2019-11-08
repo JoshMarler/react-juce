@@ -17,24 +17,16 @@ namespace blueprint
     BlueprintGenericEditor::BlueprintGenericEditor (juce::AudioProcessor* processor, const juce::String& code, juce::AudioProcessorValueTreeState* vts)
         : juce::AudioProcessorEditor(processor), valueTreeState(vts)
     {
-        appRoot = std::make_unique<ReactApplicationRoot>();
-
-        if (valueTreeState != nullptr)
-            registerParameterMethods(valueTreeState);
-
-        // Add our appRoot and kick off the app bundle; no file management to
-        // worry about when given just a string.
-        addAndMakeVisible(appRoot.get());
-        appRoot->evaluate(code);
-
-        // Now our React application is up and running, so we can start dispatching
-        // events, such as current parameter values. Here we add the listeners
-        // then dispatch the initial parameter value immediately
+        // Bind parameter listeners
         for (auto& p : processor->getParameters())
-        {
             p->addListener(this);
-            parameterValueChanged(p->getParameterIndex(), p->getValue());
-        }
+
+        // Now we can provision the app root
+        assignNewAppRoot(code);
+
+        // If an error showed up, our appRoot is already gone
+        if (appRoot)
+            addAndMakeVisible(appRoot.get());
 
         // Set an arbitrary size, should be overriden from outside the constructor
         setSize(400, 200);
@@ -43,28 +35,21 @@ namespace blueprint
     BlueprintGenericEditor::BlueprintGenericEditor (juce::AudioProcessor* processor, const juce::File& bundle, juce::AudioProcessorValueTreeState* vts)
         : juce::AudioProcessorEditor(processor), valueTreeState(vts)
     {
-        appRoot = std::make_unique<ReactApplicationRoot>();
-
         // Sanity check
         jassert (bundle.existsAsFile());
         bundleFile = bundle;
         lastModifiedTime = bundleFile.getLastModificationTime();
 
-        if (valueTreeState != nullptr)
-            registerParameterMethods(valueTreeState);
-
-        // Next we just add our appRoot and kick off the app bundle.
-        addAndMakeVisible(appRoot.get());
-        appRoot->evaluate(bundle.loadFileAsString());
-
-        // Now our React application is up and running, so we can start dispatching
-        // events, such as current parameter values. Here we add the listeners
-        // then dispatch the initial parameter value immediately
+        // Bind parameter listeners
         for (auto& p : processor->getParameters())
-        {
             p->addListener(this);
-            parameterValueChanged(p->getParameterIndex(), p->getValue());
-        }
+
+        // Now we can provision the app root
+        assignNewAppRoot(bundle.loadFileAsString());
+
+        // If an error showed up, our appRoot is already gone
+        if (appRoot)
+            addAndMakeVisible(appRoot.get());
 
         // Kick off the timer that polls for file changes
         startTimer(50);
@@ -120,7 +105,10 @@ namespace blueprint
     {
         // We don't need to worry so much about throttling gesture events since they happen far
         // more slowly than value changes
-        appRoot->dispatchEvent("parameterGestureChange", parameterIndex, gestureIsStarting);
+        if (appRoot)
+        {
+            appRoot->dispatchEvent("parameterGestureChange", parameterIndex, gestureIsStarting);
+        }
     }
 
     //==============================================================================
@@ -130,80 +118,131 @@ namespace blueprint
 
         if (lmt > lastModifiedTime)
         {
-            // Pop the root and its subtree out of the component heirarchy
-            removeChildComponent(appRoot.get());
-
-            // Then swap in a new ReactApplicationRoot, destroying the previous one
-            appRoot = std::make_unique<ReactApplicationRoot>();
-
             // Sanity check... again
             jassert (bundleFile.existsAsFile());
 
-            if (valueTreeState != nullptr)
-                registerParameterMethods(valueTreeState);
+            // Remove and delete the current appRoot
+            appRoot.reset();
 
-            // Now we kick off the new bundle
-            addAndMakeVisible(appRoot.get());
-            appRoot->evaluate(bundleFile.loadFileAsString());
-            appRoot->setBounds(getLocalBounds());
+            // Then we assign a new one
+            assignNewAppRoot(bundleFile.loadFileAsString());
 
-            // And dispatch current parameter values
-            for (auto& p : processor.getParameters())
-                parameterValueChanged(p->getParameterIndex(), p->getValue());
+            // Add and set size, carefull
+            if (appRoot)
+            {
+                addAndMakeVisible(appRoot.get());
+                appRoot->setBounds(getLocalBounds());
+            }
 
             lastModifiedTime = lmt;
         }
     }
 
-    void BlueprintGenericEditor::registerParameterMethods(const juce::AudioProcessorValueTreeState* vts)
-    {
-        appRoot->engine.registerNativeMethod(
-            "beginParameterChangeGesture",
-            [](void* stash, const juce::var::NativeFunctionArgs& args) {
-                auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
-                const juce::String& paramId = args.arguments[0].toString();
-
-                if (auto* parameter = state->getParameter(paramId))
-                    parameter->beginChangeGesture();
-
-                return juce::var::undefined();
-            },
-            (void *) vts
-        );
-
-        appRoot->engine.registerNativeMethod(
-            "setParameterValueNotifyingHost",
-            [](void* stash, const juce::var::NativeFunctionArgs& args) {
-                auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
-                const juce::String& paramId = args.arguments[0].toString();
-                const double value = args.arguments[1];
-
-                if (auto* parameter = state->getParameter(paramId))
-                    parameter->setValueNotifyingHost(value);
-
-                return juce::var::undefined();
-            },
-            (void *) vts
-        );
-
-        appRoot->engine.registerNativeMethod(
-            "endParameterChangeGesture",
-            [](void* stash, const juce::var::NativeFunctionArgs& args) {
-                auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
-                const juce::String& paramId = args.arguments[0].toString();
-
-                if (auto* parameter = state->getParameter(paramId))
-                    parameter->endChangeGesture();
-
-                return juce::var::undefined();
-            },
-            (void *) vts
-        );
-    }
-
     void BlueprintGenericEditor::resized()
     {
-        appRoot->setBounds(getLocalBounds());
+        // Evaluating the bundle in the app root might hit the error handler, which
+        // deletes the appRoot, in turn alerting the parent component (this) to remove
+        // its child and resize. So we're careful check the appRoot before doing anything
+        if (appRoot)
+        {
+            appRoot->setBounds(getLocalBounds());
+        }
+    }
+
+    void BlueprintGenericEditor::paint(juce::Graphics& g)
+    {
+        g.fillAll(juce::Colours::transparentWhite);
+
+        if (errorText)
+        {
+            g.fillAll(juce::Colour(0xffe14c37));
+            errorText->draw(g, getLocalBounds().toFloat().reduced(10.f));
+        }
+    }
+
+    void BlueprintGenericEditor::assignNewAppRoot(const juce::String& code)
+    {
+        // Assign a fresh appRoot
+        appRoot = std::make_unique<ReactApplicationRoot>();
+        appRoot->engine.onUncaughtError = [this](const juce::String& msg, const juce::String& trace) {
+            showError(trace);
+        };
+
+        // If we have a valueTreeState, bind parameter methods to the new app root
+        if (valueTreeState != nullptr)
+        {
+            appRoot->engine.registerNativeMethod(
+                "beginParameterChangeGesture",
+                [](void* stash, const juce::var::NativeFunctionArgs& args) {
+                    auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
+                    const juce::String& paramId = args.arguments[0].toString();
+
+                    if (auto* parameter = state->getParameter(paramId))
+                        parameter->beginChangeGesture();
+
+                    return juce::var::undefined();
+                },
+                (void *) valueTreeState
+            );
+
+            appRoot->engine.registerNativeMethod(
+                "setParameterValueNotifyingHost",
+                [](void* stash, const juce::var::NativeFunctionArgs& args) {
+                    auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
+                    const juce::String& paramId = args.arguments[0].toString();
+                    const double value = args.arguments[1];
+
+                    if (auto* parameter = state->getParameter(paramId))
+                        parameter->setValueNotifyingHost(value);
+
+                    return juce::var::undefined();
+                },
+                (void *) valueTreeState
+            );
+
+            appRoot->engine.registerNativeMethod(
+                "endParameterChangeGesture",
+                [](void* stash, const juce::var::NativeFunctionArgs& args) {
+                    auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
+                    const juce::String& paramId = args.arguments[0].toString();
+
+                    if (auto* parameter = state->getParameter(paramId))
+                        parameter->endChangeGesture();
+
+                    return juce::var::undefined();
+                },
+                (void *) valueTreeState
+            );
+        }
+
+        // Now evaluate the code within the environment. We reset the error text ahead
+        // of time, assuming the code will evaluate well
+        errorText.reset();
+        appRoot->evaluate(code);
+
+        // At this point the appRoot may have been removed due to an error evaluating
+        // the bundle, so we check for that case and halt if necessary
+        if (!appRoot)
+            return;
+
+        // By now, things look good, let's push current parameter values into
+        // the bundle
+        for (auto& p : processor.getParameters())
+            parameterValueChanged(p->getParameterIndex(), p->getValue());
+    }
+
+    void BlueprintGenericEditor::showError(const juce::String& trace)
+    {
+        appRoot.reset();
+        errorText.reset(new juce::AttributedString(trace));
+#if JUCE_WINDOWS
+        errorText->setFont(juce::Font("Lucida Console", 18, juce::Font::FontStyleFlags::plain));
+#elif JUCE_MAC
+        errorText->setFont(juce::Font("Monaco", 18, juce::Font::FontStyleFlags::plain));
+#else
+        errorText->setFont(18);
+#endif
+        repaint();
     }
 
 }
