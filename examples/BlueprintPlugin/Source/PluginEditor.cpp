@@ -18,25 +18,33 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
     File sourceDir = (File (__FILE__)).getParentDirectory();
 
     addAndMakeVisible(appRoot);
-    appRoot.evalScript(sourceDir.getChildFile("ui/build/js/main.js").loadFileAsString());
-    appRoot.enableHotkeyReloading();
-
-    appRoot.registerNativeMethod(
+    appRoot.evaluate(sourceDir.getChildFile("ui/build/js/main.js").loadFileAsString());
+    //appRoot.enableHotkeyReloading();
+    
+    appRoot.engine.registerNativeMethod(
         "setParameterValueNotifyingHost",
-        [this](const juce::var::NativeFunctionArgs& args) {
+        [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            auto* self = reinterpret_cast<BlueprintPluginAudioProcessorEditor*>(stash);
             const juce::String& paramId = args.arguments[0].toString();
             const double value = args.arguments[1];
-
+           
             DBG("Setting " << paramId << " to " << value);
-
-//            if (auto* parameter = processor.getValueTreeState().getParameter(paramId))
-//            {
-//                parameter->beginChangeGesture();
+//            if (auto* parameter = self->processor.getValueTreeState().getParameter(paramId))
 //                parameter->setValueNotifyingHost(value);
-//                parameter->endChangeGesture();
-//            }
-        }
+
+            return juce::var::undefined();
+        },
+        (void *) this
     );
+    
+    
+    // Globals in the js env
+    auto* ctx = appRoot.engine.getDuktapeContext();
+    duk_push_global_object(ctx);
+    duk_push_string(ctx, JucePlugin_VersionString);
+    duk_put_prop_string(ctx, -2, "__VERSION__");
+
+
 
     setResizable(true, true);
     setResizeLimits(667, 375, 1334, 750);

@@ -347,4 +347,9 @@ namespace blueprint
         return result;
     }
 
+    duk_context* EcmascriptEngine::getDuktapeContext()
+    {
+        return ctx;
+    }
+
 }
