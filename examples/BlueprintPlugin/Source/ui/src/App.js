@@ -79,8 +79,11 @@ class App extends Component {
           <Chrome
             {...styles.chrome}
             onToggleSettings={this._onToggleSettings}
-            onToggleHelp={this._onToggleHelp}>
-            <Help {...styles.contentContainer} />
+            onToggleHelp={this._onToggleHelp}
+          >
+            <View {...styles.contentContainer}>
+              <Text color={Colors.STROKE}>{"v" + global.__VERSION__}</Text>
+            </View>
           </Chrome>
         );
       default:
