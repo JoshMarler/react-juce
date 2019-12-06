@@ -107,10 +107,6 @@ namespace blueprint
          *  to proceed safely.
          */
         std::function<void(const juce::String& msg, const juce::String& trace)> onUncaughtError;
-        
-        //==============================================================================
-        /** A simple accessor for the underlying Duktape context. */
-        duk_context* getDuktapeContext();
 
     private:
         //==============================================================================
