@@ -19,7 +19,6 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
 
     addAndMakeVisible(appRoot);
     appRoot.evaluate(sourceDir.getChildFile("ui/build/js/main.js").loadFileAsString());
-    //appRoot.enableHotkeyReloading();
     
     appRoot.engine.registerNativeMethod(
         "setParameterValueNotifyingHost",
@@ -27,7 +26,7 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
             auto* self = reinterpret_cast<BlueprintPluginAudioProcessorEditor*>(stash);
             const juce::String& paramId = args.arguments[0].toString();
             const double value = args.arguments[1];
-           
+
             DBG("Setting " << paramId << " to " << value);
 //            if (auto* parameter = self->processor.getValueTreeState().getParameter(paramId))
 //                parameter->setValueNotifyingHost(value);
@@ -39,10 +38,7 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
     
     
     // Globals in the js env
-    auto* ctx = appRoot.engine.getDuktapeContext();
-    duk_push_global_object(ctx);
-    duk_push_string(ctx, JucePlugin_VersionString);
-    duk_put_prop_string(ctx, -2, "__VERSION__");
+    appRoot.engine.registerNativeProperty("__VERSION__", JucePlugin_VersionString);
 
 
 
