@@ -5,7 +5,7 @@
   "main": "./cjs/Blueprint.js",
   "scripts": {
     "build": "babel esm --out-dir cjs",
-    "init": "./scripts/init.js"
+    "init": "node scripts/init.js"
   },
   "author": "Nick Thompson",
   "babel": {
