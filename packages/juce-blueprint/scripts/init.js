@@ -40,7 +40,7 @@ fs.mkdirp(targetDir, function(err) {
     var pkg = require(pkgPath);
     pkg.dependencies['juce-blueprint'] = 'file:' + path.relative(targetDir, packageDir);
 
-    fs.writeJson(pkgPath, pkg, function(err) {
+    fs.writeJson(pkgPath, pkg, { spaces: 2 }, function(err) {
       if (err) {
         console.error(chalk.red(err));
         process.exit(1);
