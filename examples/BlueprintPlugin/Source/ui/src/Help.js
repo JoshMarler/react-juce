@@ -28,7 +28,8 @@ class Help extends Component {
     return (
       <View {...styles.container} {...this.props}>
         <ScrollView {...styles.scrollView}>
-          <View {...styles.scrollViewContent}>
+          <ScrollView.ContentView {...styles.scrollViewContent}>
+            <Text {...styles.sectionBodyText}>{"v" + global.__VERSION__}</Text>
             <SectionTitle>[SIGNAL FLOW]</SectionTitle>
             <Text {...styles.sectionBodyText}>
               Remnant consists of two independent grain engines that read from two distinct delay lines. The input signal feeds
@@ -88,7 +89,7 @@ class Help extends Component {
             <Text {...styles.sectionBodyText}>
               Sets the feedback amount from one grain engine back into itself.
             </Text>
-          </View>
+          </ScrollView.ContentView>
         </ScrollView>
       </View>
     );
