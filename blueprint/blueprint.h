@@ -61,6 +61,7 @@
 #include "core/blueprint_ImageView.h"
 #include "core/blueprint_RawTextView.h"
 #include "core/blueprint_ReactApplicationRoot.h"
+#include "core/blueprint_HotReloader.h"
 #include "core/blueprint_ScrollView.h"
 #include "core/blueprint_ScrollViewContentShadowView.h"
 #include "core/blueprint_ShadowView.h"
