@@ -1,6 +1,6 @@
 [submodule "juce"]
 	path = ext/juce
-	url = ../../WeAreROLI/JUCE.git
+	url = ../../juce-framework/JUCE.git
 [submodule "yoga"]
 	path = blueprint/yoga
 	url = ../../facebook/yoga.git
