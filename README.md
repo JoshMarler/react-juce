@@ -1,56 +1,27 @@
 # Blueprint
-> A JUCE rendering backend for React.js
+> Write cross-platform native apps with React.js and JUCE
 
-Blueprint is an experimental JavaScript/C++ framework that enables a [React.js](https://reactjs.org/) frontend for a [JUCE](http://juce.com/) application or plugin. It provides an embedded, ECMAScript-compliant JavaScript engine via [Duktape](http://duktape.org/), native hooks for rendering the React component tree via `juce::Component` instances, and a flexbox layout engine via [Yoga](https://yogalayout.com/).
+Blueprint is a hybrid JavaScript/C++ framework that enables a [React.js](https://reactjs.org/) frontend for a [JUCE](http://juce.com/) application or plugin. It provides an embedded, ECMAScript-compliant JavaScript engine via [Duktape](http://duktape.org/), native hooks for rendering the React component tree via `juce::Component` instances, and a flexbox layout engine via [Yoga](https://yogalayout.com/).
 
 For more information, see the introductory blog post here: [Blueprint: A JUCE Rendering Backend for React.js](https://nickwritesablog.com/blueprint-a-juce-rendering-backend-for-react-js)
 
 ## Examples
-Blueprint is a very young project, but already it provides the framework on which the entire user interface for [Creative Intent](http://creativeintent.co/)'s forthcoming plugin, Remnant, is built.
+Blueprint is a young project, but already it provides the framework on which the entire user interface for [Creative Intent's Remnant](https://www.creativeintent.co/product/remnant) plugin is built.
 
-![Creative Intent Remnant: Beta screenshot](https://github.com/nick-thompson/blueprint/blob/master/RemnantBeta.jpg)
+![Creative Intent Remnant: Screenshot](https://github.com/nick-thompson/blueprint/blob/master/RemnantScreenShot.jpg)
 
-Besides that, you can check out the BlueprintPlugin example in the `examples/` directory. See the "Getting Started" section
-below for building and running the demo plugin.
+Besides that, you can check out the example code in the `examples/` directory. See the "Documentation" section
+below for building and running the demo plugin. If you have a project written with Blueprint that you want to share, get in touch! I would
+love to showcase your work.
 
-## Getting Started
-First, you'll need to collect the code and its dependencies.
+## Documentation
 
-#### Getting the code
-
-```bash
-$ git clone --recurse-submodules git@github.com:nick-thompson/blueprint.git
-```
-or
-```bash
-$ git clone git@github.com:nick-thompson/blueprint.git
-$ cd blueprint
-$ git submodule update --init --recursive
-```
-
-#### Running the examples
-```bash
-$ cd blueprint/packages/juce-blueprint
-$ npm install
-$ npm run build
-$ cd ../../examples/BlueprintPlugin/Source/ui/
-$ npm install
-$ npm run build
-```
-Then open up the appropriate exporter for your platform from the appropriate example plugin directory and build as usual.
-
-#### Starting your project
-```bash
-$ cd blueprint/packages/juce-blueprint
-$ npm install
-$ npm run build
-$ npm run init -- path/to/your/project/directory
-$ cd path/to/your/project/directory
-$ npm start
-```
-
-Now Webpack will watch your JavaScript files for changes and update the bundle on save. The last step is to add the
-`blueprint::ReactApplicationRoot` to your project and mount it into your editor. See the [PluginEditor.cpp](https://github.com/nick-thompson/blueprint/blob/master/examples/BlueprintPlugin/Source/PluginEditor.cpp#L18) file in the BlueprintPlugin example for how to do that.
+The latest and greatest documentation is available on the Wiki here on GitHub:
+* [[Getting Started|getting-started]]
+* [[Running the Example|running-the-example]]
+* [[Starting a New Project|starting-a-new-project]]
+* [[API Overview|api-overview]]
+* [[Resources|resources]]
 
 ## Contributing
 Yes, please! I would be very happy to welcome your involvement. Take a look at the [open issues](https://github.com/nick-thompson/blueprint/issues)
