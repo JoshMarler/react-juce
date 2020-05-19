@@ -99,37 +99,74 @@ namespace blueprint
                         value = els;
                         break;
                     }
-                    else
+
+                    if (duk_is_function(ctx, idx))
                     {
-                        auto* obj = new juce::DynamicObject();
+                        // With a function, we first push the function reference to
+                        // the Duktape global stash so we can read it later.
+                        auto funId = juce::String("__blueprintCallback__") + juce::Uuid().toString();
 
-                        // Generic object enumeration; `duk_enum` pushes an enumerator
-                        // object to the top of the stack
-                        duk_enum(ctx, idx, DUK_ENUM_OWN_PROPERTIES_ONLY);
+                        duk_push_global_stash(ctx);
+                        duk_dup(ctx, idx);
+                        duk_put_prop_string(ctx, -2, funId.toRawUTF8());
 
-                        while (duk_next(ctx, -1, 1))
-                        {
-                            // For each found key/value pair, `duk_enum` pushes the
-                            // values to the top of the stack. So here the stack top
-                            // is [ ... enum key value]. Enum is at -3, key at -2,
-                            // value at -1 from the stack top.
-                            // Note here that all keys in an ECMAScript object are of
-                            // type string, even arrays, e.g. `myArr[0]` has an implicit
-                            // conversion from number to string. Thus here, while constructing
-                            // the DynamicObject, we take the `toString()` value for the key
-                            // always.
-                            obj->setProperty(duk_to_string(ctx, -2), readVarFromDukStack(ctx, -1));
+                        // Next we create a var::NativeFunction that captures the function
+                        // id and knows how to invoke it
+                        value = juce::var::NativeFunction {
+                            [ctx, funId = std::move(funId)](const juce::var::NativeFunctionArgs& args) -> juce::var {
+                                // Here when we're being invoked we retrieve the callback function from
+                                // the global stash and invoke it with the provided args.
+                                duk_push_global_stash(ctx);
+                                duk_get_prop_string(ctx, -1, funId.toRawUTF8());
+                                duk_require_function(ctx, -1);
 
-                            // Clear the key/value pair from the stack
-                            duk_pop_2(ctx);
-                        }
+                                // Push the args to the duktape stack
+                                duk_require_stack_top(ctx, args.numArguments);
 
-                        // Pop the enumerator from the stack
-                        duk_pop(ctx);
+                                for (int i = 0; i < args.numArguments; ++i)
+                                    pushVarToDukStack(ctx, args.arguments[i]);
 
-                        value = juce::var(obj);
+                                // Invocation
+                                if (duk_pcall(ctx, args.numArguments) != DUK_EXEC_SUCCESS)
+                                    duk_throw(ctx);
+
+                                // Callbacks don't really need return args?
+                                return juce::var();
+                            }
+                        };
+
                         break;
                     }
+
+                    // If it's not a function or an array, it's a regular object.
+                    auto* obj = new juce::DynamicObject();
+
+                    // Generic object enumeration; `duk_enum` pushes an enumerator
+                    // object to the top of the stack
+                    duk_enum(ctx, idx, DUK_ENUM_OWN_PROPERTIES_ONLY);
+
+                    while (duk_next(ctx, -1, 1))
+                    {
+                        // For each found key/value pair, `duk_enum` pushes the
+                        // values to the top of the stack. So here the stack top
+                        // is [ ... enum key value]. Enum is at -3, key at -2,
+                        // value at -1 from the stack top.
+                        // Note here that all keys in an ECMAScript object are of
+                        // type string, even arrays, e.g. `myArr[0]` has an implicit
+                        // conversion from number to string. Thus here, while constructing
+                        // the DynamicObject, we take the `toString()` value for the key
+                        // always.
+                        obj->setProperty(duk_to_string(ctx, -2), readVarFromDukStack(ctx, -1));
+
+                        // Clear the key/value pair from the stack
+                        duk_pop_2(ctx);
+                    }
+
+                    // Pop the enumerator from the stack
+                    duk_pop(ctx);
+
+                    value = juce::var(obj);
+                    break;
                 }
                 case DUK_TYPE_NONE:
                 default:
