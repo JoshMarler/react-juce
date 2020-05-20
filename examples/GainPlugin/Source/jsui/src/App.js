@@ -13,7 +13,12 @@ import {
 function animatedDraw(ctx) {
   let now = (Date.now() / 10);
   let width = now % 100;
+  let red = Math.sqrt(width / 100) * 255;
+  let hex = Math.floor(red).toString(16);
 
+  // TODO: Should update the ctx proxy to convert from javascript hex strings, aka
+  // #ffffaa to juce's Colour::fromString() API which is ffffffaa.
+  ctx.fillStyle = `ff${hex}ffaa`;
   ctx.fillRect(0, 0, width, 2);
 }
 

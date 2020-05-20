@@ -23,6 +23,28 @@ export function Image(props) {
 }
 
 export function Canvas(props) {
+  if (props.hasOwnProperty('onDraw')) {
+    let userOnDraw = props.onDraw;
+    let wrappedDraw = function(ctx) {
+      Object.defineProperty(ctx, 'fillStyle', {
+        enumerable: false,
+        configurable: false,
+        get: function() {
+          return 'Not Supported';
+        },
+        set: function(value) {
+          this.__setFillStyle(value);
+        }
+      });
+
+      return userOnDraw(ctx);
+    };
+
+    return React.createElement('CanvasView', Object.assign({}, props, {
+      onDraw: wrappedDraw,
+    }), props.children);
+  }
+
   return React.createElement('CanvasView', props, props.children);
 }
 

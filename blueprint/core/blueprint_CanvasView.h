@@ -64,6 +64,17 @@ namespace blueprint
                 auto* jsContext = new juce::DynamicObject();
                 juce::Path jsPath;
 
+                jsContext->setProperty("__setFillStyle", juce::var::NativeFunction {
+                    [&g, &jsPath](const juce::var::NativeFunctionArgs& args) -> juce::var {
+                        jassert(args.numArguments == 1);
+
+                        auto hex = args.arguments[0].toString();
+                        g.setColour(juce::Colour::fromString(hex));
+
+                        return juce::var();
+                    }
+                });
+
                 jsContext->setProperty("fillRect", juce::var::NativeFunction {
                     [&g, &jsPath](const juce::var::NativeFunctionArgs& args) -> juce::var {
                         jassert(args.numArguments == 4);
@@ -73,7 +84,6 @@ namespace blueprint
                         const int width = args.arguments[2];
                         const int height = args.arguments[3];
 
-                        g.setColour(juce::Colours::blue);
                         g.fillRect(x, y, width, height);
 
                         return juce::var();
