@@ -3,11 +3,19 @@ import Meter from './Meter';
 import React, { Component } from 'react';
 import Slider from './Slider';
 import {
+  Canvas,
   Image,
   View,
   Text,
 } from 'juce-blueprint';
 
+
+function animatedDraw(ctx) {
+  let now = (Date.now() / 10);
+  let width = now % 100;
+
+  ctx.fillRect(0, 0, width, 2);
+}
 
 class App extends Component {
   render() {
@@ -19,6 +27,7 @@ class App extends Component {
             <Label paramId="MainGain" {...styles.label} />
           </Slider>
           <Meter {...styles.meter} />
+          <Canvas {...styles.canvas} animate={true} onDraw={animatedDraw} />
         </View>
       </View>
     );
@@ -64,6 +73,11 @@ const styles = {
     'flex': 0.0,
     'width': 100.0,
     'height': 16.0,
+  },
+  canvas: {
+    'flex': 0.0,
+    'width': 100.0,
+    'height': 2
   },
 };
 

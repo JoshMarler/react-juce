@@ -454,6 +454,9 @@ namespace blueprint
                             if (duk_pcall(ctx, args.numArguments) != DUK_EXEC_SUCCESS)
                                 duk_throw(ctx);
 
+                            // Clean the result and the stash off the top of the stack
+                            duk_pop_2(ctx);
+
                             // Callbacks don't really need return args?
                             return juce::var();
                         }

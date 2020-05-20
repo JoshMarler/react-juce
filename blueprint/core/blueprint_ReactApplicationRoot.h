@@ -11,6 +11,7 @@
 
 #include <map>
 
+#include "blueprint_CanvasView.h"
 #include "blueprint_EcmascriptEngine.h"
 #include "blueprint_ImageView.h"
 #include "blueprint_RawTextView.h"
@@ -311,6 +312,13 @@ namespace blueprint
 
             registerViewType("View", []() -> ViewPair {
                 auto view = std::make_unique<View>();
+                auto shadowView = std::make_unique<ShadowView>(view.get());
+
+                return {std::move(view), std::move(shadowView)};
+            });
+
+            registerViewType("CanvasView", []() -> ViewPair {
+                auto view = std::make_unique<CanvasView>();
                 auto shadowView = std::make_unique<ShadowView>(view.get());
 
                 return {std::move(view), std::move(shadowView)};
