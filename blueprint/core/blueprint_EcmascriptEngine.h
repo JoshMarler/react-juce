@@ -108,9 +108,31 @@ namespace blueprint
          */
         std::function<void(const juce::String& msg, const juce::String& trace)> onUncaughtError;
 
+        //==============================================================================
+        // TODO: These pushVarToDukStack/readVarFromDukStack should be private, but are
+        // made public temporarily because I hacked together a nativeMethodWrapper hook
+        // that needs it. Once we replace `nativeMethodWrapper` with the LambdaHelper
+        // stuff below, these should be made private again.
+        void pushVarToDukStack (duk_context* ctx, const juce::var& v);
+        juce::var readVarFromDukStack (duk_context* ctx, duk_idx_t idx);
+
     private:
         //==============================================================================
+        struct LambdaHelper {
+            LambdaHelper(juce::var::NativeFunction fn);
+
+            static duk_ret_t invokeFromDukContext(duk_context* ctx);
+            static duk_ret_t callbackFinalizer (duk_context* ctx);
+
+            juce::var::NativeFunction callback;
+        };
+
+        //==============================================================================
         duk_context* ctx;
+        std::vector<std::unique_ptr<LambdaHelper>> lambdaReleasePool;
+
+        //==============================================================================
+        void removeLambdaHelper (LambdaHelper* helper);
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EcmascriptEngine)
