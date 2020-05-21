@@ -41,6 +41,7 @@
 #endif
 
 #include "yoga/yoga/log.h"
+#include "yoga/yoga/event/event.h"
 #include "yoga/yoga/Utils.h"
 #include "yoga/yoga/YGConfig.h"
 #include "yoga/yoga/YGEnums.h"
