@@ -91,7 +91,7 @@ namespace blueprint
                     return false;
                 }
 
-                duk_throw(ctx);
+                 duk_throw_raw(ctx);
             }
 
             // Indicate success
@@ -218,7 +218,7 @@ namespace blueprint
                 return juce::var::undefined();
             }
 
-            duk_throw(ctx);
+            duk_throw_raw(ctx);
         }
 
         // Collect the return value

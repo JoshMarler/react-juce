@@ -47,6 +47,7 @@
 #include "blueprint.h"
 
 #include "yoga/yoga/log.cpp"
+#include "yoga/yoga/event/event.cpp"
 #include "yoga/yoga/Utils.cpp"
 #include "yoga/yoga/YGConfig.cpp"
 #include "yoga/yoga/YGEnums.cpp"

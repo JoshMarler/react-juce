@@ -84,7 +84,7 @@ namespace blueprint
         const juce::String stringValue = p->getText(newValue, 0);
 
         // Dispatch parameter value updates to the javascript engine at 30Hz
-        throttleMap.throttle(parameterIndex, 1000.0 / 30.0, [=]() {
+        throttleMap.throttle(parameterIndex, 1000.0 / 30.0, [=]() mutable {
             juce::MessageManager::callAsync([=]() mutable {
                 if (safeAppRoot)
                 {
