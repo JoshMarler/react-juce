@@ -37,6 +37,28 @@ export function Canvas(props) {
         }
       });
 
+      Object.defineProperty(ctx, 'strokeStyle', {
+        enumerable: false,
+        configurable: false,
+        get: function() {
+          return 'Not Supported';
+        },
+        set: function(value) {
+          this.__setStrokeStyle(value);
+        }
+      });
+
+      Object.defineProperty(ctx, 'lineWidth', {
+        enumerable: false,
+        configurable: false,
+        get: function() {
+          return 'Not Supported';
+        },
+        set: function(value) {
+          this.__setLineWidth(value);
+        }
+      });
+
       return userOnDraw(ctx);
     };
 
