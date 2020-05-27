@@ -25,6 +25,57 @@
 
 namespace blueprint
 {
+    //==============================================================================
+    // Helper class which watches JS bundle files for changes and triggers
+    // a user supplied callback in the event of a bundle file change.
+    // BundleWatcher is able to handle multiple bundles to support loading
+    // of multiple bundle files by EcmaScriptEngine in the future.
+    class BundleWatcher : private juce::Timer
+    {
+        struct WatchedBundle
+        {
+            juce::File bundle;
+            juce::Time bundleLastModifiedTime;
+        };
+
+    public:
+        using BundleChangedCallback = std::function<void(const juce::File&)>;
+
+        explicit BundleWatcher(BundleChangedCallback  onBundleChanged)
+            : onBundleChanged(std::move(onBundleChanged))
+        {
+            startTimer(50);
+        }
+
+        void watch(const juce::File& bundle)
+        {
+            watchedBundles.push_back({ bundle, bundle.getLastModificationTime() });
+        }
+
+    private:
+        void timerCallback() override
+        {
+            std::for_each(watchedBundles.begin(), watchedBundles.end(), [=] (WatchedBundle& wb)
+            {
+                // Sanity check
+                jassert(wb.bundle.existsAsFile());
+
+                if (wb.bundle.existsAsFile())
+                {
+                    const auto lmt = wb.bundle.getLastModificationTime();
+
+                    if (lmt > wb.bundleLastModifiedTime)
+                    {
+                        onBundleChanged(wb.bundle);
+                        wb.bundleLastModifiedTime = lmt;
+                    }
+                }
+            });
+        }
+
+        std::vector<WatchedBundle> watchedBundles;
+        BundleChangedCallback      onBundleChanged;
+    };
 
     //==============================================================================
     /** The ReactApplicationRoot class prepares and maintains a Duktape evaluation
@@ -39,29 +90,95 @@ namespace blueprint
         {
             JUCE_ASSERT_MESSAGE_THREAD
 
-            _viewManager = std::make_unique<ViewManager>(this);
+            // Initialise the EcmascriptEngine
+            initEngine();
 
-            // Install React.js backend rendering methods
-            registerNativeRenderingHooks();
+            // Initialise the ViewManager
+            initViewManager();
 
-            // And install view types
-            installNativeViewTypes();
+#if JUCE_DEBUG
+            enableHotReloading();
+#endif
         }
 
         //==============================================================================
-        /** Override the default View behavior. Currently a no-op but we do not want to call the base View::resized here */
+        /** Override the default View behavior.  */
         void resized() override
         {
-            jassert(_viewManager);
-            _viewManager->performRootShadowTreeLayout();
+            // ViewManager may have been reset in the event of a bundle eval error.
+            if (viewManager)
+                viewManager->performRootShadowTreeLayout();
+        }
+
+        void paint(juce::Graphics& g) override
+        {
+            if (errorText)
+            {
+                g.fillAll(juce::Colour(0xffe14c37));
+                errorText->draw(g, getLocalBounds().toFloat().reduced(10.f));
+            }
+            else
+            {
+                View::paint(g);
+            }
         }
 
         //==============================================================================
-        /** Evaluates a javascript bundle in the Ecmascript engine. */
+        /**
+         * Evaluates a javascript bundle/code in the Ecmascript engine.
+         *
+         * It is possible to pass a js bundle file to this evaluate() overload using juce::File::loadAsString. However,
+         * if you require hot-reload functionality you should use the juce::File based evaluate() overload.
+         * This overload can also be used to evaluate js code inline/directly.
+         **/
         juce::var evaluate (const juce::String& bundle)
         {
             JUCE_ASSERT_MESSAGE_THREAD
-            return engine.evaluate(bundle);
+
+            // Clear error state from previous js evals
+            errorText.reset();
+
+            if (beforeBundleEval)
+                beforeBundleEval(std::nullopt);
+
+            jassert(engine);
+            auto result = engine->evaluate(bundle);
+
+            if (afterBundleEval)
+                afterBundleEval(std::nullopt);
+
+            return result;
+        }
+
+        /**
+         * Evaluates a javascript bundle file in the Ecmascript engine.
+         *
+         *  If hot-reload functionality has been enabled via enableHotReload(), ReactApplicationRoot will watch the
+         *  supplied bundle file for changes and provide instant UI updates. This is useful when working with Webpack
+         *  watchers etc.
+         *
+         *  Hot reloading is enabled by default in debug builds if JUCE_DEBUG is set.
+         **/
+        juce::var evaluate(const juce::File& bundle)
+        {
+            JUCE_ASSERT_MESSAGE_THREAD
+            jassert(bundle.existsAsFile());
+
+            if (beforeBundleEval)
+                beforeBundleEval(bundle);
+
+            auto result = evaluate(bundle.loadFileAsString());
+
+            if (afterBundleEval)
+                afterBundleEval(bundle);
+
+            if (hotReloadEnabled)
+            {
+                jassert(bundleWatcher);
+                bundleWatcher->watch(bundle);
+            }
+
+            return result;
         }
 
         /** Dispatches an event to the React internal view registry.
@@ -73,7 +190,13 @@ namespace blueprint
         void dispatchViewEvent (ViewId viewId, const juce::String& eventType, T... args)
         {
             JUCE_ASSERT_MESSAGE_THREAD
-            engine.invoke("__BlueprintNative__.dispatchViewEvent", viewId, eventType, std::forward<T>(args)...);
+            jassert(engine);
+            
+            // engine may have been reset in the event of a bundle eval error. We don't want to
+            // crash if client code tries to immediately dispatch an event after bundle loading.
+            // ReactApplicationRoot should report a generic error to the user rather than crashing.
+            if (engine)
+                engine->invoke("__BlueprintNative__.dispatchViewEvent", viewId, eventType, std::forward<T>(args)...);
         }
 
         /** Dispatches an event through Blueprint's EventBridge. */
@@ -81,7 +204,13 @@ namespace blueprint
         void dispatchEvent (const juce::String& eventType, T... args)
         {
             JUCE_ASSERT_MESSAGE_THREAD
-            engine.invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
+            jassert(engine);
+            
+            // engine may have been reset in the event of a bundle eval error. We don't want to
+            // crash if client code tries to immediately dispatch an event after bundle loading.
+            // ReactApplicationRoot should report a generic error to the user rather than crashing.
+            if (engine)
+                engine->invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
         }
 
         //==============================================================================
@@ -89,50 +218,224 @@ namespace blueprint
         {
             JUCE_ASSERT_MESSAGE_THREAD
 
-            jassert(_viewManager);
-            _viewManager->registerViewType(typeId, f);
+            jassert(viewManager);
+            viewManager->registerViewType(typeId, f);
         }
 
         ViewManager* const getViewManager()
         {
             JUCE_ASSERT_MESSAGE_THREAD
-            return _viewManager.get();
+            return viewManager.get();
         }
 
         //==============================================================================
-        EcmascriptEngine engine;
+        /**
+         * Enables "hot-reload" functionality so that ReactApplicationRoot watches JS bundle files added via evaluate()
+         * for changes. When one of these bundle files changes (i.e. from a Webpack watch/rebuild) ReactApplicationRoot
+         * will reload the bundle and update the View/ShadowView tree. Note hot-reloading is enabled by default if
+         * JUCE_DEBUG is set.
+         **/
+        void enableHotReloading()
+        {
+            bundleWatcher = std::make_unique<BundleWatcher>(
+                                [=](const juce::File& bundle) { handleBundleChanged(bundle); });
+
+            hotReloadEnabled = true;
+        }
+
+        //==============================================================================
+        using BundleEvalCallback = std::function<void(std::optional<juce::File> bundle)>;
+
+        /**
+         * Called before a bundle is loaded/evaluated.
+         *
+         * If hot-reload functionality is enabled then this callback will be triggered whenever a previously
+         * registered bundle file is changed (i.e. due to a Webpack watcher/rebuild).
+         *
+         * Use this callback to register any native methods/properties to be used from within the JS bundle. You can
+         * also use this callback to register any custom error handlers via ReactApplicationRoot::onUncaughtError.
+         *
+         * @param bundle The reloaded bundle file if applicable. If evaluate() was called with a raw/inline javascript
+         * code string rather than a .js file bundle will be a std::nullopt_t.
+         *
+         * For most applications the bundle will simply be the main app root bundle file. However, other use cases
+         * for evaluating multiple bundle files may exist, for example to facilitate things like polyfills etc.
+         * As a result it is good practice for callback implementations to check that bundle is the expected file.
+         *
+         * @code
+         *
+         *  MyEditor()
+         *     : appRoot()
+         * {
+         *     juce::File myAppBundle("/path/to/myAppBundle.js");
+         *
+         *     // Not strictly required if JUCE_DEBUG set.
+         *     appRoot.enableHotReload(true);
+         *
+         *     appRoot.beforeBundleEval = [=](std::optional<juce::File> bundle)
+         *     {
+         *         if (bundle)
+         *         {
+         *             if (bundle->getFullPathName() == myAppBundle.getFullPathName())
+         *             {
+         *                  appRoot.registerNativeMethod(
+         *                      "myNativeMethod",
+         *                      [](void* stash, const juce::var::NativeFunctionArgs& args) {
+         *                          auto* self = reinterpret_cast<MyEditor*>(stash);
+         *
+         *                          const juce::String& someParam = args.arguments[0].toString();
+         *                          self->myNativeMethod(someParam);
+         *
+         *                          return juce::var::undefined();
+         *                      },
+         *                      (void*) this
+         *                  );
+         *             }
+         *             else
+         *             {
+         *                 // You have loaded some other js bundle. i.e. a polyfill
+         *             }
+         *         }
+         *     };
+         *
+         *     appRoot.evaluate(myAppBundle);
+         * }
+         *
+         * @endcode
+         **/
+        BundleEvalCallback beforeBundleEval;
+
+        /**
+         * Called after a bundle is loaded/evaluated.
+         *
+         * If hot-reload functionality is enabled then this callback will be triggered whenever a previously
+         * registered bundle file is changed (i.e. due to a Webpack watcher/rebuild).
+         *
+         * Use this callback to dispatch any initial state/events required by the React/JS application on load/reload.
+         *
+         * @param bundle The reloaded bundle file if applicable. If evaluate() was called with a raw/inline javascript
+         * code string rather than a .js file bundle will be a std::nullopt_t.
+         *
+         * For most applications the bundle will simply be the main app root bundle file. However, other use cases
+         * for evaluating multiple bundle files may exist, for example to facilitate things like polyfills etc.
+         * As a result it is good practice for callback implementations to check that bundle is the expected file.
+         *
+         * @code
+         *
+         *  MyEditor()
+         *     : appRoot()
+         * {
+         *     juce::File myAppBundle("/path/to/myAppBundle.js");
+         *
+         *     // Not strictly required if JUCE_DEBUG set.
+         *     appRoot.enableHotReload(true);
+         *
+         *     appRoot.afterBundleEval = [=](std::optional<juce::File> bundle)
+         *     {
+         *         if (bundle)
+         *         {
+         *             if (bundle->getFullPathName() == myAppBundle.getFullPathName())
+         *             {
+         *                 juce::String message("This is an important message");
+         *                 appRoot.dispatchEvent("importantMessage", message);
+         *             }
+         *             else
+         *             {
+         *                 // You have loaded some other js bundle. i.e. a polyfill
+         *             }
+         *         }
+         *     };
+         *
+         *     appRoot.evaluate(myAppBundle);
+         * }
+         *
+         * @endcode
+         **/
+        BundleEvalCallback afterBundleEval;
+
+        //==============================================================================
+        /** The ReactApplicationRoot's engine instance. Note it is possible for engine to be a nullptr in the event of a bundle eval callback. */
+        std::unique_ptr<EcmascriptEngine> engine;
 
     private:
+        //==============================================================================
+        void handleBundleChanged(const juce::File& bundle)
+        {
+            initEngine();
+            initViewManager();
+
+            evaluate(bundle.loadFileAsString());
+        }
+
+        //==============================================================================
+        void handleBundleError(const juce::String& trace)
+        {
+            engine.reset();
+            viewManager.reset();
+
+            errorText = std::make_unique<juce::AttributedString>(trace);
+#if JUCE_WINDOWS
+            errorText->setFont(juce::Font("Lucida Console", 18, juce::Font::FontStyleFlags::plain));
+#elif JUCE_MAC
+            errorText->setFont(juce::Font("Monaco", 18, juce::Font::FontStyleFlags::plain));
+#else
+            errorText->setFont(18);
+#endif
+            repaint();
+        }
+
+        //==============================================================================
+        /** Initialises the EcmascriptEngine and registers our native render hooks and a generic error handler/reporter */
+        void initEngine()
+        {
+            engine = std::make_unique<EcmascriptEngine>();
+
+            // Install React.js backend rendering methods
+            registerNativeRenderingHooks();
+
+            engine->onUncaughtError = [this](const juce::String& msg, const juce::String& trace) {
+                handleBundleError(trace);
+            };
+        }
+
+        //==============================================================================
+        /** Initialises the ViewManager and registers our native view types */
+        void initViewManager()
+        {
+            viewManager = std::make_unique<ViewManager>(this);
+            installNativeViewTypes();
+        }
+
         //==============================================================================
         /** Registers each of the natively supported view types. */
         void installNativeViewTypes()
         {
             using ViewPair = ViewManager::ViewPair;
 
-            jassert(_viewManager);
+            jassert(viewManager);
 
-            _viewManager->registerViewType("Text", []() -> ViewPair {
+            viewManager->registerViewType("Text", []() -> ViewPair {
                 auto view = std::make_unique<TextView>();
                 auto shadowView = std::make_unique<TextShadowView>(view.get());
 
                 return {std::move(view), std::move(shadowView)};
             });
 
-            _viewManager->registerViewType("View", []() -> ViewPair {
+            viewManager->registerViewType("View", []() -> ViewPair {
                 auto view = std::make_unique<View>();
                 auto shadowView = std::make_unique<ShadowView>(view.get());
 
                 return {std::move(view), std::move(shadowView)};
             });
 
-            _viewManager->registerViewType("CanvasView", []() -> ViewPair {
+            viewManager->registerViewType("CanvasView", []() -> ViewPair {
                 auto view = std::make_unique<CanvasView>();
                 auto shadowView = std::make_unique<ShadowView>(view.get());
 
                 return {std::move(view), std::move(shadowView)};
             });
 
-            _viewManager->registerViewType("Image", []() -> ViewPair {
+            viewManager->registerViewType("Image", []() -> ViewPair {
                 auto view = std::make_unique<ImageView>();
 
                 // ImageView does not need a specialized shadow view, unless
@@ -143,14 +446,14 @@ namespace blueprint
                 return {std::move(view), std::move(shadowView)};
             });
 
-            _viewManager->registerViewType("ScrollView", []() -> ViewPair {
+            viewManager->registerViewType("ScrollView", []() -> ViewPair {
                 auto view = std::make_unique<ScrollView>();
                 auto shadowView = std::make_unique<ShadowView>(view.get());
 
                 return {std::move(view), std::move(shadowView)};
             });
 
-            _viewManager->registerViewType("ScrollViewContentView", []() -> ViewPair {
+            viewManager->registerViewType("ScrollViewContentView", []() -> ViewPair {
                 auto view = std::make_unique<View>();
                 auto shadowView = std::make_unique<ScrollViewContentShadowView>(view.get());
 
@@ -160,13 +463,15 @@ namespace blueprint
 
         void registerNativeRenderingHooks()
         {
-            engine.registerNativeProperty("__BlueprintNative__", juce::JSON::parse("{}"));
+            jassert(engine);
+            
+            engine->registerNativeProperty("__BlueprintNative__", juce::JSON::parse("{}"));
 
-            engine.registerNativeMethod("__BlueprintNative__", "createViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine->registerNativeMethod("__BlueprintNative__", "createViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
-                jassert (self->_viewManager);
+                jassert (self->viewManager);
                 jassert (args.numArguments == 1);
 
                 ViewManager* const viewManager = self->getViewManager();
@@ -178,7 +483,7 @@ namespace blueprint
                 return juce::var(viewId);
             }, (void *) this);
 
-            engine.registerNativeMethod("__BlueprintNative__", "createTextViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine->registerNativeMethod("__BlueprintNative__", "createTextViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -193,7 +498,7 @@ namespace blueprint
                 return juce::var(viewId);
             }, (void *) this);
 
-            engine.registerNativeMethod("__BlueprintNative__", "setViewProperty", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine->registerNativeMethod("__BlueprintNative__", "setViewProperty", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -210,7 +515,7 @@ namespace blueprint
                 return juce::var::undefined();
             }, (void *) this);
 
-            engine.registerNativeMethod("__BlueprintNative__", "setRawTextValue", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine->registerNativeMethod("__BlueprintNative__", "setRawTextValue", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -226,7 +531,7 @@ namespace blueprint
                 return juce::var::undefined();
             }, (void *) this);
 
-            engine.registerNativeMethod("__BlueprintNative__", "addChild", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine->registerNativeMethod("__BlueprintNative__", "addChild", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -246,7 +551,7 @@ namespace blueprint
                 return juce::var::undefined();
             }, (void *) this);
 
-            engine.registerNativeMethod("__BlueprintNative__", "removeChild", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine->registerNativeMethod("__BlueprintNative__", "removeChild", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -262,7 +567,7 @@ namespace blueprint
                 return juce::var::undefined();
             }, (void *) this);
 
-            engine.registerNativeMethod("__BlueprintNative__", "getRootInstanceId", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine->registerNativeMethod("__BlueprintNative__", "getRootInstanceId", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -273,8 +578,11 @@ namespace blueprint
         }
 
         //==============================================================================
-        std::unique_ptr<ViewManager> _viewManager;
+        bool hotReloadEnabled = false;
 
+        std::unique_ptr<ViewManager>            viewManager;
+        std::unique_ptr<BundleWatcher>          bundleWatcher;
+        std::unique_ptr<juce::AttributedString> errorText;
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReactApplicationRoot)
     };

@@ -20,7 +20,7 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
     addAndMakeVisible(appRoot);
     appRoot.evaluate(sourceDir.getChildFile("ui/build/js/main.js").loadFileAsString());
     
-    appRoot.engine.registerNativeMethod(
+    appRoot.engine->registerNativeMethod(
         "setParameterValueNotifyingHost",
         [](void* stash, const juce::var::NativeFunctionArgs& args) {
             auto* self = reinterpret_cast<BlueprintPluginAudioProcessorEditor*>(stash);
@@ -38,9 +38,7 @@ BlueprintPluginAudioProcessorEditor::BlueprintPluginAudioProcessorEditor (Bluepr
     
     
     // Globals in the js env
-    appRoot.engine.registerNativeProperty("__VERSION__", JucePlugin_VersionString);
-
-
+    appRoot.engine->registerNativeProperty("__VERSION__", JucePlugin_VersionString);
 
     setResizable(true, true);
     setResizeLimits(667, 375, 1334, 750);
