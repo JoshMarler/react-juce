@@ -26,8 +26,7 @@ namespace blueprint
      */
     class BlueprintGenericEditor
         : public juce::AudioProcessorEditor,
-          public juce::AudioProcessorParameter::Listener,
-          public juce::Timer
+          public juce::AudioProcessorParameter::Listener
     {
     public:
         //==============================================================================
@@ -42,31 +41,23 @@ namespace blueprint
         void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override;
 
         //==============================================================================
-        /** Implement the timer interface. */
-        void timerCallback() override;
-
         /** Override the component interface. */
         void resized() override;
         void paint (juce::Graphics&) override;
 
+        //==============================================================================
+
     private:
         //==============================================================================
-        /** Provisions and assigns a new ReactApplicationRoot. */
-        void assignNewAppRoot(const juce::String&);
-
-        /** Called for an uncaught error in the script engine.
-         *
-         *  Tears down an existing appRoot and paints the screen red with the
-         *  stack trace printed.
-         */
-        void showError(const juce::String& trace);
+        /** ReactApplicationRoot bundle eval callback functions */
+        void beforeBundleEvaluated();
+        void afterBundleEvaluated();
+        void registerAppRootCallbacks();
 
         //==============================================================================
-        std::unique_ptr<ReactApplicationRoot> appRoot;
-        std::unique_ptr<juce::AttributedString> errorText;
+        ReactApplicationRoot                  appRoot;
+        juce::File                            bundleFile;
         juce::AudioProcessorValueTreeState* valueTreeState;
-        juce::File bundleFile;
-        juce::Time lastModifiedTime;
 
         // For parameter updates to the script engine
         ThrottleMap throttleMap;

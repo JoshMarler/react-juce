@@ -24,7 +24,7 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
     jassert (bundle.existsAsFile());
 
     // Bind some native callbacks
-    appRoot.engine.registerNativeMethod(
+    appRoot.engine->registerNativeMethod(
         "beginParameterChangeGesture",
         [](void* stash, const juce::var::NativeFunctionArgs& args) {
             auto* self = reinterpret_cast<GainPluginAudioProcessorEditor*>(stash);
@@ -38,7 +38,7 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
         (void *) this
     );
 
-    appRoot.engine.registerNativeMethod(
+    appRoot.engine->registerNativeMethod(
         "setParameterValueNotifyingHost",
         [](void* stash, const juce::var::NativeFunctionArgs& args) {
             auto* self = reinterpret_cast<GainPluginAudioProcessorEditor*>(stash);
@@ -53,7 +53,7 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
         (void *) this
     );
 
-    appRoot.engine.registerNativeMethod(
+    appRoot.engine->registerNativeMethod(
         "endParameterChangeGesture",
         [](void* stash, const juce::var::NativeFunctionArgs& args) {
             auto* self = reinterpret_cast<GainPluginAudioProcessorEditor*>(stash);
