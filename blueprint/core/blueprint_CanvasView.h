@@ -101,6 +101,7 @@ namespace blueprint
         void init()
         {
             graphics = std::make_unique<juce::Graphics>(image);
+            graphics->setImageResamplingQuality(juce::Graphics::highResamplingQuality);
         }
 
     private:
