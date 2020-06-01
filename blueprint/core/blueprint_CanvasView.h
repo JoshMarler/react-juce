@@ -394,6 +394,45 @@ namespace blueprint
                         return juce::var();
                     }
             });
+
+            // drawImage support
+            setProperty("drawImage", juce::var::NativeFunction {
+                    [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
+                        jassert(graphics);
+                        jassert(args.numArguments >= 3 && args.numArguments <= 5);
+
+                        const juce::String svg  = args.arguments[0].toString();
+                        const float        xPos = args.arguments[1];
+                        const float        yPos = args.arguments[2];
+
+                        //TODO: Add support for drawimage source width and source height to draw sub rect of an image.
+                        //      ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+
+                        std::unique_ptr<juce::XmlElement> svgElement  = juce::XmlDocument::parse(svg);
+                        jassert(svgElement);
+
+                        if (svgElement)
+                        {
+                            std::unique_ptr<juce::Drawable> svgDrawable = juce::Drawable::createFromSVG(*svgElement);
+
+                            if (args.numArguments == 5)
+                            {
+                                const float destWidth  = args.arguments[3];
+                                const float destHeight = args.arguments[4];
+                                const auto  bounds     = juce::Rectangle<float>(xPos, yPos, destWidth, destHeight);
+
+                                svgDrawable->setTransformToFit(bounds, juce::RectanglePlacement::stretchToFit);
+                                svgDrawable->draw(*graphics, 1.0f);
+                            }
+                            else
+                            {
+                                svgDrawable->drawAt(*graphics, xPos, yPos, 1.0);
+                            }
+                        }
+
+                        return juce::var();
+                    }
+            });
         }
 
         //==============================================================================
