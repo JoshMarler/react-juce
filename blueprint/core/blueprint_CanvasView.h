@@ -117,8 +117,6 @@ namespace blueprint
                         const auto colourHex = args.arguments[0].toString();
                         properties.fillStyle.setColour(juce::Colour::fromString(colourHex));
 
-                        graphics->setFillType(properties.fillStyle);
-
                         return juce::var();
                     }
             });
@@ -182,6 +180,7 @@ namespace blueprint
                         const int width = args.arguments[2];
                         const int height = args.arguments[3];
 
+                        graphics->setFillType(properties.fillStyle);
                         graphics->fillRect(x, y, width, height);
 
                         return juce::var();
@@ -198,6 +197,7 @@ namespace blueprint
                         const int width = args.arguments[2];
                         const int height = args.arguments[3];
 
+                        graphics->setColour(properties.strokeStyle.colour);
                         graphics->drawRect(x, y, width, height, properties.lineWidth);
 
                         return juce::var();
@@ -317,8 +317,6 @@ namespace blueprint
                         jassert(graphics);
                         jassert(args.numArguments == 0);
 
-                        graphics->setColour(properties.strokeStyle.colour);
-                        graphics->strokePath(path, juce::PathStrokeType((float)properties.lineWidth));
                         graphics->setColour(properties.fillStyle.colour);
                         graphics->fillPath(path);
 
