@@ -22,52 +22,86 @@ export function Image(props) {
   return React.createElement('Image', props, props.children);
 }
 
-export function Canvas(props) {
-  if (props.hasOwnProperty('onDraw')) {
-    let userOnDraw = props.onDraw;
-    let wrappedDraw = function(ctx) {
-      Object.defineProperty(ctx, 'fillStyle', {
-        enumerable: false,
-        configurable: false,
-        get: function() {
-          return 'Not Supported';
-        },
-        set: function(value) {
-          this.__setFillStyle(value);
-        }
-      });
+export function bindCanvasContextProperties(ctx) {
+  Object.defineProperty(ctx, 'fillStyle', {
+    enumerable: false,
+    configurable: false,
+    get: function() {
+      return 'Not Supported';
+    },
+    set: function(value) {
+      this.__setFillStyle(value);
+    }
+  });
 
-      Object.defineProperty(ctx, 'strokeStyle', {
-        enumerable: false,
-        configurable: false,
-        get: function() {
-          return 'Not Supported';
-        },
-        set: function(value) {
-          this.__setStrokeStyle(value);
-        }
-      });
+  Object.defineProperty(ctx, 'strokeStyle', {
+    enumerable: false,
+    configurable: false,
+    get: function() {
+      return 'Not Supported';
+    },
+    set: function(value) {
+      this.__setStrokeStyle(value);
+    }
+  });
 
-      Object.defineProperty(ctx, 'lineWidth', {
-        enumerable: false,
-        configurable: false,
-        get: function() {
-          return 'Not Supported';
-        },
-        set: function(value) {
-          this.__setLineWidth(value);
-        }
-      });
+  Object.defineProperty(ctx, 'lineWidth', {
+    enumerable: false,
+    configurable: false,
+    get: function() {
+      return 'Not Supported';
+    },
+    set: function(value) {
+      this.__setLineWidth(value);
+    }
+  });
+}
 
-      return userOnDraw(ctx);
+export class Canvas extends Component {
+  constructor(props) {
+    super(props);
+
+    this._onMeasure = this._onMeasure.bind(this);
+    this._onDraw = this._onDraw.bind(this);
+
+    this.state = {
+      width: 0,
+      height: 0
     };
-
-    return React.createElement('CanvasView', Object.assign({}, props, {
-      onDraw: wrappedDraw,
-    }), props.children);
   }
 
-  return React.createElement('CanvasView', props, props.children);
+  _onMeasure(width, height) {
+    this.setState({
+      width: width,
+      height: height
+    });
+
+    if (typeof this.props.onMeasure === 'function') {
+      this.props.onMeasure(width, height);
+    }
+  }
+
+  _onDraw(ctx) {
+    if (typeof this.props.onDraw === 'function') {
+      bindCanvasContextProperties(ctx);
+
+      if (this.props.autoclear) {
+        ctx.clearRect(0, 0, this.state.width, this.state.height);
+      }
+
+      this.props.onDraw(ctx);
+    }
+  }
+
+  render() {
+    //TODO: Check whether need to use below arrow function for "this" binding
+    //      is a bug in duktape. Possible this only occurs on linux. Does not 
+    //      appear to occur on mac.
+    return React.createElement('CanvasView', Object.assign({}, this.props, {
+      onDraw: (ctx) => { this._onDraw(ctx) },
+      onMeasure: (width, height) => { this._onMeasure(width, height )}
+    }), this.props.children);
+  }
 }
 
 function ScrollViewContentView(props) {

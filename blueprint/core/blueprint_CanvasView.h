@@ -70,8 +70,9 @@ namespace blueprint
         };
 
         explicit CanvasContext()
-            : image(juce::Image::ARGB, 1, 1, true)
-            , graphics(std::make_unique<juce::Graphics>(image))
+            : ctxWidth(1)
+            , ctxHeight(1)
+            , image(juce::Image::ARGB, ctxWidth, ctxHeight, true)
         {
             registerNativeProperties();
             registerNativeFunctions();
@@ -86,7 +87,9 @@ namespace blueprint
          */
         void setSize(int width, int height)
         {
-            image = juce::Image(juce::Image::ARGB, width, height, true);
+            ctxWidth  = std::max(width, 1);
+            ctxHeight = std::max(height, 1);
+            image     = image.rescaled(ctxWidth, ctxHeight, juce::Graphics::highResamplingQuality);
         }
 
         /** Get the juce::Image instance that has been rendered to. This can be drawn to the screen
@@ -100,7 +103,11 @@ namespace blueprint
         /**  init should be called before passing the CanvasContext instance to a JS drawing function. */
         void init()
         {
-            graphics = std::make_unique<juce::Graphics>(image);
+            graphics   = std::make_unique<juce::Graphics>(image);
+            properties = Properties{};
+            path       = juce::Path{};
+
+            transformStack.clear();
         }
 
     private:
@@ -204,7 +211,22 @@ namespace blueprint
                     }
             });
 
-            //TODO: Add clearRect. Use View background color and g.fillRect?
+            setProperty("clearRect", juce::var::NativeFunction {
+                    [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
+                        jassert(graphics);
+                        jassert(args.numArguments == 4);
+
+                        const int x = args.arguments[0];
+                        const int y = args.arguments[1];
+                        const int width = args.arguments[2];
+                        const int height = args.arguments[3];
+
+                        juce::Rectangle<int> area (x, y, width, height);
+                        image.clear(area);
+
+                        return juce::var();
+                    }
+            });
 
             // Path functions
             setProperty("beginPath", juce::var::NativeFunction {
@@ -436,6 +458,9 @@ namespace blueprint
         }
 
         //==============================================================================
+        int                                ctxWidth;
+        int                                ctxHeight;
+
         juce::Image                        image;
         std::unique_ptr<juce::Graphics>    graphics;
         juce::Path                         path;
@@ -510,6 +535,7 @@ namespace blueprint
 
         void resized() override
         {
+            View::resized();
             ctx->setSize(getWidth(), getHeight());
         }
 
