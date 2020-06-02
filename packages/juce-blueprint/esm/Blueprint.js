@@ -55,6 +55,28 @@ export function bindCanvasContextProperties(ctx) {
       this.__setLineWidth(value);
     }
   });
+
+  Object.defineProperty(ctx, 'font', {
+    enumerable: false,
+    configurable: false,
+    get: function() {
+      return 'Not Supported';
+    },
+    set: function(value) {
+      this.__setFont(value);
+    }
+  });
+
+  Object.defineProperty(ctx, 'textAlign', {
+    enumerable: false,
+    configurable: false,
+    get: function() {
+      return 'Not Supported';
+    },
+    set: function(value) {
+      this.__setTextAlign(value);
+    }
+  });
 }
 
 export class Canvas extends Component {

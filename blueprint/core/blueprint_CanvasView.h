@@ -64,9 +64,11 @@ namespace blueprint
 
         struct Properties
         {
-            FillStyle      fillStyle{};
-            StrokeStyle    strokeStyle{};
-            int            lineWidth = 1;
+            FillStyle           fillStyle{};
+            StrokeStyle         strokeStyle{};
+            int                 lineWidth = 1;
+            juce::Font          font{};
+            juce::Justification textAlign = juce::Justification::left;
         };
 
         explicit CanvasContext()
@@ -150,6 +152,103 @@ namespace blueprint
 
                         const int lineWidth = args.arguments[0];
                         properties.lineWidth = lineWidth;
+
+                        return juce::var();
+                    }
+            });
+
+            /**
+             * Currently supports space separated css-font like strings with the below  supported format/properties:
+             *
+             *  "<font-style> <font-weight> <font-size> <font-family>"
+             *
+             *  One of the following values may be supplied for each font property.
+             *
+             *  <font-style>:  italic, normal
+             *  <font-weight>: bold, normal
+             *  <font-size>:   font size in pixels, i.e. "14px"
+             *  <font-family>: font name representing an available font/typeface on the system, i.e. "sans-serif"
+             *
+             *  Note, font-size and font-family must be supplied in the string from JS but font-style and font-weight
+             *  are optional, though they must precede font-size and font-family and be ordered font-style, font-weight.
+             *  If no values are supplied for font-style and font-weight the juce::Font::plain flag will be used.
+             *
+             *  Example font strings from JS bundle:
+             *
+             *  'italic bold 14px sans-serif'
+             *  'bold 14px sans-serif'
+             *  'italic 14px sans-serif'
+             *  '14px sans-serif'
+             *
+             *  Note, multi-word/space-separated strings should be place in quotes:
+             *
+             *  'bold 14px "DejaVu Serif"'
+             * */
+            setProperty("__setFont", juce::var::NativeFunction {
+                    [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
+                        jassert(graphics);
+                        jassert(args.numArguments == 1);
+
+                        const juce::String fontString = args.arguments[0].toString();
+
+                        juce::StringArray values;
+                        values.addTokens(fontString, " ");
+
+                        jassert(values.size() >=2 && values.size() <= 4);
+
+                        juce::Font::FontStyleFlags flags    = juce::Font::plain;
+                        float                      fontSize = 0;
+                        juce::String               typeface;
+
+                        for (auto& value : values)
+                        {
+                            // Remove any quoted values likely used when specifying fonts
+                            value = value.unquoted();
+
+                            if (value == "bold")
+                            {
+                                flags = static_cast<juce::Font::FontStyleFlags>(flags | juce::Font::bold);
+                            }
+                            else if (value == "italic")
+                            {
+                                flags = static_cast<juce::Font::FontStyleFlags>(flags | juce::Font::italic);
+                            }
+                            else if (value.contains("px"))
+                            {
+                                fontSize = (float)value.getIntValue();
+                            }
+                            else if (value != "normal")
+                            {
+                                typeface = value;
+                            }
+                        }
+
+                        properties.font = juce::Font(typeface, fontSize, flags);
+
+                        return juce::var();
+                    }
+            });
+
+            setProperty("__setTextAlign", juce::var::NativeFunction {
+                    [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
+                        jassert(graphics);
+                        jassert(args.numArguments == 1);
+
+                        const juce::String textAlign = args.arguments[0].toString();
+
+                        //TODO: Have "start" and "end" depend on a "direction" property.
+                        //      Leaving with sensible defaults for now. No clear way
+                        //      to provide/infer text direction from locale at the moment etc.
+                        if (textAlign == "left")
+                            properties.textAlign = juce::Justification::left;
+                        else if (textAlign == "right")
+                            properties.textAlign = juce::Justification::right;
+                        else if (textAlign == "center")
+                            properties.textAlign = juce::Justification::horizontallyCentred;
+                        else if (textAlign == "start")
+                            properties.textAlign = juce::Justification::left;
+                        else if (textAlign == "end")
+                            properties.textAlign = juce::Justification::right;
 
                         return juce::var();
                     }
@@ -451,6 +550,63 @@ namespace blueprint
                         {
                             svgDrawable->drawAt(*graphics, xPos, yPos, 1.0);
                         }
+
+                        return juce::var();
+                    }
+            });
+
+            // Text functions
+            setProperty("strokeText", juce::var::NativeFunction {
+                    [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
+                        jassert(graphics);
+                        jassert(args.numArguments >= 3 && args.numArguments <= 4);
+
+                        const juce::String text = args.arguments[0].toString();
+                        const float        xPos = args.arguments[1];
+                        const float        yPos = args.arguments[2];
+
+                        // Default maxLineWidth to full context width
+                        float maxLineWidth = (float)ctxWidth;
+
+                        if (args.numArguments == 4)
+                            maxLineWidth = args.arguments[3];
+
+                        juce::Path textPath;
+                        juce::GlyphArrangement glyphArrangement;
+
+                        glyphArrangement.addJustifiedText(properties.font, text, xPos, yPos, maxLineWidth, properties.textAlign);
+                        glyphArrangement.createPath(textPath);
+
+                        graphics->setColour(properties.strokeStyle.colour);
+                        graphics->strokePath(textPath, juce::PathStrokeType((float)properties.lineWidth));
+
+                        return juce::var();
+                    }
+            });
+
+            setProperty("fillText", juce::var::NativeFunction {
+                    [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
+                        jassert(graphics);
+                        jassert(args.numArguments >= 3 && args.numArguments <= 4);
+
+                        const juce::String text = args.arguments[0].toString();
+                        const float        xPos = args.arguments[1];
+                        const float        yPos = args.arguments[2];
+
+                        // Default maxLineWidth to full context width
+                        float maxLineWidth = (float)ctxWidth;
+
+                        if (args.numArguments == 4)
+                            maxLineWidth = args.arguments[3];
+
+                        juce::Path textPath;
+                        juce::GlyphArrangement glyphArrangement;
+
+                        glyphArrangement.addJustifiedText(properties.font, text, xPos, yPos, maxLineWidth, properties.textAlign);
+                        glyphArrangement.createPath(textPath);
+
+                        graphics->setFillType(properties.fillStyle);
+                        graphics->fillPath(textPath);
 
                         return juce::var();
                     }
