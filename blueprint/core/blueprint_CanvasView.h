@@ -408,26 +408,28 @@ namespace blueprint
                         //TODO: Add support for drawimage source width and source height to draw sub rect of an image.
                         //      ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 
-                        std::unique_ptr<juce::XmlElement> svgElement  = juce::XmlDocument::parse(svg);
-                        jassert(svgElement);
+                        std::unique_ptr<juce::XmlElement> svgElement = juce::XmlDocument::parse(svg);
 
-                        if (svgElement)
+                        if (!svgElement)
                         {
-                            std::unique_ptr<juce::Drawable> svgDrawable = juce::Drawable::createFromSVG(*svgElement);
+                            DBG("\"WARNING: Invalid SVG string supplied to `drawImage`.\"");
+                            return juce::var();
+                        }
 
-                            if (args.numArguments == 5)
-                            {
-                                const float destWidth  = args.arguments[3];
-                                const float destHeight = args.arguments[4];
-                                const auto  bounds     = juce::Rectangle<float>(xPos, yPos, destWidth, destHeight);
+                        std::unique_ptr<juce::Drawable> svgDrawable = juce::Drawable::createFromSVG(*svgElement);
 
-                                svgDrawable->setTransformToFit(bounds, juce::RectanglePlacement::stretchToFit);
-                                svgDrawable->draw(*graphics, 1.0f);
-                            }
-                            else
-                            {
-                                svgDrawable->drawAt(*graphics, xPos, yPos, 1.0);
-                            }
+                        if (args.numArguments == 5)
+                        {
+                            const float destWidth  = args.arguments[3];
+                            const float destHeight = args.arguments[4];
+                            const auto  bounds     = juce::Rectangle<float>(xPos, yPos, destWidth, destHeight);
+
+                            svgDrawable->setTransformToFit(bounds, juce::RectanglePlacement::stretchToFit);
+                            svgDrawable->draw(*graphics, 1.0f);
+                        }
+                        else
+                        {
+                            svgDrawable->drawAt(*graphics, xPos, yPos, 1.0);
                         }
 
                         return juce::var();
