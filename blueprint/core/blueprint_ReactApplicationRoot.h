@@ -52,6 +52,16 @@ namespace blueprint
             watchedBundles.push_back({ bundle, bundle.getLastModificationTime() });
         }
 
+        bool watching(const juce::File &bundle) const
+        {
+            return std::find_if(  watchedBundles.cbegin()
+                                , watchedBundles.cend()
+                                , [=](const WatchedBundle& wb)
+                                  {
+                                      return wb.bundle.getFullPathName() == bundle.getFullPathName();
+                                  }) != watchedBundles.cend();
+        }
+
     private:
         void timerCallback() override
         {
@@ -175,7 +185,9 @@ namespace blueprint
             if (hotReloadEnabled)
             {
                 jassert(bundleWatcher);
-                bundleWatcher->watch(bundle);
+
+                if (!bundleWatcher->watching(bundle))
+                    bundleWatcher->watch(bundle);
             }
 
             return result;
@@ -364,7 +376,7 @@ namespace blueprint
             initEngine();
             initViewManager();
 
-            evaluate(bundle.loadFileAsString());
+            evaluate(bundle);
         }
 
         //==============================================================================
