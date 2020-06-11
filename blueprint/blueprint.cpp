@@ -43,6 +43,7 @@
 
 #include "duktape/src-noline/duktape.c"
 #include "duktape/extras/console/duk_console.c"
+#include "duktape/examples/debug-trans-socket/duk_trans_socket_unix.c"
 
 #include "blueprint.h"
 

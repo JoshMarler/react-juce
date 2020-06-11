@@ -91,12 +91,39 @@ namespace blueprint
                     return false;
                 }
 
-                 duk_throw_raw(ctx);
+                duk_throw_raw(ctx);
             }
 
             // Indicate success
             return true;
         }
+
+        template<typename T>
+        static bool safeCompileFile(duk_context* ctx, const juce::File& file, T&& callback)
+        {
+            // Push the js filename to be compiled/evaluated
+            duk_push_string(ctx, file.getFileName().toRawUTF8());
+
+            if (duk_pcompile_string_filename(ctx, DUK_COMPILE_EVAL, file.loadFileAsString().toRawUTF8()) != 0)
+            {
+                if (callback != nullptr)
+                {
+                    const juce::String trace = duk_safe_to_stacktrace(ctx, -1);
+                    const juce::String msg = duk_safe_to_string(ctx, -1);
+
+                    // Call the user provided error handler.js
+                    std::invoke(callback, msg, trace);
+
+                    // Indicate failure
+                    return false;
+                }
+
+                duk_throw_raw(ctx);
+            }
+
+            // Indicate success
+            return true;
+       }
     }
 
     //==============================================================================
@@ -123,6 +150,37 @@ namespace blueprint
         auto result = readVarFromDukStack(ctx, -1);
 
         duk_pop(ctx);
+        return result;
+    }
+
+    juce::var EcmascriptEngine::evaluate (const juce::File& code)
+    {
+        juce::var result = juce::var::undefined();
+
+        if (detail::safeCompileFile(ctx, code, onUncaughtError))
+        {
+            // Call compiled function
+            if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS)
+            {
+                if (onUncaughtError != nullptr)
+                {
+                    const juce::String trace = duk_safe_to_stacktrace(ctx, -1);
+                    const juce::String msg = duk_safe_to_string(ctx, -1);
+
+                    // Call the user provided error handler
+                    std::invoke(onUncaughtError, msg, trace);
+
+                    return juce::var::undefined();
+                }
+
+                duk_throw_raw(ctx);
+            }
+        }
+
+        // Collect the return value
+        result = readVarFromDukStack(ctx, -1);
+        duk_pop(ctx);
+
         return result;
     }
 
@@ -226,6 +284,28 @@ namespace blueprint
 
         duk_pop(ctx);
         return result;
+    }
+
+    //==============================================================================
+    void EcmascriptEngine::debuggerAttach()
+    {
+        duk_trans_socket_init();
+        duk_trans_socket_waitconn();
+
+        duk_debugger_attach(ctx,
+                            duk_trans_socket_read_cb,
+                            duk_trans_socket_write_cb,
+                            duk_trans_socket_peek_cb,
+                            duk_trans_socket_read_flush_cb,
+                            duk_trans_socket_write_flush_cb,
+                            NULL,
+                            [](duk_context*, void*) { duk_trans_socket_finish(); },
+                            NULL);
+    }
+
+    void EcmascriptEngine::debuggerDetach()
+    {
+        duk_debugger_detach(ctx);
     }
 
     //==============================================================================

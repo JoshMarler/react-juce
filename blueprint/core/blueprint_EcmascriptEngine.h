@@ -32,6 +32,7 @@ namespace blueprint
         //==============================================================================
         /** Evaluates the given code in the interpreter, returning the result. */
         juce::var evaluate (const juce::String& code);
+        juce::var evaluate (const juce::File& code);
 
         //==============================================================================
         /** Registers a native method by the given name in the global namespace. */
@@ -99,14 +100,26 @@ namespace blueprint
         juce::var invoke (const juce::String& name, T... args);
 
         //==============================================================================
-        /** A public member which can be assigned a callback for delegating fatal error
-         *  handling to user code.
+        /** A public member which can be assigned a callback for delegating error handling to user code.
          *
-         *  Upon returning, your callback should have ceased further execution of code
-         *  in this EcmascriptEngine. You will need to create and initialize a new one
-         *  to proceed safely.
+         * This callback will be called primarily in the case of recoverable errors when evaluating JS code.
+         * It is possible to continue using this EcmascriptEngine instance after such an error has been
+         * raised. For example callers may wish to handle such an error and subsequently reload a modified
+         * version of a JS bundle file as part of a "hot-reload" workflow, incrementally fixing/debugging
+         * errors.
          */
         std::function<void(const juce::String& msg, const juce::String& trace)> onUncaughtError;
+
+        //==============================================================================
+        /**
+         * Pauses execution and waits for a debug client to attach and begin a debug session.
+         */
+        void debuggerAttach();
+
+        /**
+         * Detaches the from the current debug session/attachment.
+         */
+        void debuggerDetach();
 
         //==============================================================================
         // TODO: These pushVarToDukStack/readVarFromDukStack should be private, but are

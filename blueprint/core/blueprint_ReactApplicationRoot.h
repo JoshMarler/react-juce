@@ -91,6 +91,25 @@ namespace blueprint
     /** The ReactApplicationRoot class prepares and maintains a Duktape evaluation
         context with the relevant hooks for supporting the Blueprint render
         backend.
+
+        ReactApplicationRoot provides some useful facilities in debug builds with
+        JUCE_DEBUG defined.
+
+        Firstly, ReactApplicationRoot will automatically watch bundle
+        files (added via ReactApplicationRoot::evaluate) for changes and reload said
+        bundle in the event of a change/recompile. This allows for hot-reload functionality.
+
+        Secondly, ReactApplicationRoot provides debug functionality similar to React Native.
+        Users can hit CTRL-D/CMD-D when the ReactApplicationRoot component has focus,
+        causing the application to suspend execution and await connection from a debug client.
+        See the WIKI for details on setting up and connecting a JS debugger.
+
+        Finally, ReactApplicationRoot implements a generic error handler which will catch
+        errors from JavaScript code and display an error screen with an error trace/message.
+        This generic error handler is enabled by default in both debug and release builds.
+        Users of ReactApplicationRoot may which to override this handler by setting the
+        EcmascriptEngine::onUncaughtError callback after constructing a ReactApplicationRoot instance.
+        This can be useful to hide error details from users in production etc.
      */
     class ReactApplicationRoot : public View
     {
@@ -108,6 +127,9 @@ namespace blueprint
 
 #if JUCE_DEBUG
             enableHotReloading();
+
+            // Enable keyboardFocus to support CTRL-D/CMD-D debug attachment.
+            setWantsKeyboardFocus(true);
 #endif
         }
 
@@ -131,6 +153,19 @@ namespace blueprint
             {
                 View::paint(g);
             }
+        }
+        //==============================================================================
+        bool keyPressed(const juce::KeyPress& key) override
+        {
+#if JUCE_DEBUG
+           const auto startDebugCommand = juce::KeyPress('d', juce::ModifierKeys::commandModifier, 0);
+
+           if (engine && key == startDebugCommand)
+           {
+               engine->debuggerAttach();
+           }
+#endif
+            return true;
         }
 
         //==============================================================================
@@ -172,12 +207,17 @@ namespace blueprint
         juce::var evaluate(const juce::File& bundle)
         {
             JUCE_ASSERT_MESSAGE_THREAD
+
             jassert(bundle.existsAsFile());
+            jassert(engine);
+
+            // Clear error state from previous js evals
+            errorText.reset();
 
             if (beforeBundleEval)
                 beforeBundleEval(bundle);
 
-            auto result = evaluate(bundle.loadFileAsString());
+            auto result = engine->evaluate(bundle);
 
             if (afterBundleEval)
                 afterBundleEval(bundle);
@@ -185,7 +225,6 @@ namespace blueprint
             if (hotReloadEnabled)
             {
                 jassert(bundleWatcher);
-
                 if (!bundleWatcher->watching(bundle))
                     bundleWatcher->watch(bundle);
             }
@@ -373,8 +412,8 @@ namespace blueprint
         //==============================================================================
         void handleBundleChanged(const juce::File& bundle)
         {
-            initEngine();
             initViewManager();
+            registerNativeRenderingHooks();
 
             evaluate(bundle);
         }
@@ -382,7 +421,6 @@ namespace blueprint
         //==============================================================================
         void handleBundleError(const juce::String& trace)
         {
-            engine.reset();
             viewManager.reset();
 
             errorText = std::make_unique<juce::AttributedString>(trace);
