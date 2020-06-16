@@ -41,6 +41,8 @@
   #pragma warning(disable : 4702) // unreachable code
 #endif
 
+#include <juce_core/juce_core.h>
+
 #include "duktape/src-noline/duktape.c"
 #include "duktape/extras/console/duk_console.c"
 #include "duktape/examples/debug-trans-socket/duk_trans_socket_unix.c"
