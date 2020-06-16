@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <map>
+#include <optional>
 
 #include "blueprint_CanvasView.h"
 #include "blueprint_EcmascriptEngine.h"
@@ -242,7 +242,7 @@ namespace blueprint
         {
             JUCE_ASSERT_MESSAGE_THREAD
             jassert(engine);
-            
+
             // engine may have been reset in the event of a bundle eval error. We don't want to
             // crash if client code tries to immediately dispatch an event after bundle loading.
             // ReactApplicationRoot should report a generic error to the user rather than crashing.
@@ -256,7 +256,7 @@ namespace blueprint
         {
             JUCE_ASSERT_MESSAGE_THREAD
             jassert(engine);
-            
+
             // engine may have been reset in the event of a bundle eval error. We don't want to
             // crash if client code tries to immediately dispatch an event after bundle loading.
             // ReactApplicationRoot should report a generic error to the user rather than crashing.
@@ -514,7 +514,7 @@ namespace blueprint
         void registerNativeRenderingHooks()
         {
             jassert(engine);
-            
+
             engine->registerNativeProperty("__BlueprintNative__", juce::JSON::parse("{}"));
 
             engine->registerNativeMethod("__BlueprintNative__", "createViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
