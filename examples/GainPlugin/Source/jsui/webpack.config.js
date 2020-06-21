@@ -4,7 +4,8 @@ module.exports = {
     path: __dirname + '/build/js',
     filename: 'main.js',
     sourceMapFilename: "[file].map",
-    devtoolModuleFilenameTemplate: 'webpack:///[absolute-resource-path]'
+     devtoolModuleFilenameTemplate: info =>
+    `webpack:///${info.absoluteResourcePath.replace(/\\/g, '/')}`
   },
   devtool: "source-map",
   module: {

@@ -116,7 +116,7 @@ namespace blueprint
         // If we have a valueTreeState, bind parameter methods to the new app root
         if (valueTreeState != nullptr)
         {
-            appRoot.engine->registerNativeMethod(
+            appRoot.engine.registerNativeMethod(
                     "beginParameterChangeGesture",
                     [](void* stash, const juce::var::NativeFunctionArgs& args) {
                         auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
@@ -130,7 +130,7 @@ namespace blueprint
                     (void *) valueTreeState
             );
 
-            appRoot.engine->registerNativeMethod(
+            appRoot.engine.registerNativeMethod(
                     "setParameterValueNotifyingHost",
                     [](void* stash, const juce::var::NativeFunctionArgs& args) {
                         auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
@@ -145,7 +145,7 @@ namespace blueprint
                     (void *) valueTreeState
             );
 
-            appRoot.engine->registerNativeMethod(
+            appRoot.engine.registerNativeMethod(
                     "endParameterChangeGesture",
                     [](void* stash, const juce::var::NativeFunctionArgs& args) {
                         auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);

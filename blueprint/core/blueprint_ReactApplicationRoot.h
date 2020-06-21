@@ -74,7 +74,13 @@ namespace blueprint
                 {
                     const auto lmt = wb.bundle.getLastModificationTime();
 
-                    if (lmt > wb.bundleLastModifiedTime)
+                    // In some instances webpack rebuilds temporarily result in an empty
+                    // bundle file before rebuilding. We do not want to trigger evaluation
+                    // callbacks when the bundle file is empty as this is likely to cause errors
+                    // when users attempt to call javascript functions from C/C++. Calling eval/call
+                    // in duktape with an empty js file/string does not result in an error and simply
+                    // pushes undefined to the top of the duktape stack as the
+                    if (lmt > wb.bundleLastModifiedTime && wb.bundle.loadFileAsString().isNotEmpty())
                     {
                         onBundleChanged(wb.bundle);
                         wb.bundleLastModifiedTime = lmt;
@@ -119,11 +125,12 @@ namespace blueprint
         {
             JUCE_ASSERT_MESSAGE_THREAD
 
-            // Initialise the EcmascriptEngine
-            initEngine();
-
             // Initialise the ViewManager
             initViewManager();
+
+            engine.onUncaughtError = [this](const juce::String& msg, const juce::String& trace) {
+                handleBundleError(trace);
+            };
 
 #if JUCE_DEBUG
             enableHotReloading();
@@ -160,9 +167,9 @@ namespace blueprint
 #if JUCE_DEBUG
            const auto startDebugCommand = juce::KeyPress('d', juce::ModifierKeys::commandModifier, 0);
 
-           if (engine && key == startDebugCommand)
+           if (key == startDebugCommand)
            {
-               engine->debuggerAttach();
+               engine.debuggerAttach();
            }
 #endif
             return true;
@@ -183,13 +190,19 @@ namespace blueprint
             // Clear error state from previous js evals
             errorText.reset();
 
-            if (beforeBundleEval)
-                beforeBundleEval(std::nullopt);
+            if (!bundleValid)
+            {
+                // Install React.js backend rendering methods
+                registerNativeRenderingHooks();
 
-            jassert(engine);
-            auto result = engine->evaluate(bundle);
+                if (beforeBundleEval)
+                    beforeBundleEval(std::nullopt);
+            }
 
-            if (afterBundleEval)
+            auto result = engine.evaluate(bundle);
+            bundleValid = result != EcmascriptEngine::EvaluationError;
+
+            if (bundleValid && afterBundleEval)
                 afterBundleEval(std::nullopt);
 
             return result;
@@ -208,23 +221,28 @@ namespace blueprint
         {
             JUCE_ASSERT_MESSAGE_THREAD
 
-            jassert(bundle.existsAsFile());
-            jassert(engine);
-
             // Clear error state from previous js evals
             errorText.reset();
 
-            if (beforeBundleEval)
-                beforeBundleEval(bundle);
+            if (!bundleValid)
+            {
+                // Install React.js backend rendering methods
+                registerNativeRenderingHooks();
 
-            auto result = engine->evaluate(bundle);
+                if (beforeBundleEval)
+                    beforeBundleEval(bundle);
+            }
 
-            if (afterBundleEval)
+            auto result = engine.evaluate(bundle);
+            bundleValid = result != EcmascriptEngine::EvaluationError;
+
+            if (bundleValid && afterBundleEval)
                 afterBundleEval(bundle);
 
             if (hotReloadEnabled)
             {
                 jassert(bundleWatcher);
+
                 if (!bundleWatcher->watching(bundle))
                     bundleWatcher->watch(bundle);
             }
@@ -241,13 +259,13 @@ namespace blueprint
         void dispatchViewEvent (ViewId viewId, const juce::String& eventType, T... args)
         {
             JUCE_ASSERT_MESSAGE_THREAD
-            jassert(engine);
 
-            // engine may have been reset in the event of a bundle eval error. We don't want to
-            // crash if client code tries to immediately dispatch an event after bundle loading.
-            // ReactApplicationRoot should report a generic error to the user rather than crashing.
-            if (engine)
-                engine->invoke("__BlueprintNative__.dispatchViewEvent", viewId, eventType, std::forward<T>(args)...);
+            //TODO: Provide safety handle here ? Cannot rely on bundleValid as otherwise we
+            //      miss out on initial dispatch of things like onMeasure in call to evaluate.
+            //      Could give EcmascriptEngine a reset() function ?
+            //      Alternatively we could set bundleValid to true right before call to evaluate() ?
+
+            engine.invoke("__BlueprintNative__.dispatchViewEvent", viewId, eventType, std::forward<T>(args)...);
         }
 
         /** Dispatches an event through Blueprint's EventBridge. */
@@ -255,13 +273,13 @@ namespace blueprint
         void dispatchEvent (const juce::String& eventType, T... args)
         {
             JUCE_ASSERT_MESSAGE_THREAD
-            jassert(engine);
 
-            // engine may have been reset in the event of a bundle eval error. We don't want to
-            // crash if client code tries to immediately dispatch an event after bundle loading.
-            // ReactApplicationRoot should report a generic error to the user rather than crashing.
-            if (engine)
-                engine->invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
+            //TODO: Provide safety handle here ? Cannot rely on bundleValid as otherwise we
+            //      miss out on initial dispatch of things like onMeasure in call to evaluate.
+            //      Could give EcmascriptEngine a reset() function ?
+            //      Alternatively we could set bundleValid to true right before call to evaluate() ?
+
+            engine.invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
         }
 
         //==============================================================================
@@ -405,22 +423,25 @@ namespace blueprint
         BundleEvalCallback afterBundleEval;
 
         //==============================================================================
-        /** The ReactApplicationRoot's engine instance. Note it is possible for engine to be a nullptr in the event of a bundle eval callback. */
-        std::unique_ptr<EcmascriptEngine> engine;
+        /** The ReactApplicationRoot's engine instance. */
+        EcmascriptEngine engine;
 
     private:
         //==============================================================================
         void handleBundleChanged(const juce::File& bundle)
         {
-            initViewManager();
-            registerNativeRenderingHooks();
+            JUCE_ASSERT_MESSAGE_THREAD
 
+            initViewManager();
             evaluate(bundle);
         }
 
         //==============================================================================
         void handleBundleError(const juce::String& trace)
         {
+            JUCE_ASSERT_MESSAGE_THREAD
+
+            bundleValid = false;
             viewManager.reset();
 
             errorText = std::make_unique<juce::AttributedString>(trace);
@@ -432,20 +453,6 @@ namespace blueprint
             errorText->setFont(18);
 #endif
             repaint();
-        }
-
-        //==============================================================================
-        /** Initialises the EcmascriptEngine and registers our native render hooks and a generic error handler/reporter */
-        void initEngine()
-        {
-            engine = std::make_unique<EcmascriptEngine>();
-
-            // Install React.js backend rendering methods
-            registerNativeRenderingHooks();
-
-            engine->onUncaughtError = [this](const juce::String& msg, const juce::String& trace) {
-                handleBundleError(trace);
-            };
         }
 
         //==============================================================================
@@ -513,11 +520,9 @@ namespace blueprint
 
         void registerNativeRenderingHooks()
         {
-            jassert(engine);
+            engine.registerNativeProperty("__BlueprintNative__", juce::JSON::parse("{}"));
 
-            engine->registerNativeProperty("__BlueprintNative__", juce::JSON::parse("{}"));
-
-            engine->registerNativeMethod("__BlueprintNative__", "createViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "createViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -533,7 +538,7 @@ namespace blueprint
                 return juce::var(viewId);
             }, (void *) this);
 
-            engine->registerNativeMethod("__BlueprintNative__", "createTextViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "createTextViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -548,7 +553,7 @@ namespace blueprint
                 return juce::var(viewId);
             }, (void *) this);
 
-            engine->registerNativeMethod("__BlueprintNative__", "setViewProperty", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "setViewProperty", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -565,7 +570,7 @@ namespace blueprint
                 return juce::var::undefined();
             }, (void *) this);
 
-            engine->registerNativeMethod("__BlueprintNative__", "setRawTextValue", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "setRawTextValue", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -581,7 +586,7 @@ namespace blueprint
                 return juce::var::undefined();
             }, (void *) this);
 
-            engine->registerNativeMethod("__BlueprintNative__", "addChild", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "addChild", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -601,7 +606,7 @@ namespace blueprint
                 return juce::var::undefined();
             }, (void *) this);
 
-            engine->registerNativeMethod("__BlueprintNative__", "removeChild", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "removeChild", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -617,7 +622,7 @@ namespace blueprint
                 return juce::var::undefined();
             }, (void *) this);
 
-            engine->registerNativeMethod("__BlueprintNative__", "getRootInstanceId", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "getRootInstanceId", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -629,6 +634,7 @@ namespace blueprint
 
         //==============================================================================
         bool hotReloadEnabled = false;
+        bool bundleValid      = false;
 
         std::unique_ptr<ViewManager>            viewManager;
         std::unique_ptr<BundleWatcher>          bundleWatcher;

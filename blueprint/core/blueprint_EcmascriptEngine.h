@@ -30,7 +30,15 @@ namespace blueprint
         ~EcmascriptEngine();
 
         //==============================================================================
-        /** Evaluates the given code in the interpreter, returning the result. */
+        /** Constant representing an evaluation error */
+        static constexpr auto EvaluationError = "EcmascriptEngineEvaluationError";
+
+        /** Evaluates the given code in the interpreter, returning the result.
+         *  In the event of an evaluation error (often do to a javascript error)
+         *  evaluate will call the user supplied error handler and return an
+         *  EvaluationError result.
+         *  @see onUncaughtError.
+         */
         juce::var evaluate (const juce::String& code);
         juce::var evaluate (const juce::File& code);
 
@@ -106,7 +114,7 @@ namespace blueprint
          * It is possible to continue using this EcmascriptEngine instance after such an error has been
          * raised. For example callers may wish to handle such an error and subsequently reload a modified
          * version of a JS bundle file as part of a "hot-reload" workflow, incrementally fixing/debugging
-         * errors.
+         * errors. ReactApplicationRoot provides such a workflow.
          */
         std::function<void(const juce::String& msg, const juce::String& trace)> onUncaughtError;
 
@@ -130,6 +138,11 @@ namespace blueprint
         juce::var readVarFromDukStack (duk_context* ctx, duk_idx_t idx);
 
     private:
+        //==============================================================================
+        // Wraps the user provided error handler and is responsible for cleaning up
+        // the EcmascriptEngine in the event of an evaluation error.
+        std::function<void()> errorHandler;
+
         //==============================================================================
         struct LambdaHelper {
             LambdaHelper(juce::var::NativeFunction fn);
