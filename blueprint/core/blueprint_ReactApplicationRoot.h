@@ -75,11 +75,11 @@ namespace blueprint
                     const auto lmt = wb.bundle.getLastModificationTime();
 
                     // In some instances webpack rebuilds temporarily result in an empty
-                    // bundle file before rebuilding. We do not want to trigger evaluation
-                    // callbacks when the bundle file is empty as this is likely to cause errors
-                    // when users attempt to call javascript functions from C/C++. Calling eval/call
-                    // in duktape with an empty js file/string does not result in an error and simply
-                    // pushes undefined to the top of the duktape stack as the
+                    // bundle file. We do not want to trigger evaluation callbacks when the
+                    // bundle file is empty as this is likely to cause errors when users attempt
+                    // to call javascript functions from C/C++. Calling eval/call in duktape with
+                    // an empty js file/string does not result in an error and simply pushes undefined
+                    // to the top of the duktape stack.
                     if (lmt > wb.bundleLastModifiedTime && wb.bundle.loadFileAsString().isNotEmpty())
                     {
                         onBundleChanged(wb.bundle);
@@ -128,6 +128,9 @@ namespace blueprint
             // Initialise the ViewManager
             initViewManager();
 
+            // TODO: Arguable that we always wish to reset the ViewManager in the event of an error.
+            //       In which case we may need to somewhat change the shape of EcmascriptEngine::onUncaughtError.
+            //       If callers reassign the callback we will lose the ViewManager reset.
             engine.onUncaughtError = [this](const juce::String& msg, const juce::String& trace) {
                 handleBundleError(trace);
             };
@@ -199,7 +202,12 @@ namespace blueprint
                     beforeBundleEval(std::nullopt);
             }
 
+            // Set bundleValid prior to evaluate. This ensures dispatchEvent/dispatchViewEvent
+            // can be called during EcmascriptEngine::evaluate. This is required to allow things
+            // like triggering View "Measure" callbacks when laying out the initial component tree.
+            bundleValid = true;
             auto result = engine.evaluate(bundle);
+
             bundleValid = result != EcmascriptEngine::EvaluationError;
 
             if (bundleValid && afterBundleEval)
@@ -226,14 +234,19 @@ namespace blueprint
 
             if (!bundleValid)
             {
-                // Install React.js backend rendering methods
+                // Register internal React.js backend rendering methods
                 registerNativeRenderingHooks();
 
                 if (beforeBundleEval)
                     beforeBundleEval(bundle);
             }
 
+            // Set bundleValid prior to evaluate. This ensures dispatchEvent/dispatchViewEvent
+            // can be called during EcmascriptEngine::evaluate. This is required to allow things
+            // like triggering View "Measure" callbacks when laying out the initial component tree.
+            bundleValid = true;
             auto result = engine.evaluate(bundle);
+
             bundleValid = result != EcmascriptEngine::EvaluationError;
 
             if (bundleValid && afterBundleEval)
@@ -259,13 +272,14 @@ namespace blueprint
         void dispatchViewEvent (ViewId viewId, const juce::String& eventType, T... args)
         {
             JUCE_ASSERT_MESSAGE_THREAD
+            jassert(bundleValid);
 
-            //TODO: Provide safety handle here ? Cannot rely on bundleValid as otherwise we
-            //      miss out on initial dispatch of things like onMeasure in call to evaluate.
-            //      Could give EcmascriptEngine a reset() function ?
-            //      Alternatively we could set bundleValid to true right before call to evaluate() ?
-
-            engine.invoke("__BlueprintNative__.dispatchViewEvent", viewId, eventType, std::forward<T>(args)...);
+            // We wish to safe guard against client code which attempts to dispatch an event immediately
+            // after a bundle is evaluated should there be an evaluation error.
+            // This ensures callers do not attempt to invoke a JS function which does not currently
+            // exist in the engine.
+            if (bundleValid)
+                engine.invoke("__BlueprintNative__.dispatchViewEvent", viewId, eventType, std::forward<T>(args)...);
         }
 
         /** Dispatches an event through Blueprint's EventBridge. */
@@ -273,13 +287,14 @@ namespace blueprint
         void dispatchEvent (const juce::String& eventType, T... args)
         {
             JUCE_ASSERT_MESSAGE_THREAD
+            jassert(bundleValid);
 
-            //TODO: Provide safety handle here ? Cannot rely on bundleValid as otherwise we
-            //      miss out on initial dispatch of things like onMeasure in call to evaluate.
-            //      Could give EcmascriptEngine a reset() function ?
-            //      Alternatively we could set bundleValid to true right before call to evaluate() ?
-
-            engine.invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
+            // We wish to safe guard against client code which attempts to dispatch an event immediately
+            // after a bundle is evaluated should there be an evaluation error.
+            // This ensures callers do not attempt to invoke a JS function which does not currently
+            // exist in the engine.
+            if (bundleValid)
+                engine.invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
         }
 
         //==============================================================================
