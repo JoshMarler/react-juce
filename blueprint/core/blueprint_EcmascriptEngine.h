@@ -34,9 +34,8 @@ namespace blueprint
         static constexpr auto EvaluationError = "EcmascriptEngineEvaluationError";
 
         /** Evaluates the given code in the interpreter, returning the result.
-         *  In the event of an evaluation error (often do to a javascript error)
-         *  evaluate will call the user supplied error handler and return an
-         *  EvaluationError result.
+         *  In the event of an evaluation error, evaluate will call the user
+         *  supplied error handler and return an EvaluationError result.
          *  @see onUncaughtError.
          */
         juce::var evaluate (const juce::String& code);
