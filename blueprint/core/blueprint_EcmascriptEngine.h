@@ -18,7 +18,7 @@ namespace blueprint
      *  with an interface implemented by Duktape, but which may be implemented by one of
      *  many embedded engines in the future.
      */
-    class EcmascriptEngine
+    class EcmascriptEngine : private juce::Timer
     {
     public:
         //==============================================================================
@@ -138,6 +138,9 @@ namespace blueprint
         juce::var readVarFromDukStack (duk_context* ctx, duk_idx_t idx);
 
     private:
+        //==============================================================================
+        void timerCallback() override;
+
         //==============================================================================
         // Wraps the user provided error handler and is responsible for cleaning up
         // the EcmascriptEngine in the event of an evaluation error.

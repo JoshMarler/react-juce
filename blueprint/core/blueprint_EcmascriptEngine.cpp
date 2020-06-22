@@ -159,6 +159,7 @@ namespace blueprint
             // finalizers in the event of an evaluation error or duk_pcall failure.
             lambdaReleasePool.clear();
         };
+
     }
 
     EcmascriptEngine::~EcmascriptEngine()
@@ -308,19 +309,33 @@ namespace blueprint
         duk_trans_socket_waitconn();
 
         duk_debugger_attach(ctx,
-                            duk_trans_socket_read_cb,
-                            duk_trans_socket_write_cb,
-                            duk_trans_socket_peek_cb,
-                            duk_trans_socket_read_flush_cb,
-                            duk_trans_socket_write_flush_cb,
-                            NULL,
-                            [](duk_context*, void*) { duk_trans_socket_finish(); },
-                            NULL);
+            duk_trans_socket_read_cb,
+            duk_trans_socket_write_cb,
+            duk_trans_socket_peek_cb,
+            duk_trans_socket_read_flush_cb,
+            duk_trans_socket_write_flush_cb,
+            NULL,
+            [](duk_context* ctx, void* data)
+            {
+                duk_trans_socket_finish();
+
+                auto engine = static_cast<EcmascriptEngine*>(data);
+                engine->stopTimer();
+            },
+            this);
+
+        // Start timer for duk_debugger_cooperate calls
+        startTimer(200);
     }
 
     void EcmascriptEngine::debuggerDetach()
     {
         duk_debugger_detach(ctx);
+    }
+
+    void EcmascriptEngine::timerCallback()
+    {
+        duk_debugger_cooperate(ctx);
     }
 
     //==============================================================================
