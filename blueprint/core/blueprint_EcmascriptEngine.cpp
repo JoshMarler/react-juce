@@ -552,7 +552,6 @@ namespace blueprint
                             // the global stash and invoke it with the provided args.
                             duk_push_global_stash(ctx);
                             duk_get_prop_string(ctx, -1, funId.toRawUTF8());
-
                             duk_require_function(ctx, -1);
 
                             // Push the args to the duktape stack
