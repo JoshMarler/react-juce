@@ -14,24 +14,6 @@ namespace blueprint
 {
 
     //==============================================================================
-    BlueprintGenericEditor::BlueprintGenericEditor (juce::AudioProcessor* processor, const juce::String& code, juce::AudioProcessorValueTreeState* vts)
-        : juce::AudioProcessorEditor(processor), valueTreeState(vts)
-    {
-        // Bind parameter listeners
-        for (auto& p : processor->getParameters())
-            p->addListener(this);
-
-        // Setup the ReactApplicationRoot callbacks and evaluate the supplied JS code/bundle
-        registerAppRootCallbacks();
-        appRoot.evaluate(code);
-
-        // Add ReactApplicationRoot as child component
-        addAndMakeVisible(appRoot);
-
-        // Set an arbitrary size, should be overridden from outside the constructor
-        setSize(400, 200);
-    }
-
     BlueprintGenericEditor::BlueprintGenericEditor (juce::AudioProcessor* processor, const juce::File& bundle, juce::AudioProcessorValueTreeState* vts)
         : juce::AudioProcessorEditor(processor), valueTreeState(vts)
     {
@@ -170,17 +152,17 @@ namespace blueprint
 
     void BlueprintGenericEditor::registerAppRootCallbacks()
     {
-        appRoot.beforeBundleEval = [=] (std::optional<juce::File> bundle)
+        appRoot.beforeBundleEval = [=] (const juce::File& bundle)
         {
-            if (bundle && bundle->getFullPathName() == bundleFile.getFullPathName())
+            if (bundle.getFullPathName() == bundleFile.getFullPathName())
             {
                 beforeBundleEvaluated();
             }
         };
 
-        appRoot.afterBundleEval = [=] (std::optional<juce::File> bundle)
+        appRoot.afterBundleEval = [=] (const juce::File& bundle)
         {
-            if (bundle && bundle->getFullPathName() == bundleFile.getFullPathName())
+            if (bundle.getFullPathName() == bundleFile.getFullPathName())
             {
                 afterBundleEvaluated();
             }
