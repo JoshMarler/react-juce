@@ -69,7 +69,7 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
 
     // Next we just add our appRoot and kick off the app bundle.
     addAndMakeVisible(appRoot);
-    appRoot.evaluate(bundle.loadFileAsString());
+    appRoot.evaluate(bundle);
 
     // Now our React application is up and running, so we can start dispatching
     // events, such as current parameter values.
