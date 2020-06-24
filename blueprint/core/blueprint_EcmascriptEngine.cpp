@@ -74,6 +74,10 @@ namespace blueprint
             throw std::runtime_error(msg);
         }
 
+        //TODO: Keep safeEvalString and safeCompileFile or make EcmascripEngine member funcs
+        //      now that we have out errorHandle wrapper in EcmascriptEngine? Passing
+        //      callback here feels a bit ambiguous in regards to popping the error
+        //      off of the stack after invoking the error callback. Whose responsibility is it etc.
         template <typename T>
         static bool safeEvalString(duk_context* ctx, const juce::String& s, T&& callback)
         {
@@ -81,22 +85,46 @@ namespace blueprint
             {
                 if (callback != nullptr)
                 {
-                    const juce::String trace = duk_safe_to_stacktrace(ctx, -1);
-                    const juce::String msg = duk_safe_to_string(ctx, -1);
-
-                    // Call the user provided error handler
-                    std::invoke(callback, msg, trace);
-
-                    // Indicate failure
+                    // Call the user provided error handler and indicate failure
+                    std::invoke(callback);
                     return false;
                 }
 
-                 duk_throw_raw(ctx);
+                duk_throw_raw(ctx);
             }
 
             // Indicate success
             return true;
         }
+
+        template<typename T>
+        static bool safeCompileFile(duk_context* ctx, const juce::File& file, T&& callback)
+        {
+            // Push the js filename to be compiled/evaluated
+            duk_push_string(ctx, file.getFileName().toRawUTF8());
+
+            if (duk_pcompile_string_filename(ctx, DUK_COMPILE_EVAL, file.loadFileAsString().toRawUTF8()) != 0)
+            {
+                if (callback != nullptr)
+                {
+                    // Call the user provided error handler.js and indicate failure
+                    std::invoke(callback);
+                    return false;
+                }
+
+                duk_throw_raw(ctx);
+            }
+
+            // Indicate success
+            return true;
+       }
+
+       static void dumpContext(duk_context* ctx)
+       {
+           duk_push_context_dump(ctx);
+           DBG(duk_to_string(ctx, -1));
+           duk_pop(ctx);
+       }
     }
 
     //==============================================================================
@@ -107,6 +135,31 @@ namespace blueprint
 
         // Add console.log support
         duk_console_init(ctx, DUK_CONSOLE_FLUSH);
+
+        // Create our error handler wrapping a user supplied error callback.
+        errorHandler = [=]
+        {
+            if (onUncaughtError == nullptr)
+                duk_throw_raw(ctx);
+
+            const juce::String trace = duk_safe_to_stacktrace(ctx, -1);
+            const juce::String msg = duk_safe_to_string(ctx, -1);
+
+            // Call the user provided error handler
+            std::invoke(onUncaughtError, msg, trace);
+
+            // Clear out the stack so we can re-register native functions
+            // after we clear out the lambda release pool etc.
+            while (duk_get_top(ctx))
+            {
+                duk_remove(ctx, duk_get_top_index(ctx));
+            }
+
+            // Clear the LambdaHelper release pool as duktape does not call object
+            // finalizers in the event of an evaluation error or duk_pcall failure.
+            lambdaReleasePool.clear();
+        };
+
     }
 
     EcmascriptEngine::~EcmascriptEngine()
@@ -117,12 +170,38 @@ namespace blueprint
     //==============================================================================
     juce::var EcmascriptEngine::evaluate (const juce::String& code)
     {
-        if (!detail::safeEvalString(ctx, code, onUncaughtError))
-            return juce::var::undefined();
+        jassert(code.isNotEmpty());
+
+        if (!detail::safeEvalString(ctx, code, errorHandler))
+            return juce::var(EvaluationError);
 
         auto result = readVarFromDukStack(ctx, -1);
-
         duk_pop(ctx);
+
+        return result;
+    }
+
+    juce::var EcmascriptEngine::evaluate (const juce::File& code)
+    {
+        jassert(code.existsAsFile());
+        jassert(code.loadFileAsString().isNotEmpty());
+
+        juce::var result = juce::var::undefined();
+
+        if (!detail::safeCompileFile(ctx, code, errorHandler))
+            return juce::var(EvaluationError);
+
+        // Call compiled function
+        if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS)
+        {
+            errorHandler();
+            return juce::var(EvaluationError);
+        }
+
+        // Collect the return value
+        result = readVarFromDukStack(ctx, -1);
+        duk_pop(ctx);
+
         return result;
     }
 
@@ -150,7 +229,7 @@ namespace blueprint
     void EcmascriptEngine::registerNativeMethod (const juce::String& target, const juce::String& name, NativeFunction fn, void* stash)
     {
         // Evaluate the target string on the context, leaving the result on the stack
-        if (!detail::safeEvalString(ctx, target, onUncaughtError))
+        if (!detail::safeEvalString(ctx, target, errorHandler))
             return;
 
         // We wrap the native function to provide a helper layer storing and retrieving the
@@ -180,7 +259,8 @@ namespace blueprint
     void EcmascriptEngine::registerNativeProperty (const juce::String& target, const juce::String& name, const juce::var& value)
     {
         // Evaluate the target string on the context, leaving the result on the stack
-        if (!detail::safeEvalString(ctx, target, onUncaughtError))
+        // TODO: Return specific error code if target not in stack?
+        if (!detail::safeEvalString(ctx, target, errorHandler))
             return;
 
         // Then assign the property
@@ -192,13 +272,15 @@ namespace blueprint
     juce::var EcmascriptEngine::invoke (const juce::String& name, const std::vector<juce::var>& vargs)
     {
         // Evaluate the target string on the context, leaving the result on the stack
-        if (!detail::safeEvalString(ctx, name, onUncaughtError))
+        // TODO: Return specific error code if name not in stack?
+        if (!detail::safeEvalString(ctx, name, errorHandler))
             return juce::var::undefined();
 
+        // Ensure requested function exists on the stack
         duk_require_function(ctx, -1);
 
         // Push the args to the duktape stack
-        auto nargs = static_cast<duk_idx_t>(vargs.size());
+        const auto nargs = static_cast<duk_idx_t>(vargs.size());
         duk_require_stack_top(ctx, nargs);
 
         for (auto& p : vargs)
@@ -207,25 +289,53 @@ namespace blueprint
         // Invocation
         if (duk_pcall(ctx, nargs) != DUK_EXEC_SUCCESS)
         {
-            if (onUncaughtError != nullptr)
-            {
-                const juce::String trace = duk_safe_to_stacktrace(ctx, -1);
-                const juce::String msg = duk_safe_to_string(ctx, -1);
+            errorHandler();
 
-                // Call the user provided error handler
-                std::invoke(onUncaughtError, msg, trace);
-
-                return juce::var::undefined();
-            }
-
-            duk_throw_raw(ctx);
+            // TODO: Return specific error code if invoke fails?
+            return juce::var::undefined();
         }
 
         // Collect the return value
         auto result = readVarFromDukStack(ctx, -1);
-
         duk_pop(ctx);
+
         return result;
+    }
+
+    //==============================================================================
+    void EcmascriptEngine::debuggerAttach()
+    {
+        duk_trans_socket_init();
+        duk_trans_socket_waitconn();
+
+        duk_debugger_attach(ctx,
+            duk_trans_socket_read_cb,
+            duk_trans_socket_write_cb,
+            duk_trans_socket_peek_cb,
+            duk_trans_socket_read_flush_cb,
+            duk_trans_socket_write_flush_cb,
+            NULL,
+            [](duk_context* ctx, void* data)
+            {
+                duk_trans_socket_finish();
+
+                auto engine = static_cast<EcmascriptEngine*>(data);
+                engine->stopTimer();
+            },
+            this);
+
+        // Start timer for duk_debugger_cooperate calls
+        startTimer(200);
+    }
+
+    void EcmascriptEngine::debuggerDetach()
+    {
+        duk_debugger_detach(ctx);
+    }
+
+    void EcmascriptEngine::timerCallback()
+    {
+        duk_debugger_cooperate(ctx);
     }
 
     //==============================================================================

@@ -18,7 +18,7 @@ namespace blueprint
      *  with an interface implemented by Duktape, but which may be implemented by one of
      *  many embedded engines in the future.
      */
-    class EcmascriptEngine
+    class EcmascriptEngine : private juce::Timer
     {
     public:
         //==============================================================================
@@ -30,8 +30,16 @@ namespace blueprint
         ~EcmascriptEngine();
 
         //==============================================================================
-        /** Evaluates the given code in the interpreter, returning the result. */
+        /** Constant representing an evaluation error */
+        static constexpr auto EvaluationError = "EcmascriptEngineEvaluationError";
+
+        /** Evaluates the given code in the interpreter, returning the result.
+         *  In the event of an evaluation error, evaluate will call the user
+         *  supplied error handler and return an EvaluationError result.
+         *  @see onUncaughtError.
+         */
         juce::var evaluate (const juce::String& code);
+        juce::var evaluate (const juce::File& code);
 
         //==============================================================================
         /** Registers a native method by the given name in the global namespace. */
@@ -99,14 +107,26 @@ namespace blueprint
         juce::var invoke (const juce::String& name, T... args);
 
         //==============================================================================
-        /** A public member which can be assigned a callback for delegating fatal error
-         *  handling to user code.
+        /** A public member which can be assigned a callback for delegating error handling to user code.
          *
-         *  Upon returning, your callback should have ceased further execution of code
-         *  in this EcmascriptEngine. You will need to create and initialize a new one
-         *  to proceed safely.
+         * This callback will be called primarily in the case of recoverable errors when evaluating JS code.
+         * It is possible to continue using this EcmascriptEngine instance after such an error has been
+         * raised. For example callers may wish to handle such an error and subsequently reload a modified
+         * version of a JS bundle file as part of a "hot-reload" workflow, incrementally fixing/debugging
+         * errors. ReactApplicationRoot provides such a workflow.
          */
         std::function<void(const juce::String& msg, const juce::String& trace)> onUncaughtError;
+
+        //==============================================================================
+        /**
+         * Pauses execution and waits for a debug client to attach and begin a debug session.
+         */
+        void debuggerAttach();
+
+        /**
+         * Detaches the from the current debug session/attachment.
+         */
+        void debuggerDetach();
 
         //==============================================================================
         // TODO: These pushVarToDukStack/readVarFromDukStack should be private, but are
@@ -117,6 +137,14 @@ namespace blueprint
         juce::var readVarFromDukStack (duk_context* ctx, duk_idx_t idx);
 
     private:
+        //==============================================================================
+        void timerCallback() override;
+
+        //==============================================================================
+        // Wraps the user provided error handler and is responsible for cleaning up
+        // the EcmascriptEngine in the event of an evaluation error.
+        std::function<void()> errorHandler;
+
         //==============================================================================
         struct LambdaHelper {
             LambdaHelper(juce::var::NativeFunction fn);

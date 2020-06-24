@@ -3739,4 +3739,15 @@ typedef struct duk_hthread duk_context;
 #error unsupported: byte order detection failed
 #endif  /* defined(DUK_USE_BYTEORDER) */
 
+
+#if JUCE_DEBUG
+//TODO: We need a better system for allowing custom/user configured duk_config headers
+//      in blueprint. This set of inline change works for now to enable debugging support.
+#define DUK_USE_INTERRUPT_COUNTER
+#define DUK_USE_DEBUGGER_SUPPORT
+#define DUK_USE_DEBUGGER_INSPECT
+#define DUK_USE_DEBUGGER_FWD_LOGGING
+
+#endif
+
 #endif  /* DUK_CONFIG_H_INCLUDED */

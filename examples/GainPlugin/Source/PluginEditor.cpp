@@ -24,7 +24,7 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
     jassert (bundle.existsAsFile());
 
     // Bind some native callbacks
-    appRoot.engine->registerNativeMethod(
+    appRoot.engine.registerNativeMethod(
         "beginParameterChangeGesture",
         [](void* stash, const juce::var::NativeFunctionArgs& args) {
             auto* self = reinterpret_cast<GainPluginAudioProcessorEditor*>(stash);
@@ -38,7 +38,7 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
         (void *) this
     );
 
-    appRoot.engine->registerNativeMethod(
+    appRoot.engine.registerNativeMethod(
         "setParameterValueNotifyingHost",
         [](void* stash, const juce::var::NativeFunctionArgs& args) {
             auto* self = reinterpret_cast<GainPluginAudioProcessorEditor*>(stash);
@@ -53,7 +53,7 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
         (void *) this
     );
 
-    appRoot.engine->registerNativeMethod(
+    appRoot.engine.registerNativeMethod(
         "endParameterChangeGesture",
         [](void* stash, const juce::var::NativeFunctionArgs& args) {
             auto* self = reinterpret_cast<GainPluginAudioProcessorEditor*>(stash);
@@ -69,7 +69,7 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
 
     // Next we just add our appRoot and kick off the app bundle.
     addAndMakeVisible(appRoot);
-    appRoot.evaluate(bundle.loadFileAsString());
+    appRoot.evaluate(bundle);
 
     // Now our React application is up and running, so we can start dispatching
     // events, such as current parameter values.

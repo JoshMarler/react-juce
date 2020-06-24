@@ -2,8 +2,12 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: __dirname + '/build/js',
-    filename: 'main.js'
+    filename: 'main.js',
+    sourceMapFilename: "[file].map",
+     devtoolModuleFilenameTemplate: info =>
+    `webpack:///${info.absoluteResourcePath.replace(/\\/g, '/')}`
   },
+  devtool: "source-map",
   module: {
     rules: [
       {

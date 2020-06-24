@@ -241,7 +241,15 @@ duk_size_t duk_trans_socket_write_cb(void *udata, const char *buffer, duk_size_t
 	 * timeout here to recover from "black hole" disconnects.
 	 */
 
+	//TODO: Hacked the example implementation for now to avoid SIGPIPE errors terminating the
+	//      program when debug client terminates the tcp connection.
+	//      We should probably move this to a blueprint specific debug transport implementation at some point.
+	//      For more advanced users, it may be useful to allow a mechanism to easily override the
+	//      transport mechanism used for debugging. i.e. to allow debug over serial etc.
+	signal(SIGPIPE, SIG_IGN);
 	ret = write(client_sock, (const void *) buffer, (size_t) length);
+    signal(SIGPIPE, SIG_DFL);
+
 	if (ret <= 0 || ret > (ssize_t) length) {
 		fprintf(stderr, "%s: debug write failed, closing connection: %s\n",
 		        __FILE__, strerror(errno));

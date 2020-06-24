@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <map>
+#include <optional>
 
 #include "blueprint_CanvasView.h"
 #include "blueprint_EcmascriptEngine.h"
@@ -74,7 +74,13 @@ namespace blueprint
                 {
                     const auto lmt = wb.bundle.getLastModificationTime();
 
-                    if (lmt > wb.bundleLastModifiedTime)
+                    // In some instances webpack rebuilds temporarily result in an empty
+                    // bundle file. We do not want to trigger evaluation callbacks when the
+                    // bundle file is empty as this is likely to cause errors when users attempt
+                    // to call javascript functions from C/C++. Calling eval/call in duktape with
+                    // an empty js file/string does not result in an error and simply pushes undefined
+                    // to the top of the duktape stack.
+                    if (lmt > wb.bundleLastModifiedTime && wb.bundle.loadFileAsString().isNotEmpty())
                     {
                         onBundleChanged(wb.bundle);
                         wb.bundleLastModifiedTime = lmt;
@@ -91,6 +97,25 @@ namespace blueprint
     /** The ReactApplicationRoot class prepares and maintains a Duktape evaluation
         context with the relevant hooks for supporting the Blueprint render
         backend.
+
+        ReactApplicationRoot provides some useful facilities in debug builds with
+        JUCE_DEBUG defined.
+
+        Firstly, ReactApplicationRoot will automatically watch bundle
+        files (added via ReactApplicationRoot::evaluate) for changes and reload said
+        bundle in the event of a change/recompile. This allows for hot-reload functionality.
+
+        Secondly, ReactApplicationRoot provides debug functionality similar to React Native.
+        Users can hit CTRL-D/CMD-D when the ReactApplicationRoot component has focus,
+        causing the application to suspend execution and await connection from a debug client.
+        See the WIKI for details on setting up and connecting a JS debugger.
+
+        Finally, ReactApplicationRoot implements a generic error handler which will catch
+        errors from JavaScript code and display an error screen with an error trace/message.
+        This generic error handler is enabled by default in both debug and release builds.
+        Users of ReactApplicationRoot may which to override this handler by setting the
+        EcmascriptEngine::onUncaughtError callback after constructing a ReactApplicationRoot instance.
+        This can be useful to hide error details from users in production etc.
      */
     class ReactApplicationRoot : public View
     {
@@ -100,14 +125,21 @@ namespace blueprint
         {
             JUCE_ASSERT_MESSAGE_THREAD
 
-            // Initialise the EcmascriptEngine
-            initEngine();
-
             // Initialise the ViewManager
             initViewManager();
 
+            // TODO: Arguable that we always wish to reset the ViewManager in the event of an error.
+            //       In which case we may need to somewhat change the shape of EcmascriptEngine::onUncaughtError.
+            //       If callers reassign the callback we will lose the ViewManager reset.
+            engine.onUncaughtError = [this](const juce::String& msg, const juce::String& trace) {
+                handleBundleError(trace);
+            };
+
 #if JUCE_DEBUG
             enableHotReloading();
+
+            // Enable keyboardFocus to support CTRL-D/CMD-D debug attachment.
+            setWantsKeyboardFocus(true);
 #endif
         }
 
@@ -132,34 +164,21 @@ namespace blueprint
                 View::paint(g);
             }
         }
-
         //==============================================================================
-        /**
-         * Evaluates a javascript bundle/code in the Ecmascript engine.
-         *
-         * It is possible to pass a js bundle file to this evaluate() overload using juce::File::loadAsString. However,
-         * if you require hot-reload functionality you should use the juce::File based evaluate() overload.
-         * This overload can also be used to evaluate js code inline/directly.
-         **/
-        juce::var evaluate (const juce::String& bundle)
+        bool keyPressed(const juce::KeyPress& key) override
         {
-            JUCE_ASSERT_MESSAGE_THREAD
+#if JUCE_DEBUG
+           const auto startDebugCommand = juce::KeyPress('d', juce::ModifierKeys::commandModifier, 0);
 
-            // Clear error state from previous js evals
-            errorText.reset();
-
-            if (beforeBundleEval)
-                beforeBundleEval(std::nullopt);
-
-            jassert(engine);
-            auto result = engine->evaluate(bundle);
-
-            if (afterBundleEval)
-                afterBundleEval(std::nullopt);
-
-            return result;
+           if (key == startDebugCommand)
+           {
+               engine.debuggerAttach();
+           }
+#endif
+            return true;
         }
 
+        //==============================================================================
         /**
          * Evaluates a javascript bundle file in the Ecmascript engine.
          *
@@ -172,14 +191,28 @@ namespace blueprint
         juce::var evaluate(const juce::File& bundle)
         {
             JUCE_ASSERT_MESSAGE_THREAD
-            jassert(bundle.existsAsFile());
 
-            if (beforeBundleEval)
-                beforeBundleEval(bundle);
+            // Clear error state from previous js evals
+            errorText.reset();
 
-            auto result = evaluate(bundle.loadFileAsString());
+            if (!bundleValid)
+            {
+                // Register internal React.js backend rendering methods
+                registerNativeRenderingHooks();
 
-            if (afterBundleEval)
+                if (beforeBundleEval)
+                    beforeBundleEval(bundle);
+            }
+
+            // Set bundleValid prior to evaluate. This ensures dispatchEvent/dispatchViewEvent
+            // can be called during EcmascriptEngine::evaluate. This is required to allow things
+            // like triggering View "Measure" callbacks when laying out the initial component tree.
+            bundleValid = true;
+            auto result = engine.evaluate(bundle);
+
+            bundleValid = result != EcmascriptEngine::EvaluationError;
+
+            if (bundleValid && afterBundleEval)
                 afterBundleEval(bundle);
 
             if (hotReloadEnabled)
@@ -202,13 +235,14 @@ namespace blueprint
         void dispatchViewEvent (ViewId viewId, const juce::String& eventType, T... args)
         {
             JUCE_ASSERT_MESSAGE_THREAD
-            jassert(engine);
-            
-            // engine may have been reset in the event of a bundle eval error. We don't want to
-            // crash if client code tries to immediately dispatch an event after bundle loading.
-            // ReactApplicationRoot should report a generic error to the user rather than crashing.
-            if (engine)
-                engine->invoke("__BlueprintNative__.dispatchViewEvent", viewId, eventType, std::forward<T>(args)...);
+            jassert(bundleValid);
+
+            // We wish to safe guard against client code which attempts to dispatch an event immediately
+            // after a bundle is evaluated should there be an evaluation error.
+            // This ensures callers do not attempt to invoke a JS function which does not currently
+            // exist in the engine.
+            if (bundleValid)
+                engine.invoke("__BlueprintNative__.dispatchViewEvent", viewId, eventType, std::forward<T>(args)...);
         }
 
         /** Dispatches an event through Blueprint's EventBridge. */
@@ -216,13 +250,14 @@ namespace blueprint
         void dispatchEvent (const juce::String& eventType, T... args)
         {
             JUCE_ASSERT_MESSAGE_THREAD
-            jassert(engine);
-            
-            // engine may have been reset in the event of a bundle eval error. We don't want to
-            // crash if client code tries to immediately dispatch an event after bundle loading.
-            // ReactApplicationRoot should report a generic error to the user rather than crashing.
-            if (engine)
-                engine->invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
+            jassert(bundleValid);
+
+            // We wish to safe guard against client code which attempts to dispatch an event immediately
+            // after a bundle is evaluated should there be an evaluation error.
+            // This ensures callers do not attempt to invoke a JS function which does not currently
+            // exist in the engine.
+            if (bundleValid)
+                engine.invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
         }
 
         //==============================================================================
@@ -256,7 +291,7 @@ namespace blueprint
         }
 
         //==============================================================================
-        using BundleEvalCallback = std::function<void(std::optional<juce::File> bundle)>;
+        using BundleEvalCallback = std::function<void(const juce::File& bundle)>;
 
         /**
          * Called before a bundle is loaded/evaluated.
@@ -267,8 +302,7 @@ namespace blueprint
          * Use this callback to register any native methods/properties to be used from within the JS bundle. You can
          * also use this callback to register any custom error handlers via ReactApplicationRoot::onUncaughtError.
          *
-         * @param bundle The reloaded bundle file if applicable. If evaluate() was called with a raw/inline javascript
-         * code string rather than a .js file bundle will be a std::nullopt_t.
+         * @param bundle The reloaded bundle file.
          *
          * For most applications the bundle will simply be the main app root bundle file. However, other use cases
          * for evaluating multiple bundle files may exist, for example to facilitate things like polyfills etc.
@@ -284,29 +318,26 @@ namespace blueprint
          *     // Not strictly required if JUCE_DEBUG set.
          *     appRoot.enableHotReload(true);
          *
-         *     appRoot.beforeBundleEval = [=](std::optional<juce::File> bundle)
+         *     appRoot.beforeBundleEval = [=](juce::File bundle)
          *     {
-         *         if (bundle)
+         *         if (bundle.getFullPathName() == myAppBundle.getFullPathName())
          *         {
-         *             if (bundle->getFullPathName() == myAppBundle.getFullPathName())
-         *             {
-         *                  appRoot.registerNativeMethod(
-         *                      "myNativeMethod",
-         *                      [](void* stash, const juce::var::NativeFunctionArgs& args) {
-         *                          auto* self = reinterpret_cast<MyEditor*>(stash);
+         *              appRoot.registerNativeMethod(
+         *                  "myNativeMethod",
+         *                  [](void* stash, const juce::var::NativeFunctionArgs& args) {
+         *                      auto* self = reinterpret_cast<MyEditor*>(stash);
          *
-         *                          const juce::String& someParam = args.arguments[0].toString();
-         *                          self->myNativeMethod(someParam);
+         *                      const juce::String& someParam = args.arguments[0].toString();
+         *                      self->myNativeMethod(someParam);
          *
-         *                          return juce::var::undefined();
-         *                      },
-         *                      (void*) this
-         *                  );
-         *             }
-         *             else
-         *             {
-         *                 // You have loaded some other js bundle. i.e. a polyfill
-         *             }
+         *                      return juce::var::undefined();
+         *                  },
+         *                  (void*) this
+         *              );
+         *         }
+         *         else
+         *         {
+         *             // You have loaded some other js bundle. i.e. a polyfill
          *         }
          *     };
          *
@@ -325,8 +356,7 @@ namespace blueprint
          *
          * Use this callback to dispatch any initial state/events required by the React/JS application on load/reload.
          *
-         * @param bundle The reloaded bundle file if applicable. If evaluate() was called with a raw/inline javascript
-         * code string rather than a .js file bundle will be a std::nullopt_t.
+         * @param bundle The reloaded bundle file.
          *
          * For most applications the bundle will simply be the main app root bundle file. However, other use cases
          * for evaluating multiple bundle files may exist, for example to facilitate things like polyfills etc.
@@ -342,19 +372,16 @@ namespace blueprint
          *     // Not strictly required if JUCE_DEBUG set.
          *     appRoot.enableHotReload(true);
          *
-         *     appRoot.afterBundleEval = [=](std::optional<juce::File> bundle)
+         *     appRoot.afterBundleEval = [=](const juce::File& bundle)
          *     {
-         *         if (bundle)
+         *         if (bundle.getFullPathName() == myAppBundle.getFullPathName())
          *         {
-         *             if (bundle->getFullPathName() == myAppBundle.getFullPathName())
-         *             {
-         *                 juce::String message("This is an important message");
-         *                 appRoot.dispatchEvent("importantMessage", message);
-         *             }
-         *             else
-         *             {
-         *                 // You have loaded some other js bundle. i.e. a polyfill
-         *             }
+         *             juce::String message("This is an important message");
+         *             appRoot.dispatchEvent("importantMessage", message);
+         *         }
+         *         else
+         *         {
+         *             // You have loaded some other js bundle. i.e. a polyfill
          *         }
          *     };
          *
@@ -366,23 +393,25 @@ namespace blueprint
         BundleEvalCallback afterBundleEval;
 
         //==============================================================================
-        /** The ReactApplicationRoot's engine instance. Note it is possible for engine to be a nullptr in the event of a bundle eval callback. */
-        std::unique_ptr<EcmascriptEngine> engine;
+        /** The ReactApplicationRoot's engine instance. */
+        EcmascriptEngine engine;
 
     private:
         //==============================================================================
         void handleBundleChanged(const juce::File& bundle)
         {
-            initEngine();
-            initViewManager();
+            JUCE_ASSERT_MESSAGE_THREAD
 
+            initViewManager();
             evaluate(bundle);
         }
 
         //==============================================================================
         void handleBundleError(const juce::String& trace)
         {
-            engine.reset();
+            JUCE_ASSERT_MESSAGE_THREAD
+
+            bundleValid = false;
             viewManager.reset();
 
             errorText = std::make_unique<juce::AttributedString>(trace);
@@ -394,20 +423,6 @@ namespace blueprint
             errorText->setFont(18);
 #endif
             repaint();
-        }
-
-        //==============================================================================
-        /** Initialises the EcmascriptEngine and registers our native render hooks and a generic error handler/reporter */
-        void initEngine()
-        {
-            engine = std::make_unique<EcmascriptEngine>();
-
-            // Install React.js backend rendering methods
-            registerNativeRenderingHooks();
-
-            engine->onUncaughtError = [this](const juce::String& msg, const juce::String& trace) {
-                handleBundleError(trace);
-            };
         }
 
         //==============================================================================
@@ -475,11 +490,9 @@ namespace blueprint
 
         void registerNativeRenderingHooks()
         {
-            jassert(engine);
-            
-            engine->registerNativeProperty("__BlueprintNative__", juce::JSON::parse("{}"));
+            engine.registerNativeProperty("__BlueprintNative__", juce::JSON::parse("{}"));
 
-            engine->registerNativeMethod("__BlueprintNative__", "createViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "createViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -495,7 +508,7 @@ namespace blueprint
                 return juce::var(viewId);
             }, (void *) this);
 
-            engine->registerNativeMethod("__BlueprintNative__", "createTextViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "createTextViewInstance", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -510,7 +523,7 @@ namespace blueprint
                 return juce::var(viewId);
             }, (void *) this);
 
-            engine->registerNativeMethod("__BlueprintNative__", "setViewProperty", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "setViewProperty", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -527,7 +540,7 @@ namespace blueprint
                 return juce::var::undefined();
             }, (void *) this);
 
-            engine->registerNativeMethod("__BlueprintNative__", "setRawTextValue", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "setRawTextValue", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -543,7 +556,7 @@ namespace blueprint
                 return juce::var::undefined();
             }, (void *) this);
 
-            engine->registerNativeMethod("__BlueprintNative__", "addChild", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "addChild", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -563,7 +576,7 @@ namespace blueprint
                 return juce::var::undefined();
             }, (void *) this);
 
-            engine->registerNativeMethod("__BlueprintNative__", "removeChild", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "removeChild", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -579,7 +592,7 @@ namespace blueprint
                 return juce::var::undefined();
             }, (void *) this);
 
-            engine->registerNativeMethod("__BlueprintNative__", "getRootInstanceId", [](void* stash, const juce::var::NativeFunctionArgs& args) {
+            engine.registerNativeMethod("__BlueprintNative__", "getRootInstanceId", [](void* stash, const juce::var::NativeFunctionArgs& args) {
                 auto self = reinterpret_cast<ReactApplicationRoot*>(stash);
 
                 jassert (self != nullptr);
@@ -591,6 +604,7 @@ namespace blueprint
 
         //==============================================================================
         bool hotReloadEnabled = false;
+        bool bundleValid      = false;
 
         std::unique_ptr<ViewManager>            viewManager;
         std::unique_ptr<BundleWatcher>          bundleWatcher;

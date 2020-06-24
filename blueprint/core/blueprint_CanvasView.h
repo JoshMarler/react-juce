@@ -527,7 +527,7 @@ namespace blueprint
                         //TODO: Add support for drawimage source width and source height to draw sub rect of an image.
                         //      ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 
-                        std::unique_ptr<juce::XmlElement> svgElement = juce::XmlDocument::parse(svg);
+                        std::unique_ptr<juce::XmlElement> svgElement(juce::XmlDocument::parse(svg));
 
                         if (!svgElement)
                         {
@@ -535,7 +535,7 @@ namespace blueprint
                             return juce::var();
                         }
 
-                        std::unique_ptr<juce::Drawable> svgDrawable = juce::Drawable::createFromSVG(*svgElement);
+                        std::unique_ptr<juce::Drawable> svgDrawable(juce::Drawable::createFromSVG(*svgElement));
 
                         if (args.numArguments == 5)
                         {
