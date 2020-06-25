@@ -393,6 +393,33 @@ namespace blueprint
         BundleEvalCallback afterBundleEval;
 
         //==============================================================================
+        using EventSubscriptionToken = int;
+
+        /**
+         * Subscribe to a given event from js. This should be called in your beforeBundleEval
+         * callback as the set of listeners/subscriptions will be cleared on bundle reloads.
+         * Returns an EventSubscriptionToken instance which callers may store and later use to unsubscribe()
+         * a previously registered event handler.
+         * Note, callers should take care to avoid callback loops between subscribe and dispatchEvent etc.
+         **/
+        EventSubscriptionToken subscribe(const juce::String &eventType, juce::var::NativeFunction handler)
+        {
+            JUCE_ASSERT_MESSAGE_THREAD
+            jassert(handler);
+
+            return engine.invoke("__BlueprintNative__.subscribe", eventType, std::move(handler));
+        }
+
+        /**
+         * Removes/Unsubscribes a previously registered event handler/callback.
+         */
+        void unsubscribe(const EventSubscriptionToken &token)
+        {
+            JUCE_ASSERT_MESSAGE_THREAD
+            engine.invoke("__BlueprintNative__.unsubscribe", token);
+        }
+
+        //==============================================================================
         /** The ReactApplicationRoot's engine instance. */
         EcmascriptEngine engine;
 
@@ -609,6 +636,7 @@ namespace blueprint
         std::unique_ptr<ViewManager>            viewManager;
         std::unique_ptr<BundleWatcher>          bundleWatcher;
         std::unique_ptr<juce::AttributedString> errorText;
+
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReactApplicationRoot)
     };
