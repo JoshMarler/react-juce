@@ -119,12 +119,14 @@ namespace blueprint
             return true;
        }
 
+/*
        static void dumpContext(duk_context* ctx)
        {
            duk_push_context_dump(ctx);
            DBG(duk_to_string(ctx, -1));
            duk_pop(ctx);
        }
+*/
     }
 
     //==============================================================================
