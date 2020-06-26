@@ -79,7 +79,18 @@ export function bindCanvasContextProperties(ctx) {
   });
 }
 
-export class Canvas extends Component {
+interface CanvasProps {
+  onMeasure: (width: number, height: number) => void;
+  onDraw: (ctx: CanvasRenderingContext2D) => void;
+  autoclear?: boolean;
+}
+
+interface CanvasState {
+  width: number;
+  height: number;
+}
+
+export class Canvas extends Component<CanvasProps, CanvasState> {
   constructor(props) {
     super(props);
 

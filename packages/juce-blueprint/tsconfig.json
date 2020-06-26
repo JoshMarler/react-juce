@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "./cjs",
+    "allowJs": true,
+    "target": "es5",
+    "lib": ["esnext", "dom"],
+    "esModuleInterop": true
+  },
+  "include": ["./esm/**/*"]
+}
