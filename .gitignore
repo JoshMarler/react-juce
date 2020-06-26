@@ -19,6 +19,7 @@
 *.VC.db
 *.VC.opendb
 xcuserdata
+xcshareddata
 *.xccheckout
 *.xcscmblueprint
 contents.xcworkspacedata

@@ -63,7 +63,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\..\blueprint;..\..\..\..\blueprint\duktape\src-noline;..\..\..\..\ext\juce\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\..\blueprint;..\..\..\..\blueprint\duktape\src-noline;..\..\..\..\blueprint\yoga;..\..\..\..\ext\juce\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2017_78A5024=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=1;JucePlugin_Build_Unity=0;JUCE_SHARED_CODE=1;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -103,7 +103,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\..\blueprint;..\..\..\..\blueprint\duktape\src-noline;..\..\..\..\ext\juce\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\..\blueprint;..\..\..\..\blueprint\duktape\src-noline;..\..\..\..\blueprint\yoga;..\..\..\..\ext\juce\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2017_78A5024=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=1;JucePlugin_Build_Unity=0;JUCE_SHARED_CODE=1;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -138,6 +138,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp"/>
     <ClCompile Include="..\..\Source\PluginEditor.cpp"/>
+    <ClCompile Include="..\..\..\..\blueprint\core\blueprint_EcmascriptEngine.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\core\blueprint_GenericEditor.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\core\blueprint_ReactApplicationRoot.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -148,6 +154,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\core\blueprint_View.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\core\blueprint_ViewManager.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\examples\alloc-hybrid\duk_alloc_hybrid.c">
@@ -199,9 +208,6 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\examples\eventloop\main.c">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\duktape\examples\eventloop\ncurses.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\examples\eventloop\poll.c">
@@ -435,6 +441,9 @@
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hbuffer_alloc.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hbuffer_assert.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hbuffer_ops.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -468,7 +477,13 @@
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_heap_stringtable.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_heaphdr_assert.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hobject_alloc.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hobject_assert.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hobject_class.c">
@@ -484,6 +499,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hobject_props.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hstring_assert.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hstring_misc.c">
@@ -729,6 +747,9 @@
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hbuffer_alloc.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hbuffer_assert.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hbuffer_ops.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -762,7 +783,13 @@
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_heap_stringtable.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_heaphdr_assert.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hobject_alloc.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hobject_assert.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hobject_class.c">
@@ -778,6 +805,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hobject_props.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hstring_assert.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hstring_misc.c">
@@ -867,6 +897,9 @@
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_util_tinyrandom.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\tests\blueprint_EcmascriptEngineTests.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\benchmark\YGBenchmark.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -879,16 +912,22 @@
     <ClCompile Include="..\..\..\..\blueprint\yoga\csharp\Yoga\YGInterop.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\YGJNI.cpp">
+    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\common.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\YGJTypes.cpp">
+    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\corefunctions.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\YGJNIVanilla.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\yogajni.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\YogaJniException.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\javascript\sources\Config.cc">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\javascript\sources\global.cc">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\javascript\sources\nbind.cc">
@@ -897,55 +936,55 @@
     <ClCompile Include="..\..\..\..\blueprint\yoga\javascript\sources\Node.cc">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\detail\Environment.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\detail\Exceptions.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\detail\Hybrid.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\detail\References.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\detail\utf8.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\ByteBuffer.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\Countable.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\Environment.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\Exceptions.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\fbjni.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\Hybrid.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\jni_helpers.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\LocalString.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\OnLoad.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\References.cpp">
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\ReadableByteChannel.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\WeakReference.cpp">
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\lyra\cxa_throw.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\lyra\lyra.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\assert.cpp">
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\lyra\lyra_breakpad.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\log.cpp">
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\lyra\lyra_exceptions.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\onload.cpp">
+    <ClCompile Include="..\..\..\..\blueprint\yoga\tests\BitUtilsTest.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\tests\CompactValueTest.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\tests\InstrumentationTest.cpp">
+    <ClCompile Include="..\..\..\..\blueprint\yoga\tests\EventsTest.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\tests\InternalTest.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\tests\YGAbsolutePositionTest.cpp">
@@ -1074,6 +1113,9 @@
     <ClCompile Include="..\..\..\..\blueprint\yoga\tests\YGSizeOverflowTest.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\tests\YGStyleAccessorsTest.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\tests\YGStyleTest.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1089,6 +1131,24 @@
     <ClCompile Include="..\..\..\..\blueprint\yoga\tests\YGZeroOutLayoutRecursivlyTest.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\testutil\src\main\cpp\jni\jni.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\testutil\src\main\cpp\testutil\testutil.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\util\SingleWriterValueList.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\util\SingleWriterValueListTest.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\yoga\event\event.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\yoga\internal\experiments.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\yoga\log.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1102,9 +1162,6 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\yoga\YGLayout.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\yoga\YGMarker.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\yoga\YGNode.cpp">
@@ -2954,14 +3011,20 @@
   <ItemGroup>
     <ClInclude Include="..\..\Source\PluginProcessor.h"/>
     <ClInclude Include="..\..\Source\PluginEditor.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\core\blueprint_CanvasView.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\core\blueprint_EcmascriptEngine.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\core\blueprint_GenericEditor.h"/>
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ImageView.h"/>
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_RawTextView.h"/>
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ReactApplicationRoot.h"/>
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ScrollView.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ScrollViewContentShadowView.h"/>
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ShadowView.h"/>
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_TextShadowView.h"/>
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_TextView.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ThrottleMap.h"/>
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_View.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ViewManager.h"/>
     <ClInclude Include="..\..\..\..\blueprint\duktape\examples\alloc-hybrid\duk_alloc_hybrid.h"/>
     <ClInclude Include="..\..\..\..\blueprint\duktape\examples\alloc-logging\duk_alloc_logging.h"/>
     <ClInclude Include="..\..\..\..\blueprint\duktape\examples\alloc-torture\duk_alloc_torture.h"/>
@@ -2969,6 +3032,7 @@
     <ClInclude Include="..\..\..\..\blueprint\duktape\examples\codepage-conv\duk_codepage_conv.h"/>
     <ClInclude Include="..\..\..\..\blueprint\duktape\examples\debug-trans-dvalue\duk_trans_dvalue.h"/>
     <ClInclude Include="..\..\..\..\blueprint\duktape\examples\debug-trans-socket\duk_trans_socket.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\duktape\examples\eventloop\c_eventloop.h"/>
     <ClInclude Include="..\..\..\..\blueprint\duktape\extras\alloc-pool\duk_alloc_pool.h"/>
     <ClInclude Include="..\..\..\..\blueprint\duktape\extras\alloc-pool\ptrcomp_fixup.h"/>
     <ClInclude Include="..\..\..\..\blueprint\duktape\extras\cbor\duk_cbor.h"/>
@@ -3064,63 +3128,62 @@
     <ClInclude Include="..\..\..\..\blueprint\yoga\csharp\Yoga\stdafx.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\csharp\Yoga\targetver.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\csharp\Yoga\YGInterop.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\YGJTypes.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\common.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\corefunctions.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\macros.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\ScopedGlobalRef.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\ScopedLocalRef.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\YGJNI.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\YGJNIVanilla.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\YGJTypesVanilla.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\YogaJniException.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\javascript\sources\Config.hh"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\javascript\sources\global.hh"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\javascript\sources\Layout.hh"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\javascript\sources\Node.hh"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\javascript\sources\Size.hh"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\javascript\sources\Value.hh"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Boxed.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\ByteBuffer.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Common.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Context.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\CoreClasses-inl.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\CoreClasses.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Exceptions.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\File.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Hybrid.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Iterator-inl.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Iterator.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\JThread.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Meta-forward.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Meta-inl.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Meta.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\MetaConvert.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\NativeRunnable.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\ReferenceAllocators-inl.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\ReferenceAllocators.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\References-forward.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\References-inl.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\References.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Registration-inl.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Registration.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\TypeTraits.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\ALog.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\assert.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\Countable.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\Environment.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\log.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\lyra.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\noncopyable.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\nonmovable.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\ProgramLocation.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\RefPtr.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\StaticInitialized.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\ThreadLocal.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\visibility.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\Countable.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\GlobalReference.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\jni_helpers.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\LocalReference.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\LocalString.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\Registration.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\WeakReference.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Boxed.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Common.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\CoreClasses-inl.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\CoreClasses.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Environment.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Exceptions.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Hybrid.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Iterator-inl.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Iterator.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\JWeakReference.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Log.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Meta-forward.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Meta-inl.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Meta.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\MetaConvert.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\ReferenceAllocators-inl.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\ReferenceAllocators.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\References-forward.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\References-inl.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\References.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Registration-inl.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Registration.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\TypeTraits.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\utf8.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\ByteBuffer.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\Context.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\fbjni.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\File.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\JThread.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\NativeRunnable.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\ReadableByteChannel.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\lyra\lyra.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\lyra\lyra_exceptions.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\lib\jni\real\jni.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\lib\jni\jni.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\testutil\src\main\cpp\include\yoga\testutil\testutil.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\util\SingleWriterValueList.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\event\event.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\internal\experiments-inl.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\internal\experiments.h"/>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\BitUtils.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\CompactValue.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\instrumentation.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\log.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\Utils.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\YGConfig.h"/>
@@ -3128,7 +3191,6 @@
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\YGFloatOptional.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\YGLayout.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\YGMacros.h"/>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\YGMarker.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\YGNode.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\YGNodePrint.h"/>
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\YGStyle.h"/>
@@ -3891,6 +3953,7 @@
     <None Include="..\..\..\..\blueprint\yoga\android\README.md"/>
     <None Include="..\..\..\..\blueprint\yoga\java\CMakeLists.txt"/>
     <None Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\CMakeLists.txt"/>
+    <None Include="..\..\..\..\blueprint\yoga\testutil\src\main\cpp\CMakeLists.txt"/>
     <None Include="..\..\..\..\blueprint\yoga\website\contents\contributing\opening-a-pull-request.md"/>
     <None Include="..\..\..\..\blueprint\yoga\website\contents\contributing\testing.md"/>
     <None Include="..\..\..\..\blueprint\yoga\website\contents\contributing\writing-documentation.md"/>

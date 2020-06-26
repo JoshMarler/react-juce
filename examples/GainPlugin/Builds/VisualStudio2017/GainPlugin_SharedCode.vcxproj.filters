@@ -107,6 +107,9 @@
     <Filter Include="JUCE Modules\blueprint\duktape">
       <UniqueIdentifier>{0215397C-1A70-A977-769B-D1D31B870961}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\blueprint\tests">
+      <UniqueIdentifier>{C60893CE-39FB-125B-5410-373CA2806F8B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\blueprint\yoga\.github">
       <UniqueIdentifier>{2D3DD65F-E36F-CE38-A439-68F98C4B5BAB}</UniqueIdentifier>
     </Filter>
@@ -134,17 +137,20 @@
     <Filter Include="JUCE Modules\blueprint\yoga\javascript">
       <UniqueIdentifier>{D4F2394A-41B2-01E7-F98D-5EC34200BE34}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni">
-      <UniqueIdentifier>{957678D5-C6B6-6847-AB9D-3D24B84100EC}</UniqueIdentifier>
+    <Filter Include="JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail">
+      <UniqueIdentifier>{9BA8E78E-127B-B60B-B5D1-0B7707AFF387}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb">
-      <UniqueIdentifier>{75D29C3F-6754-D37B-550B-2C48CF0FF104}</UniqueIdentifier>
+    <Filter Include="JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni">
+      <UniqueIdentifier>{6717DD49-ABA1-723C-9C11-DD913B4E6AE9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\jni">
-      <UniqueIdentifier>{D5464051-FA54-8824-574F-5D2A67483575}</UniqueIdentifier>
+    <Filter Include="JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\lyra">
+      <UniqueIdentifier>{78E462AB-FDB2-B5C7-EE85-0A481EBE86B3}</UniqueIdentifier>
     </Filter>
     <Filter Include="JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include">
       <UniqueIdentifier>{B3A36CAA-036F-9732-DCE9-65D178ECA73C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni\detail">
+      <UniqueIdentifier>{22839F4D-A39B-877B-24DB-06AD5D71BCCC}</UniqueIdentifier>
     </Filter>
     <Filter Include="JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni">
       <UniqueIdentifier>{E970EBF8-4CEB-0343-3078-CEFEA5216D3D}</UniqueIdentifier>
@@ -176,6 +182,36 @@
     <Filter Include="JUCE Modules\blueprint\yoga\tests">
       <UniqueIdentifier>{C75C5513-B888-5B22-A4E3-D628A4E92CCA}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\testutil\src\main\cpp\include\yoga\testutil">
+      <UniqueIdentifier>{571613DD-E1EF-A8E9-35CF-24185ADC93E8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\testutil\src\main\cpp\include\yoga">
+      <UniqueIdentifier>{D6B250F5-FFF3-4CE1-810E-E974A3E4DF68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\testutil\src\main\cpp\include">
+      <UniqueIdentifier>{E8AB9EA5-1A06-F188-A74A-A28D3D4500D1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\testutil\src\main\cpp\jni">
+      <UniqueIdentifier>{35612D87-AC14-489B-34CE-4F81393F7F5D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\testutil\src\main\cpp\testutil">
+      <UniqueIdentifier>{C0E0C400-CE8F-50D4-55F2-4E4A6AD63499}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\testutil\src\main\cpp">
+      <UniqueIdentifier>{E60D2C67-D5F8-64F6-0C0E-052DD497F551}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\testutil\src\main">
+      <UniqueIdentifier>{451BDE86-8BF6-A12F-CA9A-CD61FD681002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\testutil\src">
+      <UniqueIdentifier>{34DF868B-7BA7-DB98-6939-2E01C64C4A89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\testutil">
+      <UniqueIdentifier>{0DD28281-C7E1-F390-BE65-C1D50BE8459D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\util">
+      <UniqueIdentifier>{EBB4193F-698C-5CA5-4ACF-4CBE2F0B50DF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\blueprint\yoga\website\contents\contributing">
       <UniqueIdentifier>{41025821-15AB-5C66-A3FD-5422E5287629}</UniqueIdentifier>
     </Filter>
@@ -193,6 +229,12 @@
     </Filter>
     <Filter Include="JUCE Modules\blueprint\yoga\website">
       <UniqueIdentifier>{2BB10AFD-579D-265D-60DB-5789BE03A558}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\yoga\event">
+      <UniqueIdentifier>{E8BB7803-D7E1-7FEB-5284-95545DD2A608}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\blueprint\yoga\yoga\internal">
+      <UniqueIdentifier>{F85F9E97-B70B-4BBF-FFA2-AEDA6BCC9574}</UniqueIdentifier>
     </Filter>
     <Filter Include="JUCE Modules\blueprint\yoga\yoga">
       <UniqueIdentifier>{035F5ED5-797B-347B-9A1D-32E4616E3384}</UniqueIdentifier>
@@ -664,6 +706,12 @@
     <ClCompile Include="..\..\Source\PluginEditor.cpp">
       <Filter>GainPlugin\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\core\blueprint_EcmascriptEngine.cpp">
+      <Filter>JUCE Modules\blueprint\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\core\blueprint_GenericEditor.cpp">
+      <Filter>JUCE Modules\blueprint\core</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\core\blueprint_ReactApplicationRoot.cpp">
       <Filter>JUCE Modules\blueprint\core</Filter>
     </ClCompile>
@@ -674,6 +722,9 @@
       <Filter>JUCE Modules\blueprint\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\core\blueprint_View.cpp">
+      <Filter>JUCE Modules\blueprint\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\core\blueprint_ViewManager.cpp">
       <Filter>JUCE Modules\blueprint\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\examples\alloc-hybrid\duk_alloc_hybrid.c">
@@ -725,9 +776,6 @@
       <Filter>JUCE Modules\blueprint\duktape\examples\eventloop</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\examples\eventloop\main.c">
-      <Filter>JUCE Modules\blueprint\duktape\examples\eventloop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\duktape\examples\eventloop\ncurses.c">
       <Filter>JUCE Modules\blueprint\duktape\examples\eventloop</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\examples\eventloop\poll.c">
@@ -961,6 +1009,9 @@
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hbuffer_alloc.c">
       <Filter>JUCE Modules\blueprint\duktape\src-input</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hbuffer_assert.c">
+      <Filter>JUCE Modules\blueprint\duktape\src-input</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hbuffer_ops.c">
       <Filter>JUCE Modules\blueprint\duktape\src-input</Filter>
     </ClCompile>
@@ -994,7 +1045,13 @@
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_heap_stringtable.c">
       <Filter>JUCE Modules\blueprint\duktape\src-input</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_heaphdr_assert.c">
+      <Filter>JUCE Modules\blueprint\duktape\src-input</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hobject_alloc.c">
+      <Filter>JUCE Modules\blueprint\duktape\src-input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hobject_assert.c">
       <Filter>JUCE Modules\blueprint\duktape\src-input</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hobject_class.c">
@@ -1010,6 +1067,9 @@
       <Filter>JUCE Modules\blueprint\duktape\src-input</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hobject_props.c">
+      <Filter>JUCE Modules\blueprint\duktape\src-input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hstring_assert.c">
       <Filter>JUCE Modules\blueprint\duktape\src-input</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-input\duk_hstring_misc.c">
@@ -1255,6 +1315,9 @@
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hbuffer_alloc.c">
       <Filter>JUCE Modules\blueprint\duktape\src-separate</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hbuffer_assert.c">
+      <Filter>JUCE Modules\blueprint\duktape\src-separate</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hbuffer_ops.c">
       <Filter>JUCE Modules\blueprint\duktape\src-separate</Filter>
     </ClCompile>
@@ -1288,7 +1351,13 @@
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_heap_stringtable.c">
       <Filter>JUCE Modules\blueprint\duktape\src-separate</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_heaphdr_assert.c">
+      <Filter>JUCE Modules\blueprint\duktape\src-separate</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hobject_alloc.c">
+      <Filter>JUCE Modules\blueprint\duktape\src-separate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hobject_assert.c">
       <Filter>JUCE Modules\blueprint\duktape\src-separate</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hobject_class.c">
@@ -1304,6 +1373,9 @@
       <Filter>JUCE Modules\blueprint\duktape\src-separate</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hobject_props.c">
+      <Filter>JUCE Modules\blueprint\duktape\src-separate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hstring_assert.c">
       <Filter>JUCE Modules\blueprint\duktape\src-separate</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_hstring_misc.c">
@@ -1393,6 +1465,9 @@
     <ClCompile Include="..\..\..\..\blueprint\duktape\src-separate\duk_util_tinyrandom.c">
       <Filter>JUCE Modules\blueprint\duktape\src-separate</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\tests\blueprint_EcmascriptEngineTests.cpp">
+      <Filter>JUCE Modules\blueprint\tests</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\benchmark\YGBenchmark.c">
       <Filter>JUCE Modules\blueprint\yoga\benchmark</Filter>
     </ClCompile>
@@ -1405,16 +1480,22 @@
     <ClCompile Include="..\..\..\..\blueprint\yoga\csharp\Yoga\YGInterop.cpp">
       <Filter>JUCE Modules\blueprint\yoga\csharp\Yoga</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\YGJNI.cpp">
+    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\common.cpp">
       <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\YGJTypes.cpp">
+    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\corefunctions.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\YGJNIVanilla.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\yogajni.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\java\jni\YogaJniException.cpp">
       <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\javascript\sources\Config.cc">
-      <Filter>JUCE Modules\blueprint\yoga\javascript\sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\javascript\sources\global.cc">
       <Filter>JUCE Modules\blueprint\yoga\javascript\sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\javascript\sources\nbind.cc">
@@ -1423,55 +1504,55 @@
     <ClCompile Include="..\..\..\..\blueprint\yoga\javascript\sources\Node.cc">
       <Filter>JUCE Modules\blueprint\yoga\javascript\sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\detail\Environment.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\detail\Exceptions.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\detail\Hybrid.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\detail\References.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\detail\utf8.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni\detail</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\ByteBuffer.cpp">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\Countable.cpp">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\Environment.cpp">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\Exceptions.cpp">
       <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\fbjni.cpp">
       <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\Hybrid.cpp">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\jni_helpers.cpp">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\LocalString.cpp">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\OnLoad.cpp">
       <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\References.cpp">
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\ReadableByteChannel.cpp">
       <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\jni\WeakReference.cpp">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\jni</Filter>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\lyra\cxa_throw.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\lyra</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\lyra\lyra.cpp">
       <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\lyra</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\assert.cpp">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp</Filter>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\lyra\lyra_breakpad.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\lyra</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\log.cpp">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp</Filter>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\lyra\lyra_exceptions.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\lyra</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\onload.cpp">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp</Filter>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\tests\BitUtilsTest.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\tests\CompactValueTest.cpp">
       <Filter>JUCE Modules\blueprint\yoga\tests</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\tests\InstrumentationTest.cpp">
+    <ClCompile Include="..\..\..\..\blueprint\yoga\tests\EventsTest.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\tests\InternalTest.cpp">
       <Filter>JUCE Modules\blueprint\yoga\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\tests\YGAbsolutePositionTest.cpp">
@@ -1600,6 +1681,9 @@
     <ClCompile Include="..\..\..\..\blueprint\yoga\tests\YGSizeOverflowTest.cpp">
       <Filter>JUCE Modules\blueprint\yoga\tests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\tests\YGStyleAccessorsTest.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\tests</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\tests\YGStyleTest.cpp">
       <Filter>JUCE Modules\blueprint\yoga\tests</Filter>
     </ClCompile>
@@ -1615,6 +1699,24 @@
     <ClCompile Include="..\..\..\..\blueprint\yoga\tests\YGZeroOutLayoutRecursivlyTest.cpp">
       <Filter>JUCE Modules\blueprint\yoga\tests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\testutil\src\main\cpp\jni\jni.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\testutil\src\main\cpp\jni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\testutil\src\main\cpp\testutil\testutil.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\testutil\src\main\cpp\testutil</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\util\SingleWriterValueList.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\util\SingleWriterValueListTest.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\yoga\event\event.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\yoga\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\blueprint\yoga\yoga\internal\experiments.cpp">
+      <Filter>JUCE Modules\blueprint\yoga\yoga\internal</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\yoga\log.cpp">
       <Filter>JUCE Modules\blueprint\yoga\yoga</Filter>
     </ClCompile>
@@ -1628,9 +1730,6 @@
       <Filter>JUCE Modules\blueprint\yoga\yoga</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\yoga\YGLayout.cpp">
-      <Filter>JUCE Modules\blueprint\yoga\yoga</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\blueprint\yoga\yoga\YGMarker.cpp">
       <Filter>JUCE Modules\blueprint\yoga\yoga</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\blueprint\yoga\yoga\YGNode.cpp">
@@ -3675,6 +3774,15 @@
     <ClInclude Include="..\..\Source\PluginEditor.h">
       <Filter>GainPlugin\Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\core\blueprint_CanvasView.h">
+      <Filter>JUCE Modules\blueprint\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\core\blueprint_EcmascriptEngine.h">
+      <Filter>JUCE Modules\blueprint\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\core\blueprint_GenericEditor.h">
+      <Filter>JUCE Modules\blueprint\core</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ImageView.h">
       <Filter>JUCE Modules\blueprint\core</Filter>
     </ClInclude>
@@ -3687,6 +3795,9 @@
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ScrollView.h">
       <Filter>JUCE Modules\blueprint\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ScrollViewContentShadowView.h">
+      <Filter>JUCE Modules\blueprint\core</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ShadowView.h">
       <Filter>JUCE Modules\blueprint\core</Filter>
     </ClInclude>
@@ -3696,7 +3807,13 @@
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_TextView.h">
       <Filter>JUCE Modules\blueprint\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ThrottleMap.h">
+      <Filter>JUCE Modules\blueprint\core</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\blueprint\core\blueprint_View.h">
+      <Filter>JUCE Modules\blueprint\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\core\blueprint_ViewManager.h">
       <Filter>JUCE Modules\blueprint\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\blueprint\duktape\examples\alloc-hybrid\duk_alloc_hybrid.h">
@@ -3719,6 +3836,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\blueprint\duktape\examples\debug-trans-socket\duk_trans_socket.h">
       <Filter>JUCE Modules\blueprint\duktape\examples\debug-trans-socket</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\duktape\examples\eventloop\c_eventloop.h">
+      <Filter>JUCE Modules\blueprint\duktape\examples\eventloop</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\blueprint\duktape\extras\alloc-pool\duk_alloc_pool.h">
       <Filter>JUCE Modules\blueprint\duktape\extras\alloc-pool</Filter>
@@ -4005,13 +4125,34 @@
     <ClInclude Include="..\..\..\..\blueprint\yoga\csharp\Yoga\YGInterop.h">
       <Filter>JUCE Modules\blueprint\yoga\csharp\Yoga</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\YGJTypes.h">
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\common.h">
+      <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\corefunctions.h">
+      <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\macros.h">
+      <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\ScopedGlobalRef.h">
+      <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\ScopedLocalRef.h">
+      <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\YGJNI.h">
+      <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\YGJNIVanilla.h">
+      <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\YGJTypesVanilla.h">
+      <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\java\jni\YogaJniException.h">
       <Filter>JUCE Modules\blueprint\yoga\java\jni</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\blueprint\yoga\javascript\sources\Config.hh">
-      <Filter>JUCE Modules\blueprint\yoga\javascript\sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\javascript\sources\global.hh">
       <Filter>JUCE Modules\blueprint\yoga\javascript\sources</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\blueprint\yoga\javascript\sources\Layout.hh">
@@ -4026,143 +4167,104 @@
     <ClInclude Include="..\..\..\..\blueprint\yoga\javascript\sources\Value.hh">
       <Filter>JUCE Modules\blueprint\yoga\javascript\sources</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Boxed.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Boxed.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\ByteBuffer.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Common.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Common.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\CoreClasses-inl.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Context.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\CoreClasses.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\CoreClasses-inl.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Environment.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\CoreClasses.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Exceptions.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Exceptions.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Hybrid.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\File.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Iterator-inl.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Hybrid.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Iterator.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Iterator-inl.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\JWeakReference.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Iterator.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Log.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\JThread.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Meta-forward.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Meta-forward.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Meta-inl.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Meta-inl.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Meta.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Meta.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\MetaConvert.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\MetaConvert.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\ReferenceAllocators-inl.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\NativeRunnable.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\ReferenceAllocators.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\ReferenceAllocators-inl.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\References-forward.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\ReferenceAllocators.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\References-inl.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\References-forward.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\References.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\References-inl.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Registration-inl.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\References.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\Registration.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Registration-inl.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\TypeTraits.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\Registration.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail\utf8.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni\TypeTraits.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\ByteBuffer.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\ALog.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\Context.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\assert.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\fbjni.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\Countable.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\File.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\Environment.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\JThread.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\fbjni.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\NativeRunnable.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\log.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni\ReadableByteChannel.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fbjni</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\lyra.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\lyra\lyra.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\lyra</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\noncopyable.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\nonmovable.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\ProgramLocation.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\RefPtr.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\StaticInitialized.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\ThreadLocal.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\fb\visibility.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\fb</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\Countable.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\jni</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\GlobalReference.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\jni</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\jni_helpers.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\jni</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\LocalReference.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\jni</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\LocalString.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\jni</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\Registration.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\jni</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\jni\WeakReference.h">
-      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\jni</Filter>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\include\lyra\lyra_exceptions.h">
+      <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp\include\lyra</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\blueprint\yoga\lib\jni\real\jni.h">
       <Filter>JUCE Modules\blueprint\yoga\lib\jni\real</Filter>
@@ -4170,10 +4272,25 @@
     <ClInclude Include="..\..\..\..\blueprint\yoga\lib\jni\jni.h">
       <Filter>JUCE Modules\blueprint\yoga\lib\jni</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\CompactValue.h">
+    <ClInclude Include="..\..\..\..\blueprint\yoga\testutil\src\main\cpp\include\yoga\testutil\testutil.h">
+      <Filter>JUCE Modules\blueprint\yoga\testutil\src\main\cpp\include\yoga\testutil</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\util\SingleWriterValueList.h">
+      <Filter>JUCE Modules\blueprint\yoga\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\event\event.h">
+      <Filter>JUCE Modules\blueprint\yoga\yoga\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\internal\experiments-inl.h">
+      <Filter>JUCE Modules\blueprint\yoga\yoga\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\internal\experiments.h">
+      <Filter>JUCE Modules\blueprint\yoga\yoga\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\BitUtils.h">
       <Filter>JUCE Modules\blueprint\yoga\yoga</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\instrumentation.h">
+    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\CompactValue.h">
       <Filter>JUCE Modules\blueprint\yoga\yoga</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\log.h">
@@ -4195,9 +4312,6 @@
       <Filter>JUCE Modules\blueprint\yoga\yoga</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\YGMacros.h">
-      <Filter>JUCE Modules\blueprint\yoga\yoga</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\YGMarker.h">
       <Filter>JUCE Modules\blueprint\yoga\yoga</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\blueprint\yoga\yoga\YGNode.h">
@@ -6481,6 +6595,9 @@
     </None>
     <None Include="..\..\..\..\blueprint\yoga\lib\fb\src\main\cpp\CMakeLists.txt">
       <Filter>JUCE Modules\blueprint\yoga\lib\fb\src\main\cpp</Filter>
+    </None>
+    <None Include="..\..\..\..\blueprint\yoga\testutil\src\main\cpp\CMakeLists.txt">
+      <Filter>JUCE Modules\blueprint\yoga\testutil\src\main\cpp</Filter>
     </None>
     <None Include="..\..\..\..\blueprint\yoga\website\contents\contributing\opening-a-pull-request.md">
       <Filter>JUCE Modules\blueprint\yoga\website\contents\contributing</Filter>
