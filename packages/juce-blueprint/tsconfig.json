@@ -5,7 +5,7 @@
     "target": "es5",
     "lib": ["esnext", "dom"],
     "esModuleInterop": true,
-    "module": "system",
+    "module": "CommonJS",
     "declaration": true,
     "moduleResolution": "node"
   },
