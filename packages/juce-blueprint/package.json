@@ -10,6 +10,7 @@
   },
   "author": "Nick Thompson",
   "devDependencies": {
+    "@types/invariant": "^2.2.33",
     "@types/react": "^16.9.41",
     "chalk": "^2.4.2",
     "fs-extra": "^8.1.0",
@@ -17,6 +18,7 @@
   },
   "dependencies": {
     "core-js": "2.6.0",
+    "invariant": "^2.2.4",
     "react": "^16.6.3",
     "react-reconciler": "^0.17.2"
   }
