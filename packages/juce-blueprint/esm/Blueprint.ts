@@ -79,7 +79,7 @@ export function bindCanvasContextProperties(ctx) {
   });
 }
 
-interface CanvasProps {
+export interface CanvasProps {
   onMeasure: (width: number, height: number) => void;
   onDraw: (ctx: CanvasRenderingContext2D) => void;
   autoclear?: boolean;
@@ -217,7 +217,7 @@ export default {
     return BlueprintBackend.getRootContainer();
   },
 
-  render(element, container, callback) {
+  render(element, container, callback?: () => void) {
     console.log('Render started...');
 
     // Create a root Container if it doesnt exist

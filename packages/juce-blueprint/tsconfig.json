@@ -4,7 +4,11 @@
     "allowJs": true,
     "target": "es5",
     "lib": ["esnext", "dom"],
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "module": "system",
+    "moduleResolution": "node",
+    "declaration": true
   },
+  "exclude": ["node_modules"],
   "include": ["./esm/**/*"]
 }

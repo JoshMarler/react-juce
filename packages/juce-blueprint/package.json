@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "BlueprintPlugin user interface in React.",
   "main": "./cjs/Blueprint.js",
+  "types": "./cjs/Blueprint.d.ts",
   "scripts": {
     "build": "tsc",
     "init": "node scripts/init.js"
