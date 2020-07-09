@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "description": "BlueprintPlugin user interface in React.",
   "main": "./cjs/Blueprint.js",
+  "types": "./cjs/Blueprint.d.ts",
   "scripts": {
-    "build": "babel esm --out-dir cjs --extensions '.ts'",
+    "build": "npm run build:types && npm run build:js",
+    "build:types": "tsc --emitDeclarationOnly --outFile ./cjs/Blueprint.d.ts",
+    "build:js": "babel esm --out-dir cjs --extensions \".js,.ts\"",
     "init": "node scripts/init.js"
   },
   "author": "Nick Thompson",
@@ -12,7 +15,7 @@
     "presets": [
       "@babel/preset-env",
       "@babel/preset-react",
-      "@babel/preset-typescript"
+      "@babel/typescript"
     ]
   },
   "devDependencies": {
@@ -25,7 +28,7 @@
     "@types/react": "^16.9.41",
     "chalk": "^2.4.2",
     "fs-extra": "^8.1.0",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.6"
   },
   "dependencies": {
     "core-js": "2.6.0",

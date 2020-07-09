@@ -1,14 +1,11 @@
 {
   "compilerOptions": {
-    "outDir": "./cjs",
-    "allowJs": true,
-    "target": "es5",
-    "lib": ["dom"],
-    "esModuleInterop": true,
-    "module": "CommonJS",
-    "declaration": true,
-    "moduleResolution": "node"
+    "target": "es5",       
+    "declaration": true,                
+    "module": "commonjs",                    
+    "allowJs": true,                          
+    "strict": true,                          
+    "esModuleInterop": true,                 
   },
-  "exclude": ["node_modules"],
   "include": ["./esm/**/*"]
 }
