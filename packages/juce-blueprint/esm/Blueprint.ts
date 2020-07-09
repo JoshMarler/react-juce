@@ -11,6 +11,7 @@ export { default as EventBridge } from './lib/EventBridge';
 // you can use <View> in your JSX. Otherwise we need the dynamic friendliness
 // of the createElement call (note that the type is a string...);
 export function View(props) {
+  const x = Array.from('foo');
   return React.createElement('View', props, props.children);
 }
 

@@ -3,7 +3,7 @@
     "outDir": "./cjs",
     "allowJs": true,
     "target": "es5",
-    "lib": ["esnext", "dom"],
+    "lib": ["dom"],
     "esModuleInterop": true,
     "module": "CommonJS",
     "declaration": true,
