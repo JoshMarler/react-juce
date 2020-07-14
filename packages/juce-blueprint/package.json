@@ -12,6 +12,14 @@
   },
   "author": "Nick Thompson",
   "babel": {
+    "plugins": [
+      [
+        "@babel/plugin-transform-runtime",
+        {
+          "corejs": 3
+        }
+      ]
+    ],
     "presets": [
       "@babel/preset-env",
       "@babel/preset-react",
@@ -21,9 +29,11 @@
   "devDependencies": {
     "@babel/cli": "^7.2.0",
     "@babel/core": "^7.2.0",
+    "@babel/plugin-transform-runtime": "^7.10.5",
     "@babel/preset-env": "^7.2.0",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.10.4",
+    "@babel/runtime-corejs3": "^7.10.5",
     "@types/invariant": "^2.2.33",
     "@types/react": "^16.9.41",
     "chalk": "^2.4.2",
