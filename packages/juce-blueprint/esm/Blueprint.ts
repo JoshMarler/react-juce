@@ -10,19 +10,19 @@ export { default as EventBridge } from './lib/EventBridge';
 // We'll need to wrap the default native components in stuff like this so that
 // you can use <View> in your JSX. Otherwise we need the dynamic friendliness
 // of the createElement call (note that the type is a string...);
-export function View(props) {
+export function View(props: any) {
   return React.createElement('View', props, props.children);
 }
 
-export function Text(props) {
+export function Text(props: any) {
   return React.createElement('Text', props, props.children);
 }
 
-export function Image(props) {
+export function Image(props: any) {
   return React.createElement('Image', props, props.children);
 }
 
-export function bindCanvasContextProperties(ctx) {
+export function bindCanvasContextProperties(ctx: any) {
   Object.defineProperty(ctx, 'fillStyle', {
     enumerable: false,
     configurable: false,
@@ -79,8 +79,19 @@ export function bindCanvasContextProperties(ctx) {
   });
 }
 
-export class Canvas extends Component {
-  constructor(props) {
+export interface CanvasProps {
+  onMeasure: (width: number, height: number) => void;
+  onDraw: (ctx: CanvasRenderingContext2D) => void;
+  autoclear?: boolean;
+}
+
+interface CanvasState {
+  width: number;
+  height: number;
+}
+
+export class Canvas extends Component<CanvasProps, CanvasState> {
+  constructor(props: CanvasProps) {
     super(props);
 
     this._onMeasure = this._onMeasure.bind(this);
@@ -92,7 +103,7 @@ export class Canvas extends Component {
     };
   }
 
-  _onMeasure(width, height) {
+  _onMeasure(width: number, height: number) {
     this.setState({
       width: width,
       height: height
@@ -103,7 +114,7 @@ export class Canvas extends Component {
     }
   }
 
-  _onDraw(ctx) {
+  _onDraw(ctx: any) {
     if (typeof this.props.onDraw === 'function') {
       bindCanvasContextProperties(ctx);
 
@@ -120,17 +131,17 @@ export class Canvas extends Component {
     //      is a bug in duktape. Possible this only occurs on linux. Does not 
     //      appear to occur on mac.
     return React.createElement('CanvasView', Object.assign({}, this.props, {
-      onDraw: (ctx) => { this._onDraw(ctx) },
-      onMeasure: (width, height) => { this._onMeasure(width, height )}
+      onDraw: (ctx: any) => { this._onDraw(ctx) },
+      onMeasure: (width: number, height: number) => { this._onMeasure(width, height )}
     }), this.props.children);
   }
 }
 
-function ScrollViewContentView(props) {
+function ScrollViewContentView(props: any) {
   return React.createElement('ScrollViewContentView', props, props.children);
 }
 
-export function ScrollView(props) {
+export function ScrollView(props: any) {
   const child = React.Children.only(props.children);
 
   invariant(
@@ -206,7 +217,7 @@ export default {
     return BlueprintBackend.getRootContainer();
   },
 
-  render(element, container, callback) {
+  render(element: any, container: any, callback?: () => void) {
     console.log('Render started...');
 
     // Create a root Container if it doesnt exist
