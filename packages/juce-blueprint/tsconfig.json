@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es5",       
-    "declaration": true,                
-    "module": "commonjs",                    
-    "allowJs": true,                          
-    "strict": true,                          
-    "esModuleInterop": true,                 
+    "target": "es6",
+    "declaration": true,
+    "module": "commonjs",
+    "allowJs": true,
+    "strict": true,
+    "esModuleInterop": true
   },
   "include": ["./esm/**/*"]
 }
