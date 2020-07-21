@@ -15,6 +15,80 @@
 namespace blueprint
 {
 
+    struct BoundsAnimator : public juce::Timer {
+        using StepCallback = std::function<void(juce::Rectangle<float>)>;
+
+        enum class EasingType {
+            Linear,
+            QuadraticIn,
+            QuadraticOut,
+            QuadraticInOut,
+        };
+
+        juce::Rectangle<float> start;
+        juce::Rectangle<float> dest;
+        StepCallback callback;
+        double duration;
+        double startTime;
+        int frameRate = 45;
+        EasingType easingType = EasingType::Linear;
+
+        BoundsAnimator(double durationMs, int frameRate, EasingType et, juce::Rectangle<float> start, juce::Rectangle<float> dest, StepCallback cb)
+            : start(start)
+            , dest(dest)
+            , callback(cb)
+            , duration(durationMs)
+            , frameRate(frameRate)
+            , easingType(et)
+        {
+            startTime = juce::Time::getMillisecondCounterHiRes();
+            startTimerHz(45);
+        }
+
+        ~BoundsAnimator() {
+            stopTimer();
+        }
+
+        float lerp(float a, float b, float t) {
+            return a + (t * (b - a));
+        }
+
+        void timerCallback() override {
+            double const now = juce::Time::getMillisecondCounterHiRes();
+            double t = std::clamp((now - startTime) / duration, 0.0, 1.0);
+
+            // Super helpful cheat sheet: https://gist.github.com/gre/1650294
+            switch (easingType) {
+                case EasingType::Linear:
+                    break;
+                case EasingType::QuadraticIn:
+                    t = t * t;
+                    break;
+                case EasingType::QuadraticOut:
+                    t = t * (2.0 - t);
+                    break;
+                case EasingType::QuadraticInOut:
+                    t = (t < 0.5) ? (2.0 * t * t) : (-1.0 + (4.0 - 2.0 * t) * t);
+                    break;
+                default:
+                    break;
+            }
+
+            if (t >= 0.9999) {
+                callback(dest);
+                stopTimer();
+                return;
+            }
+
+            callback({
+                lerp(start.getX(), dest.getX(), t),
+                lerp(start.getY(), dest.getY(), t),
+                lerp(start.getWidth(), dest.getWidth(), t),
+                lerp(start.getHeight(), dest.getHeight(), t),
+            });
+        }
+    };
+
     //==============================================================================
     /** The ShadowView class decouples layout constraints from the actual View instances
         so that our View tree and ShadowView tree might differ (i.e. in the case of raw
@@ -95,9 +169,6 @@ namespace blueprint
          */
         virtual void flushViewLayout()
         {
-            view->setFloatBounds(getCachedLayoutBounds());
-            view->setBounds(getCachedLayoutBounds().toNearestInt());
-
 #ifdef DEBUG
             if (props.contains("debug"))
                 YGNodePrint(yogaNode, (YGPrintOptions) (YGPrintOptionsLayout
@@ -105,8 +176,57 @@ namespace blueprint
                                                         | YGPrintOptionsChildren));
 #endif
 
+            if (props.contains("layoutAnimated"))
+            {
+                if (props["layoutAnimated"].isBool() && props["layoutAnimated"])
+                {
+                    // Default parameters
+                    return flushViewLayoutAnimated(50.0, 45, BoundsAnimator::EasingType::Linear);
+                }
+
+                if (props["layoutAnimated"].isObject())
+                {
+                    double const durationMs = props["layoutAnimated"].getProperty("duration", 50.0);
+                    double const frameRate = props["layoutAnimated"].getProperty("frameRate", 45);
+                    int const et = props["layoutAnimated"].getProperty("easing", 0);
+
+                    return flushViewLayoutAnimated(durationMs, frameRate, static_cast<BoundsAnimator::EasingType>(et));
+                }
+            }
+
+            view->setFloatBounds(getCachedLayoutBounds());
+            view->setBounds(getCachedLayoutBounds().toNearestInt());
+
             for (auto& child : children)
                 child->flushViewLayout();
+        }
+
+        /** Recursive traversal of the shadow tree, flushing layout bounds to the
+         *  associated view components smoothly over time. This recursive step allows
+         *  an animation of a component subtree by just marking the parent as animated.
+         */
+        virtual void flushViewLayoutAnimated(double const durationMs, int const frameRate, BoundsAnimator::EasingType const et)
+        {
+            auto viewCurrentBounds = view->getBounds().toFloat();
+            auto viewDestinationBounds = getCachedLayoutBounds();
+
+            animator = std::make_unique<BoundsAnimator>(
+                durationMs,
+                frameRate,
+                et,
+                viewCurrentBounds,
+                viewDestinationBounds,
+                [safeView = juce::Component::SafePointer(view)](auto && stepBounds) {
+                    if (auto* view = safeView.getComponent()) {
+                        view->setFloatBounds(stepBounds);
+                        view->setBounds(stepBounds.toNearestInt());
+                    }
+                }
+            );
+
+            for (auto& child : children) {
+                child->flushViewLayoutAnimated(durationMs, frameRate, et);
+            }
         }
 
     protected:
@@ -115,6 +235,7 @@ namespace blueprint
         View* view = nullptr;
         juce::NamedValueSet props;
 
+        std::unique_ptr<BoundsAnimator> animator;
         std::vector<ShadowView*> children;
 
     private:

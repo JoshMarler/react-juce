@@ -1,3 +1,4 @@
+import AnimatedFlexBoxExample from './AnimatedFlexBox';
 import Label from './Label';
 import Meter from './Meter';
 import React, { Component } from 'react';
@@ -24,6 +25,13 @@ function animatedDraw(ctx) {
 
 class App extends Component {
   render() {
+    // Uncomment here to watch the animated flex box example in action
+    // return (
+    //   <View {...styles.container}>
+    //     <AnimatedFlexBoxExample />
+    //   </View>
+    // );
+
     return (
       <View {...styles.container}>
         <View {...styles.content}>

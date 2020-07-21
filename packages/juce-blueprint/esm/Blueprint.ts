@@ -161,6 +161,13 @@ View.ClickEventFlags = {
   allowClickEventsOnlyOnChildren: 3,
 };
 
+View.EasingFunctions = {
+  linear: 0,
+  quadraticIn: 1,
+  quadraticOut: 2,
+  quadraticInOut: 3,
+};
+
 Image.PlacementFlags = {
   xLeft: 1,
   xRight: 2,
