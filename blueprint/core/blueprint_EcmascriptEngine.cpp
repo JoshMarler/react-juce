@@ -412,14 +412,7 @@ namespace blueprint
     //==============================================================================
     void EcmascriptEngine::removeLambdaHelper (LambdaHelper* helper)
     {
-        for (size_t i = 0; i < lambdaReleasePool.size(); ++i)
-        {
-            if (lambdaReleasePool[i].get() == helper)
-            {
-                lambdaReleasePool.erase(lambdaReleasePool.begin() + i);
-                break;
-            }
-        }
+        lambdaReleasePool.erase(helper->id);
     }
 
     //==============================================================================
@@ -486,7 +479,7 @@ namespace blueprint
             duk_set_finalizer(ctx, -2);
 
             // And hang on to it!
-            lambdaReleasePool.push_back(std::move(helper));
+            lambdaReleasePool[helper->id] = std::move(helper);
             return;
         }
 

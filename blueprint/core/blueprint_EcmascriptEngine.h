@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <unordered_map>
 
 namespace blueprint
 {
@@ -153,11 +154,12 @@ namespace blueprint
             static duk_ret_t callbackFinalizer (duk_context* ctx);
 
             juce::var::NativeFunction callback;
+            juce::Uuid                id;
         };
 
         //==============================================================================
         duk_context* ctx;
-        std::vector<std::unique_ptr<LambdaHelper>> lambdaReleasePool;
+        std::unordered_map<juce::Uuid, std::unique_ptr<LambdaHelper>> lambdaReleasePool;
 
         //==============================================================================
         void removeLambdaHelper (LambdaHelper* helper);
