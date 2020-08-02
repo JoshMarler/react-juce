@@ -83,6 +83,111 @@ namespace blueprint
 
     namespace
     {
+        //==============================================================================
+        struct FlexProperties
+        {
+            // Flex enums
+            juce::Identifier direction       = "direction";
+            juce::Identifier flexDirection   = "flex-direction";
+            juce::Identifier justifyContent  = "justify-content";
+            juce::Identifier alignItems      = "align-items";
+            juce::Identifier alignContent    = "align-content";
+            juce::Identifier alignSelf       = "align-self";
+            juce::Identifier position        = "position";
+            juce::Identifier flexWrap        = "flex-wrap";
+            juce::Identifier overflow        = "overflow";
+
+            // Flex dimensions
+            juce::Identifier flex            = "flex";
+            juce::Identifier flexGrow        = "flex-grow";
+            juce::Identifier flexShrink      = "flex-shrink";
+            juce::Identifier flexBasis       = "flex-basis";
+            juce::Identifier width           = "width";
+            juce::Identifier height          = "height";
+            juce::Identifier minWidth        = "min-width";
+            juce::Identifier minHeight       = "min-height";
+            juce::Identifier maxWidth        = "max-width";
+            juce::Identifier maxHeight       = "max-height";
+            juce::Identifier aspectRatio     = "aspect-ratio";
+
+            // Margin
+            juce::Identifier marginMetaProp   = "margin";
+            juce::Identifier marginLeft       = juce::String("margin-") + YGEdgeToString(YGEdgeLeft);
+            juce::Identifier marginRight      = juce::String("margin-") + YGEdgeToString(YGEdgeRight);
+            juce::Identifier marginTop        = juce::String("margin-") + YGEdgeToString(YGEdgeTop);
+            juce::Identifier marginBottom     = juce::String("margin-") + YGEdgeToString(YGEdgeBottom);
+            juce::Identifier marginStart      = juce::String("margin-") + YGEdgeToString(YGEdgeStart);
+            juce::Identifier marginEnd        = juce::String("margin-") + YGEdgeToString(YGEdgeEnd);
+            juce::Identifier marginHorizontal = juce::String("margin-") + YGEdgeToString(YGEdgeHorizontal);
+            juce::Identifier marginVertical   = juce::String("margin-") + YGEdgeToString(YGEdgeVertical);
+
+            // Padding
+            juce::Identifier paddingMetaProp   = "padding";
+            juce::Identifier paddingLeft       = juce::String("padding-") + YGEdgeToString(YGEdgeLeft);
+            juce::Identifier paddingRight      = juce::String("padding-") + YGEdgeToString(YGEdgeRight);
+            juce::Identifier paddingTop        = juce::String("padding-") + YGEdgeToString(YGEdgeTop);
+            juce::Identifier paddingBottom     = juce::String("padding-") + YGEdgeToString(YGEdgeBottom);
+            juce::Identifier paddingStart      = juce::String("padding-") + YGEdgeToString(YGEdgeStart);
+            juce::Identifier paddingEnd        = juce::String("padding-") + YGEdgeToString(YGEdgeEnd);
+            juce::Identifier paddingHorizontal = juce::String("padding-") + YGEdgeToString(YGEdgeHorizontal);
+            juce::Identifier paddingVertical   = juce::String("padding-") + YGEdgeToString(YGEdgeVertical);
+
+            //Position
+            juce::Identifier positionLeft      = YGEdgeToString(YGEdgeLeft);
+            juce::Identifier positionRight     = YGEdgeToString(YGEdgeRight);
+            juce::Identifier positionTop       = YGEdgeToString(YGEdgeTop);
+            juce::Identifier positionBottom    = YGEdgeToString(YGEdgeBottom);
+            //TODO: Any need for other edge values? i.e. start, end ?
+        } flexProperties;
+
+        bool isMarginProp(const juce::Identifier& prop)
+        {
+            static const std::array<juce::Identifier, 9> marginProps =
+            {
+                flexProperties.marginMetaProp,
+                flexProperties.marginLeft,
+                flexProperties.marginRight,
+                flexProperties.marginTop,
+                flexProperties.marginBottom,
+                flexProperties.marginStart,
+                flexProperties.marginEnd,
+                flexProperties.marginHorizontal,
+                flexProperties.marginVertical
+            };
+
+            return std::find(marginProps.cbegin(), marginProps.cend(), prop) != marginProps.cend();
+        }
+
+        bool isPaddingProp(const juce::Identifier& prop)
+        {
+            static std::array<juce::Identifier, 9> paddingProps =
+            {
+                flexProperties.paddingMetaProp,
+                flexProperties.paddingLeft,
+                flexProperties.paddingRight,
+                flexProperties.paddingTop,
+                flexProperties.paddingBottom,
+                flexProperties.paddingStart,
+                flexProperties.paddingEnd,
+                flexProperties.paddingHorizontal,
+                flexProperties.paddingVertical
+            };
+
+            return std::find(paddingProps.cbegin(), paddingProps.cend(), prop) != paddingProps.cend();
+        }
+
+        bool isPositionProp(const juce::Identifier& prop)
+        {
+            static std::array<juce::Identifier, 4> positionProps =
+            {
+                flexProperties.positionLeft,
+                flexProperties.positionRight,
+                flexProperties.positionTop,
+                flexProperties.positionBottom,
+            };
+
+            return std::find(positionProps.cbegin(), positionProps.cend(), prop) != positionProps.cend();
+        }
 
         //==============================================================================
         std::map<juce::String, YGDirection> ValidDirectionValues {
@@ -150,17 +255,51 @@ namespace blueprint
         template<typename T>
         bool validateFlexProperty (juce::String value, std::map<juce::String, T> validValues)
         {
-            for (const auto& [flexValue, enumValue] : validValues)
+            return std::any_of(validValues.cbegin(), validValues.cend(), [=] (const auto &pair)
             {
-                if (value.equalsIgnoreCase(flexValue))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+                return value.equalsIgnoreCase(pair.first);
+            });
         }
+    }
 
+    //==============================================================================
+    bool ShadowView::isLayoutProperty(const juce::Identifier& property)
+    {
+        static const std::array<juce::Identifier, 21> properties =
+        {
+            flexProperties.direction,
+            flexProperties.flexDirection,
+            flexProperties.justifyContent,
+            flexProperties.alignItems,
+            flexProperties.alignContent,
+            flexProperties.alignSelf,
+            flexProperties.position,
+            flexProperties.flexWrap,
+            flexProperties.overflow,
+            flexProperties.flex,
+            flexProperties.flexGrow,
+            flexProperties.flexShrink,
+            flexProperties.flexBasis,
+            flexProperties.width,
+            flexProperties.height,
+            flexProperties.minWidth,
+            flexProperties.minHeight,
+            flexProperties.minWidth,
+            flexProperties.maxWidth,
+            flexProperties.maxHeight,
+            flexProperties.aspectRatio
+        };
+
+        if (std::find(properties.cbegin(), properties.cend(), property) != properties.cend())
+            return true;
+        else if (isMarginProp(property))
+            return true;
+        else if (isPaddingProp(property))
+            return true;
+        else if (isPositionProp(property))
+            return true;
+        else
+            return false;
     }
 
     //==============================================================================
@@ -170,122 +309,157 @@ namespace blueprint
 
         //==============================================================================
         // Flex enums
-        if (name == juce::Identifier("direction"))
+        if (name == flexProperties.direction)
         {
             jassert (validateFlexProperty(newValue, ValidDirectionValues));
             YGNodeStyleSetDirection(yogaNode, ValidDirectionValues[newValue]);
+            return;
         }
 
-        if (name == juce::Identifier("flex-direction"))
+        if (name == flexProperties.flexDirection)
         {
             jassert (validateFlexProperty(newValue, ValidFlexDirectionValues));
             YGNodeStyleSetFlexDirection(yogaNode, ValidFlexDirectionValues[newValue]);
+            return;
         }
 
-        if (name == juce::Identifier("justify-content"))
+        if (name == flexProperties.justifyContent)
         {
             jassert (validateFlexProperty(newValue, ValidJustifyValues));
             YGNodeStyleSetJustifyContent(yogaNode, ValidJustifyValues[newValue]);
+            return;
         }
 
-        if (name == juce::Identifier("align-items"))
+        if (name == flexProperties.alignItems)
         {
             jassert (validateFlexProperty(newValue, ValidAlignValues));
             YGNodeStyleSetAlignItems(yogaNode, ValidAlignValues[newValue]);
+            return;
         }
 
-        if (name == juce::Identifier("align-content"))
+        if (name == flexProperties.alignContent)
         {
             jassert (validateFlexProperty(newValue, ValidAlignValues));
             YGNodeStyleSetAlignContent(yogaNode, ValidAlignValues[newValue]);
+            return;
         }
 
-        if (name == juce::Identifier("align-self"))
+        if (name == flexProperties.alignSelf)
         {
             jassert (validateFlexProperty(newValue, ValidAlignValues));
             YGNodeStyleSetAlignSelf(yogaNode, ValidAlignValues[newValue]);
+            return;
         }
 
-        if (name == juce::Identifier("position"))
+        if (name == flexProperties.position)
         {
             jassert (validateFlexProperty(newValue, ValidPositionTypeValues));
             YGNodeStyleSetPositionType(yogaNode, ValidPositionTypeValues[newValue]);
+            return;
         }
 
-        if (name == juce::Identifier("flex-wrap"))
+        if (name == flexProperties.flexWrap)
         {
             jassert (validateFlexProperty(newValue, ValidFlexWrapValues));
             YGNodeStyleSetFlexWrap(yogaNode, ValidFlexWrapValues[newValue]);
+            return;
         }
 
-        if (name == juce::Identifier("overflow"))
+        if (name == flexProperties.overflow)
         {
             jassert (validateFlexProperty(newValue, ValidOverflowValues));
             YGNodeStyleSetOverflow(yogaNode, ValidOverflowValues[newValue]);
+            return;
         }
 
         //==============================================================================
         // Flex dimensions
-        if (name == juce::Identifier("flex"))
+        if (name == flexProperties.flex)
+        {
             BP_SET_FLEX_FLOAT_PROPERTY(newValue, YGNodeStyleSetFlex, yogaNode)
-        if (name == juce::Identifier("flex-grow"))
+            return;
+        }
+        if (name == flexProperties.flexGrow)
+        {
             BP_SET_FLEX_FLOAT_PROPERTY(newValue, YGNodeStyleSetFlexGrow, yogaNode)
-        if (name == juce::Identifier("flex-shrink"))
+            return;
+        }
+        if (name == flexProperties.flexShrink)
+        {
             BP_SET_FLEX_FLOAT_PROPERTY(newValue, YGNodeStyleSetFlexShrink, yogaNode)
-        if (name == juce::Identifier("flex-basis"))
+            return;
+        }
+        if (name == flexProperties.flexBasis)
+        {
             BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(newValue, YGNodeStyleSetFlexBasis, yogaNode)
-        if (name == juce::Identifier("width"))
+            return;
+        }
+        if (name == flexProperties.width)
+        {
             BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(newValue, YGNodeStyleSetWidth, yogaNode)
-        if (name == juce::Identifier("height"))
+            return;
+        }
+        if (name == flexProperties.height)
+        {
             BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(newValue, YGNodeStyleSetHeight, yogaNode)
-        if (name == juce::Identifier("min-width"))
+            return;
+        }
+        if (name == flexProperties.minWidth)
+        {
             BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetMinWidth, yogaNode)
-        if (name == juce::Identifier("min-height"))
+            return;
+        }
+        if (name == flexProperties.minHeight)
+        {
             BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetMinHeight, yogaNode)
-        if (name == juce::Identifier("max-width"))
+            return;
+        }
+        if (name == flexProperties.maxWidth)
+        {
             BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetMaxWidth, yogaNode)
-        if (name == juce::Identifier("max-height"))
+            return;
+        }
+        if (name == flexProperties.maxHeight)
+        {
             BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetMaxHeight, yogaNode)
-        if (name == juce::Identifier("aspect-ratio"))
+            return;
+        }
+        if (name == flexProperties.aspectRatio)
+        {
             BP_SET_FLEX_FLOAT_PROPERTY(newValue, YGNodeStyleSetAspectRatio, yogaNode)
+            return;
+        }
 
         //==============================================================================
         // Margin
-        juce::Identifier marginMetaProp ("margin");
-
-        for (const auto& [edgeName, enumValue] : ValidEdgeValues)
+        if (isMarginProp(name))
         {
-            juce::Identifier propId (juce::String("margin-") + edgeName);
+            if (name == flexProperties.marginMetaProp)
+                BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(newValue, YGNodeStyleSetMargin, yogaNode, YGEdgeAll)
+            else
+                BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(newValue, YGNodeStyleSetMargin, yogaNode, ValidEdgeValues[name.toString().replace("margin-", "")])
 
-            if (name == propId || (name == marginMetaProp && enumValue == YGEdgeAll))
-            {
-                BP_SET_FLEX_DIMENSION_PROPERTY_AUTO(newValue, YGNodeStyleSetMargin, yogaNode, enumValue);
-            }
+           return;
         }
 
         //==============================================================================
         // Padding
-        juce::Identifier paddingMetaProp ("padding");
-
-        for (const auto& [edgeName, enumValue] : ValidEdgeValues)
+        if (isPaddingProp(name))
         {
-            juce::Identifier propId (juce::String("padding-") + edgeName);
+            if (name == flexProperties.paddingMetaProp)
+                BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetPadding, yogaNode, YGEdgeAll)
+            else
+                BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetMargin, yogaNode, ValidEdgeValues[name.toString().replace("padding-", "")])
 
-            if (name == propId || (name == paddingMetaProp && enumValue == YGEdgeAll))
-            {
-                BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetPadding, yogaNode, enumValue);
-            }
+            return;
         }
 
         //==============================================================================
         // Position
-        for (const auto& [edgeName, enumValue] : ValidEdgeValues)
+        if (isPositionProp(name))
         {
-            if (name == juce::Identifier(edgeName))
-            {
-                BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetPosition, yogaNode, enumValue);
-            }
+            BP_SET_FLEX_DIMENSION_PROPERTY(newValue, YGNodeStyleSetPosition, yogaNode, ValidEdgeValues[name.toString()]);
+            return;
         }
     }
-
 }

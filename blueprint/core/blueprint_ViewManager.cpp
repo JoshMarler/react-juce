@@ -53,12 +53,19 @@ namespace blueprint
         const auto& [view, shadow] = getViewHandle(viewId);
 
         view->setProperty(name, value);
-        shadow->setProperty(name, value);
 
-        // For now, we just assume that any new property update means we
-        // need to redraw or lay out our tree again. This is an easy future
-        // optimization.
-        performRootShadowTreeLayout();
+        //TODO: There is an element of duplicate work checking ShadowView::isLayoutProperty and
+        //      then effectively running N property comparisons in the worst case again
+        //      in ShadowView::setProperty. We could have ShadowView::setProperty return a boolean
+        //      if a property was set succesfully and if false avoid performRootShadowTreeLayout ?
+        if (ShadowView::isLayoutProperty(name))
+        {
+            //TODO: Here is where we could use juce::AsyncUpdater to coalesce layout property
+            //      updates into a single root layout operation.
+            shadow->setProperty(name, value);
+            performRootShadowTreeLayout();
+        }
+
         view->repaint();
     }
 

@@ -14,7 +14,6 @@
 
 namespace blueprint
 {
-
     //==============================================================================
     /** The ShadowView class decouples layout constraints from the actual View instances
         so that our View tree and ShadowView tree might differ (i.e. in the case of raw
@@ -36,6 +35,9 @@ namespace blueprint
         }
 
         //==============================================================================
+        /** Returns whether or not a given property is a ShadowView/layout property. */
+        static bool isLayoutProperty(const juce::Identifier& prop);
+
         /** Set a property on the shadow view. */
         virtual void setProperty (const juce::Identifier& name, const juce::var& newValue);
 
