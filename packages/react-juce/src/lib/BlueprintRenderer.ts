@@ -42,7 +42,9 @@ const HostConfig = {
   },
 
   prepareForCommit: (...args: any) => {},
-  resetAfterCommit: (...args: any) => {},
+  resetAfterCommit: (...args: any) => {
+    BlueprintBackend.resetAfterCommit();
+  },
 
   /** Called to determine whether or not a new text value can be set on an
    *  existing node, or if a new text node needs to be created.
