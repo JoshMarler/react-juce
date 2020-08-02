@@ -48,18 +48,16 @@ namespace blueprint
         return id;
     }
 
-    void ViewManager::setViewProperty(ViewId viewId, const juce::Identifier& name, const juce::var& value)
+    void ViewManager::setViewProperty(ViewId viewId, const juce::String& name, const juce::var& value)
     {
         const auto& [view, shadow] = getViewHandle(viewId);
 
-        view->setProperty(name, value);
-        shadow->setProperty(name, value);
-
-        // For now, we just assume that any new property update means we
-        // need to redraw or lay out our tree again. This is an easy future
-        // optimization.
-        performRootShadowTreeLayout();
-        view->repaint();
+        // ShadowView::setProperty returns true when a layout prop
+        // has been set.  Otherwise set on the view and repaint
+        if(!shadow->setProperty(name, value)) {
+          view->setProperty(name, value);
+          view->repaint();
+        }
     }
 
     void ViewManager::setRawTextValue(ViewId viewId, const juce::String& value)

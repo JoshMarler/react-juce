@@ -50,7 +50,7 @@ namespace blueprint
         ViewId createTextViewInstance(const juce::String& value);
 
         /** Calls View::setProperty on the requested View */
-        void setViewProperty(ViewId viewId, const juce::Identifier& name, const juce::var& value);
+        void setViewProperty(ViewId viewId, const juce::String& name, const juce::var& value);
 
         /** Calls RawTextView::setText on the requested View. If the ViewId supplied is not the id of a RawTextView
          *  this is a no-op.

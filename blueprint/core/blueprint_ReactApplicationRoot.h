@@ -561,6 +561,13 @@ namespace blueprint
                 juce::ignoreUnused(args);
                 return juce::var(getViewId());
             });
+
+            engine.registerNativeMethod("__BlueprintNative__", "resetAfterCommit", [this](const juce::var::NativeFunctionArgs& args) {
+                // TODO, something else... traverse for dirty
+                // yoga nodes
+                getViewManager().performRootShadowTreeLayout();
+                return juce::var::undefined();
+            });
         }
 
         //==============================================================================

@@ -11,6 +11,8 @@
 
 #include "blueprint_View.h"
 
+#define BP_SPREAD_SETTER_PERCENT(setter) setter, setter##Percent
+#define BP_SPREAD_SETTER_AUTO(setter) BP_SPREAD_SETTER_PERCENT(setter), setter##Auto
 
 namespace blueprint
 {
@@ -89,6 +91,58 @@ namespace blueprint
         }
     };
 
+    template <typename Setter, typename ...Args>
+    const auto getYogaNodeFloatSetter(Setter setter, Args... args) {
+      return [=](const juce::var& value, YGNodeRef node) {
+        if(value.isDouble()) {
+          setter(node, args..., (float) value);
+          return true;
+        }
+        return false;
+      };
+    }
+
+    template <typename Setter, typename SetterPercent, typename ...Args>
+    const auto getYogaNodeDimensionSetter(Setter setter, SetterPercent setterPercent, Args... args) {
+      return [=, floatSetter = getYogaNodeFloatSetter(setter, args...)](const juce::var& value, YGNodeRef node) {
+        if (floatSetter(value, node))
+          return true;
+        if (value.isString() && value.toString().contains("%"))
+        {
+          juce::String strVal = value.toString().retainCharacters("-1234567890.");
+          setterPercent(node, args..., strVal.getFloatValue());
+          return true;
+        }
+        setter(node, args..., YGUndefined);
+        return true;
+      };
+    }
+
+    template <typename Setter, typename SetterPercent, typename SetterAuto, typename ...Args>
+    const auto getYogaNodeDimensionAutoSetter(Setter setter, SetterPercent setterPercent, SetterAuto setterAuto, Args... args) {
+      return [=, nonAutoSetter = getYogaNodeDimensionSetter(setter, setterPercent, args...)](const juce::var& value, YGNodeRef node) {
+        if (value.isString() && value.toString() == "auto") {
+          setterAuto(node, args...);
+          return true;
+        }
+        return nonAutoSetter(value, node);
+      };
+    }
+
+    template <typename Setter, typename EnumMap>
+    const auto getYogaNodeEnumSetter(Setter setter, EnumMap &map) {
+      return [=](const juce::var& value, YGNodeRef node) {                       \
+        const auto val = map.find(value);
+        if(val == map.end()) {
+          // TODO catch further up to add the key at which we tried
+          // to set this enum property to the message and rethrow
+          throw std::invalid_argument("Invalid property: " + value.toString().toStdString());
+        }
+        setter(node, val->second);
+        return true;
+      };
+    }
+
     //==============================================================================
     /** The ShadowView class decouples layout constraints from the actual View instances
         so that our View tree and ShadowView tree might differ (i.e. in the case of raw
@@ -111,7 +165,7 @@ namespace blueprint
 
         //==============================================================================
         /** Set a property on the shadow view. */
-        virtual void setProperty (const juce::Identifier& name, const juce::var& newValue);
+        virtual bool setProperty (const juce::String& name, const juce::var& newValue);
 
         /** Adds a child component behind the existing children. */
         virtual void addChild (ShadowView* childView, int index = -1)

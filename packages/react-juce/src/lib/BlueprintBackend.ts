@@ -262,5 +262,9 @@ export default {
 
     __viewRegistry[id] = instance;
     return instance;
-  }
+  },
+  resetAfterCommit() {
+    //@ts-ignore
+    return __BlueprintNative__.resetAfterCommit();
+  },
 };

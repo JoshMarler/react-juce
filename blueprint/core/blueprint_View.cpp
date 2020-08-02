@@ -113,12 +113,14 @@ namespace blueprint
 
     void View::setFloatBounds(juce::Rectangle<float> bounds)
     {
+        static const juce::Identifier transformMatrix("transform-matrix");
+
         cachedFloatBounds = bounds;
 
         // Update transforms
-        if (props.contains("transform-matrix"))
+        if (props.contains(transformMatrix))
         {
-            const juce::var& matrix = props["transform-matrix"];
+            const juce::var& matrix = props[transformMatrix];
             if(matrix.isArray() && matrix.getArray()->size() >= 16) {
               const juce::Array<juce::var> &m = *matrix.getArray();
 

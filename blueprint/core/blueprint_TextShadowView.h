@@ -39,14 +39,16 @@ namespace blueprint
 
         //==============================================================================
         /** Set a property on the shadow view. */
-        void setProperty (const juce::Identifier& name, const juce::var& value) override
+        bool setProperty (const juce::String& name, const juce::var& value) override
         {
-            ShadowView::setProperty(name, value);
+            const bool layoutPropertyWasSet = ShadowView::setProperty(name, value);
 
             // For certain text properties we want Yoga to know that we need
             // to measure again. For example, changing the font size.
-            if (name == juce::Identifier("font-size"))
+            if (name.compare("font-size") == 0)
                 markDirty();
+
+            return layoutPropertyWasSet;
         }
 
         /** Override the default ShadowView behavior to explicitly error. */
