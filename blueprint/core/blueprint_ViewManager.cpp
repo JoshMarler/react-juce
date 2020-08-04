@@ -52,8 +52,6 @@ namespace blueprint
     {
         const auto& [view, shadow] = getViewHandle(viewId);
 
-        view->setProperty(name, value);
-
         //TODO: There is an element of duplicate work checking ShadowView::isLayoutProperty and
         //      then effectively running N property comparisons in the worst case again
         //      in ShadowView::setProperty. We could have ShadowView::setProperty return a boolean
@@ -65,8 +63,11 @@ namespace blueprint
             shadow->setProperty(name, value);
             performRootShadowTreeLayout();
         }
-
-        view->repaint();
+        else
+        {
+            view->setProperty(name, value);
+            view->repaint();
+        }
     }
 
     void ViewManager::setRawTextValue(ViewId viewId, const juce::String& value)
