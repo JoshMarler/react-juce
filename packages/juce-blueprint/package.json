@@ -2,11 +2,11 @@
   "name": "juce-blueprint",
   "version": "0.1.0",
   "description": "BlueprintPlugin user interface in React.",
-  "main": "./cjs/Blueprint.js",
-  "types": "./cjs/Blueprint.d.ts",
+  "main": "./cjs/juce-blueprint.js",
+  "types": "./cjs/juce-blueprint.d.ts",
   "scripts": {
     "build": "npm run build:types && npm run build:js",
-    "build:types": "tsc --emitDeclarationOnly --outFile ./cjs/Blueprint.d.ts",
+    "build:types": "tsc --emitDeclarationOnly --outFile ./cjs/juce-blueprint.d.ts",
     "build:js": "babel esm --out-dir cjs --extensions \".js,.ts\"",
     "init": "node scripts/init.js"
   },
