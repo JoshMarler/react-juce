@@ -99,43 +99,35 @@ namespace blueprint
         if (valueTreeState != nullptr)
         {
             appRoot.engine.registerNativeMethod(
-                    "beginParameterChangeGesture",
-                    [](void* stash, const juce::var::NativeFunctionArgs& args) {
-                        auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
+                "beginParameterChangeGesture",
+                [this](const juce::var::NativeFunctionArgs& args) {
+                    if (auto* parameter = valueTreeState->getParameter(args.arguments[0].toString()))
+                        parameter->beginChangeGesture();
 
-                        if (auto* parameter = state->getParameter (args.arguments[0].toString()))
-                            parameter->beginChangeGesture();
-
-                        return juce::var::undefined();
-                    },
-                    (void *) valueTreeState
+                    return juce::var::undefined();
+                }
             );
 
             appRoot.engine.registerNativeMethod(
-                    "setParameterValueNotifyingHost",
-                    [](void* stash, const juce::var::NativeFunctionArgs& args) {
-                        auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
+                "setParameterValueNotifyingHost",
+                [this](const juce::var::NativeFunctionArgs& args) {
+                    if (auto* parameter = valueTreeState->getParameter(args.arguments[0].toString()))
+                        parameter->setValueNotifyingHost(args.arguments[1]);
 
-                        if (auto* parameter = state->getParameter (args.arguments[0].toString()))
-                            parameter->setValueNotifyingHost (static_cast<float> (args.arguments[1]));
-
-                        return juce::var::undefined();
-                    },
-                    (void *) valueTreeState
+                    return juce::var::undefined();
+                }
             );
 
             appRoot.engine.registerNativeMethod(
-                    "endParameterChangeGesture",
-                    [](void* stash, const juce::var::NativeFunctionArgs& args) {
-                        auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
-                        const juce::String& paramId = args.arguments[0].toString();
+                "endParameterChangeGesture",
+                [this](const juce::var::NativeFunctionArgs& args) {
+                    const juce::String& paramId = args.arguments[0].toString();
 
-                        if (auto* parameter = state->getParameter(paramId))
-                            parameter->endChangeGesture();
+                    if (auto* parameter = valueTreeState->getParameter(paramId))
+                        parameter->endChangeGesture();
 
-                        return juce::var::undefined();
-                    },
-                    (void *) valueTreeState
+                    return juce::var::undefined();
+                }
             );
         }
     }

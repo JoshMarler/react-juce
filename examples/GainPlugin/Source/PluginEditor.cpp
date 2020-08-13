@@ -26,45 +26,39 @@ GainPluginAudioProcessorEditor::GainPluginAudioProcessorEditor (GainPluginAudioP
     // Bind some native callbacks
     appRoot.engine.registerNativeMethod(
         "beginParameterChangeGesture",
-        [](void* stash, const juce::var::NativeFunctionArgs& args) {
-            auto* self = reinterpret_cast<GainPluginAudioProcessorEditor*>(stash);
+        [this](const juce::var::NativeFunctionArgs& args) {
             const juce::String& paramId = args.arguments[0].toString();
 
-            if (auto* parameter = self->processor.getValueTreeState().getParameter(paramId))
+            if (auto* parameter = processor.getValueTreeState().getParameter(paramId))
                 parameter->beginChangeGesture();
 
             return juce::var::undefined();
-        },
-        (void *) this
+        }
     );
 
     appRoot.engine.registerNativeMethod(
         "setParameterValueNotifyingHost",
-        [](void* stash, const juce::var::NativeFunctionArgs& args) {
-            auto* self = reinterpret_cast<GainPluginAudioProcessorEditor*>(stash);
+        [this](const juce::var::NativeFunctionArgs& args) {
             const juce::String& paramId = args.arguments[0].toString();
             const double value = args.arguments[1];
 
-            if (auto* parameter = self->processor.getValueTreeState().getParameter(paramId))
+            if (auto* parameter = processor.getValueTreeState().getParameter(paramId))
                 parameter->setValueNotifyingHost(value);
 
             return juce::var::undefined();
-        },
-        (void *) this
+        }
     );
 
     appRoot.engine.registerNativeMethod(
         "endParameterChangeGesture",
-        [](void* stash, const juce::var::NativeFunctionArgs& args) {
-            auto* self = reinterpret_cast<GainPluginAudioProcessorEditor*>(stash);
+        [this](const juce::var::NativeFunctionArgs& args) {
             const juce::String& paramId = args.arguments[0].toString();
 
-            if (auto* parameter = self->processor.getValueTreeState().getParameter(paramId))
+            if (auto* parameter = processor.getValueTreeState().getParameter(paramId))
                 parameter->endChangeGesture();
 
             return juce::var::undefined();
-        },
-        (void *) this
+        }
     );
 
     // Next we just add our appRoot and kick off the app bundle.

@@ -56,7 +56,7 @@ namespace blueprint
         //==============================================================================
         ReactApplicationRoot                  appRoot;
         juce::File                            bundleFile;
-        juce::AudioProcessorValueTreeState* valueTreeState;
+        juce::AudioProcessorValueTreeState*   valueTreeState;
 
         // For parameter updates to the script engine
         ThrottleMap throttleMap;
