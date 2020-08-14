@@ -80,7 +80,7 @@ export function bindCanvasContextProperties(ctx: any) {
 }
 
 export interface CanvasProps {
-  onMeasure: (width: number, height: number) => void;
+  onMeasure?: (width: number, height: number) => void;
   onDraw: (ctx: CanvasRenderingContext2D) => void;
   autoclear?: boolean;
 }
@@ -128,7 +128,7 @@ export class Canvas extends Component<CanvasProps, CanvasState> {
 
   render() {
     //TODO: Check whether need to use below arrow function for "this" binding
-    //      is a bug in duktape. Possible this only occurs on linux. Does not 
+    //      is a bug in duktape. Possible this only occurs on linux. Does not
     //      appear to occur on mac.
     return React.createElement('CanvasView', Object.assign({}, this.props, {
       onDraw: (ctx: any) => { this._onDraw(ctx) },
