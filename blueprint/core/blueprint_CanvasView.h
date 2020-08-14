@@ -677,7 +677,7 @@ namespace blueprint
             if (props.contains("onDraw") && props["onDraw"].isMethod())
             {
                 std::vector<juce::var> jsArgs {{ctx.get()}};
-                juce::var::NativeFunctionArgs nfArgs (juce::var(), jsArgs.data(), jsArgs.size());
+                juce::var::NativeFunctionArgs nfArgs (juce::var(), jsArgs.data(), static_cast<int>(jsArgs.size()));
 
                 std::invoke(props["onDraw"].getNativeFunction(), nfArgs);
             }
