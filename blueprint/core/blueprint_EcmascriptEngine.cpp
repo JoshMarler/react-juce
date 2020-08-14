@@ -520,7 +520,7 @@ namespace blueprint
 
                     for (duk_size_t i = 0; i < len; ++i)
                     {
-                        duk_get_prop_index(ctx, idx, i);
+                        duk_get_prop_index(ctx, idx, static_cast<duk_uarridx_t>(i));
                         els.add(readVarFromDukStack(ctx, -1));
                         duk_pop(ctx);
                     }
