@@ -189,10 +189,8 @@ namespace blueprint
                         jassert(graphics);
                         jassert(args.numArguments == 1);
 
-                        const juce::String fontString = args.arguments[0].toString();
-
-                        juce::StringArray values;
-                        values.addTokens(fontString, " ");
+                        auto fontString = args.arguments[0].toString();
+                        auto values = juce::StringArray::fromTokens (fontString, juce::StringRef (" "), {});
 
                         jassert(values.size() >=2 && values.size() <= 4);
 
@@ -637,7 +635,7 @@ namespace blueprint
         {
         }
 
-        ~CanvasView()
+        ~CanvasView() override
         {
             if (isTimerRunning())
                 stopTimer();

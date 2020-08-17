@@ -41,8 +41,8 @@ namespace blueprint
     public:
         using BundleChangedCallback = std::function<void(const juce::File&)>;
 
-        explicit BundleWatcher(BundleChangedCallback  onBundleChanged)
-            : onBundleChanged(std::move(onBundleChanged))
+        explicit BundleWatcher(BundleChangedCallback onBundleChangedCallback)
+            : onBundleChanged(std::move(onBundleChangedCallback))
         {
             startTimer(50);
         }
@@ -132,6 +132,7 @@ namespace blueprint
             //       In which case we may need to somewhat change the shape of EcmascriptEngine::onUncaughtError.
             //       If callers reassign the callback we will lose the ViewManager reset.
             engine.onUncaughtError = [this](const juce::String& msg, const juce::String& trace) {
+                juce::ignoreUnused (msg);
                 handleBundleError(trace);
             };
 
@@ -263,16 +264,14 @@ namespace blueprint
         //==============================================================================
         void registerViewType(const juce::String& typeId, ViewManager::ViewFactory f)
         {
-            JUCE_ASSERT_MESSAGE_THREAD
-
-            jassert(viewManager);
-            viewManager->registerViewType(typeId, f);
+            getViewManager().registerViewType(typeId, f);
         }
 
-        ViewManager* const getViewManager()
+        ViewManager& getViewManager()
         {
             JUCE_ASSERT_MESSAGE_THREAD
-            return viewManager.get();
+            jassert (viewManager != nullptr);
+            return *viewManager.get();
         }
 
         //==============================================================================
@@ -526,11 +525,8 @@ namespace blueprint
                 jassert (self->viewManager);
                 jassert (args.numArguments == 1);
 
-                ViewManager* const viewManager = self->getViewManager();
-                jassert(viewManager);
-
-                juce::String viewType = args.arguments[0].toString();
-                ViewId viewId = viewManager->createViewInstance(viewType);
+                auto viewType = args.arguments[0].toString();
+                ViewId viewId = self->getViewManager().createViewInstance(viewType);
 
                 return juce::var(viewId);
             }, (void *) this);
@@ -541,13 +537,10 @@ namespace blueprint
                 jassert (self != nullptr);
                 jassert (args.numArguments == 1);
 
-                ViewManager* const viewManager = self->getViewManager();
-                jassert(viewManager);
+                auto textValue = args.arguments[0].toString();
+                auto viewId = self->getViewManager().createTextViewInstance(textValue);
 
-                juce::String textValue = args.arguments[0].toString();
-                ViewId viewId = viewManager->createTextViewInstance(textValue);
-
-                return juce::var(viewId);
+                return juce::var (viewId);
             }, (void *) this);
 
             engine.registerNativeMethod("__BlueprintNative__", "setViewProperty", [](void* stash, const juce::var::NativeFunctionArgs& args) {
@@ -560,10 +553,7 @@ namespace blueprint
                 auto propertyName = args.arguments[1].toString();
                 auto propertyValue = args.arguments[2];
 
-                ViewManager* const viewManager = self->getViewManager();
-                jassert(viewManager);
-
-                viewManager->setViewProperty(viewId, propertyName, propertyValue);
+                self->getViewManager().setViewProperty(viewId, propertyName, propertyValue);
                 return juce::var::undefined();
             }, (void *) this);
 
@@ -576,10 +566,7 @@ namespace blueprint
                 ViewId viewId = args.arguments[0];
                 auto textValue = args.arguments[1].toString();
 
-                ViewManager* const viewManager = self->getViewManager();
-                jassert(viewManager);
-
-                viewManager->setRawTextValue(viewId, textValue);
+                self->getViewManager().setRawTextValue(viewId, textValue);
                 return juce::var::undefined();
             }, (void *) this);
 
@@ -596,10 +583,7 @@ namespace blueprint
                 if (args.numArguments > 2)
                     index = args.arguments[2];
 
-                ViewManager* const viewManager = self->getViewManager();
-                jassert(viewManager);
-
-                viewManager->addChild(parentId, childId, index);
+                self->getViewManager().addChild(parentId, childId, index);
                 return juce::var::undefined();
             }, (void *) this);
 
@@ -612,10 +596,7 @@ namespace blueprint
                 ViewId parentId = args.arguments[0];
                 ViewId childId = args.arguments[1];
 
-                ViewManager* const viewManager = self->getViewManager();
-                jassert(viewManager);
-
-                viewManager->removeChild(parentId, childId);
+                self->getViewManager().removeChild(parentId, childId);
                 return juce::var::undefined();
             }, (void *) this);
 

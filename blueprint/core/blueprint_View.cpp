@@ -26,30 +26,23 @@ namespace blueprint
     {
         props.set(name, value);
 
-        if (name == juce::Identifier("interceptClickEvents"))
+        if (name == juce::StringRef ("interceptClickEvents"))
         {
-            int flag = value;
+            switch (static_cast<int> (value))
+            {
+                case 0:      setInterceptsMouseClicks (false, false);  break;
+                case 1:      setInterceptsMouseClicks (true,  true);   break;
+                case 2:      setInterceptsMouseClicks (true,  false);  break;
+                case 3:      setInterceptsMouseClicks (false, true);   break;
 
-            switch (flag) {
-                case 0:
-                    setInterceptsMouseClicks(false, false);
-                    break;
-                case 2:
-                    setInterceptsMouseClicks(true, false);
-                    break;
-                case 3:
-                    setInterceptsMouseClicks(false, true);
-                    break;
-                case 1:
-                default:
-                    setInterceptsMouseClicks(true, true);
-                    break;
+                default:     setInterceptsMouseClicks (true,  true);   break;
             }
         }
 
-        if (name == juce::Identifier("opacity"))
-            setAlpha((double) value);
-        if (name == juce::Identifier("refId"))
+        if (name == juce::StringRef("opacity"))
+            setAlpha(static_cast<float> (value));
+
+        if (name == juce::StringRef("refId"))
             _refId = juce::Identifier(value.toString());
     }
 
@@ -66,9 +59,9 @@ namespace blueprint
         // Update transforms
         if (props.contains("transform-rotate"))
         {
-            float cxRelParent = cachedFloatBounds.getX() + cachedFloatBounds.getWidth() * 0.5f;
-            float cyRelParent = cachedFloatBounds.getY() + cachedFloatBounds.getHeight() * 0.5f;
-            double angle = props["transform-rotate"];
+            auto cxRelParent = cachedFloatBounds.getX() + cachedFloatBounds.getWidth() * 0.5f;
+            auto cyRelParent = cachedFloatBounds.getY() + cachedFloatBounds.getHeight() * 0.5f;
+            auto angle = static_cast<float> (props["transform-rotate"]);
 
             setTransform(juce::AffineTransform::rotation(angle, cxRelParent, cyRelParent));
         }
@@ -77,7 +70,7 @@ namespace blueprint
     //==============================================================================
     float View::getResolvedLengthProperty (const juce::String& name, float axisLength)
     {
-        float ret = 0.0;
+        float ret = 0;
 
         if (props.contains(name))
         {
@@ -117,7 +110,7 @@ namespace blueprint
         else if (props.contains("border-color") && props.contains("border-width"))
         {
             juce::Path border;
-            juce::Colour c = juce::Colour::fromString(props["border-color"].toString());
+            auto c = juce::Colour::fromString(props["border-color"].toString());
             float borderWidth = props["border-width"];
 
             // Note this little bounds trick. When a Path is stroked, the line width extends
@@ -125,9 +118,9 @@ namespace blueprint
             // line is the exact bounding box then the component clipping makes the corners
             // appear to have different radii on the interior and exterior of the box.
             auto borderBounds = getLocalBounds().toFloat().reduced(borderWidth * 0.5f);
-            const float width = borderBounds.getWidth();
-            const float height = borderBounds.getHeight();
-            const float minLength = std::min(width, height);
+            auto width  = borderBounds.getWidth();
+            auto height = borderBounds.getHeight();
+            auto minLength = std::min(width, height);
             float borderRadius = getResolvedLengthProperty("border-radius", minLength);
 
             border.addRoundedRectangle(borderBounds, borderRadius);
@@ -143,7 +136,6 @@ namespace blueprint
             if (!c.isTransparent())
                 g.fillAll(c);
         }
-
     }
 
     //==============================================================================
@@ -152,34 +144,33 @@ namespace blueprint
         auto w = cachedFloatBounds.getWidth();
         auto h = cachedFloatBounds.getHeight();
 
-        if (ReactApplicationRoot* root = findParentComponentOfClass<ReactApplicationRoot>())
+        if (auto root = findParentComponentOfClass<ReactApplicationRoot>())
             root->dispatchViewEvent(getViewId(), "Measure", w, h);
     }
 
     void View::mouseDown (const juce::MouseEvent& e)
     {
-        if (ReactApplicationRoot* root = findParentComponentOfClass<ReactApplicationRoot>())
+        if (auto root = findParentComponentOfClass<ReactApplicationRoot>())
             root->dispatchViewEvent(getViewId(), "MouseDown", e.x, e.y);
     }
 
     void View::mouseUp (const juce::MouseEvent& e)
     {
-        if (ReactApplicationRoot* root = findParentComponentOfClass<ReactApplicationRoot>())
+        if (auto root = findParentComponentOfClass<ReactApplicationRoot>())
             root->dispatchViewEvent(getViewId(), "MouseUp", e.x, e.y);
     }
 
     void View::mouseDrag (const juce::MouseEvent& e)
     {
-        float mouseDownX = e.mouseDownPosition.getX();
-        float mouseDownY = e.mouseDownPosition.getY();
+        auto mouseDown = e.mouseDownPosition;
 
-        if (ReactApplicationRoot* root = findParentComponentOfClass<ReactApplicationRoot>())
-            root->dispatchViewEvent(getViewId(), "MouseDrag", e.x, e.y, mouseDownX, mouseDownY);
+        if (auto root = findParentComponentOfClass<ReactApplicationRoot>())
+            root->dispatchViewEvent(getViewId(), "MouseDrag", e.x, e.y, mouseDown.x, mouseDown.y);
     }
 
     void View::mouseDoubleClick (const juce::MouseEvent& e)
     {
-        if (ReactApplicationRoot* root = findParentComponentOfClass<ReactApplicationRoot>())
+        if (auto root = findParentComponentOfClass<ReactApplicationRoot>())
             root->dispatchViewEvent(getViewId(), "MouseDoubleClick", e.x, e.y);
     }
 }

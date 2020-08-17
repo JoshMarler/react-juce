@@ -33,28 +33,28 @@ namespace blueprint
         int frameRate = 45;
         EasingType easingType = EasingType::Linear;
 
-        BoundsAnimator(double durationMs, int frameRate, EasingType et, juce::Rectangle<float> start, juce::Rectangle<float> dest, StepCallback cb)
-            : start(start)
-            , dest(dest)
-            , callback(cb)
+        BoundsAnimator(double durationMs, int frameRateToUse, EasingType et,
+                       juce::Rectangle<float> startRect, juce::Rectangle<float> destRect,
+                       StepCallback cb)
+            : start(startRect)
+            , dest(destRect)
+            , callback(std::move (cb))
             , duration(durationMs)
-            , frameRate(frameRate)
+            , frameRate(frameRateToUse)
             , easingType(et)
         {
             startTime = juce::Time::getMillisecondCounterHiRes();
             startTimerHz(45);
         }
 
-        ~BoundsAnimator() {
+        ~BoundsAnimator() override {
             stopTimer();
         }
 
-        float lerp(float a, float b, float t) {
-            return a + (t * (b - a));
-        }
+        static constexpr float  lerp (float a, float b, double t)  { return a + (static_cast<float> (t) * (b - a)); }
 
         void timerCallback() override {
-            double const now = juce::Time::getMillisecondCounterHiRes();
+            auto now = juce::Time::getMillisecondCounterHiRes();
             double t = std::clamp((now - startTime) / duration, 0.0, 1.0);
 
             // Super helpful cheat sheet: https://gist.github.com/gre/1650294
@@ -125,7 +125,7 @@ namespace blueprint
             {
                 jassert (juce::isPositiveAndNotGreaterThan(index, YGNodeGetChildCount(yogaNode)));
 
-                YGNodeInsertChild(yogaNode, childView->yogaNode, index);
+                YGNodeInsertChild(yogaNode, childView->yogaNode, static_cast<uint32_t> (index));
                 children.insert(children.begin() + index, childView);
             }
         }
@@ -190,7 +190,7 @@ namespace blueprint
                     double const frameRate = props["layoutAnimated"].getProperty("frameRate", 45);
                     int const et = props["layoutAnimated"].getProperty("easing", 0);
 
-                    return flushViewLayoutAnimated(durationMs, frameRate, static_cast<BoundsAnimator::EasingType>(et));
+                    return flushViewLayoutAnimated(durationMs, static_cast<int> (frameRate), static_cast<BoundsAnimator::EasingType>(et));
                 }
             }
 
@@ -217,9 +217,9 @@ namespace blueprint
                 viewCurrentBounds,
                 viewDestinationBounds,
                 [safeView = juce::Component::SafePointer(view)](auto && stepBounds) {
-                    if (auto* view = safeView.getComponent()) {
-                        view->setFloatBounds(stepBounds);
-                        view->setBounds(stepBounds.toNearestInt());
+                    if (auto* v = safeView.getComponent()) {
+                        v->setFloatBounds(stepBounds);
+                        v->setBounds(stepBounds.toNearestInt());
                     }
                 }
             );

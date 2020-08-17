@@ -133,28 +133,28 @@ namespace blueprint
     EcmascriptEngine::EcmascriptEngine()
     {
         // Allocate a new js heap
-        ctx = duk_create_heap(NULL, NULL, NULL, NULL, detail::fatalErrorHandler);
+        dukContext = duk_create_heap (nullptr, nullptr, nullptr, nullptr, detail::fatalErrorHandler);
 
         // Add console.log support
-        duk_console_init(ctx, DUK_CONSOLE_FLUSH);
+        duk_console_init(dukContext, DUK_CONSOLE_FLUSH);
 
         // Create our error handler wrapping a user supplied error callback.
         errorHandler = [=]
         {
             if (onUncaughtError == nullptr)
-                duk_throw_raw(ctx);
+                duk_throw_raw(dukContext);
 
-            const juce::String trace = duk_safe_to_stacktrace(ctx, -1);
-            const juce::String msg = duk_safe_to_string(ctx, -1);
+            const juce::String trace = duk_safe_to_stacktrace(dukContext, -1);
+            const juce::String msg = duk_safe_to_string(dukContext, -1);
 
             // Call the user provided error handler
             std::invoke(onUncaughtError, msg, trace);
 
             // Clear out the stack so we can re-register native functions
             // after we clear out the lambda release pool etc.
-            while (duk_get_top(ctx))
+            while (duk_get_top(dukContext))
             {
-                duk_remove(ctx, duk_get_top_index(ctx));
+                duk_remove(dukContext, duk_get_top_index(dukContext));
             }
 
             // Clear the LambdaHelper release pool as duktape does not call object
@@ -166,7 +166,7 @@ namespace blueprint
 
     EcmascriptEngine::~EcmascriptEngine()
     {
-        duk_destroy_heap(ctx);
+        duk_destroy_heap(dukContext);
     }
 
     //==============================================================================
@@ -174,11 +174,11 @@ namespace blueprint
     {
         jassert(code.isNotEmpty());
 
-        if (!detail::safeEvalString(ctx, code, errorHandler))
+        if (!detail::safeEvalString(dukContext, code, errorHandler))
             return juce::var(EvaluationError);
 
-        auto result = readVarFromDukStack(ctx, -1);
-        duk_pop(ctx);
+        auto result = readVarFromDukStack(dukContext, -1);
+        duk_pop(dukContext);
 
         return result;
     }
@@ -190,19 +190,19 @@ namespace blueprint
 
         juce::var result = juce::var::undefined();
 
-        if (!detail::safeCompileFile(ctx, code, errorHandler))
+        if (!detail::safeCompileFile(dukContext, code, errorHandler))
             return juce::var(EvaluationError);
 
         // Call compiled function
-        if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS)
+        if (duk_pcall(dukContext, 0) != DUK_EXEC_SUCCESS)
         {
             errorHandler();
             return juce::var(EvaluationError);
         }
 
         // Collect the return value
-        result = readVarFromDukStack(ctx, -1);
-        duk_pop(ctx);
+        result = readVarFromDukStack(dukContext, -1);
+        duk_pop(dukContext);
 
         return result;
     }
@@ -210,64 +210,64 @@ namespace blueprint
     //==============================================================================
     void EcmascriptEngine::registerNativeMethod (const juce::String& name, NativeFunction fn, void* stash)
     {
-        duk_push_global_object(ctx);
+        duk_push_global_object(dukContext);
 
         // We wrap the native function to provide a helper layer storing and retrieving the
         // stash, and marshalling between the Duktape C interface and the NativeFunction interface
-        duk_push_c_function(ctx, detail::nativeMethodWrapper, DUK_VARARGS);
+        duk_push_c_function(dukContext, detail::nativeMethodWrapper, DUK_VARARGS);
 
         // Now we assign the pointers as properties of the wrapper function
-        duk_push_pointer(ctx, (void *) fn);
-        duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("NativeFunctionPtr"));
-        duk_push_pointer(ctx, (void *) this);
-        duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("EnginePtr"));
-        duk_push_pointer(ctx, stash);
-        duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("StashPtr"));
+        duk_push_pointer(dukContext, (void *) fn);
+        duk_put_prop_string(dukContext, -2, DUK_HIDDEN_SYMBOL("NativeFunctionPtr"));
+        duk_push_pointer(dukContext, (void *) this);
+        duk_put_prop_string(dukContext, -2, DUK_HIDDEN_SYMBOL("EnginePtr"));
+        duk_push_pointer(dukContext, stash);
+        duk_put_prop_string(dukContext, -2, DUK_HIDDEN_SYMBOL("StashPtr"));
 
         // And finally we assign the function to its name in the global namespace
-        duk_put_prop_string(ctx, -2, name.toRawUTF8());
+        duk_put_prop_string(dukContext, -2, name.toRawUTF8());
     }
 
     void EcmascriptEngine::registerNativeMethod (const juce::String& target, const juce::String& name, NativeFunction fn, void* stash)
     {
         // Evaluate the target string on the context, leaving the result on the stack
-        if (!detail::safeEvalString(ctx, target, errorHandler))
+        if (!detail::safeEvalString(dukContext, target, errorHandler))
             return;
 
         // We wrap the native function to provide a helper layer storing and retrieving the
         // stash, and marshalling between the Duktape C interface and the NativeFunction interface
-        duk_push_c_function(ctx, detail::nativeMethodWrapper, DUK_VARARGS);
+        duk_push_c_function(dukContext, detail::nativeMethodWrapper, DUK_VARARGS);
 
         // Now we assign the pointers as properties of the wrapper function
-        duk_push_pointer(ctx, (void *) fn);
-        duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("NativeFunctionPtr"));
-        duk_push_pointer(ctx, (void *) this);
-        duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("EnginePtr"));
-        duk_push_pointer(ctx, stash);
-        duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("StashPtr"));
+        duk_push_pointer(dukContext, (void *) fn);
+        duk_put_prop_string(dukContext, -2, DUK_HIDDEN_SYMBOL("NativeFunctionPtr"));
+        duk_push_pointer(dukContext, (void *) this);
+        duk_put_prop_string(dukContext, -2, DUK_HIDDEN_SYMBOL("EnginePtr"));
+        duk_push_pointer(dukContext, stash);
+        duk_put_prop_string(dukContext, -2, DUK_HIDDEN_SYMBOL("StashPtr"));
 
         // And finally we assign the function to its name in the global namespace
-        duk_put_prop_string(ctx, -2, name.toRawUTF8());
+        duk_put_prop_string(dukContext, -2, name.toRawUTF8());
     }
 
     //==============================================================================
     void EcmascriptEngine::registerNativeProperty (const juce::String& name, const juce::var& value)
     {
-        duk_push_global_object(ctx);
-        pushVarToDukStack(ctx, value);
-        duk_put_prop_string(ctx, -2, name.toRawUTF8());
+        duk_push_global_object(dukContext);
+        pushVarToDukStack(dukContext, value);
+        duk_put_prop_string(dukContext, -2, name.toRawUTF8());
     }
 
     void EcmascriptEngine::registerNativeProperty (const juce::String& target, const juce::String& name, const juce::var& value)
     {
         // Evaluate the target string on the context, leaving the result on the stack
         // TODO: Return specific error code if target not in stack?
-        if (!detail::safeEvalString(ctx, target, errorHandler))
+        if (!detail::safeEvalString(dukContext, target, errorHandler))
             return;
 
         // Then assign the property
-        pushVarToDukStack(ctx, value);
-        duk_put_prop_string(ctx, -2, name.toRawUTF8());
+        pushVarToDukStack(dukContext, value);
+        duk_put_prop_string(dukContext, -2, name.toRawUTF8());
     }
 
     //==============================================================================
@@ -275,21 +275,21 @@ namespace blueprint
     {
         // Evaluate the target string on the context, leaving the result on the stack
         // TODO: Return specific error code if name not in stack?
-        if (!detail::safeEvalString(ctx, name, errorHandler))
+        if (!detail::safeEvalString(dukContext, name, errorHandler))
             return juce::var::undefined();
 
         // Ensure requested function exists on the stack
-        duk_require_function(ctx, -1);
+        duk_require_function(dukContext, -1);
 
         // Push the args to the duktape stack
         const auto nargs = static_cast<duk_idx_t>(vargs.size());
-        duk_require_stack_top(ctx, nargs);
+        duk_require_stack_top(dukContext, nargs);
 
         for (auto& p : vargs)
-            pushVarToDukStack(ctx, p);
+            pushVarToDukStack(dukContext, p);
 
         // Invocation
-        if (duk_pcall(ctx, nargs) != DUK_EXEC_SUCCESS)
+        if (duk_pcall(dukContext, nargs) != DUK_EXEC_SUCCESS)
         {
             errorHandler();
 
@@ -298,8 +298,8 @@ namespace blueprint
         }
 
         // Collect the return value
-        auto result = readVarFromDukStack(ctx, -1);
-        duk_pop(ctx);
+        auto result = readVarFromDukStack(dukContext, -1);
+        duk_pop(dukContext);
 
         return result;
     }
@@ -310,14 +310,14 @@ namespace blueprint
         duk_trans_socket_init();
         duk_trans_socket_waitconn();
 
-        duk_debugger_attach(ctx,
+        duk_debugger_attach(dukContext,
             duk_trans_socket_read_cb,
             duk_trans_socket_write_cb,
             duk_trans_socket_peek_cb,
             duk_trans_socket_read_flush_cb,
             duk_trans_socket_write_flush_cb,
-            NULL,
-            [](duk_context* ctx, void* data)
+            nullptr,
+            [](duk_context*, void* data)
             {
                 duk_trans_socket_finish();
 
@@ -332,12 +332,12 @@ namespace blueprint
 
     void EcmascriptEngine::debuggerDetach()
     {
-        duk_debugger_detach(ctx);
+        duk_debugger_detach(dukContext);
     }
 
     void EcmascriptEngine::timerCallback()
     {
-        duk_debugger_cooperate(ctx);
+        duk_debugger_cooperate(dukContext);
     }
 
     //==============================================================================
@@ -432,7 +432,7 @@ namespace blueprint
         if (v.isArray())
         {
             duk_idx_t arr_idx = duk_push_array(ctx);
-            int i = 0;
+            duk_uarridx_t i = 0;
 
             for (auto& e : *(v.getArray()))
             {

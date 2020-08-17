@@ -47,6 +47,7 @@ namespace blueprint
 
         void addChild (View* childView, int index = -1) override
         {
+            juce::ignoreUnused (index);
             jassert (viewport.getViewedComponent() == nullptr);
             viewport.setViewedComponent(childView, false);
         }

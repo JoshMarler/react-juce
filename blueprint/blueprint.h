@@ -40,6 +40,21 @@
 #define YG_ENUM_BEGIN(name) enum name: unsigned
 #endif
 
+#if __clang__
+ // What the hell is wrong with library authors who don't run CI builds with strict warning checks
+ // and keep their code clean and tidy!?!? As well as missing their own bugs, it means that users of
+ // their library then hit a million warnings, so they reduce THEIR warning level to avoid the noise,
+ // (because they'll be too lazy/busy to fix it, or at least to add pragmas like this), and everyone's
+ // code just ends up a little bit worse..  [/rant]
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wc++98-compat-extra-semi"
+ #pragma clang diagnostic ignored "-Wextra-semi"
+ #pragma clang diagnostic ignored "-Wsign-conversion"
+ #pragma clang diagnostic ignored "-Wswitch-enum"
+ #pragma clang diagnostic ignored "-Wunused-parameter"
+ #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+#endif
+
 #include "yoga/yoga/log.h"
 #include "yoga/yoga/event/event.h"
 #include "yoga/yoga/Utils.h"
@@ -57,6 +72,10 @@
 #include "duktape/src-noline/duktape.h"
 #include "duktape/extras/console/duk_console.h"
 #include "duktape/examples/debug-trans-socket/duk_trans_socket.h"
+
+#if __clang__
+ #pragma clang diagnostic pop
+#endif
 
 #include "core/blueprint_EcmascriptEngine.h"
 #include "core/blueprint_CanvasView.h"
