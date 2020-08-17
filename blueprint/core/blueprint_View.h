@@ -31,7 +31,7 @@ namespace blueprint
     public:
         //==============================================================================
         View() = default;
-        virtual ~View() = default;
+        ~View() override = default;
 
         //==============================================================================
         /** Returns this view's identifier. */

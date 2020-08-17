@@ -30,9 +30,9 @@ namespace blueprint
     {
     public:
         //==============================================================================
-        BlueprintGenericEditor (juce::AudioProcessor*, const juce::File&, juce::AudioProcessorValueTreeState* = nullptr);
+        BlueprintGenericEditor (juce::AudioProcessor&, const juce::File&, juce::AudioProcessorValueTreeState* = nullptr);
 
-        ~BlueprintGenericEditor();
+        ~BlueprintGenericEditor() override;
 
         //==============================================================================
         /** Implement the AudioProcessorParameter::Listener interface. */

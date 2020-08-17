@@ -57,6 +57,18 @@
 // configs.
 #include <juce_core/system/juce_TargetPlatform.h>
 
+#if __clang__
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #pragma clang diagnostic ignored "-Wc++98-compat-extra-semi"
+ #pragma clang diagnostic ignored "-Wswitch-enum"
+ #pragma clang diagnostic ignored "-Wshorten-64-to-32"
+ #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+ #pragma clang diagnostic ignored "-Wshadow-field-in-constructor"
+ #pragma clang diagnostic ignored "-Wsign-conversion"
+ #pragma clang diagnostic ignored "-Wimplicit-float-conversion"
+#endif
+
 #include "duktape/src-noline/duktape.c"
 #include "duktape/extras/console/duk_console.c"
 
@@ -65,7 +77,6 @@
 #else
     #include "duktape/examples/debug-trans-socket/duk_trans_socket_unix.c"
 #endif
-
 
 #include "blueprint.h"
 
@@ -80,6 +91,10 @@
 #include "yoga/yoga/YGStyle.cpp"
 #include "yoga/yoga/YGValue.cpp"
 #include "yoga/yoga/Yoga.cpp"
+
+#if __clang__
+ #pragma clang diagnostic pop
+#endif
 
 // Enable compiler warnings
 #if _MSC_VER

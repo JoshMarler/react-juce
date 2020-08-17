@@ -34,7 +34,7 @@ namespace blueprint
         RawTextView(const juce::String& text) : _text(text) {}
 
         //==============================================================================
-        void setProperty (const juce::Identifier& name, const juce::var& newValue) override
+        void setProperty (const juce::Identifier&, const juce::var&) override
         {
             throw std::logic_error("A RawTextView can't receive properties.");
         }

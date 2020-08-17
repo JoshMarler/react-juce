@@ -28,7 +28,7 @@ namespace blueprint
 
         //==============================================================================
         EcmascriptEngine();
-        ~EcmascriptEngine();
+        ~EcmascriptEngine() override;
 
         //==============================================================================
         /** Constant representing an evaluation error */
@@ -158,7 +158,7 @@ namespace blueprint
         };
 
         //==============================================================================
-        duk_context* ctx;
+        duk_context* dukContext;
         std::unordered_map<juce::Uuid, std::unique_ptr<LambdaHelper>> lambdaReleasePool;
 
         //==============================================================================

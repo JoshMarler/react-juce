@@ -14,9 +14,9 @@ namespace blueprint
 {
 
     //==============================================================================
-    YGSize measureTextNode(YGNodeRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
-        TextShadowView* context = reinterpret_cast<TextShadowView*>(YGNodeGetContext(node));
-        TextView* view = dynamic_cast<TextView*>(context->getAssociatedView());
+    YGSize measureTextNode(YGNodeRef node, float width, YGMeasureMode /*widthMode*/, float /*height*/, YGMeasureMode /*heightMode*/) {
+        auto context = reinterpret_cast<TextShadowView*>(YGNodeGetContext(node));
+        auto view = dynamic_cast<TextView*>(context->getAssociatedView());
 
         jassert (view != nullptr);
 

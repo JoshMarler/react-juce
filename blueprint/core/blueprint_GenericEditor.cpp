@@ -14,15 +14,15 @@ namespace blueprint
 {
 
     //==============================================================================
-    BlueprintGenericEditor::BlueprintGenericEditor (juce::AudioProcessor* processor, const juce::File& bundle, juce::AudioProcessorValueTreeState* vts)
-        : juce::AudioProcessorEditor(processor), valueTreeState(vts)
+    BlueprintGenericEditor::BlueprintGenericEditor (juce::AudioProcessor& proc, const juce::File& bundle, juce::AudioProcessorValueTreeState* vts)
+        : juce::AudioProcessorEditor (proc), valueTreeState(vts)
     {
         // Sanity check
         jassert (bundle.existsAsFile());
         bundleFile = bundle;
 
         // Bind parameter listeners
-        for (auto& p : processor->getParameters())
+        for (auto& p : proc.getParameters())
             p->addListener(this);
 
         // Setup the ReactApplicationRoot callbacks and evaluate the supplied JS code/bundle
@@ -102,9 +102,8 @@ namespace blueprint
                     "beginParameterChangeGesture",
                     [](void* stash, const juce::var::NativeFunctionArgs& args) {
                         auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
-                        const juce::String& paramId = args.arguments[0].toString();
 
-                        if (auto* parameter = state->getParameter(paramId))
+                        if (auto* parameter = state->getParameter (args.arguments[0].toString()))
                             parameter->beginChangeGesture();
 
                         return juce::var::undefined();
@@ -116,11 +115,9 @@ namespace blueprint
                     "setParameterValueNotifyingHost",
                     [](void* stash, const juce::var::NativeFunctionArgs& args) {
                         auto* state = reinterpret_cast<juce::AudioProcessorValueTreeState*>(stash);
-                        const juce::String& paramId = args.arguments[0].toString();
-                        const double value = args.arguments[1];
 
-                        if (auto* parameter = state->getParameter(paramId))
-                            parameter->setValueNotifyingHost(value);
+                        if (auto* parameter = state->getParameter (args.arguments[0].toString()))
+                            parameter->setValueNotifyingHost (static_cast<float> (args.arguments[1]));
 
                         return juce::var::undefined();
                     },
