@@ -40,7 +40,18 @@ namespace blueprint
             Error(const juce::String& msg, const juce::String& _stack)
                 : std::runtime_error(msg.toStdString()), stack(_stack) {}
 
+            Error(const juce::String& msg, const juce::String& _stack, const juce::String& _context)
+                : std::runtime_error(msg.toStdString()), stack(_stack), context(_context) {}
+
+            const char* what() const throw()
+            {
+                auto base = juce::String(std::runtime_error::what());
+                auto full = base + "\n" + context;
+                return full.toRawUTF8();
+            }
+
             juce::String stack;
+            juce::String context;
         };
 
         /** A helper struct for representing an error that occured within the Duktape
@@ -154,6 +165,7 @@ namespace blueprint
             LambdaHelper(juce::var::NativeFunction fn, uint32_t _id);
 
             static duk_ret_t invokeFromDukContext(duk_context* ctx);
+            static duk_ret_t invokeFromDukContextLightFunc(duk_context* ctx);
             static duk_ret_t callbackFinalizer (duk_context* ctx);
 
             juce::var::NativeFunction callback;
@@ -163,14 +175,16 @@ namespace blueprint
         //==============================================================================
         duk_context* dukContext;
         uint32_t nextHelperId = 0;
-        std::unordered_map<uint32_t, std::unique_ptr<LambdaHelper>> lambdaReleasePool;
+        int32_t nextMagicInt = 0;
+        std::unordered_map<uint32_t, std::unique_ptr<LambdaHelper>> persistentReleasePool;
+        std::unordered_map<int16_t, std::unique_ptr<LambdaHelper>> temporaryReleasePool;
 
         //==============================================================================
         /** Helper for cleaning up native function temporaries. */
         void removeLambdaHelper (LambdaHelper* helper);
 
         /** Helper for pushing a juce::var to the duktape stack. */
-        void pushVarToDukStack (duk_context* ctx, const juce::var& v);
+        void pushVarToDukStack (duk_context* ctx, const juce::var& v, bool persistNativeFunctions = false);
 
         /** Helper for reading from the duktape stack to a juce::var instance. */
         juce::var readVarFromDukStack (duk_context* ctx, duk_idx_t idx);

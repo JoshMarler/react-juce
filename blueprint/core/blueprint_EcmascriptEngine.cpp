@@ -20,6 +20,14 @@ namespace blueprint
             throw EcmascriptEngine::FatalError(msg);
         }
 
+        static juce::String getContextDump(duk_context* ctx)
+        {
+            duk_push_context_dump(ctx);
+            auto ret = juce::String(duk_to_string(ctx, -1));
+            duk_pop(ctx);
+            return ret;
+        }
+
         static void safeCall(duk_context* ctx, const int numArgs)
         {
             if (duk_pcall(ctx, numArgs) != DUK_EXEC_SUCCESS)
@@ -27,7 +35,7 @@ namespace blueprint
                 const juce::String stack = duk_safe_to_stacktrace(ctx, -1);
                 const juce::String msg = duk_safe_to_string(ctx, -1);
 
-                throw EcmascriptEngine::Error(msg, stack);
+                throw EcmascriptEngine::Error(msg, stack, getContextDump(ctx));
             }
         }
 
@@ -38,7 +46,7 @@ namespace blueprint
                 const juce::String stack = duk_safe_to_stacktrace(ctx, -1);
                 const juce::String msg = duk_safe_to_string(ctx, -1);
 
-                throw EcmascriptEngine::Error(msg, stack);
+                throw EcmascriptEngine::Error(msg, stack, getContextDump(ctx));
             }
         }
 
@@ -55,9 +63,9 @@ namespace blueprint
                 const juce::String stack = duk_safe_to_stacktrace(ctx, -1);
                 const juce::String msg = duk_safe_to_string(ctx, -1);
 
-                throw EcmascriptEngine::Error(msg, stack);
+                throw EcmascriptEngine::Error(msg, stack, getContextDump(ctx));
             }
-       }
+        }
 
     }
 
@@ -69,6 +77,12 @@ namespace blueprint
 
         // Add console.log support
         duk_console_init(dukContext, DUK_CONSOLE_FLUSH);
+
+        // Install a pointer back to this EcmascriptEngine instance
+        duk_push_global_stash(dukContext);
+        duk_push_pointer(dukContext, (void *) this);
+        duk_put_prop_string(dukContext, -2, DUK_HIDDEN_SYMBOL("__EcmascriptEngineInstance__"));
+        duk_pop(dukContext);
     }
 
     EcmascriptEngine::~EcmascriptEngine()
@@ -129,8 +143,9 @@ namespace blueprint
     void EcmascriptEngine::registerNativeProperty (const juce::String& name, const juce::var& value)
     {
         duk_push_global_object(dukContext);
-        pushVarToDukStack(dukContext, value);
+        pushVarToDukStack(dukContext, value, true);
         duk_put_prop_string(dukContext, -2, name.toRawUTF8());
+        duk_pop(dukContext);
     }
 
     void EcmascriptEngine::registerNativeProperty (const juce::String& target, const juce::String& name, const juce::var& value)
@@ -143,8 +158,9 @@ namespace blueprint
         }
 
         // Then assign the property
-        pushVarToDukStack(dukContext, value);
+        pushVarToDukStack(dukContext, value, true);
         duk_put_prop_string(dukContext, -2, name.toRawUTF8());
+        duk_pop(dukContext);
     }
 
     //==============================================================================
@@ -175,14 +191,6 @@ namespace blueprint
         auto result = readVarFromDukStack(dukContext, -1);
         duk_pop(dukContext);
 
-        // Here, we know that we have potentially just pushed temporaries
-        // to the stack. Duktape will eventually get around to garbage collection,
-        // but specifically where we have LambdaHelper allocations for these
-        // temporaries, we want to keep our release pool fairly small. For that
-        // reason, we manually invoke a garbage collection pass right away.
-        // TODO: Revisit with lightfuncs
-        // duk_gc(ctx, 0);
-
         return result;
     }
 
@@ -195,7 +203,7 @@ namespace blueprint
 
         // Clear the LambdaHelper release pool as duktape does not call object
         // finalizers in the event of an evaluation error or duk_pcall failure.
-        lambdaReleasePool.clear();
+        persistentReleasePool.clear();
     }
 
     //==============================================================================
@@ -277,7 +285,45 @@ namespace blueprint
         // Otherwise, push the result to the stack and tell duktape
         engine->pushVarToDukStack(ctx, result);
         return 1;
-   }
+    }
+
+    duk_ret_t EcmascriptEngine::LambdaHelper::invokeFromDukContextLightFunc (duk_context* ctx)
+    {
+        // Retrieve the engine pointer
+        duk_push_global_stash(ctx);
+        duk_get_prop_string(ctx, -1, DUK_HIDDEN_SYMBOL("__EcmascriptEngineInstance__"));
+
+        auto* engine = static_cast<EcmascriptEngine*>(duk_get_pointer(ctx, -1));
+        duk_pop_2(ctx);
+
+        // Retrieve the lambda helper
+        duk_push_current_function(ctx);
+        auto magic = duk_get_magic(ctx, -1);
+        auto& helper = engine->temporaryReleasePool.at(magic);
+        duk_pop(ctx);
+
+        // Now we can collect our args
+        std::vector<juce::var> args;
+        int nargs = duk_get_top(ctx);
+
+        for (int i = 0; i < nargs; ++i)
+            args.push_back(engine->readVarFromDukStack(ctx, i));
+
+        // Now we can invoke the user method with its arguments
+        auto result = std::invoke(helper->callback, juce::var::NativeFunctionArgs(
+            juce::var(),
+            args.data(),
+            static_cast<int>(args.size())
+        ));
+
+        // For an undefined result, return 0 to notify the duktape interpreter
+        if (result.isUndefined())
+            return 0;
+
+        // Otherwise, push the result to the stack and tell duktape
+        engine->pushVarToDukStack(ctx, result);
+        return 1;
+    }
 
     duk_ret_t EcmascriptEngine::LambdaHelper::callbackFinalizer (duk_context* ctx)
     {
@@ -306,10 +352,10 @@ namespace blueprint
     //==============================================================================
     void EcmascriptEngine::removeLambdaHelper (LambdaHelper* helper)
     {
-        lambdaReleasePool.erase(helper->id);
+        persistentReleasePool.erase(helper->id);
     }
 
-    void EcmascriptEngine::pushVarToDukStack (duk_context* ctx, const juce::var& v)
+    void EcmascriptEngine::pushVarToDukStack (duk_context* ctx, const juce::var& v, bool persistNativeFunctions)
     {
         if (v.isVoid() || v.isUndefined())
             return duk_push_undefined(ctx);
@@ -328,7 +374,7 @@ namespace blueprint
 
             for (auto& e : *(v.getArray()))
             {
-                pushVarToDukStack(ctx, e);
+                pushVarToDukStack(ctx, e, persistNativeFunctions);
                 duk_put_prop_index(ctx, arr_idx, i++);
             }
 
@@ -342,7 +388,7 @@ namespace blueprint
 
                 for (auto& e : o->getProperties())
                 {
-                    pushVarToDukStack(ctx, e.value);
+                    pushVarToDukStack(ctx, e.value, persistNativeFunctions);
                     duk_put_prop_string(ctx, obj_idx, e.name.toString().toRawUTF8());
                 }
             }
@@ -351,27 +397,48 @@ namespace blueprint
         }
         if (v.isMethod())
         {
-            // We wrap the native function to provide a helper layer storing and retrieving the
-            // stash, and marshalling between the Duktape C interface and the NativeFunction interface
-            duk_push_c_function(ctx, LambdaHelper::invokeFromDukContext, DUK_VARARGS);
+            if (persistNativeFunctions)
+            {
+                // For persisted native functions, we provide a helper layer storing and retrieving the
+                // stash, and marshalling between the Duktape C interface and the NativeFunction interface
+                duk_push_c_function(ctx, LambdaHelper::invokeFromDukContext, DUK_VARARGS);
 
-            // Now we assign the pointers as properties of the wrapper function
-            auto helper = std::make_unique<LambdaHelper>(v.getNativeFunction(), nextHelperId++);
-            duk_push_pointer(ctx, (void *) helper.get());
-            duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("LambdaHelperPtr"));
-            duk_push_pointer(ctx, (void *) this);
-            duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("EnginePtr"));
+                // Now we assign the pointers as properties of the wrapper function
+                auto helper = std::make_unique<LambdaHelper>(v.getNativeFunction(), nextHelperId++);
+                duk_push_pointer(ctx, (void *) helper.get());
+                duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("LambdaHelperPtr"));
+                duk_push_pointer(ctx, (void *) this);
+                duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("EnginePtr"));
 
-            // Now we prepare the finalizer
-            duk_push_c_function(ctx, LambdaHelper::callbackFinalizer, 1);
-            duk_push_pointer(ctx, (void *) helper.get());
-            duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("LambdaHelperPtr"));
-            duk_push_pointer(ctx, (void *) this);
-            duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("EnginePtr"));
-            duk_set_finalizer(ctx, -2);
+                // Now we prepare the finalizer
+                duk_push_c_function(ctx, LambdaHelper::callbackFinalizer, 1);
+                duk_push_pointer(ctx, (void *) helper.get());
+                duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("LambdaHelperPtr"));
+                duk_push_pointer(ctx, (void *) this);
+                duk_put_prop_string(ctx, -2, DUK_HIDDEN_SYMBOL("EnginePtr"));
+                duk_set_finalizer(ctx, -2);
 
-            // And hang on to it!
-            lambdaReleasePool[helper->id] = std::move(helper);
+                // And hang on to it!
+                persistentReleasePool[helper->id] = std::move(helper);
+            }
+            else
+            {
+                // For temporary native functions, we use the stack-allocated lightfunc. In
+                // this case we can't attach properties, so we can't rely on raw pointers to
+                // the LambdaHelper and we can't rely on finalizers. So, all we do here is use
+                // a small pool for temporary LambdaHelpers. Within this pool, we just allow insertions
+                // to wrap around and clobber previous temporaries, effectively garbage collecting on
+                // demand. The maximum number of temporary values before wrapping is 255, as dictated
+                // by that we use the lightfunc's magic number to identify our native callback.
+                auto helper = std::make_unique<LambdaHelper>(v.getNativeFunction(), nextHelperId++);
+                auto magic = nextMagicInt++;
+
+                duk_push_c_lightfunc(ctx, LambdaHelper::invokeFromDukContextLightFunc, DUK_VARARGS, 15, magic);
+                temporaryReleasePool[magic] = std::move(helper);
+
+                if (nextMagicInt >= 127)
+                    nextMagicInt = -128;
+            }
             return;
         }
 
@@ -403,6 +470,7 @@ namespace blueprint
                 value = juce::String(juce::CharPointer_UTF8(duk_get_string(ctx, idx)));
                 break;
             case DUK_TYPE_OBJECT:
+            case DUK_TYPE_LIGHTFUNC:
             {
                 if (duk_is_array(ctx, idx))
                 {
@@ -420,7 +488,7 @@ namespace blueprint
                     break;
                 }
 
-                if (duk_is_function(ctx, idx))
+                if (duk_is_function(ctx, idx) || duk_is_lightfunc(ctx, idx))
                 {
                     // With a function, we first push the function reference to
                     // the Duktape global stash so we can read it later.
@@ -429,6 +497,7 @@ namespace blueprint
                     duk_push_global_stash(ctx);
                     duk_dup(ctx, idx);
                     duk_put_prop_string(ctx, -2, funId.toRawUTF8());
+                    duk_pop(ctx);
 
                     // Next we create a var::NativeFunction that captures the function
                     // id and knows how to invoke it
@@ -438,7 +507,9 @@ namespace blueprint
                             // the global stash and invoke it with the provided args.
                             duk_push_global_stash(ctx);
                             duk_get_prop_string(ctx, -1, funId.toRawUTF8());
-                            duk_require_function(ctx, -1);
+
+                            if (!(duk_is_lightfunc(ctx, -1) || duk_is_function(ctx, -1)))
+                                throw Error("Global callback not found.", "", detail::getContextDump(ctx));
 
                             // Push the args to the duktape stack
                             duk_require_stack_top(ctx, args.numArguments);
@@ -456,14 +527,6 @@ namespace blueprint
 
                             // Clean the result and the stash off the top of the stack
                             duk_pop_2(ctx);
-
-                            // Here too, we know that we have potentially just pushed temporaries
-                            // to the stack. Duktape will eventually get around to garbage collection,
-                            // but specifically where we have LambdaHelper allocations for these
-                            // temporaries, we want to keep our release pool fairly small. For that
-                            // reason, we manually invoke a garbage collection pass right away.
-                            // TODO: Revisit with lightfuncs
-                            duk_gc(ctx, 0);
 
                             // Callbacks don't really need return args?
                             return juce::var();
