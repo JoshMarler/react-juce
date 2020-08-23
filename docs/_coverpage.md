@@ -7,4 +7,4 @@
 - Lightweight and portable for native audio plugins
 
 [GitHub](https://github.com/nick-thompson/blueprint)
-[Get Started](#blueprint)
+[Get Started](#introduction)
