@@ -418,9 +418,6 @@ namespace blueprint
             JUCE_ASSERT_MESSAGE_THREAD
             jassert(handler);
 
-            // TODO: Here we have a case of `invoke` where the callback is not a temporary. Perhaps
-            // we want two different `invoke` methods: one for immeidately cleaning up temporaries,
-            // and one which persists native functions. `pinvoke`? `invokeWithPersistentNativeFunctions`?
             return engine.invoke("__BlueprintNative__.subscribe", eventType, std::move(handler));
         }
 
