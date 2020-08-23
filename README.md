@@ -16,12 +16,7 @@ love to showcase your work.
 
 ## Documentation
 
-The latest and greatest documentation is available on the Wiki here on GitHub:
-* [Getting Started](https://github.com/nick-thompson/blueprint/wiki/Getting-Started)
-* [Running the Example](https://github.com/nick-thompson/blueprint/wiki/running-the-example)
-* [Starting a New Project](https://github.com/nick-thompson/blueprint/wiki/starting-a-new-project)
-* [API Overview](https://github.com/nick-thompson/blueprint/wiki/api-overview)
-* [Resources](https://github.com/nick-thompson/blueprint/wiki/resources)
+See [Blueprint Docs & Getting Started](https://nick-thompson.github.io/blueprint/)
 
 ## Contributing
 Yes, please! I would be very happy to welcome your involvement. Take a look at the [open issues](https://github.com/nick-thompson/blueprint/issues)
