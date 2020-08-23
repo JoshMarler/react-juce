@@ -298,19 +298,20 @@ namespace blueprint
 
         // Retrieve the lambda helper
         duk_push_current_function(ctx);
-        auto magic = duk_get_magic(ctx, -1);
-        auto& helper = engine->temporaryReleasePool.at(magic);
+        const auto magic = duk_get_magic(ctx, -1);
+        auto& helper = engine->temporaryReleasePool[magic + 128];
         duk_pop(ctx);
 
         // Now we can collect our args
+        const auto nargs = duk_get_top(ctx);
         std::vector<juce::var> args;
-        int nargs = duk_get_top(ctx);
+        args.reserve(nargs);
 
         for (int i = 0; i < nargs; ++i)
             args.push_back(engine->readVarFromDukStack(ctx, i));
 
         // Now we can invoke the user method with its arguments
-        auto result = std::invoke(helper->callback, juce::var::NativeFunctionArgs(
+        const auto result = std::invoke(helper->callback, juce::var::NativeFunctionArgs(
             juce::var(),
             args.data(),
             static_cast<int>(args.size())
@@ -434,7 +435,7 @@ namespace blueprint
                 auto magic = nextMagicInt++;
 
                 duk_push_c_lightfunc(ctx, LambdaHelper::invokeFromDukContextLightFunc, DUK_VARARGS, 15, magic);
-                temporaryReleasePool[magic] = std::move(helper);
+                temporaryReleasePool[magic + 128] = std::move(helper);
 
                 if (nextMagicInt >= 127)
                     nextMagicInt = -128;

@@ -177,7 +177,7 @@ namespace blueprint
         uint32_t nextHelperId = 0;
         int32_t nextMagicInt = 0;
         std::unordered_map<uint32_t, std::unique_ptr<LambdaHelper>> persistentReleasePool;
-        std::unordered_map<int16_t, std::unique_ptr<LambdaHelper>> temporaryReleasePool;
+        std::array<std::unique_ptr<LambdaHelper>, 255> temporaryReleasePool;
 
         //==============================================================================
         /** Helper for cleaning up native function temporaries. */
