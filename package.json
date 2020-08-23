@@ -1,0 +1,15 @@
+{
+  "name": "blueprint",
+  "version": "0.1.0",
+  "description": "Write cross-platform native apps with React and JUCE",
+  "directories": {
+    "example": "examples"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nick-thompson/blueprint.git"
+  },
+  "devDependencies": {
+    "docsify-cli": "^4.4.1"
+  }
+}
