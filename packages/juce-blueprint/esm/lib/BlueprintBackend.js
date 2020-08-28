@@ -1,7 +1,6 @@
 /* global __BlueprintNative__:false */
 
 let __rootViewInstance = null;
-let __viewRegistry = {};
 
 if (typeof window !== 'undefined') {
   // This is just a little shim so that I can build for web and run my renderer
@@ -83,21 +82,6 @@ class RawTextViewInstance {
   }
 }
 
-__BlueprintNative__.dispatchViewEvent = function dispatchEvent(viewId, eventType, ...args) {
-  if (__viewRegistry.hasOwnProperty(viewId)) {
-    let instance = __viewRegistry[viewId];
-    let eventHandler = instance._props[`on${eventType}`];
-
-    // TODO: Could do manual event bubbling here. Form an "event" object, give it to the
-    // handler, and then walk up the parent chain giving the same object to every parent
-    // callback. Would require that ViewInstance carry pointers to parents but that should
-    // be trivial...
-    if (typeof eventHandler === 'function') {
-      eventHandler.call(null, ...args);
-    }
-  }
-}
-
 export default {
 
   getRootContainer() {
@@ -113,8 +97,6 @@ export default {
   createViewInstance(viewType, props, parentInstance) {
     const id = __BlueprintNative__.createViewInstance(viewType);
     const instance = new ViewInstance(id, viewType, props);
-
-    __viewRegistry[id] = instance;
     return instance;
   },
 

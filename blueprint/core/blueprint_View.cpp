@@ -144,33 +144,37 @@ namespace blueprint
         auto w = cachedFloatBounds.getWidth();
         auto h = cachedFloatBounds.getHeight();
 
-        if (auto root = findParentComponentOfClass<ReactApplicationRoot>())
-            root->dispatchViewEvent(getViewId(), "Measure", w, h);
+        dispatchViewEvent("onMeasure", w, h);
     }
 
     void View::mouseDown (const juce::MouseEvent& e)
     {
-        if (auto root = findParentComponentOfClass<ReactApplicationRoot>())
-            root->dispatchViewEvent(getViewId(), "MouseDown", e.x, e.y);
+        dispatchViewEvent("onMouseDown", e.x, e.y);
     }
 
     void View::mouseUp (const juce::MouseEvent& e)
     {
-        if (auto root = findParentComponentOfClass<ReactApplicationRoot>())
-            root->dispatchViewEvent(getViewId(), "MouseUp", e.x, e.y);
+        dispatchViewEvent("onMouseUp", e.x, e.y);
     }
 
     void View::mouseDrag (const juce::MouseEvent& e)
     {
         auto mouseDown = e.mouseDownPosition;
-
-        if (auto root = findParentComponentOfClass<ReactApplicationRoot>())
-            root->dispatchViewEvent(getViewId(), "MouseDrag", e.x, e.y, mouseDown.x, mouseDown.y);
+        dispatchViewEvent("onMouseDrag", e.x, e.y, mouseDown.x, mouseDown.y);
     }
 
     void View::mouseDoubleClick (const juce::MouseEvent& e)
     {
-        if (auto root = findParentComponentOfClass<ReactApplicationRoot>())
-            root->dispatchViewEvent(getViewId(), "MouseDoubleClick", e.x, e.y);
+        dispatchViewEvent("onMouseDoubleClick", e.x, e.y);
+    }
+
+    bool View::keyPressed (const juce::KeyPress& key)
+    {
+        dispatchViewEvent("onKeyPress", key.getKeyCode());
+
+        // TODO: `dispatchViewEvent` should take something like a SyntheticEvent
+        // and provide methods for stopPropagation/cancelBubble, which we can
+        // use here to indicate a real return value.
+        return false;
     }
 }

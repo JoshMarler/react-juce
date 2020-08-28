@@ -226,24 +226,6 @@ namespace blueprint
             }
         }
 
-        /** Dispatches an event to the React internal view registry.
-
-            If the view given by the `viewId` has a handler for the given event, it
-            will be called with the given arguments.
-         */
-        template <typename... T>
-        void dispatchViewEvent (ViewId viewId, const juce::String& eventType, T... args)
-        {
-            JUCE_ASSERT_MESSAGE_THREAD
-
-            // We wish to safe guard against client code which attempts to dispatch an event immediately
-            // after a bundle is evaluated should there be an evaluation error.
-            // This ensures callers do not attempt to invoke a JS function which does not currently
-            // exist in the engine.
-            // TODO: remove view event dispatching from reactAppRoot; can now be done in View itself
-            engine.invoke("__BlueprintNative__.dispatchViewEvent", viewId, eventType, std::forward<T>(args)...);
-        }
-
         /** Dispatches an event through Blueprint's EventBridge. */
         template <typename... T>
         void dispatchEvent (const juce::String& eventType, T... args)

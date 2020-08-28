@@ -72,6 +72,25 @@ namespace blueprint
         /** Dispatches a mouseDoubleClick event to the React application. */
         void mouseDoubleClick (const juce::MouseEvent& e) override;
 
+        /** Dispatches a keyPress event to the React application. */
+        bool keyPressed (const juce::KeyPress& e) override;
+
+        //==============================================================================
+        /** Invokes, if exists, the respective view event handler. */
+        template <typename... Ts>
+        void dispatchViewEvent (const juce::String& eventType, Ts... args)
+        {
+            JUCE_ASSERT_MESSAGE_THREAD
+
+            if (props.contains(eventType) && props[eventType].isMethod())
+            {
+                std::vector<juce::var> vargs { args... };
+                juce::var::NativeFunctionArgs nfArgs (juce::var(), vargs.data(), static_cast<int>(vargs.size()));
+
+                std::invoke(props[eventType].getNativeFunction(), nfArgs);
+            }
+        }
+
     protected:
         //==============================================================================
         juce::NamedValueSet props;
