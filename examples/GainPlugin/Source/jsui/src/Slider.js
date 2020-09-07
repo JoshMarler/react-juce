@@ -47,26 +47,29 @@ class Slider extends Component {
     );
   }
 
-  _onMeasure(width, height) {
+  _onMeasure(e) {
     this.setState({
-      width: width,
-      height: height,
+      width: e.width,
+      height: e.height,
     });
   }
 
-  _onMouseDown(mouseX, mouseY) {
+  _onMouseDown(e) {
     this._valueAtDragStart = this.state.value;
+    this._mouseDownX = e.x;
+    this._mouseDownY = e.y;
+
     global.beginParameterChangeGesture(this.props.paramId);
   }
 
-  _onMouseUp(mouseX, mouseY) {
+  _onMouseUp(e) {
     global.endParameterChangeGesture(this.props.paramId);
   }
 
-  _onMouseDrag(mouseX, mouseY, mouseDownX, mouseDownY) {
+  _onMouseDrag(e) {
     // Component vectors
-    let dx = mouseX - mouseDownX;
-    let dy = mouseDownY - mouseY;
+    let dx = e.x - this._mouseDownX;
+    let dy = e.y - this._mouseDownY;
 
     // Delta
     let dm = dx + dy;
@@ -163,7 +166,6 @@ const styles = {
     'position': 'absolute',
     'left': 0.0,
     'top': 0.0,
-    'interceptClickEvents': false,
     'transform-rotate': Math.PI * 1.25,
   },
 };

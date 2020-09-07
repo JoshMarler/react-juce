@@ -43,13 +43,6 @@ namespace blueprint
             Error(const juce::String& msg, const juce::String& _stack, const juce::String& _context)
                 : std::runtime_error(msg.toStdString()), stack(_stack), context(_context) {}
 
-            const char* what() const throw()
-            {
-                auto base = juce::String(std::runtime_error::what());
-                auto full = base + "\n" + context;
-                return full.toRawUTF8();
-            }
-
             juce::String stack;
             juce::String context;
         };

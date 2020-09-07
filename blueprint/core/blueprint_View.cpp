@@ -11,6 +11,44 @@
 namespace blueprint
 {
 
+    namespace detail
+    {
+
+        /** A little helper for DynamicObject construction. */
+        juce::var makeViewEventObject (const juce::NamedValueSet& props)
+        {
+            auto* o = new juce::DynamicObject();
+
+            for (auto& pair : props)
+                o->setProperty(pair.name, pair.value);
+
+            return juce::var(o);
+        }
+
+        /** Another little helper for DynamicObject construction. */
+        juce::var makeViewEventObject (const juce::MouseEvent& me)
+        {
+            // TODO: Get all of it!
+            return makeViewEventObject({
+                {"x", me.x},
+                {"y", me.y},
+                {"screenX", me.getScreenX()},
+                {"screenY", me.getScreenY()},
+            });
+        }
+
+        /** And another little helper for DynamicObject construction. */
+        juce::var makeViewEventObject (const juce::KeyPress& ke)
+        {
+            // TODO: Get all of it!
+            return makeViewEventObject({
+                {"key", juce::String(ke.getTextCharacter())},
+                {"keyCode", ke.getKeyCode()},
+            });
+        }
+
+    }
+
     //==============================================================================
     ViewId View::getViewId()
     {
@@ -38,6 +76,9 @@ namespace blueprint
                 default:     setInterceptsMouseClicks (true,  true);   break;
             }
         }
+
+        if (name == juce::StringRef("onKeyPress"))
+            setWantsKeyboardFocus(true);
 
         if (name == juce::StringRef("opacity"))
             setAlpha(static_cast<float> (value));
@@ -144,37 +185,70 @@ namespace blueprint
         auto w = cachedFloatBounds.getWidth();
         auto h = cachedFloatBounds.getHeight();
 
-        dispatchViewEvent("onMeasure", w, h);
+        dispatchViewEvent("onMeasure", detail::makeViewEventObject({
+            {"width", w},
+            {"height", h}
+        }));
     }
 
     void View::mouseDown (const juce::MouseEvent& e)
     {
-        dispatchViewEvent("onMouseDown", e.x, e.y);
+        dispatchViewEvent("onMouseDown", detail::makeViewEventObject(e));
     }
 
     void View::mouseUp (const juce::MouseEvent& e)
     {
-        dispatchViewEvent("onMouseUp", e.x, e.y);
+        dispatchViewEvent("onMouseUp", detail::makeViewEventObject(e));
     }
 
     void View::mouseDrag (const juce::MouseEvent& e)
     {
-        auto mouseDown = e.mouseDownPosition;
-        dispatchViewEvent("onMouseDrag", e.x, e.y, mouseDown.x, mouseDown.y);
+        // TODO: mouseDrag isn't a dom event... is it?
+        dispatchViewEvent("onMouseDrag", detail::makeViewEventObject(e));
     }
 
     void View::mouseDoubleClick (const juce::MouseEvent& e)
     {
-        dispatchViewEvent("onMouseDoubleClick", e.x, e.y);
+        dispatchViewEvent("onMouseDoubleClick", detail::makeViewEventObject(e));
     }
 
     bool View::keyPressed (const juce::KeyPress& key)
     {
-        dispatchViewEvent("onKeyPress", key.getKeyCode());
+        dispatchViewEvent("onKeyPress", detail::makeViewEventObject(key));
 
-        // TODO: `dispatchViewEvent` should take something like a SyntheticEvent
-        // and provide methods for stopPropagation/cancelBubble, which we can
-        // use here to indicate a real return value.
-        return false;
+        // We always inform the underlying juce::Component that we've consumed the event,
+        // because we manually bubble a SyntheticEvent wrapper up the javascript view tree.
+        // However, because the React app may be only a subtree of the overall app architecture,
+        // we skip up to the ReactApplicationRoot parent and restart the keypress event propagation
+        // up there.
+        if (auto* parent = findParentComponentOfClass<ReactApplicationRoot>())
+            parent->keyPressed(key);
+
+        return true;
     }
+
+    void View::dispatchViewEvent (const juce::String& eventType, const juce::var& e)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+
+        if (props.contains(eventType) && props[eventType].isMethod())
+        {
+            std::array<juce::var, 1> vargs { e };
+            juce::var::NativeFunctionArgs nfArgs (juce::var(), vargs.data(), static_cast<int>(vargs.size()));
+
+            try
+            {
+                std::invoke(props[eventType].getNativeFunction(), nfArgs);
+            }
+            catch (const EcmascriptEngine::Error& err)
+            {
+                if (auto* parent = findParentComponentOfClass<ReactApplicationRoot>())
+                    return parent->handleRuntimeError(err);
+
+                // If we coudln't find a parent that can handle it, rethrow
+                throw err;
+            }
+        }
+    }
+
 }

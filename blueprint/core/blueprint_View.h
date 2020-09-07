@@ -77,19 +77,7 @@ namespace blueprint
 
         //==============================================================================
         /** Invokes, if exists, the respective view event handler. */
-        template <typename... Ts>
-        void dispatchViewEvent (const juce::String& eventType, Ts... args)
-        {
-            JUCE_ASSERT_MESSAGE_THREAD
-
-            if (props.contains(eventType) && props[eventType].isMethod())
-            {
-                std::vector<juce::var> vargs { args... };
-                juce::var::NativeFunctionArgs nfArgs (juce::var(), vargs.data(), static_cast<int>(vargs.size()));
-
-                std::invoke(props[eventType].getNativeFunction(), nfArgs);
-            }
-        }
+        void dispatchViewEvent (const juce::String& eventType, const juce::var& e);
 
     protected:
         //==============================================================================

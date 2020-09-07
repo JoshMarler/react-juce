@@ -24,12 +24,73 @@ if (typeof window !== 'undefined') {
   };
 }
 
+function isMouseEventHandler(key) {
+  const k = key.toLowerCase();
+
+  return k === 'onmousedown' ||
+    k == 'onmouseup' ||
+    k == 'onmousedrag' ||
+    k == 'onmouseclick';
+}
+
+function isKeyboardEventHandler(key) {
+  const k = key.toLowerCase();
+
+  return k === 'onkeydown' ||
+    k == 'onkeyup' ||
+    k == 'onkeypress';
+}
+
+class SyntheticEvent {
+  constructor(props) {
+    this.bubbles = true;
+    this.defaultPrevented = false;
+
+    this._internal = props;
+  }
+
+  stopPropagation() {
+    this.bubbles = false;
+  }
+
+  preventDefault() {
+    this.defaultPrevented = true;
+  }
+}
+
+class SyntheticMouseEvent extends SyntheticEvent {
+  constructor(props) {
+    super(props);
+
+    this.x = this.clientX = props.x;
+    this.y = this.clientY = props.y;
+    this.screenX = props.screenX;
+    this.screenY = props.screenY;
+  }
+}
+
+class SyntheticKeyboardEvent extends SyntheticEvent {
+  constructor(props) {
+    super(props);
+
+    this.keyCode = props.keyCode;
+    this.key = props.key;
+  }
+}
+
+function noop() {}
+
 class ViewInstance {
-  constructor(id, type, props) {
+  constructor(id, type, props, parent) {
     this._id = id;
     this._type = type;
     this._children = [];
     this._props = props;
+    this._parent = parent;
+
+    this.setProperty('onMouseDown', noop);
+    this.setProperty('onMouseUp', noop);
+    this.setProperty('onMouseDrag', noop);
   }
 
   getChildIndex(childInstance) {
@@ -43,11 +104,15 @@ class ViewInstance {
   }
 
   appendChild(childInstance) {
+    childInstance._parent = this;
+
     this._children.push(childInstance);
     return __BlueprintNative__.addChild(this._id, childInstance._id);
   }
 
   insertChild(childInstance, index) {
+    childInstance._parent = this;
+
     this._children.splice(index, 0, childInstance);
     return __BlueprintNative__.addChild(this._id, childInstance._id, index);
   }
@@ -66,7 +131,34 @@ class ViewInstance {
       [propKey]: value,
     });
 
+    if (isMouseEventHandler(propKey)) {
+      return __BlueprintNative__.setViewProperty(this._id, propKey, (evt) => {
+        this.bubbleViewEvent(propKey, new SyntheticMouseEvent(evt));
+      });
+    }
+
+    if (isKeyboardEventHandler(propKey)) {
+      return __BlueprintNative__.setViewProperty(this._id, propKey, (evt) => {
+        this.bubbleViewEvent(propKey, new SyntheticKeyboardEvent(evt));
+      });
+    }
+
     return __BlueprintNative__.setViewProperty(this._id, propKey, value);
+  }
+
+  bubbleViewEvent(propKey, evt) {
+    let instance = this;
+
+    while (instance && evt.bubbles) {
+      const hasHandler = instance._props.hasOwnProperty(propKey) &&
+        typeof instance._props[propKey] === 'function';
+
+      if (hasHandler) {
+        instance._props[propKey](evt);
+      }
+
+      instance = instance._parent;
+    }
   }
 }
 
@@ -96,7 +188,7 @@ export default {
 
   createViewInstance(viewType, props, parentInstance) {
     const id = __BlueprintNative__.createViewInstance(viewType);
-    const instance = new ViewInstance(id, viewType, props);
+    const instance = new ViewInstance(id, viewType, props, parentInstance);
     return instance;
   },
 

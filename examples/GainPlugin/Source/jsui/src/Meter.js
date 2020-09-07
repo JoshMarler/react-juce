@@ -37,10 +37,10 @@ class Meter extends Component {
     });
   }
 
-  _onMeasure(width, height) {
+  _onMeasure(e) {
     this.setState({
-      width: width,
-      height: height,
+      width: e.width,
+      height: e.height,
     });
   }
 

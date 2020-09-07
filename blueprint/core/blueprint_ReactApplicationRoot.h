@@ -214,15 +214,8 @@ namespace blueprint
             }
             catch (const EcmascriptEngine::Error& err)
             {
-#if JUCE_DEBUG
-                handleBundleError(err);
+                handleRuntimeError(err);
                 return juce::var();
-#else
-                // In release builds, we don't catch errors and show the red screen,
-                // we allow the exception to raise up to the user to be handled properly
-                // for a production app.
-                throw err;
-#endif
             }
         }
 
@@ -241,14 +234,7 @@ namespace blueprint
             try {
                 engine.invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
             } catch (const EcmascriptEngine::Error& err) {
-#if JUCE_DEBUG
-                handleBundleError(err);
-#else
-                // In release builds, we don't catch errors and show the red screen,
-                // we allow the exception to raise up to the user to be handled properly
-                // for a production app.
-                throw err;
-#endif
+                handleRuntimeError(err);
             }
         }
 
@@ -413,6 +399,41 @@ namespace blueprint
         }
 
         //==============================================================================
+        void handleRuntimeError(const EcmascriptEngine::Error& err)
+        {
+#if ! JUCE_DEBUG
+            // In release builds, we don't catch errors and show the red screen,
+            // we allow the exception to raise up to the user to be handled properly
+            // for a production app.
+            throw err;
+#endif
+
+            JUCE_ASSERT_MESSAGE_THREAD
+
+            DBG("");
+            DBG("==== Error in JavaScript runtime. Context: ====");
+            DBG(err.context);
+            DBG("");
+            DBG(err.what());
+
+            errorText = std::make_unique<juce::AttributedString>(err.stack);
+
+#if JUCE_WINDOWS
+            errorText->setFont(juce::Font("Lucida Console", 18, juce::Font::FontStyleFlags::plain));
+#elif JUCE_MAC
+            errorText->setFont(juce::Font("Monaco", 18, juce::Font::FontStyleFlags::plain));
+#else
+            errorText->setFont(18);
+#endif
+
+            // Lastly, kill the ViewManager to tear down existing views and prevent
+            // further view interaction
+            viewManager = nullptr;
+
+            repaint();
+        }
+
+        //==============================================================================
         /** The ReactApplicationRoot's engine instance. */
         EcmascriptEngine engine;
 
@@ -425,24 +446,6 @@ namespace blueprint
             engine.reset();
             initViewManager();
             evaluate(bundle);
-        }
-
-        //==============================================================================
-        void handleBundleError(const EcmascriptEngine::Error& err)
-        {
-            JUCE_ASSERT_MESSAGE_THREAD
-            DBG(juce::String("Error in script evaluation: ") + err.what());
-
-            errorText = std::make_unique<juce::AttributedString>(err.stack);
-
-#if JUCE_WINDOWS
-            errorText->setFont(juce::Font("Lucida Console", 18, juce::Font::FontStyleFlags::plain));
-#elif JUCE_MAC
-            errorText->setFont(juce::Font("Monaco", 18, juce::Font::FontStyleFlags::plain));
-#else
-            errorText->setFont(18);
-#endif
-            repaint();
         }
 
         //==============================================================================
