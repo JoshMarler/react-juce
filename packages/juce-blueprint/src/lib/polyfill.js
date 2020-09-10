@@ -1,7 +1,3 @@
-/** Polyfill ES2015 data structures with core-js. */
-import 'core-js/es6/set';
-import 'core-js/es6/map';
-
 /** The EventLoop manages all outstanding timers, invoking callbacks and
  *  clearing the registry in response to a regular interrupt from the JUCE
  *  backend.

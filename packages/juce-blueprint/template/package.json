@@ -18,28 +18,6 @@
     "webpack": "^4.27.1",
     "webpack-cli": "^3.1.2"
   },
-  "babel": {
-    "presets": [
-      "@babel/preset-env",
-      "@babel/preset-react"
-    ],
-    "plugins": [
-      [
-        "@babel/plugin-transform-runtime",
-        {
-          "absoluteRuntime": false,
-          "corejs": 3,
-          "helpers": true,
-          "regenerator": true,
-          "useESModules": false,
-          "version": "7.0.0-beta.0"
-        }
-      ],
-      [
-        "@babel/plugin-proposal-class-properties"
-      ]
-    ]
-  },
   "scripts": {
     "start": "webpack -w --mode=development",
     "build": "webpack --mode=production"

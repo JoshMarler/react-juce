@@ -1,11 +1,19 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "declaration": true,
     "module": "commonjs",
+    "target": "es6",
+    "lib": ["es2015", "dom"],
+    "declaration": true,
+    "sourceMap": true,
+    "isolatedModules":true,
+    "esModuleInterop": true,
     "allowJs": true,
+    "noImplicitAny": false,
     "strict": true,
-    "esModuleInterop": true
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "jsx": "react"
   },
-  "include": ["./esm/**/*"]
+  "include": ["./src/**/*"],
+  "exclude": ["./src/lib/polyfill.js"]
 }
