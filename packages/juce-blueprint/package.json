@@ -2,48 +2,40 @@
   "name": "juce-blueprint",
   "version": "0.1.0",
   "description": "BlueprintPlugin user interface in React.",
-  "main": "./cjs/juce-blueprint.js",
-  "types": "./cjs/juce-blueprint.d.ts",
-  "scripts": {
-    "build": "npm run build:types && npm run build:js",
-    "build:types": "tsc --emitDeclarationOnly --outFile ./cjs/juce-blueprint.d.ts",
-    "build:js": "babel esm --out-dir cjs --extensions \".js,.ts\"",
-    "init": "node scripts/init.js"
-  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "author": "Nick Thompson",
-  "babel": {
-    "plugins": [
-      [
-        "@babel/plugin-transform-runtime",
-        {
-          "corejs": 3
-        }
-      ]
-    ],
-    "presets": [
-      "@babel/preset-env",
-      "@babel/preset-react",
-      "@babel/preset-typescript"
-    ]
-  },
   "devDependencies": {
-    "@babel/cli": "^7.2.0",
-    "@babel/core": "^7.2.0",
-    "@babel/plugin-transform-runtime": "^7.10.5",
-    "@babel/preset-env": "^7.2.0",
-    "@babel/preset-react": "^7.0.0",
+    "@babel/cli": "^7.10.0",
+    "@babel/core": "^7.11.1",
+    "@babel/plugin-transform-runtime": "^7.11.0",
+    "@babel/preset-env": "^7.11.0",
+    "@babel/preset-react": "^7.10.4",
     "@babel/preset-typescript": "^7.10.4",
-    "@babel/runtime-corejs3": "^7.10.5",
+    "@types/core-js": "^2.5.4",
     "@types/invariant": "^2.2.33",
+    "@types/node": "^14.6.4",
     "@types/react": "^16.9.41",
+    "@types/react-reconciler": "^0.18.0",
+    "awesome-typescript-loader": "^5.2.1",
     "chalk": "^2.4.2",
     "fs-extra": "^8.1.0",
-    "typescript": "^3.9.6"
+    "typescript": "^3.9.6",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2"
   },
   "dependencies": {
+    "@babel/runtime-corejs3": "^7.11.2",
     "core-js": "2.6.0",
     "invariant": "^2.2.4",
-    "react": "^16.6.3",
     "react-reconciler": "^0.17.2"
+  },
+  "peerDependencies": {
+    "react": "^16.13.1"
+  },
+  "scripts": {
+    "build": "webpack --mode=production",
+    "watch": "webpack --watch --debug --mode=development",
+    "init": "node scripts/init.js"
   }
 }
