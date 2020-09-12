@@ -491,23 +491,38 @@ namespace blueprint
 
                 if (duk_is_function(ctx, idx) || duk_is_lightfunc(ctx, idx))
                 {
+                    struct CallbackHelper {
+                        CallbackHelper(duk_context* _ctx)
+                            : _context(_ctx)
+                            , funcId(juce::String("__blueprintCallback__") + juce::Uuid().toString()) {}
+
+                        ~CallbackHelper() {
+                            duk_push_global_stash(_context);
+                            duk_del_prop_string(_context, -1, funcId.toRawUTF8());
+                            duk_pop(_context);
+                        }
+
+                        duk_context* _context;
+                        juce::String funcId;
+                    };
+
                     // With a function, we first push the function reference to
                     // the Duktape global stash so we can read it later.
-                    auto funId = juce::String("__blueprintCallback__") + juce::Uuid().toString();
+                    auto helper = std::make_shared<CallbackHelper>(ctx);
 
                     duk_push_global_stash(ctx);
                     duk_dup(ctx, idx);
-                    duk_put_prop_string(ctx, -2, funId.toRawUTF8());
+                    duk_put_prop_string(ctx, -2, helper->funcId.toRawUTF8());
                     duk_pop(ctx);
 
                     // Next we create a var::NativeFunction that captures the function
                     // id and knows how to invoke it
                     value = juce::var::NativeFunction {
-                        [this, ctx, funId = std::move(funId)](const juce::var::NativeFunctionArgs& args) -> juce::var {
+                        [this, ctx, helper](const juce::var::NativeFunctionArgs& args) -> juce::var {
                             // Here when we're being invoked we retrieve the callback function from
                             // the global stash and invoke it with the provided args.
                             duk_push_global_stash(ctx);
-                            duk_get_prop_string(ctx, -1, funId.toRawUTF8());
+                            duk_get_prop_string(ctx, -1, helper->funcId.toRawUTF8());
 
                             if (!(duk_is_lightfunc(ctx, -1) || duk_is_function(ctx, -1)))
                                 throw Error("Global callback not found.", "", detail::getContextDump(ctx));
