@@ -43,7 +43,7 @@
   "dependencies": {
     "core-js": "2.6.0",
     "invariant": "^2.2.4",
-    "react": "^16.6.3",
+    "react": "^16.13.1",
     "react-reconciler": "^0.17.2"
   }
 }
