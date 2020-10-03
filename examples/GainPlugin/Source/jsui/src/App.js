@@ -35,7 +35,7 @@ class App extends Component {
     return (
       <View {...styles.container}>
         <View {...styles.content}>
-          <Image source={require('./logo.svg')} {...styles.logo} />
+          <Image source={require('./logo.png')} {...styles.logo} />
           <Slider paramId="MainGain" {...styles.knob}>
             <Label paramId="MainGain" {...styles.label} />
           </Slider>
