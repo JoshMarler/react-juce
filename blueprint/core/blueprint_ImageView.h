@@ -34,7 +34,7 @@ namespace blueprint
             {
                 juce::String source = value.toString();
 
-                if (source.startsWith("data:"))
+                if (source.startsWith("data:image/"))
                 {
                     auto drawableImg = std::make_unique<juce::DrawableImage>();
                     const juce::Image img = loadImageFromDataURL(source);
@@ -81,20 +81,60 @@ namespace blueprint
         //==============================================================================
         juce::Image loadImageFromDataURL(juce::String& source)
         {
-            int index = source.indexOf(",");
-            juce::String base64Encoded = source.substring(index + 1);
+            // source is a data URL that describes image.
+            // the format is `data:[<mediatype>][;base64],<data>`
+            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
+            int commaIndex = source.indexOf(",");
+            int semiIndex = source.indexOf(";");
+            if (commaIndex == -1 || semiIndex == -1)
+            {
+                throw std::runtime_error("Image received an invalid data url.");
+            }
+            
+            auto base64EncodedData = source.substring(commaIndex + 1);
             juce::MemoryOutputStream outStream{};
 
-            if(!juce::Base64::convertFromBase64(outStream, base64Encoded))
+            if(!juce::Base64::convertFromBase64(outStream, base64EncodedData))
             {
-                throw std::logic_error("Image failed to convert data url.");
+                throw std::runtime_error("Image failed to convert data url.");
             }
 
-            std::unique_ptr<juce::InputStream> inputStream;
-            inputStream.reset(new juce::MemoryInputStream(outStream.getData(), outStream.getDataSize(), false));
+            juce::MemoryInputStream inputStream (outStream.getData(), outStream.getDataSize(), false);
 
-            auto fmt = std::make_unique<juce::PNGImageFormat>();
-            return fmt->decodeImage(*inputStream.get());
+            auto mimeType = source.substring(5,semiIndex);
+            auto fmt = prepareImageFormat(mimeType);
+            
+            if (fmt == nullptr)
+            {
+                throw std::runtime_error("Unsupported format.");
+            }
+
+            if (!fmt->canUnderstand(inputStream))
+            {
+                throw std::runtime_error("Cannot understand the image.");
+            }
+            
+            inputStream.setPosition(0);
+            return fmt->decodeImage(inputStream);
+        }
+        
+        std::unique_ptr<juce::ImageFileFormat> prepareImageFormat(juce::String& mimeType)
+        {
+            if (mimeType == "image/png")
+            {
+                return std::make_unique<juce::PNGImageFormat>();
+            }
+            
+            if (mimeType == "image/jpeg")
+            {
+                return std::make_unique<juce::JPEGImageFormat>();
+            }
+            
+            if (mimeType == "image/gif")
+            {
+                return std::make_unique<juce::GIFImageFormat>();
+            }
+            return nullptr;
         }
     };
 
