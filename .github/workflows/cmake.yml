@@ -19,19 +19,6 @@ jobs:
       with:
         submodules: true
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
-
-    - name: Install dependencies
-      working-directory: ${{runner.workspace}}/blueprint/packages/juce-blueprint
-      run: npm ci
-
-    - name: Build juce-blueprint
-      working-directory: ${{runner.workspace}}/blueprint/packages/juce-blueprint
-      run: npm run build
-
     - name: Fetch juce dependencies
       run: sudo apt-get update && sudo apt-get install libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxext-dev libfreetype6-dev libasound2-dev
 
