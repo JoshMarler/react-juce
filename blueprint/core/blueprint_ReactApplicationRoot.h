@@ -136,6 +136,11 @@ namespace blueprint
             setWantsKeyboardFocus(true);
 #endif
         }
+        
+        ~ReactApplicationRoot()
+        {
+            props.clear();
+        }
 
         //==============================================================================
         /** Override the default View behavior.  */
