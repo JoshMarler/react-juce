@@ -25,7 +25,7 @@ namespace blueprint
     public:
         //==============================================================================
         EcmascriptEngine();
-        ~EcmascriptEngine() override;
+        ~EcmascriptEngine() override = default;
 
         //==============================================================================
         /** A helper struct for representing an error that occured within the Duktape
@@ -166,21 +166,25 @@ namespace blueprint
         };
 
         //==============================================================================
-        duk_context* dukContext;
         uint32_t nextHelperId = 0;
         int32_t nextMagicInt = 0;
         std::unordered_map<uint32_t, std::unique_ptr<LambdaHelper>> persistentReleasePool;
         std::array<std::unique_ptr<LambdaHelper>, 255> temporaryReleasePool;
+
+        // The duk_context must be listed after the release pools so that it is destructed
+        // before the pools. That way, as the duk_context is being freed and finalizing all
+        // of our lambda helpers, our pools still exist for those code paths.
+        std::shared_ptr<duk_context> dukContext;
 
         //==============================================================================
         /** Helper for cleaning up native function temporaries. */
         void removeLambdaHelper (LambdaHelper* helper);
 
         /** Helper for pushing a juce::var to the duktape stack. */
-        void pushVarToDukStack (duk_context* ctx, const juce::var& v, bool persistNativeFunctions = false);
+        void pushVarToDukStack (std::shared_ptr<duk_context> ctx, const juce::var& v, bool persistNativeFunctions = false);
 
         /** Helper for reading from the duktape stack to a juce::var instance. */
-        juce::var readVarFromDukStack (duk_context* ctx, duk_idx_t idx);
+        juce::var readVarFromDukStack (std::shared_ptr<duk_context> ctx, duk_idx_t idx);
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EcmascriptEngine)
