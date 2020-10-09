@@ -330,6 +330,7 @@ namespace blueprint
                     [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
                         jassert(graphics);
                         jassert(args.numArguments == 0);
+                        juce::ignoreUnused(args);
 
                         // Reset the current path on a call to beginPath on the context.
                         path = juce::Path();
@@ -356,6 +357,7 @@ namespace blueprint
                     [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
                         jassert(graphics);
                         jassert(args.numArguments == 2);
+                        juce::ignoreUnused(args);
 
                         const float x = args.arguments[0];
                         const float y = args.arguments[1];
@@ -412,6 +414,7 @@ namespace blueprint
                     [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
                         jassert(graphics);
                         jassert(args.numArguments == 0);
+                        juce::ignoreUnused(args);
 
                         path.closeSubPath();
 
@@ -423,6 +426,7 @@ namespace blueprint
                     [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
                         jassert(graphics);
                         jassert(args.numArguments == 0);
+                        juce::ignoreUnused(args);
 
                         graphics->setColour(properties.strokeStyle.colour);
                         graphics->strokePath(path, juce::PathStrokeType((float)properties.lineWidth));
@@ -435,6 +439,7 @@ namespace blueprint
                     [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
                         jassert(graphics);
                         jassert(args.numArguments == 0);
+                        juce::ignoreUnused(args);
 
                         graphics->setColour(properties.fillStyle.colour);
                         graphics->fillPath(path);
@@ -499,6 +504,7 @@ namespace blueprint
                     [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
                         jassert(graphics);
                         jassert(args.numArguments == 0);
+                        juce::ignoreUnused(args);
 
                         while (!transformStack.empty())
                         {

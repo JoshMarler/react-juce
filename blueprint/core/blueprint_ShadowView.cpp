@@ -152,6 +152,8 @@ namespace blueprint
         {
             for (const auto& [flexValue, enumValue] : validValues)
             {
+                juce::ignoreUnused (enumValue);
+                
                 if (value.equalsIgnoreCase(flexValue))
                 {
                     return true;

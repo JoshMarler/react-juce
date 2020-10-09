@@ -40,29 +40,39 @@
 #define YG_ENUM_BEGIN(name) enum name: unsigned
 #endif
 
-#if __clang__
- // What the hell is wrong with library authors who don't run CI builds with strict warning checks
- // and keep their code clean and tidy!?!? As well as missing their own bugs, it means that users of
- // their library then hit a million warnings, so they reduce THEIR warning level to avoid the noise,
- // (because they'll be too lazy/busy to fix it, or at least to add pragmas like this), and everyone's
- // code just ends up a little bit worse..  [/rant]
+// What the hell is wrong with library authors who don't run CI builds with strict warning checks
+// and keep their code clean and tidy!?!? As well as missing their own bugs, it means that users of
+// their library then hit a million warnings, so they reduce THEIR warning level to avoid the noise,
+// (because they'll be too lazy/busy to fix it, or at least to add pragmas like this), and everyone's
+// code just ends up a little bit worse..  [/rant]
+#if _MSC_VER
+ #pragma warning(push)
+#elif __clang__
  #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wc++98-compat-extra-semi"
  #pragma clang diagnostic ignored "-Wextra-semi"
  #pragma clang diagnostic ignored "-Wsign-conversion"
  #pragma clang diagnostic ignored "-Wswitch-enum"
  #pragma clang diagnostic ignored "-Wunused-parameter"
- #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+ #if __clang_major__ > 10
+  #pragma clang diagnostic ignored "-Wc++98-compat-extra-semi"
+  #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+ #else
+  #pragma clang diagnostic ignored "-Wconversion"
+ #endif
+#elif __GNUC__
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #pragma GCC diagnostic ignored "-Wsign-conversion"
+ #pragma GCC diagnostic ignored "-Wswitch-enum"
+ #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
 
 #include "yoga/yoga/log.h"
 #include "yoga/yoga/event/event.h"
-#include "yoga/yoga/Utils.h"
 #include "yoga/yoga/YGConfig.h"
 #include "yoga/yoga/YGEnums.h"
 #include "yoga/yoga/YGFloatOptional.h"
 #include "yoga/yoga/YGLayout.h"
-#include "yoga/yoga/YGNode.h"
 #include "yoga/yoga/YGNodePrint.h"
 #include "yoga/yoga/YGStyle.h"
 #include "yoga/yoga/YGValue.h"
@@ -73,8 +83,11 @@
 #include "duktape/extras/console/duk_console.h"
 #include "duktape/examples/debug-trans-socket/duk_trans_socket.h"
 
-#if __clang__
+#if _MSC_VER
+#elif __clang__
  #pragma clang diagnostic pop
+#elif __GNUC__
+ #pragma GCC diagnostic pop
 #endif
 
 #include "core/blueprint_EcmascriptEngine.h"

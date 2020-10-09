@@ -161,6 +161,7 @@ namespace blueprint
         //==============================================================================
         bool keyPressed(const juce::KeyPress& key) override
         {
+            juce::ignoreUnused(key);
 #if JUCE_DEBUG
            const auto startDebugCommand = juce::KeyPress('d', juce::ModifierKeys::commandModifier, 0);
 
@@ -557,6 +558,7 @@ namespace blueprint
 
             engine.registerNativeMethod("__BlueprintNative__", "getRootInstanceId", [this](const juce::var::NativeFunctionArgs& args) {
                 jassert (args.numArguments == 0);
+                juce::ignoreUnused(args);
                 return juce::var(getViewId());
             });
         }
