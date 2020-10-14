@@ -93,12 +93,12 @@ namespace blueprint
     }
 
     //==============================================================================
-    void BlueprintGenericEditor::beforeBundleEvaluated()
+    void BlueprintGenericEditor::beforeBundleEvaluated(std::shared_ptr<blueprint::EcmascriptEngine> engine)
     {
         // If we have a valueTreeState, bind parameter methods to the new app root
         if (valueTreeState != nullptr)
         {
-            appRoot.engine.registerNativeMethod(
+            engine->registerNativeMethod(
                 "beginParameterChangeGesture",
                 [this](const juce::var::NativeFunctionArgs& args) {
                     if (auto* parameter = valueTreeState->getParameter(args.arguments[0].toString()))
@@ -108,7 +108,7 @@ namespace blueprint
                 }
             );
 
-            appRoot.engine.registerNativeMethod(
+            engine->registerNativeMethod(
                 "setParameterValueNotifyingHost",
                 [this](const juce::var::NativeFunctionArgs& args) {
                     if (auto* parameter = valueTreeState->getParameter(args.arguments[0].toString()))
@@ -118,7 +118,7 @@ namespace blueprint
                 }
             );
 
-            appRoot.engine.registerNativeMethod(
+            engine->registerNativeMethod(
                 "endParameterChangeGesture",
                 [this](const juce::var::NativeFunctionArgs& args) {
                     const juce::String& paramId = args.arguments[0].toString();
@@ -132,7 +132,7 @@ namespace blueprint
         }
     }
 
-    void BlueprintGenericEditor::afterBundleEvaluated()
+    void BlueprintGenericEditor::afterBundleEvaluated(std::shared_ptr<blueprint::EcmascriptEngine> engine)
     {
         // Push current parameter values into the bundle on load
         for (auto& p : processor.getParameters())
@@ -141,19 +141,19 @@ namespace blueprint
 
     void BlueprintGenericEditor::registerAppRootCallbacks()
     {
-        appRoot.beforeBundleEval = [=] (const juce::File& bundle)
+        appRoot.beforeBundleEval = [=] (std::shared_ptr<blueprint::EcmascriptEngine> engine, const juce::File& bundle)
         {
-            if (bundle.getFullPathName() == bundleFile.getFullPathName())
+            if (bundle == bundleFile)
             {
-                beforeBundleEvaluated();
+                beforeBundleEvaluated(engine);
             }
         };
 
-        appRoot.afterBundleEval = [=] (const juce::File& bundle)
+        appRoot.afterBundleEval = [=] (std::shared_ptr<blueprint::EcmascriptEngine> engine, const juce::File& bundle)
         {
-            if (bundle.getFullPathName() == bundleFile.getFullPathName())
+            if (bundle == bundleFile)
             {
-                afterBundleEvaluated();
+                afterBundleEvaluated(engine);
             }
         };
     }

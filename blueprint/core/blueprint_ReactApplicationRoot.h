@@ -11,88 +11,14 @@
 
 #include <optional>
 
-#include "blueprint_CanvasView.h"
 #include "blueprint_EcmascriptEngine.h"
-#include "blueprint_ImageView.h"
-#include "blueprint_RawTextView.h"
-#include "blueprint_ScrollView.h"
-#include "blueprint_ScrollViewContentShadowView.h"
-#include "blueprint_ShadowView.h"
-#include "blueprint_TextShadowView.h"
-#include "blueprint_TextView.h"
+#include "blueprint_FileWatcher.h"
 #include "blueprint_View.h"
 #include "blueprint_ViewManager.h"
 
 
 namespace blueprint
 {
-    //==============================================================================
-    // Helper class which watches JS bundle files for changes and triggers
-    // a user supplied callback in the event of a bundle file change.
-    // BundleWatcher is able to handle multiple bundles to support loading
-    // of multiple bundle files by EcmaScriptEngine in the future.
-    class BundleWatcher : private juce::Timer
-    {
-        struct WatchedBundle
-        {
-            juce::File bundle;
-            juce::Time bundleLastModifiedTime;
-        };
-
-    public:
-        using BundleChangedCallback = std::function<void(const juce::File&)>;
-
-        explicit BundleWatcher(BundleChangedCallback onBundleChangedCallback)
-            : onBundleChanged(std::move(onBundleChangedCallback))
-        {
-            startTimer(50);
-        }
-
-        void watch(const juce::File& bundle)
-        {
-            watchedBundles.push_back({ bundle, bundle.getLastModificationTime() });
-        }
-
-        bool watching(const juce::File &bundle) const
-        {
-            return std::find_if(  watchedBundles.cbegin()
-                                , watchedBundles.cend()
-                                , [=](const WatchedBundle& wb)
-                                  {
-                                      return wb.bundle.getFullPathName() == bundle.getFullPathName();
-                                  }) != watchedBundles.cend();
-        }
-
-    private:
-        void timerCallback() override
-        {
-            std::for_each(watchedBundles.begin(), watchedBundles.end(), [=] (WatchedBundle& wb)
-            {
-                // Sanity check
-                jassert(wb.bundle.existsAsFile());
-
-                if (wb.bundle.existsAsFile())
-                {
-                    const auto lmt = wb.bundle.getLastModificationTime();
-
-                    // In some instances webpack rebuilds temporarily result in an empty
-                    // bundle file. We do not want to trigger evaluation callbacks when the
-                    // bundle file is empty as this is likely to cause errors when users attempt
-                    // to call javascript functions from C/C++. Calling eval/call in duktape with
-                    // an empty js file/string does not result in an error and simply pushes undefined
-                    // to the top of the duktape stack.
-                    if (lmt > wb.bundleLastModifiedTime && wb.bundle.loadFileAsString().isNotEmpty())
-                    {
-                        onBundleChanged(wb.bundle);
-                        wb.bundleLastModifiedTime = lmt;
-                    }
-                }
-            });
-        }
-
-        std::vector<WatchedBundle> watchedBundles;
-        BundleChangedCallback      onBundleChanged;
-    };
 
     //==============================================================================
     /** The ReactApplicationRoot class prepares and maintains a Duktape evaluation
@@ -122,103 +48,32 @@ namespace blueprint
     {
     public:
         //==============================================================================
-        ReactApplicationRoot()
-        {
-            JUCE_ASSERT_MESSAGE_THREAD
+        ReactApplicationRoot(std::shared_ptr<EcmascriptEngine> ee);
+        ReactApplicationRoot();
 
-            // Initialise the ViewManager
-            initViewManager();
+        //==============================================================================
+        /** Override the default resized behavior. */
+        void resized() override;
+
+        /** Override the default paint behavior. */
+        void paint(juce::Graphics& g) override;
 
 #if JUCE_DEBUG
-            enableHotReloading();
-
-            // Enable keyboardFocus to support CTRL-D/CMD-D debug attachment.
-            setWantsKeyboardFocus(true);
+        /** In debug builds, we add a keypress handler to toggle debugging. */
+        bool keyPressed(const juce::KeyPress& key) override;
 #endif
-        }
 
         //==============================================================================
-        /** Override the default View behavior.  */
-        void resized() override
-        {
-            // ViewManager may have been reset in the event of a bundle eval error.
-            if (viewManager)
-                viewManager->performRootShadowTreeLayout();
-        }
-
-        void paint(juce::Graphics& g) override
-        {
-            if (errorText)
-            {
-                g.fillAll(juce::Colour(0xffe14c37));
-                errorText->draw(g, getLocalBounds().toFloat().reduced(10.f));
-            }
-            else
-            {
-                View::paint(g);
-            }
-        }
-        //==============================================================================
-        bool keyPressed(const juce::KeyPress& key) override
-        {
-            juce::ignoreUnused(key);
-#if JUCE_DEBUG
-           const auto startDebugCommand = juce::KeyPress('d', juce::ModifierKeys::commandModifier, 0);
-
-           if (key == startDebugCommand)
-           {
-               engine.debuggerAttach();
-           }
-#endif
-            return true;
-        }
-
-        //==============================================================================
-        /**
-         * Evaluates a javascript bundle file in the Ecmascript engine.
+        /** Evaluates a javascript bundle file in the Ecmascript engine.
          *
-         *  If hot-reload functionality has been enabled via enableHotReload(), ReactApplicationRoot will watch the
-         *  supplied bundle file for changes and provide instant UI updates. This is useful when working with Webpack
-         *  watchers etc.
-         *
-         *  Hot reloading is enabled by default in debug builds if JUCE_DEBUG is set.
-         **/
-        juce::var evaluate(const juce::File& bundle)
-        {
-            JUCE_ASSERT_MESSAGE_THREAD
+         * With the default behavior, ReactApplicationRoot will watch the supplied bundle
+         * for changes and provide instant updates. If you're managing your own EcmascriptEngine,
+         * you'll need to manage hot reloading on your own.
+         */
+        juce::var evaluate(const juce::File& bundle);
 
-            // Clear error state from previous js evals
-            errorText.reset();
-
-            if (hotReloadEnabled)
-            {
-                jassert(bundleWatcher);
-
-                if (!bundleWatcher->watching(bundle))
-                    bundleWatcher->watch(bundle);
-            }
-
-            try
-            {
-                // Register internal React.js backend rendering methods
-                registerNativeRenderingHooks();
-
-                if (beforeBundleEval)
-                    beforeBundleEval(bundle);
-
-                auto result = engine.evaluate(bundle);
-
-                if (afterBundleEval)
-                    afterBundleEval(bundle);
-
-                return result;
-            }
-            catch (const EcmascriptEngine::Error& err)
-            {
-                handleRuntimeError(err);
-                return juce::var();
-            }
-        }
+        /** Install a custom view type into the view manager. */
+        void registerViewType(const juce::String& typeId, ViewManager::ViewFactory f);
 
         /** Dispatches an event through Blueprint's EventBridge. */
         template <typename... T>
@@ -233,45 +88,36 @@ namespace blueprint
                 return;
 
             try {
-                engine.invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
+                engine->invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
             } catch (const EcmascriptEngine::Error& err) {
                 handleRuntimeError(err);
             }
         }
 
         //==============================================================================
-        void registerViewType(const juce::String& typeId, ViewManager::ViewFactory f)
-        {
-            getViewManager().registerViewType(typeId, f);
-        }
+        /** Enables hot reloading (on by default in debug builds). */
+        void enableHotReloading();
 
-        ViewManager& getViewManager()
-        {
-            JUCE_ASSERT_MESSAGE_THREAD
-            jassert (viewManager != nullptr);
-            return *viewManager.get();
-        }
+        /** Disables hot reloading (on by default in debug builds). */
+        void disableHotReloading();
 
         //==============================================================================
-        /**
-         * Enables "hot-reload" functionality so that ReactApplicationRoot watches JS bundle files added via evaluate()
-         * for changes. When one of these bundle files changes (i.e. from a Webpack watch/rebuild) ReactApplicationRoot
-         * will reload the bundle and update the View/ShadowView tree. Note hot-reloading is enabled by default if
-         * JUCE_DEBUG is set.
-         **/
-        void enableHotReloading()
-        {
-            bundleWatcher = std::make_unique<BundleWatcher>(
-                [=](const juce::File& bundle) {
-                    handleBundleChanged(bundle);
-                }
-            );
+        /** Displays the red error screen for the given error. */
+        void handleRuntimeError(const EcmascriptEngine::Error& err);
 
-            hotReloadEnabled = true;
-        }
+        /** Clears the EcmascriptEngine and the view table. */
+        void reset();
+
+        /** Installs the rendering hooks needed by the React reconciler into the
+         *  EcmascriptEngine environment.
+         *
+         *  Should be called after every `reset` and before evaluating the bundle.
+         *  When using the default ReactApplicationRoot, this happens automatically.
+         */
+        void bindNativeRenderingHooks();
 
         //==============================================================================
-        using BundleEvalCallback = std::function<void(const juce::File& bundle)>;
+        using BundleEvalCallback = std::function<void(std::shared_ptr<EcmascriptEngine> e, const juce::File& bundle)>;
 
         /**
          * Called before a bundle is loaded/evaluated.
@@ -372,209 +218,12 @@ namespace blueprint
          **/
         BundleEvalCallback afterBundleEval;
 
-        //==============================================================================
-        void handleRuntimeError(const EcmascriptEngine::Error& err)
-        {
-#if ! JUCE_DEBUG
-            // In release builds, we don't catch errors and show the red screen,
-            // we allow the exception to raise up to the user to be handled properly
-            // for a production app.
-            throw err;
-#endif
-
-            JUCE_ASSERT_MESSAGE_THREAD
-
-            DBG("");
-            DBG("==== Error in JavaScript runtime. Context: ====");
-            DBG(err.context);
-            DBG("");
-            DBG(err.what());
-
-            errorText = std::make_unique<juce::AttributedString>(err.stack);
-
-#if JUCE_WINDOWS
-            errorText->setFont(juce::Font("Lucida Console", 18, juce::Font::FontStyleFlags::plain));
-#elif JUCE_MAC
-            errorText->setFont(juce::Font("Monaco", 18, juce::Font::FontStyleFlags::plain));
-#else
-            errorText->setFont(18);
-#endif
-
-            // Lastly, kill the ViewManager to tear down existing views and prevent
-            // further view interaction
-            viewManager = nullptr;
-
-            repaint();
-        }
-
-        //==============================================================================
-        /** The ReactApplicationRoot's engine instance. */
-        EcmascriptEngine engine;
-
     private:
         //==============================================================================
-        void handleBundleChanged(const juce::File& bundle)
-        {
-            JUCE_ASSERT_MESSAGE_THREAD
+        ViewManager viewManager;
 
-            engine.reset();
-            initViewManager();
-            evaluate(bundle);
-        }
-
-        //==============================================================================
-        /** Initialises the ViewManager and registers our native view types */
-        void initViewManager()
-        {
-            viewManager = std::make_unique<ViewManager>(this);
-            installNativeViewTypes();
-        }
-
-        //==============================================================================
-        /** Registers each of the natively supported view types. */
-        void installNativeViewTypes()
-        {
-            using ViewPair = ViewManager::ViewPair;
-
-            jassert(viewManager);
-
-            viewManager->registerViewType("Text", []() -> ViewPair {
-                auto view = std::make_unique<TextView>();
-                auto shadowView = std::make_unique<TextShadowView>(view.get());
-
-                return {std::move(view), std::move(shadowView)};
-            });
-
-            viewManager->registerViewType("View", []() -> ViewPair {
-                auto view = std::make_unique<View>();
-                auto shadowView = std::make_unique<ShadowView>(view.get());
-
-                return {std::move(view), std::move(shadowView)};
-            });
-
-            viewManager->registerViewType("CanvasView", []() -> ViewPair {
-                auto view = std::make_unique<CanvasView>();
-                auto shadowView = std::make_unique<ShadowView>(view.get());
-
-                return {std::move(view), std::move(shadowView)};
-            });
-
-            viewManager->registerViewType("Image", []() -> ViewPair {
-                auto view = std::make_unique<ImageView>();
-
-                // ImageView does not need a specialized shadow view, unless
-                // we want to enforce at the ShadowView level that it cannot
-                // take children.
-                auto shadowView = std::make_unique<ShadowView>(view.get());
-
-                return {std::move(view), std::move(shadowView)};
-            });
-
-            viewManager->registerViewType("ScrollView", []() -> ViewPair {
-                auto view = std::make_unique<ScrollView>();
-                auto shadowView = std::make_unique<ShadowView>(view.get());
-
-                return {std::move(view), std::move(shadowView)};
-            });
-
-            viewManager->registerViewType("ScrollViewContentView", []() -> ViewPair {
-                auto view = std::make_unique<View>();
-                auto shadowView = std::make_unique<ScrollViewContentShadowView>(view.get());
-
-                return {std::move(view), std::move(shadowView)};
-            });
-        }
-
-        void registerNativeRenderingHooks()
-        {
-            engine.registerNativeProperty("__BlueprintNative__", juce::JSON::parse("{}"));
-
-            engine.registerNativeMethod("__BlueprintNative__", "createViewInstance", [this](const juce::var::NativeFunctionArgs& args) {
-                jassert (args.numArguments == 1);
-
-                auto viewType = args.arguments[0].toString();
-                ViewId viewId = getViewManager().createViewInstance(viewType);
-
-                return juce::var(viewId);
-            });
-
-            engine.registerNativeMethod("__BlueprintNative__", "createTextViewInstance", [this](const juce::var::NativeFunctionArgs& args) {
-                jassert (args.numArguments == 1);
-
-                auto textValue = args.arguments[0].toString();
-                auto viewId = getViewManager().createTextViewInstance(textValue);
-
-                return juce::var(viewId);
-            });
-
-            engine.registerNativeMethod("__BlueprintNative__", "setViewProperty", [this](const juce::var::NativeFunctionArgs& args) {
-                jassert (args.numArguments == 3);
-                jassert(viewManager);
-
-                ViewId viewId = args.arguments[0];
-                auto propertyName = args.arguments[1].toString();
-                auto propertyValue = args.arguments[2];
-
-                getViewManager().setViewProperty(viewId, propertyName, propertyValue);
-                return juce::var::undefined();
-            });
-
-            engine.registerNativeMethod("__BlueprintNative__", "setRawTextValue", [this](const juce::var::NativeFunctionArgs& args) {
-                jassert (args.numArguments == 2);
-                jassert(viewManager);
-
-                ViewId viewId = args.arguments[0];
-                auto textValue = args.arguments[1].toString();
-
-                getViewManager().setRawTextValue(viewId, textValue);
-                return juce::var::undefined();
-            });
-
-            engine.registerNativeMethod("__BlueprintNative__", "addChild", [this](const juce::var::NativeFunctionArgs& args) {
-                jassert (args.numArguments >= 2);
-                jassert(viewManager);
-
-                ViewId parentId = args.arguments[0];
-                ViewId childId = args.arguments[1];
-                int index = -1;
-
-                if (args.numArguments > 2)
-                    index = args.arguments[2];
-
-                getViewManager().addChild(parentId, childId, index);
-                return juce::var::undefined();
-            });
-
-            engine.registerNativeMethod("__BlueprintNative__", "removeChild", [this](const juce::var::NativeFunctionArgs& args) {
-                jassert (args.numArguments == 2);
-                jassert(viewManager);
-
-                ViewId parentId = args.arguments[0];
-                ViewId childId = args.arguments[1];
-
-                getViewManager().removeChild(parentId, childId);
-                return juce::var::undefined();
-            });
-
-            engine.registerNativeMethod("__BlueprintNative__", "getRootInstanceId", [this](const juce::var::NativeFunctionArgs& args) {
-                jassert (args.numArguments == 0);
-                juce::ignoreUnused(args);
-                return juce::var(getViewId());
-            });
-
-            engine.registerNativeMethod("__BlueprintNative__", "resetAfterCommit", [this](const juce::var::NativeFunctionArgs& args) {
-                // TODO, something else... traverse for dirty
-                // yoga nodes
-                getViewManager().performRootShadowTreeLayout();
-                return juce::var::undefined();
-            });
-        }
-
-        //==============================================================================
-        bool hotReloadEnabled = false;
-
-        std::unique_ptr<ViewManager>            viewManager;
-        std::unique_ptr<BundleWatcher>          bundleWatcher;
+        std::shared_ptr<EcmascriptEngine>       engine;
+        std::unique_ptr<FileWatcher>            fileWatcher;
         std::unique_ptr<juce::AttributedString> errorText;
 
         //==============================================================================

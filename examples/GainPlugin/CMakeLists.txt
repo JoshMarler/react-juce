@@ -39,9 +39,7 @@ juce_generate_juce_header(GainPlugin)
 # first argument, then a visibility parameter for the sources (PRIVATE is normally best practice,
 # although it doesn't really affect executable targets). Finally, we supply a list of source files
 # that will be built into the target. This is a standard CMake command.
-target_sources(GainPlugin PRIVATE
-    PluginEditor.cpp
-    PluginProcessor.cpp)
+target_sources(GainPlugin PRIVATE PluginProcessor.cpp)
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
 # project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use

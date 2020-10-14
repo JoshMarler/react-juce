@@ -8,13 +8,45 @@
 */
 
 #include "blueprint_ViewManager.h"
+#include "blueprint_CanvasView.h"
+#include "blueprint_ImageView.h"
+#include "blueprint_ScrollView.h"
+#include "blueprint_ScrollViewContentShadowView.h"
+#include "blueprint_TextView.h"
+#include "blueprint_TextShadowView.h"
 
 namespace blueprint
 {
+
+    namespace
+    {
+
+        /** A quick helper for registering view types. */
+        template <typename ViewType, typename ShadowViewType>
+        struct GenericViewFactory
+        {
+            ViewManager::ViewPair operator()() {
+                auto view = std::make_unique<ViewType>();
+                auto shadowView = std::make_unique<ShadowViewType>(view.get());
+
+                return {std::move(view), std::move(shadowView)};
+            }
+        };
+
+    }
+
     ViewManager::ViewManager(View* rootView)
         : rootId(rootView->getViewId())
     {
         shadowViewTable[rootId] = std::make_unique<ShadowView>(rootView);
+
+        // Register the default view types
+        registerViewType("View", GenericViewFactory<View, ShadowView>());
+        registerViewType("Text", GenericViewFactory<TextView, TextShadowView>());
+        registerViewType("CanvasView", GenericViewFactory<CanvasView, ShadowView>());
+        registerViewType("Image", GenericViewFactory<ImageView, ShadowView>());
+        registerViewType("ScrollView", GenericViewFactory<ScrollView, ShadowView>());
+        registerViewType("ScrollViewContentView", GenericViewFactory<View, ScrollViewContentShadowView>());
     }
 
     void ViewManager::registerViewType(const juce::String &typeId, ViewFactory f)
@@ -184,6 +216,17 @@ namespace blueprint
 
         root->computeViewLayout(width, height);
         root->flushViewLayout();
+    }
+
+    void ViewManager::clearViewTables()
+    {
+        auto nh = shadowViewTable.extract(rootId);
+
+        viewTable.clear();
+        shadowViewTable.clear();
+
+        // Make a new root shadow view to reinitialize the view table
+        shadowViewTable[rootId] = std::make_unique<ShadowView>(nh.mapped()->getAssociatedView());
     }
 
     std::pair<View*, ShadowView*> ViewManager::getViewHandle (ViewId viewId)

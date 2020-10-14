@@ -44,13 +44,11 @@ namespace blueprint
         void resized() override;
         void paint (juce::Graphics&) override;
 
-        //==============================================================================
-
     private:
         //==============================================================================
         /** ReactApplicationRoot bundle eval callback functions */
-        void beforeBundleEvaluated();
-        void afterBundleEvaluated();
+        void beforeBundleEvaluated(std::shared_ptr<blueprint::EcmascriptEngine>);
+        void afterBundleEvaluated(std::shared_ptr<blueprint::EcmascriptEngine>);
         void registerAppRootCallbacks();
 
         //==============================================================================
