@@ -29,6 +29,7 @@ contents.xcworkspacedata
 .dirstamp
 profile
 node_modules
+examples/**/build
 **/MacOSX/build
 **/iOS/build
 **/IDEWorkspaceChecks.plist
