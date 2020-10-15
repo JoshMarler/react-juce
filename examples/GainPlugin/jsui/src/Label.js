@@ -10,10 +10,13 @@ class Label extends Component {
   constructor(props) {
     super(props);
 
+    this._onMouseEnter = this._onMouseEnter.bind(this);
+    this._onMouseExit = this._onMouseExit.bind(this);
     this._onParameterValueChange = this._onParameterValueChange.bind(this);
 
     this.state = {
       label: '',
+      color: 'ff626262'
     };
   }
 
@@ -33,10 +36,24 @@ class Label extends Component {
     }
   }
 
+  _onMouseEnter() {
+    console.log('entered')
+    this.setState({
+      color: 'ffff7777'
+    })
+  }
+
+  _onMouseExit() {
+    console.log('exited')
+    this.setState({
+      color: 'ff626262'
+    })
+  }
+
   render() {
     return (
-      <View {...this.props}>
-        <Text {...styles.labelText}>
+      <View {...this.props} onMouseEnter={this._onMouseEnter} onMouseExit={this._onMouseExit}>
+        <Text {...styles.labelText} color={this.state.color}>
           {this.state.label}
         </Text>
       </View>
@@ -46,7 +63,6 @@ class Label extends Component {
 
 const styles = {
   labelText: {
-    'color': 'ff626262',
     'font-size': 16.0,
     'line-spacing': 1.6,
   },

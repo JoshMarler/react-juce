@@ -30,6 +30,7 @@ class Slider extends Component {
       width: 0,
       height: 0,
       value: initialValue,
+      color: '#ff2222'
     };
   }
 
@@ -132,7 +133,7 @@ class Slider extends Component {
           cx="${cx}"
           cy="${cy}"
           r="${radius}"
-          stroke="#66FDCF"
+          stroke="${this.state.color}"
           stroke-width="${strokeWidth}"
           stroke-dasharray="${dashArray.join(',')}"
           fill="none" />
@@ -149,7 +150,11 @@ class Slider extends Component {
         onMeasure={this._onMeasure}
         onMouseDown={this._onMouseDown}
         onMouseUp={this._onMouseUp}
-        onMouseDrag={this._onMouseDrag}>
+        onMouseDrag={this._onMouseDrag}
+        onMouseEnter={() => this.setState({color: '#22ff22'})}
+        onMouseExit={() => this.setState({color: '#ff2222'})}
+        onMouseMove={(e) => console.log(e)}
+        >
         <Image {...styles.canvas} source={this._renderVectorGraphics(value, width, height)} />
         {this.props.children}
       </View>
