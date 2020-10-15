@@ -191,6 +191,21 @@ namespace blueprint
         }));
     }
 
+    void View::mouseMove (const juce::MouseEvent& e)
+    {
+        dispatchViewEvent("onMouseMove", detail::makeViewEventObject(e));
+    }
+
+    void View::mouseEnter (const juce::MouseEvent& e)
+    {
+        dispatchViewEvent("onMouseEnter", detail::makeViewEventObject(e));
+    }
+
+    void View::mouseExit (const juce::MouseEvent& e)
+    {
+        dispatchViewEvent("onMouseExit", detail::makeViewEventObject(e));
+    }
+
     void View::mouseDown (const juce::MouseEvent& e)
     {
         dispatchViewEvent("onMouseDown", detail::makeViewEventObject(e));
@@ -206,6 +221,7 @@ namespace blueprint
         // TODO: mouseDrag isn't a dom event... is it?
         dispatchViewEvent("onMouseDrag", detail::makeViewEventObject(e));
     }
+
 
     void View::mouseDoubleClick (const juce::MouseEvent& e)
     {
