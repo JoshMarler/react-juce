@@ -133,7 +133,7 @@ class Slider extends Component {
           cx="${cx}"
           cy="${cy}"
           r="${radius}"
-          stroke="${this.state.color}"
+          stroke="#66FDCF"
           stroke-width="${strokeWidth}"
           stroke-dasharray="${dashArray.join(',')}"
           fill="none" />

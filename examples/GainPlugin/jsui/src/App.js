@@ -80,7 +80,6 @@ const styles = {
     'flex': 1.0,
     'justify-content': 'center',
     'align-items': 'center',
-    'interceptClickEvents': false,
   },
   meter: {
     'flex': 0.0,
