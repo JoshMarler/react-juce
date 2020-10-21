@@ -3,7 +3,7 @@ import {
   EventBridge,
   Text,
   View,
-} from 'juce-blueprint';
+} from 'react-juce';
 
 
 class Label extends Component {

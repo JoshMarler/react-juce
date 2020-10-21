@@ -1,9 +1,16 @@
 {
-  "name": "juce-blueprint",
-  "version": "0.1.0",
-  "description": "BlueprintPlugin user interface in React.",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "name": "react-juce",
+  "version": "0.1.2",
+  "description": "Write cross-platform native apps with React.js and JUCE.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nick-thompson/blueprint.git"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/index.js"
+  ],
   "author": "Nick Thompson",
   "devDependencies": {
     "@babel/cli": "^7.10.0",

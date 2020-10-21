@@ -34,39 +34,26 @@ fs.mkdirp(targetDir, function(err) {
       process.exit(1);
     }
 
-    console.log('[*] Linking juce-blueprint package');
+    console.log('[*] Installing dependencies');
 
-    var pkgPath = path.resolve(targetDir, 'package.json');
-    var pkg = require(pkgPath);
-    pkg.dependencies['juce-blueprint'] = 'file:' + path.relative(targetDir, packageDir);
-
-    fs.writeJson(pkgPath, pkg, { spaces: 2 }, function(err) {
+    cp.exec('npm install', { cwd: targetDir }, function(err, stdout, stderr) {
       if (err) {
         console.error(chalk.red(err));
+        console.error(stderr);
         process.exit(1);
       }
 
-      console.log('[*] Installing dependencies');
-
-      cp.exec('npm install', { cwd: targetDir }, function(err, stdout, stderr) {
-        if (err) {
-          console.error(chalk.red(err));
-          console.error(stderr);
-          process.exit(1);
-        }
-
-        console.log();
-        console.log(`
+      console.log();
+      console.log(`
 ${chalk.blue('Success!')} Initialized a Blueprint template in ${chalk.green(targetDir)}
 
 You can now get started by typing:
 
-  ${chalk.blue('cd')} ${args[0]}
-  ${chalk.blue('npm start')}
+${chalk.blue('cd')} ${args[0]}
+${chalk.blue('npm start')}
 
 Then adding the blueprint::ReactApplicationRoot component to your project.
-        `);
-      });
+      `);
     });
   });
 });

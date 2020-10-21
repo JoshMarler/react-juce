@@ -4,7 +4,7 @@ import {
   Image,
   Text,
   View,
-} from 'juce-blueprint';
+} from 'react-juce';
 
 
 class Slider extends Component {
