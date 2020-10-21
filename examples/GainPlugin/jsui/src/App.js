@@ -8,7 +8,7 @@ import {
   Image,
   View,
   Text,
-} from 'juce-blueprint';
+} from 'react-juce';
 
 
 function animatedDraw(ctx) {

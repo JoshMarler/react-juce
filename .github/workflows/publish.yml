@@ -1,0 +1,30 @@
+name: Publish Packages
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Install dependencies
+      working-directory: ${{runner.workspace}}/blueprint/packages/juce-blueprint
+      run: npm ci
+
+    - name: Build react-juce
+      working-directory: ${{runner.workspace}}/blueprint/packages/juce-blueprint
+      run: npm run build
+
+    - name: Publish
+      working-directory: ${{runner.workspace}}/blueprint/packages/juce-blueprint
+      run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

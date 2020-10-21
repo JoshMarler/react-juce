@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import {
   EventBridge,
-} from 'juce-blueprint';
+} from 'react-juce';
 
 
 /** This is more or less a proxy to the EventBridge's parameter events that
