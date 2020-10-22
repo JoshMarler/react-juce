@@ -4,3 +4,4 @@
 * [Starting a new Project](New_Project.md)
 * [API Documentation](API.md)
 * [Resources](Resources.md)
+* [Debugging](Editor-Debugger-Configuration.md)
