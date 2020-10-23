@@ -5,6 +5,8 @@ import {
   View,
 } from 'juce-blueprint';
 
+const grey = 'ff626262';
+const cyan = 'ff66fdcf';
 
 class Label extends Component {
   constructor(props) {
@@ -14,6 +16,7 @@ class Label extends Component {
 
     this.state = {
       label: '',
+      color: grey
     };
   }
 
@@ -36,7 +39,12 @@ class Label extends Component {
   render() {
     return (
       <View {...this.props}>
-        <Text {...styles.labelText}>
+        <Text
+          {...styles.labelText}
+          color={this.state.color}
+          onMouseEnter={() => this.setState({ color: cyan })}
+          onMouseExit={() => this.setState({ color: grey })}
+        >
           {this.state.label}
         </Text>
       </View>
@@ -46,7 +54,6 @@ class Label extends Component {
 
 const styles = {
   labelText: {
-    'color': 'ff626262',
     'font-size': 16.0,
     'line-spacing': 1.6,
   },
