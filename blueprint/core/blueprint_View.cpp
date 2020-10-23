@@ -106,6 +106,12 @@ namespace blueprint
 
             setTransform(juce::AffineTransform::rotation(angle, cxRelParent, cyRelParent));
         }
+        if (props.contains("transform-scaleY"))
+        {
+            auto scaleY = static_cast<float> (props["transform-scaleY"]);
+
+            setTransform(juce::AffineTransform::scale(1.0f, scaleY));
+        }
     }
 
     //==============================================================================
