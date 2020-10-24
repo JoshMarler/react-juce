@@ -115,8 +115,13 @@ namespace blueprint
         if (props.contains("transform-scaleX"))
         {
             auto scaleX = static_cast<float> (props["transform-scaleX"]);
-
             setTransform(juce::AffineTransform::scale(scaleX, 1.0f));
+        }
+        if (props.contains("transform-scale"))
+        {
+            float scaleX = props["transform-scale"].getArray()->getReference(0);
+            float scaleY = props["transform-scale"].getArray()->getReference(1);
+            setTransform(juce::AffineTransform::scale(scaleX, scaleY));
         }
     }
 
