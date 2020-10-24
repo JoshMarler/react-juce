@@ -123,6 +123,12 @@ namespace blueprint
             float scaleY = props["transform-scale"].getArray()->getReference(1);
             setTransform(juce::AffineTransform::scale(scaleX, scaleY));
         }
+        if (props.contains("transform-translate"))
+        {
+            float deltaX = props["transform-translate"].getArray()->getReference(0);
+            float deltaY = props["transform-translate"].getArray()->getReference(1);
+            setTransform(juce::AffineTransform::translation(deltaX, deltaY));
+        }
     }
 
     //==============================================================================
