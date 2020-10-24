@@ -106,6 +106,29 @@ namespace blueprint
 
             setTransform(juce::AffineTransform::rotation(angle, cxRelParent, cyRelParent));
         }
+        if (props.contains("transform-scaleY"))
+        {
+            auto scaleY = static_cast<float> (props["transform-scaleY"]);
+
+            setTransform(juce::AffineTransform::scale(1.0f, scaleY));
+        }
+        if (props.contains("transform-scaleX"))
+        {
+            auto scaleX = static_cast<float> (props["transform-scaleX"]);
+            setTransform(juce::AffineTransform::scale(scaleX, 1.0f));
+        }
+        if (props.contains("transform-scale"))
+        {
+            float scaleX = props["transform-scale"].getArray()->getReference(0);
+            float scaleY = props["transform-scale"].getArray()->getReference(1);
+            setTransform(juce::AffineTransform::scale(scaleX, scaleY));
+        }
+        if (props.contains("transform-translate"))
+        {
+            float deltaX = props["transform-translate"].getArray()->getReference(0);
+            float deltaY = props["transform-translate"].getArray()->getReference(1);
+            setTransform(juce::AffineTransform::translation(deltaX, deltaY));
+        }
     }
 
     //==============================================================================
