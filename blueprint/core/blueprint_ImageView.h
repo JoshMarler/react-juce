@@ -14,6 +14,20 @@
 
 namespace blueprint
 {
+    namespace
+    {
+        // juce::URL::isWellFormed is currently not a complete
+        // implementation, so we have this slightly more robust check
+        // for now.
+        bool isWellFormedURL(const juce::URL &url)
+        {
+            return url.isWellFormed()  &&
+                   url.getScheme().isNotEmpty() &&
+                   !url.toString(false).startsWith("data");
+        }
+
+    }
+
     //==============================================================================
     /** The ImageView class is a core view for drawing images within Blueprint's
         layout system.
@@ -37,7 +51,7 @@ namespace blueprint
                 const juce::String source    = value.toString();
                 const juce::URL    sourceURL = source;
 
-                if (sourceURL.isWellFormed())
+                if (isWellFormedURL(sourceURL))
                 {
                     auto drawableImg = std::make_unique<juce::DrawableImage>();
                     drawableImg->setImage(loadImageFromURL(sourceURL));
