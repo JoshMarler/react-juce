@@ -129,6 +129,27 @@ namespace blueprint
             float deltaY = props["transform-translate"].getArray()->getReference(1);
             setTransform(juce::AffineTransform::translation(deltaX, deltaY));
         }
+        
+          if (props.contains("transform-scale-translate"))
+        {
+            float scaleX = props["transform-scale-translate"].getArray()->getReference(0);
+            float scaleY = props["transform-scale-translate"].getArray()->getReference(1);
+            float deltaX = props["transform-scale-translate"].getArray()->getReference(2);
+            float deltaY = props["transform-scale-translate"].getArray()->getReference(3);
+            setTransform(juce::AffineTransform::scale(scaleX, scaleY).translated(deltaX, deltaY));
+        }
+
+         if (props.contains("transform-scale-pivot"))
+        {
+            float scaleX = props["transform-scale-pivot"].getArray()->getReference(0);
+            float scaleY = props["transform-scale-pivot"].getArray()->getReference(1);
+            float pivotX = props["transform-scale-pivot"].getArray()->getReference(2);
+            float pivotY = props["transform-scale-pivot"].getArray()->getReference(3);
+            setTransform(juce::AffineTransform::scale(scaleX, scaleY,pivotX,pivotY));
+        }
+
+
+        
     }
 
     //==============================================================================
