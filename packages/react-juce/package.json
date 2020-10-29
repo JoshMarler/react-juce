@@ -36,6 +36,7 @@
     "@babel/runtime-corejs3": "^7.11.2",
     "core-js": "2.6.0",
     "invariant": "^2.2.4",
+    "matrix-js": "^1.5.1",
     "react-reconciler": "^0.17.2"
   },
   "peerDependencies": {

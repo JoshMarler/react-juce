@@ -116,13 +116,25 @@ namespace blueprint
         cachedFloatBounds = bounds;
 
         // Update transforms
-        if (props.contains("transform-rotate"))
+        if (props.contains("transform-matrix"))
         {
-            auto cxRelParent = cachedFloatBounds.getX() + cachedFloatBounds.getWidth() * 0.5f;
-            auto cyRelParent = cachedFloatBounds.getY() + cachedFloatBounds.getHeight() * 0.5f;
-            auto angle = static_cast<float> (props["transform-rotate"]);
+            const juce::var& matrix = props["transform-matrix"];
+            if(matrix.isArray() && matrix.getArray()->size() >= 16) {
+              const juce::Array<juce::var> &m = *matrix.getArray();
 
-            setTransform(juce::AffineTransform::rotation(angle, cxRelParent, cyRelParent));
+              auto cxRelParent = cachedFloatBounds.getX() + cachedFloatBounds.getWidth() * 0.5f;
+              auto cyRelParent = cachedFloatBounds.getY() + cachedFloatBounds.getHeight() * 0.5f;
+
+              const auto translateToOrigin = juce::AffineTransform::translation(cxRelParent * -1.0f, cyRelParent * -1.0f);
+              // set 2d homogeneous matrix using 3d homogeneous matrix
+              const auto transform = juce::AffineTransform(
+                m[0], m[1], m[3],
+                m[4], m[5], m[7]
+              );
+              const auto translateFromOrigin = juce::AffineTransform::translation(cxRelParent, cyRelParent);
+
+              setTransform(translateToOrigin.followedBy(transform).followedBy(translateFromOrigin));
+            }
         }
     }
 
