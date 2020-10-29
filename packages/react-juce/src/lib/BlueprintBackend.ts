@@ -1,6 +1,7 @@
 import SyntheticEvents,
        { SyntheticMouseEvent,
          SyntheticKeyboardEvent } from './SyntheticEvents'
+import { macroPropertyGetters } from './MacroProperties';
 
 /* global __BlueprintNative__:false */
 
@@ -109,6 +110,13 @@ export class ViewInstance {
     // to our renderer's setProperty from the reconciler.
     if (propKey === 'viewRef') {
       value.current = this;
+      return;
+    }
+
+    if (macroPropertyGetters.hasOwnProperty(propKey)) {
+      for (const [k, v] of macroPropertyGetters[propKey](value))
+        //@ts-ignore
+        __BlueprintNative__.setViewProperty(this._id, k, v);
       return;
     }
 
