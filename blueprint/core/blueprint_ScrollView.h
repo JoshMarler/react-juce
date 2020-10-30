@@ -11,7 +11,6 @@
 
 #include "blueprint_View.h"
 
-
 namespace blueprint
 {
 
@@ -24,40 +23,24 @@ namespace blueprint
     {
     public:
         //==============================================================================
-        ScrollView()
-        {
-            addAndMakeVisible(viewport);
-            // TODO: Set these based on props...
-            viewport.setScrollBarsShown(true, false);
-        }
+        // Props following CSS Scrollbars spec with some omissions/additions.
+        // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Scrollbars
+        static inline juce::Identifier overflowXProp           = "overflow-x";
+        static inline juce::Identifier overflowYProp           = "overflow-y";
+        static inline juce::Identifier scrollBarWidthProp      = "scrollbar-width";
+        static inline juce::Identifier scrollbarThumbColorProp = "scrollbar-thumb-color";
+        static inline juce::Identifier scrollbarTrackColorProp = "scrollbar-track-color";
+        static inline juce::Identifier scrollOnDragProp        = "scroll-on-drag";
 
         //==============================================================================
-        void setProperty (const juce::Identifier& name, const juce::var& value) override
-        {
-            View::setProperty(name, value);
-
-            if (name == juce::Identifier("scrollbar-thumb-color"))
-            {
-                juce::Colour c = juce::Colour::fromString(props["scrollbar-thumb-color"].toString());
-
-                viewport.getVerticalScrollBar().setColour(juce::ScrollBar::thumbColourId, c);
-                viewport.getHorizontalScrollBar().setColour(juce::ScrollBar::thumbColourId, c);
-            }
-        }
-
-        void addChild (View* childView, int index = -1) override
-        {
-            juce::ignoreUnused (index);
-            jassert (viewport.getViewedComponent() == nullptr);
-            viewport.setViewedComponent(childView, false);
-        }
+        ScrollView();
 
         //==============================================================================
-        void resized() override
-        {
-            viewport.setBounds(getLocalBounds());
-            View::resized();
-        }
+        void setProperty (const juce::Identifier& name, const juce::var& value) override;
+        void addChild (View* childView, int index = -1) override;
+
+        //==============================================================================
+        void resized() override;
 
     private:
         //==============================================================================
