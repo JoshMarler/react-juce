@@ -119,6 +119,7 @@
 #include "core/blueprint_TextShadowView.cpp"
 #include "core/blueprint_View.cpp"
 #include "core/blueprint_ViewManager.cpp"
+#include "core/blueprint_ScrollView.cpp"
 
 #ifdef BLUEPRINT_INCLUDE_TESTS
 #include "tests/blueprint_EcmascriptEngineTests.cpp"
