@@ -76,6 +76,9 @@ namespace blueprint
         bool keyPressed (const juce::KeyPress& e) override;
 
         //==============================================================================
+        bool isMouseSourceOver(const juce::MouseEvent &e);
+
+        //==============================================================================
         /** Invokes, if exists, the respective view event handler. */
         void dispatchViewEvent (const juce::String& eventType, const juce::var& e);
 

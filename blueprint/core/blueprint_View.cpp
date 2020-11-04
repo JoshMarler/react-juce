@@ -198,7 +198,22 @@ namespace blueprint
 
     void View::mouseUp (const juce::MouseEvent& e)
     {
-        dispatchViewEvent("onMouseUp", detail::makeViewEventObject(e));
+        if (isMouseSourceOver(e))
+        {
+            dispatchViewEvent("onMouseUp", detail::makeViewEventObject(e));
+        }
+        else
+        {
+            juce::Component *topParent              = getTopLevelComponent();
+            const juce::MouseEvent topRelativeEvent = e.getEventRelativeTo(topParent);
+
+            juce::Component *componentUnderMouse = topParent->getComponentAt(topRelativeEvent.x, topRelativeEvent.y);
+
+            if (auto v = dynamic_cast<blueprint::View*>(componentUnderMouse))
+            {
+                v->dispatchViewEvent("onMouseUp", detail::makeViewEventObject(e.getEventRelativeTo(v)));
+            }
+        }
     }
 
     void View::mouseDrag (const juce::MouseEvent& e)
@@ -210,6 +225,14 @@ namespace blueprint
     void View::mouseDoubleClick (const juce::MouseEvent& e)
     {
         dispatchViewEvent("onMouseDoubleClick", detail::makeViewEventObject(e));
+    }
+
+    bool View::isMouseSourceOver(const juce::MouseEvent &e)
+    {
+        if (e.source.isTouch() || e.source.isPen())
+            return getLocalBounds().toFloat().contains(e.position);
+
+        return isMouseOver();
     }
 
     bool View::keyPressed (const juce::KeyPress& key)
@@ -231,23 +254,10 @@ namespace blueprint
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
-        if (props.contains(eventType) && props[eventType].isMethod())
+        if (auto *parent = findParentComponentOfClass<ReactApplicationRoot>())
         {
-            std::array<juce::var, 1> vargs { e };
-            juce::var::NativeFunctionArgs nfArgs (juce::var(), vargs.data(), static_cast<int>(vargs.size()));
-
-            try
-            {
-                std::invoke(props[eventType].getNativeFunction(), nfArgs);
-            }
-            catch (const EcmascriptEngine::Error& err)
-            {
-                if (auto* parent = findParentComponentOfClass<ReactApplicationRoot>())
-                    return parent->handleRuntimeError(err);
-
-                // If we coudln't find a parent that can handle it, rethrow
-                throw err;
-            }
+            std::vector<juce::var> vargs { getViewId(), eventType, e };
+            parent->engine.invoke("__BlueprintNative__.dispatchViewEvent", vargs);
         }
     }
 
