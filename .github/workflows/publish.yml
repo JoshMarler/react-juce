@@ -16,15 +16,15 @@ jobs:
         registry-url: 'https://registry.npmjs.org'
 
     - name: Install dependencies
-      working-directory: ${{runner.workspace}}/blueprint/packages/juce-blueprint
+      working-directory: ${{runner.workspace}}/blueprint/packages/react-juce
       run: npm ci
 
     - name: Build react-juce
-      working-directory: ${{runner.workspace}}/blueprint/packages/juce-blueprint
+      working-directory: ${{runner.workspace}}/blueprint/packages/react-juce
       run: npm run build
 
     - name: Publish
-      working-directory: ${{runner.workspace}}/blueprint/packages/juce-blueprint
+      working-directory: ${{runner.workspace}}/blueprint/packages/react-juce
       run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
