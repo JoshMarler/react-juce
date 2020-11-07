@@ -1,9 +1,26 @@
 # Blueprint
 > Write cross-platform native apps with React.js and JUCE
 
-Blueprint is a hybrid JavaScript/C++ framework that enables a [React.js](https://reactjs.org/) frontend for a [JUCE](http://juce.com/) application or plugin. It provides an embedded, ECMAScript-compliant JavaScript engine via [Duktape](http://duktape.org/), native hooks for rendering the React component tree via `juce::Component` instances, and a flexbox layout engine via [Yoga](https://yogalayout.com/).
+Blueprint is a hybrid JavaScript/C++ framework that enables a [React.js](https://reactjs.org/) frontend for a [JUCE](http://juce.com/) application or plugin. It provides an embedded, ES5 JavaScript engine via [Duktape](http://duktape.org/), native hooks for rendering the React component tree to `juce::Component` instances, and a flexbox layout engine via [Yoga](https://yogalayout.com/).
 
 For more information, see the introductory blog post here: [Blueprint: A JUCE Rendering Backend for React.js](https://nickwritesablog.com/blueprint-a-juce-rendering-backend-for-react-js)
+
+## Status
+
+**Approaching Beta**. We hope to announce a beta release in the coming weeks, after which we will aim our focus at stability and completeness on the path
+to a 1.0 release.
+
+**Anticipated Breaking Changes**
+* We'll be renaming Blueprint to react-juce before beta (#34)
+* Updating the examples and `npm init` template to point to npm instead of the local package
+* `ReactApplicationRoot::evaluate` and `ReactApplicationRoot::evaluateFile` (#115)
+* Refactoring the hot reloader and decoupling the EcmascriptEngine from ReactApplicationRoot (#65)
+
+
+## Maintainers
+
+* [@nick-thompson](https://github.com/nick-thompson)
+* [@joshmarler](https://github.com/JoshMarler)
 
 ## Examples
 Blueprint is a young project, but already it provides the framework on which the entire user interface for [Creative Intent's Remnant](https://www.creativeintent.co/product/remnant) plugin is built.
