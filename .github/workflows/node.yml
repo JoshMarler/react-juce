@@ -16,9 +16,9 @@ jobs:
         registry-url: 'https://npm.pkg.github.com'
 
     - name: Install dependencies
-      working-directory: ${{runner.workspace}}/blueprint/packages/juce-blueprint
+      working-directory: ${{runner.workspace}}/blueprint/packages/react-juce
       run: npm ci
 
-    - name: Build juce-blueprint
-      working-directory: ${{runner.workspace}}/blueprint/packages/juce-blueprint
+    - name: Build react-juce
+      working-directory: ${{runner.workspace}}/blueprint/packages/react-juce
       run: npm run build
