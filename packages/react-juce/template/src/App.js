@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
   View,
   Text,
-} from 'juce-blueprint';
+} from 'react-juce';
 
 
 class App extends Component {

@@ -10,12 +10,12 @@ easy with the JUCE module format, and Blueprint abides by that format. Follow al
 
 ## Template Generator
 
-Next, the first thing we want to do here is write some React.js, so let's start with a "Hello World!" of our own. Blueprint's `juce-blueprint` package carries a template generator that you can use to boostrap a React application for your project. For this step, let's assume your JUCE project directory is at `~/MyProject`, the source files are at `~/MyProject/Source`, and we want to put the React application source at `~/MyProject/Source/jsui` (note, you can put this wherever you want). Now, to use the template generator, we start again at the root of the Blueprint git repository:
+Next, the first thing we want to do here is write some React.js, so let's start with a "Hello World!" of our own. Blueprint's `react-juce` npm package carries a template generator that you can use to boostrap a React application for your project. For this step, let's assume your JUCE project directory is at `~/MyProject`, the source files are at `~/MyProject/Source`, and we want to put the React application source at `~/MyProject/Source/jsui` (note, you can put this wherever you want). Now, to use the template generator, we start again at the root of the Blueprint git repository:
 
 ```bash
 $ pwd
 /Users/nick/Dev/blueprint
-$ cd packages/juce-blueprint
+$ cd packages/react-juce
 $ npm run init -- ~/MyProject/Source/jsui
 ```
 

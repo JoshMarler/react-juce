@@ -29,16 +29,5 @@ Note that the `git@github.com` prefix here indicates cloning via SSH. If you pre
 to work with git via HTTPS you'll want to swap in `https://github.com/nick-thompson/blueprint.git`
 in the above commands.
 
-## Building juce-blueprint
-Now we almost have everything we need to start working with Blueprint. The last step
-is to build the `juce-blueprint` JavaScript library included in the repository. From within
-the root of the `blueprint` git repository:
-
-```bash
-$ cd packages/juce-blueprint
-$ npm install
-$ npm run build
-```
-
 At this point, we've got everything ready to get our project up and running. Let's
 move on to the next step, [running the demo plugin](Running_the_Example.md).

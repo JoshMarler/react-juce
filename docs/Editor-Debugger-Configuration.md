@@ -57,7 +57,7 @@ You also need to ensure that your bundle is not minified, this can be achieved b
 In the case of the `GainPlugin` example this can be achieved by running `npm run start` in `GainPlugin/jsui`.
 
 The `webpack.config.js` template provided by Blueprint enables all of this for you. See: [Starting a new Project](New_Project.md) for a project
-template setup which includes debugger support. Project template files are available under `blueprint/packages/juce-blueprint/template`.
+template setup which includes debugger support. Project template files are available under `blueprint/packages/react-juce/template`.
 
 Example `webpack.config.js`:
 
