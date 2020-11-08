@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 /** The EventLoop manages all outstanding timers, invoking callbacks and
  *  clearing the registry in response to a regular interrupt from the JUCE
  *  backend.
@@ -70,3 +72,6 @@ function __setInterval__ (cb, wait, c, d, e, f, g) {
 global.__schedulerInterrupt__ = __schedulerInterrupt__;
 global.setTimeout = __setTimeout__;
 global.setInterval = __setInterval__;
+
+// Typescript hack
+export {}
