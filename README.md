@@ -12,7 +12,7 @@ to a 1.0 release.
 
 **Anticipated Breaking Changes**
 * We'll be renaming Blueprint to react-juce before beta (#34)
-* Updating the examples and `npm init` template to point to npm instead of the local package
+* ~~Updating the examples and `npm init` template to point to npm instead of the local package~~
 * `ReactApplicationRoot::evaluate` and `ReactApplicationRoot::evaluateFile` (#115)
 * Refactoring the hot reloader and decoupling the EcmascriptEngine from ReactApplicationRoot (#65)
 
