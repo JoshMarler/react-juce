@@ -13,20 +13,37 @@ namespace blueprint
 
     namespace detail
     {
+        juce::var getMouseEventRelatedTarget(const juce::MouseEvent& e, const blueprint::View& view)
+        {
+            juce::Component *topParent              = view.getTopLevelComponent();
+            const juce::MouseEvent topRelativeEvent = e.getEventRelativeTo(topParent);
+
+            juce::Component *componentUnderMouse = topParent->getComponentAt(topRelativeEvent.x, topRelativeEvent.y);
+
+            if (auto v = dynamic_cast<blueprint::View*>(componentUnderMouse))
+                return v->getViewId();
+
+            // return null relatedTarget if event occurred from a non-View component.
+            return {};
+        }
 
         /** A little helper for DynamicObject construction. */
-        juce::var makeViewEventObject (const juce::NamedValueSet& props)
+        juce::var makeViewEventObject (const juce::NamedValueSet& props, const blueprint::View& view)
         {
             auto* o = new juce::DynamicObject();
 
             for (auto& pair : props)
                 o->setProperty(pair.name, pair.value);
 
+            o->setProperty("target", view.getViewId());
+
+            //TODO: Add timeStamp.
+
             return juce::var(o);
         }
 
         /** Another little helper for DynamicObject construction. */
-        juce::var makeViewEventObject (const juce::MouseEvent& me)
+        juce::var makeViewEventObject (const juce::MouseEvent& me, const blueprint::View &view)
         {
             // TODO: Get all of it!
             return makeViewEventObject({
@@ -34,28 +51,29 @@ namespace blueprint
                 {"y", me.y},
                 {"screenX", me.getScreenX()},
                 {"screenY", me.getScreenY()},
-            });
+                {"relatedTarget", getMouseEventRelatedTarget(me, view)}
+            }, view);
         }
 
         /** And another little helper for DynamicObject construction. */
-        juce::var makeViewEventObject (const juce::KeyPress& ke)
+        juce::var makeViewEventObject (const juce::KeyPress& ke, const blueprint::View &view)
         {
             // TODO: Get all of it!
             return makeViewEventObject({
                 {"key", juce::String(ke.getTextCharacter())},
                 {"keyCode", ke.getKeyCode()},
-            });
+            }, view);
         }
 
     }
 
     //==============================================================================
-    ViewId View::getViewId()
+    ViewId View::getViewId() const
     {
         return juce::DefaultHashFunctions::generateHash(_viewId, INT_MAX);
     }
 
-    juce::Identifier View::getRefId()
+    juce::Identifier View::getRefId() const
     {
         return _refId;
     }
@@ -188,33 +206,33 @@ namespace blueprint
         dispatchViewEvent("onMeasure", detail::makeViewEventObject({
             {"width", w},
             {"height", h}
-        }));
+        }, *this));
     }
 
     void View::mouseDown (const juce::MouseEvent& e)
     {
-        dispatchViewEvent("onMouseDown", detail::makeViewEventObject(e));
+        dispatchViewEvent("onMouseDown", detail::makeViewEventObject(e, *this));
     }
 
     void View::mouseUp (const juce::MouseEvent& e)
     {
-        dispatchViewEvent("onMouseUp", detail::makeViewEventObject(e));
+        dispatchViewEvent("onMouseUp", detail::makeViewEventObject(e, *this));
     }
 
     void View::mouseDrag (const juce::MouseEvent& e)
     {
         // TODO: mouseDrag isn't a dom event... is it?
-        dispatchViewEvent("onMouseDrag", detail::makeViewEventObject(e));
+        dispatchViewEvent("onMouseDrag", detail::makeViewEventObject(e, *this));
     }
 
     void View::mouseDoubleClick (const juce::MouseEvent& e)
     {
-        dispatchViewEvent("onMouseDoubleClick", detail::makeViewEventObject(e));
+        dispatchViewEvent("onMouseDoubleClick", detail::makeViewEventObject(e, *this));
     }
 
     bool View::keyPressed (const juce::KeyPress& key)
     {
-        dispatchViewEvent("onKeyPress", detail::makeViewEventObject(key));
+        dispatchViewEvent("onKeyPress", detail::makeViewEventObject(key, *this));
 
         // We always inform the underlying juce::Component that we've consumed the event,
         // because we manually bubble a SyntheticEvent wrapper up the javascript view tree.
@@ -231,23 +249,10 @@ namespace blueprint
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
-        if (props.contains(eventType) && props[eventType].isMethod())
+        if (auto *parent = findParentComponentOfClass<ReactApplicationRoot>())
         {
-            std::array<juce::var, 1> vargs { e };
-            juce::var::NativeFunctionArgs nfArgs (juce::var(), vargs.data(), static_cast<int>(vargs.size()));
-
-            try
-            {
-                std::invoke(props[eventType].getNativeFunction(), nfArgs);
-            }
-            catch (const EcmascriptEngine::Error& err)
-            {
-                if (auto* parent = findParentComponentOfClass<ReactApplicationRoot>())
-                    return parent->handleRuntimeError(err);
-
-                // If we coudln't find a parent that can handle it, rethrow
-                throw err;
-            }
+            std::vector<juce::var> vargs { getViewId(), eventType, e };
+            parent->engine.invoke("__BlueprintNative__.dispatchViewEvent", vargs);
         }
     }
 

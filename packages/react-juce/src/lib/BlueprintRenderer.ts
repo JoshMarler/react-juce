@@ -32,8 +32,8 @@ const HostConfig = {
 
   /** Provides the context for rendering a child element.
    */
-  getChildHostContext(parentHostContext: HostContext, 
-                      elementType: string, 
+  getChildHostContext(parentHostContext: HostContext,
+                      elementType: string,
                       rootContainerInstance: ViewInstance): HostContext {
     const isInTextParent = parentHostContext.isInTextParent ||
       elementType === 'Text';
@@ -61,10 +61,10 @@ const HostConfig = {
   },
 
   /** Create a new DOM node. */
-  createInstance(elementType: string, 
-                 props: any, 
-                 rootContainerInstance: ViewInstance, 
-                 hostContext: HostContext, 
+  createInstance(elementType: string,
+                 props: any,
+                 rootContainerInstance: ViewInstance,
+                 hostContext: HostContext,
                  internalInstanceHandle: any): ViewInstance {
     invariant(
       !hostContext.isInTextParent,
@@ -75,16 +75,16 @@ const HostConfig = {
   },
 
   /** Create a new text node. */
-  createTextInstance(text: string, 
-                     rootContainerInstance: ViewInstance, 
-                     hostContext: HostContext, 
+  createTextInstance(text: string,
+                     rootContainerInstance: ViewInstance,
+                     hostContext: HostContext,
                      internalInstanceHandle: any): RawTextViewInstance {
     invariant(
       hostContext.isInTextParent,
       'Raw text strings must be rendered within a <Text> element.'
     );
 
-    return BlueprintBackend.createTextViewInstance(text);
+    return BlueprintBackend.createTextViewInstance(text, rootContainerInstance);
   },
 
   /** Mount the child to its container. */
@@ -96,9 +96,9 @@ const HostConfig = {
    *  this method will be called to finalize the node. We take this opportunity
    *  to propagate relevant properties to the node.
    */
-  finalizeInitialChildren(instance: ViewInstance, 
-                          elementType: string, 
-                          props: any, 
+  finalizeInitialChildren(instance: ViewInstance,
+                          elementType: string,
+                          props: any,
                           rootContainerInstance: ViewInstance): void {
     Object.keys(props).forEach(function(propKey) {
       if (propKey !== 'children') {
@@ -111,11 +111,11 @@ const HostConfig = {
    *  properties that need to be updated. This is more-or-less an opportunity
    *  for us to diff our props before propagating.
    */
-  prepareUpdate(domElement: any, 
-                elementType: string, 
-                oldProps: any, 
-                newProps: any, 
-                rootContainerInstance: ViewInstance, 
+  prepareUpdate(domElement: any,
+                elementType: string,
+                oldProps: any,
+                newProps: any,
+                rootContainerInstance: ViewInstance,
                 hostContext: HostContext) {
     // The children prop will be handled separately via the tree update.
     let {children: oldChildren, ...op} = oldProps;
@@ -137,11 +137,11 @@ const HostConfig = {
   /** Following from `prepareUpdate` above, this is our opportunity to apply
    *  the update payload to a given instance.
    */
-  commitUpdate(instance: ViewInstance, 
-               updatePayload: any, 
-               elementType: string, 
-               oldProps: any, 
-               newProps: any, 
+  commitUpdate(instance: ViewInstance,
+               updatePayload: any,
+               elementType: string,
+               oldProps: any,
+               newProps: any,
                internalInstanceHandle: any): void {
     Object.keys(updatePayload).forEach(function(propKey:string): void {
       instance.setProperty(propKey, updatePayload[propKey]);
@@ -159,9 +159,9 @@ const HostConfig = {
 
   /** TODO
    */
-  commitMount(instance: ViewInstance, 
-              type: string, 
-              newProps: any, 
+  commitMount(instance: ViewInstance,
+              type: string,
+              newProps: any,
               internalInstanceHandle: any): void {
     // Noop
   },
@@ -181,8 +181,8 @@ const HostConfig = {
   /** Inserts a child node into a parent's children array, just before the
    *  second given child node.
    */
-  insertBefore(parentInstance: ViewInstance, 
-               child: ViewInstance, 
+  insertBefore(parentInstance: ViewInstance,
+               child: ViewInstance,
                beforeChild: ViewInstance): void {
     let index = parentInstance.getChildIndex(beforeChild);
 

@@ -35,10 +35,10 @@ namespace blueprint
 
         //==============================================================================
         /** Returns this view's identifier. */
-        ViewId getViewId();
+        ViewId getViewId() const;
 
         /** Returns this view's reference identifier, optionally set via React props. */
-        juce::Identifier getRefId();
+        juce::Identifier getRefId() const;
 
         /** Set a property on the native view. */
         virtual void setProperty (const juce::Identifier&, const juce::var&);

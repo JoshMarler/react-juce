@@ -1,13 +1,19 @@
+import { Instance } from "./BlueprintBackend";
+
 export class SyntheticEvent {
   public  bubbles: boolean;
   public  defaultPrevented: boolean;
+  public  target: Instance;
   private _internal: any;
 
   constructor(props: any) {
     this.bubbles = true;
     this.defaultPrevented = false;
 
-    this._internal = props;
+    const { target, ...other } = props;
+    this.target = target;
+
+    this._internal = other;
   }
 
   stopPropagation(): void {
@@ -20,12 +26,13 @@ export class SyntheticEvent {
 }
 
 export class SyntheticMouseEvent extends SyntheticEvent {
-  public x: number; 
+  public x: number;
   public y: number;
   public clientX: number;
   public clientY: number;
   public screenX: number;
   public screenY: number;
+  public relatedTarget: Instance;
 
   constructor(props: any) {
     super(props);
@@ -34,6 +41,7 @@ export class SyntheticMouseEvent extends SyntheticEvent {
     this.y = this.clientY = props.y;
     this.screenX = props.screenX;
     this.screenY = props.screenY;
+    this.relatedTarget = props.relatedTarget;
   }
 }
 
@@ -67,3 +75,4 @@ export default {
       k == 'onkeypress';
   }
 }
+
