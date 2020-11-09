@@ -15,6 +15,8 @@ export * from './components/ScrollView';
 export * from './components/Canvas';
 export * from './components/Text';
 export * from './components/Image';
+export * from './components/Button';
+
 export * from './lib/SyntheticEvents';
 
 let __renderStarted = false;
