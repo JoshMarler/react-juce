@@ -225,10 +225,9 @@ __BlueprintNative__.dispatchViewEvent = function dispatchEvent(viewId: string, e
       __bubbleEvent(instance, eventType, event);
 
       if (__lastMouseDownViewId && viewId === __lastMouseDownViewId) {
+      	__lastMouseDownViewId = null;
         __bubbleEvent(instance, "onClick", event);
       }
-
-      __lastMouseDownViewId = null;
       return;
     }
 

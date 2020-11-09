@@ -252,7 +252,15 @@ namespace blueprint
         if (auto *parent = findParentComponentOfClass<ReactApplicationRoot>())
         {
             std::vector<juce::var> vargs { getViewId(), eventType, e };
-            parent->engine.invoke("__BlueprintNative__.dispatchViewEvent", vargs);
+
+            try
+            {
+                parent->engine.invoke("__BlueprintNative__.dispatchViewEvent", vargs);
+            }
+            catch (const EcmascriptEngine::Error& err)
+            {
+                parent->handleRuntimeError(err);
+            }
         }
     }
 
