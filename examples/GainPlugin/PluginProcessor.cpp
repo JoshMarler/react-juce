@@ -28,7 +28,12 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                 return String(Decibels::gainToDecibels(value), 1) + "dB";
             },
             nullptr
-        )
+        ),
+        std::make_unique<AudioParameterBool>(
+            "MainMute",
+            "Mute",
+            false
+       )
     );
 
     return params;
@@ -163,6 +168,13 @@ void GainPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
     // Our intense dsp processing
     gain.setValue(*params.getRawParameterValue("MainGain"));
     gain.applyGain(buffer, buffer.getNumSamples());
+
+    if (auto *muteParam  = dynamic_cast<AudioParameterBool*>(params.getParameter("MainMute")))
+    {
+        bool muted = muteParam->get();
+        if (muted)
+            buffer.applyGain(0.0f);
+    }
 
     // We'll also report peak values for our meter. This isn't an ideal way to do this
     // as the rate between the audio processing callback and the timer on which the

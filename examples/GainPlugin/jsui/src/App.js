@@ -3,11 +3,12 @@ import Label from './Label';
 import Meter from './Meter';
 import React, { Component } from 'react';
 import Slider from './Slider';
+import ParameterToggleButton from './ParameterToggleButton'
 import {
   Canvas,
   Image,
-  View,
   Text,
+  View,
 } from 'react-juce';
 
 
@@ -24,6 +25,21 @@ function animatedDraw(ctx) {
 }
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this._onMuteToggled = this._onMuteToggled.bind(this);
+
+    this.state = {
+      muted: false
+    }
+  }
+
+  _onMuteToggled(toggled) {
+    this.setState({
+      muted: toggled
+    });
+  }
+
   render() {
     // Uncomment here to watch the animated flex box example in action
     // return (
@@ -31,6 +47,9 @@ class App extends Component {
     //     <AnimatedFlexBoxExample />
     //   </View>
     // );
+
+    const muteBackgroundColor = this.state.muted ? 'ff66FDCF' : 'ff17191f';
+    const muteTextColor = this.state.muted ? 'ff17191f' : 'ff66FDCF';
 
     return (
       <View {...styles.container}>
@@ -41,6 +60,16 @@ class App extends Component {
           </Slider>
           <Meter {...styles.meter} />
           <Canvas {...styles.canvas} animate={true} onDraw={animatedDraw} />
+          <ParameterToggleButton
+            paramId="MainMute"
+            onToggled={this._onMuteToggled}
+            background-color={muteBackgroundColor}
+            {...styles.mute_button}
+          >
+            <Text color={muteTextColor} {...styles.mute_button_text}>
+              MUTE
+            </Text>
+          </ParameterToggleButton>
         </View>
       </View>
     );
@@ -75,6 +104,7 @@ const styles = {
     'min-height': 100.0,
     'width': '50%',
     'height': '50%',
+    'margin-top': 15,
   },
   label: {
     'flex': 1.0,
@@ -90,8 +120,26 @@ const styles = {
   canvas: {
     'flex': 0.0,
     'width': 100.0,
-    'height': 2
+    'height': 2,
+    'margin-top': 10,
   },
+  mute_button: {
+    'justify-content': 'center',
+    'align-items': 'center',
+    'border-radius': 5.0,
+    'border-width': 2.0,
+    'border-color': 'ff66FDCF',
+    'margin-top': 10,
+    'min-width': 30.0,
+    'min-height': 30.0,
+    'width': '20%',
+    'height': '17.5%',
+  },
+  mute_button_text: {
+    'font-size': 20.0,
+    'line-spacing': 1.6,
+    'font-style': Text.FontStyleFlags.bold,
+  }
 };
 
 export default App;

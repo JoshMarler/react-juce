@@ -59,7 +59,7 @@ export class Button extends Component<ButtonProps, ButtonState> {
   }
 
   handleDown = (e: SyntheticMouseEvent): void => {
-    if (this.props.onMouseDown && typeof this.props.onMouseDown === 'function')
+    if (typeof this.props.onMouseDown === 'function')
       this.props.onMouseDown.call(null, e);
 
     this.setState({
@@ -68,14 +68,14 @@ export class Button extends Component<ButtonProps, ButtonState> {
   }
 
   handleUp = (e: SyntheticMouseEvent): void => {
-    if (this.props.onMouseUp && typeof this.props.onMouseUp === 'function')
+    if (typeof this.props.onMouseUp === 'function')
       this.props.onMouseUp.call(null, e);
 
     this.setState({
       down: false
     });
 
-    if (this.props.onClick && typeof this.props.onClick === 'function') {
+    if (typeof this.props.onClick === 'function') {
       const instance = this._ref ? this._ref.current : null;
 
       if (instance && instance.contains(e.relatedTarget)) {
