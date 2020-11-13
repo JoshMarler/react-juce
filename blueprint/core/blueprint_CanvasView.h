@@ -308,6 +308,42 @@ namespace blueprint
                     }
             });
 
+            setProperty("strokeRoundedRect", juce::var::NativeFunction {
+                    [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
+                        jassert(graphics);
+                        jassert(args.numArguments == 5);
+
+                        const float x = args.arguments[0];
+                        const float y = args.arguments[1];
+                        const float width = args.arguments[2];
+                        const float height = args.arguments[3];
+                        const float cornerSize = args.arguments[4];
+
+                        graphics->setColour(properties.strokeStyle.colour);
+                        graphics->drawRoundedRectangle(x, y, width, height, cornerSize, properties.lineWidth);
+
+                        return juce::var();
+                    }
+            });
+
+            setProperty("fillRoundedRect", juce::var::NativeFunction {
+                    [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
+                        jassert(graphics);
+                        jassert(args.numArguments == 5);
+
+                        const float x = args.arguments[0];
+                        const float y = args.arguments[1];
+                        const float width = args.arguments[2];
+                        const float height = args.arguments[3];
+                        const float cornerSize = args.arguments[4];
+
+                        graphics->setFillType(properties.fillStyle);
+                        graphics->fillRoundedRectangle(x, y, width, height, cornerSize);
+
+                        return juce::var();
+                    }
+            });
+
             setProperty("clearRect", juce::var::NativeFunction {
                     [=](const juce::var::NativeFunctionArgs& args) -> juce::var {
                         jassert(graphics);
