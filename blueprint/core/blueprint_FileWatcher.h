@@ -54,25 +54,24 @@ namespace blueprint
         {
             bool shouldFireChangeEvent = false;
 
-            // First step is to erase any files that no longer exist from our
-            // file map, and check for any changes along the way
+            // First step here is to be careful for empty files. Some bundlers
+            // may delete the target file just before replacing it with their
+            // new compiled result, and if we happen to poll in between we'll
+            // get a messed up result.
             for (auto it = watchedFiles.begin(); it != watchedFiles.end();)
             {
                 auto& f = (*it).first;
                 bool const fileExists = f.existsAsFile() && (f.getSize() > 0);
 
-                if (!fileExists)
+                if (fileExists)
                 {
-                    it = watchedFiles.erase(it);
-                    continue;
-                }
+                    const auto lmt = f.getLastModificationTime();
 
-                const auto lmt = f.getLastModificationTime();
-
-                if (lmt > (*it).second)
-                {
-                    shouldFireChangeEvent = true;
-                    watchedFiles[f] = lmt;
+                    if (lmt > (*it).second)
+                    {
+                        shouldFireChangeEvent = true;
+                        watchedFiles[f] = lmt;
+                    }
                 }
 
                 it++;
