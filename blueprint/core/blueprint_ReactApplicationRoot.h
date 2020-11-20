@@ -94,6 +94,25 @@ namespace blueprint
             }
         }
 
+        /** Dispatches a view event through Blueprint's internal event replayer. */
+        template <typename... T>
+        void dispatchViewEvent (T... args)
+        {
+            JUCE_ASSERT_MESSAGE_THREAD
+
+            // We early return here in the event that we're currently showing the red error
+            // screen. This prevents subsequent errors caused by dispatching events with an
+            // incorrect engine state from overwriting the first error message.
+            if (errorText)
+                return;
+
+            try {
+                engine->invoke("__BlueprintNative__.dispatchViewEvent", std::forward<T>(args)...);
+            } catch (const EcmascriptEngine::Error& err) {
+                handleRuntimeError(err);
+            }
+        }
+
         //==============================================================================
         /** Enables hot reloading (on by default in debug builds). */
         void enableHotReloading();

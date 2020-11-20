@@ -264,18 +264,7 @@ namespace blueprint
         JUCE_ASSERT_MESSAGE_THREAD
 
         if (auto *parent = findParentComponentOfClass<ReactApplicationRoot>())
-        {
-            std::vector<juce::var> vargs { getViewId(), eventType, e };
-
-            try
-            {
-                parent->engine.invoke("__BlueprintNative__.dispatchViewEvent", vargs);
-            }
-            catch (const EcmascriptEngine::Error& err)
-            {
-                parent->handleRuntimeError(err);
-            }
-        }
+            parent->dispatchViewEvent(getViewId(), eventType, e);
     }
 
 }
