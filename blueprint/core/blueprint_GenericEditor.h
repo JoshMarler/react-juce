@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "blueprint_HotReloadingHarness.h"
 #include "blueprint_ReactApplicationRoot.h"
 #include "blueprint_ThrottleMap.h"
 
@@ -52,7 +53,10 @@ namespace blueprint
         void registerAppRootCallbacks();
 
         //==============================================================================
+        std::shared_ptr<EcmascriptEngine>     engine;
         ReactApplicationRoot                  appRoot;
+        HotReloadingHarness                   harness;
+
         juce::File                            bundleFile;
         juce::AudioProcessorValueTreeState*   valueTreeState;
 

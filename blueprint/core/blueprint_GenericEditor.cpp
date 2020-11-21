@@ -15,7 +15,11 @@ namespace blueprint
 
     //==============================================================================
     BlueprintGenericEditor::BlueprintGenericEditor (juce::AudioProcessor& proc, const juce::File& bundle, juce::AudioProcessorValueTreeState* vts)
-        : juce::AudioProcessorEditor (proc), valueTreeState(vts)
+        : juce::AudioProcessorEditor (proc)
+        , engine(std::make_shared<EcmascriptEngine>())
+        , appRoot(engine)
+        , harness(appRoot, engine)
+        , valueTreeState(vts)
     {
         // Sanity check
         jassert (bundle.existsAsFile());
@@ -27,7 +31,11 @@ namespace blueprint
 
         // Setup the ReactApplicationRoot callbacks and evaluate the supplied JS code/bundle
         registerAppRootCallbacks();
+        harness.watch(bundleFile);
+
+        beforeBundleEvaluated(nullptr);
         appRoot.evaluate(bundleFile);
+        afterBundleEvaluated(nullptr);
 
         // Add ReactApplicationRoot as child component
         addAndMakeVisible(appRoot);
@@ -93,7 +101,7 @@ namespace blueprint
     }
 
     //==============================================================================
-    void BlueprintGenericEditor::beforeBundleEvaluated(std::shared_ptr<blueprint::EcmascriptEngine> engine)
+    void BlueprintGenericEditor::beforeBundleEvaluated(std::shared_ptr<blueprint::EcmascriptEngine> /* engine */)
     {
         // If we have a valueTreeState, bind parameter methods to the new app root
         if (valueTreeState != nullptr)
@@ -141,20 +149,14 @@ namespace blueprint
 
     void BlueprintGenericEditor::registerAppRootCallbacks()
     {
-        appRoot.beforeBundleEval = [=] (std::shared_ptr<blueprint::EcmascriptEngine> engine, const juce::File& bundle)
+        harness.beforeBundleEval = [=] (std::shared_ptr<blueprint::EcmascriptEngine> engine, const juce::File& bundle)
         {
-            if (bundle == bundleFile)
-            {
-                beforeBundleEvaluated(engine);
-            }
+            beforeBundleEvaluated(engine);
         };
 
-        appRoot.afterBundleEval = [=] (std::shared_ptr<blueprint::EcmascriptEngine> engine, const juce::File& bundle)
+        harness.afterBundleEval = [=] (std::shared_ptr<blueprint::EcmascriptEngine> engine, const juce::File& bundle)
         {
-            if (bundle == bundleFile)
-            {
-                afterBundleEvaluated(engine);
-            }
+            afterBundleEvaluated(engine);
         };
     }
 }

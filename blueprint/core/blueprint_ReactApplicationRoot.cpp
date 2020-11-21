@@ -19,25 +19,15 @@ namespace blueprint
         : viewManager(this)
         , engine(ee)
     {
+        JUCE_ASSERT_MESSAGE_THREAD
         bindNativeRenderingHooks();
     }
 
     ReactApplicationRoot::ReactApplicationRoot()
         : ReactApplicationRoot(std::make_shared<EcmascriptEngine>())
     {
-        JUCE_ASSERT_MESSAGE_THREAD
-
-        fileWatcher = std::make_unique<FileWatcher>([this]() {
-            reset();
-            bindNativeRenderingHooks();
-
-            for (auto& f : fileWatcher->getWatchedFiles())
-                evaluate(f);
-        });
 
 #if JUCE_DEBUG
-        enableHotReloading();
-
         // Enable keyboardFocus to support CTRL-D/CMD-D debug attachment.
         setWantsKeyboardFocus(true);
 #endif
@@ -79,19 +69,9 @@ namespace blueprint
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
-        if (fileWatcher) { fileWatcher->watch(bundle); }
-
         try
         {
-            if (beforeBundleEval)
-                beforeBundleEval(engine, bundle);
-
-            auto result = engine->evaluate(bundle);
-
-            if (afterBundleEval)
-                afterBundleEval(engine, bundle);
-
-            return result;
+            return engine->evaluate(bundle);
         }
         catch (const EcmascriptEngine::Error& err)
         {
@@ -104,25 +84,6 @@ namespace blueprint
     void ReactApplicationRoot::registerViewType(const juce::String& typeId, ViewManager::ViewFactory f)
     {
         viewManager.registerViewType(typeId, f);
-    }
-
-    //==============================================================================
-    void ReactApplicationRoot::enableHotReloading()
-    {
-        // If you hit this assert, it's because you're managing your own EcmascriptEngine
-        // and ReactApplicationRoot's default hot reloading behavior is therefore disabled.
-        // If you want hot reloading while managing your own EcmascriptEngine, see blueprint_FileWatcher.h.
-        jassert (fileWatcher != nullptr);
-        fileWatcher->start();
-    }
-
-    void ReactApplicationRoot::disableHotReloading()
-    {
-        // If you hit this assert, it's because you're managing your own EcmascriptEngine
-        // and ReactApplicationRoot's default hot reloading behavior is therefore disabled.
-        // If you want hot reloading while managing your own EcmascriptEngine, see blueprint_FileWatcher.h.
-        jassert (fileWatcher != nullptr);
-        fileWatcher->stop();
     }
 
     //==============================================================================
