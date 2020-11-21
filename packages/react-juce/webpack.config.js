@@ -40,6 +40,19 @@ module.exports = env => {
               ]
             },
             {
+              test: /\.js$/,
+              include: /node_modules\/matrix-js/,
+              use: [
+                {
+                  loader: "awesome-typescript-loader",
+                  options: {
+                     useBabel: true,
+                     babelCore: '@babel/core',
+                  }
+                }
+              ]
+            },
+            {
               test: /\.svg$/,
               exclude: /node_modules/,
               use: ['svg-inline-loader']
