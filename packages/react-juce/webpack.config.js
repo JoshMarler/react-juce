@@ -4,7 +4,7 @@ module.exports = env => {
     return {
         entry: './src/index.tsx',
         output: {
-          path: __dirname + '/dist',
+          path: path.resolve(__dirname, 'dist'),
           filename: 'index.js',
           libraryTarget: "umd",
           globalObject: "this",
@@ -27,21 +27,21 @@ module.exports = env => {
           rules: [
             {
               test: /\.tsx?$/,
-              exclude: /node_modules/,
+              exclude: path.resolve(__dirname, 'node_modules'),
               use: [
                 {
                   loader: "awesome-typescript-loader",
                   options: {
                      useBabel: true,
                      babelCore: '@babel/core',
-                     declarationDir: __dirname + '/dist'
+                     declarationDir: path.resolve(__dirname, 'dist')
                   }
                 }
               ]
             },
             {
               test: /\.js$/,
-              include: /node_modules\/matrix-js/,
+              include: path.resolve(__dirname, 'node_modules', 'matrix-js'),
               use: [
                 {
                   loader: "awesome-typescript-loader",
@@ -54,7 +54,7 @@ module.exports = env => {
             },
             {
               test: /\.svg$/,
-              exclude: /node_modules/,
+              exclude: path.resolve(__dirname, 'node_modules'),
               use: ['svg-inline-loader']
             },
           ]
