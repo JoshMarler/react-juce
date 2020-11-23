@@ -68,6 +68,9 @@ namespace blueprint
          */
         void performRootShadowTreeLayout();
 
+        /** Empties the internal view tables, deallocating every view except the root in the ViewManager heirarchy. */
+        void clearViewTables();
+
         //==============================================================================
     private:
         void enumerateChildViewIds (std::vector<ViewId>& ids, View* v);

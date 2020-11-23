@@ -112,6 +112,7 @@
  #pragma GCC diagnostic pop
 #endif
 
+#include "core/blueprint_AppHarness.cpp"
 #include "core/blueprint_EcmascriptEngine.cpp"
 #include "core/blueprint_GenericEditor.cpp"
 #include "core/blueprint_ReactApplicationRoot.cpp"

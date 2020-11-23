@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "blueprint_AppHarness.h"
 #include "blueprint_ReactApplicationRoot.h"
 #include "blueprint_ThrottleMap.h"
 
@@ -44,17 +45,17 @@ namespace blueprint
         void resized() override;
         void paint (juce::Graphics&) override;
 
-        //==============================================================================
-
     private:
         //==============================================================================
         /** ReactApplicationRoot bundle eval callback functions */
         void beforeBundleEvaluated();
         void afterBundleEvaluated();
-        void registerAppRootCallbacks();
 
         //==============================================================================
+        std::shared_ptr<EcmascriptEngine>     engine;
         ReactApplicationRoot                  appRoot;
+        AppHarness                            harness;
+
         juce::File                            bundleFile;
         juce::AudioProcessorValueTreeState*   valueTreeState;
 

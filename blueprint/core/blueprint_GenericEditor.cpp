@@ -15,7 +15,11 @@ namespace blueprint
 
     //==============================================================================
     BlueprintGenericEditor::BlueprintGenericEditor (juce::AudioProcessor& proc, const juce::File& bundle, juce::AudioProcessorValueTreeState* vts)
-        : juce::AudioProcessorEditor (proc), valueTreeState(vts)
+        : juce::AudioProcessorEditor (proc)
+        , engine(std::make_shared<EcmascriptEngine>())
+        , appRoot(engine)
+        , harness(appRoot)
+        , valueTreeState(vts)
     {
         // Sanity check
         jassert (bundle.existsAsFile());
@@ -25,9 +29,13 @@ namespace blueprint
         for (auto& p : proc.getParameters())
             p->addListener(this);
 
-        // Setup the ReactApplicationRoot callbacks and evaluate the supplied JS code/bundle
-        registerAppRootCallbacks();
-        appRoot.evaluate(bundleFile);
+        // Set up the hot reloading callbacks
+        harness.onBeforeAll = [this]() { beforeBundleEvaluated(); };
+        harness.onAfterAll = [this]() { afterBundleEvaluated(); };
+
+        // Set up the file watching and kick off the initial render
+        harness.watch(bundleFile);
+        harness.start();
 
         // Add ReactApplicationRoot as child component
         addAndMakeVisible(appRoot);
@@ -98,7 +106,7 @@ namespace blueprint
         // If we have a valueTreeState, bind parameter methods to the new app root
         if (valueTreeState != nullptr)
         {
-            appRoot.engine.registerNativeMethod(
+            engine->registerNativeMethod(
                 "beginParameterChangeGesture",
                 [this](const juce::var::NativeFunctionArgs& args) {
                     if (auto* parameter = valueTreeState->getParameter(args.arguments[0].toString()))
@@ -108,7 +116,7 @@ namespace blueprint
                 }
             );
 
-            appRoot.engine.registerNativeMethod(
+            engine->registerNativeMethod(
                 "setParameterValueNotifyingHost",
                 [this](const juce::var::NativeFunctionArgs& args) {
                     if (auto* parameter = valueTreeState->getParameter(args.arguments[0].toString()))
@@ -118,7 +126,7 @@ namespace blueprint
                 }
             );
 
-            appRoot.engine.registerNativeMethod(
+            engine->registerNativeMethod(
                 "endParameterChangeGesture",
                 [this](const juce::var::NativeFunctionArgs& args) {
                     const juce::String& paramId = args.arguments[0].toString();
@@ -139,22 +147,4 @@ namespace blueprint
             parameterValueChanged(p->getParameterIndex(), p->getValue());
     }
 
-    void BlueprintGenericEditor::registerAppRootCallbacks()
-    {
-        appRoot.beforeBundleEval = [=] (const juce::File& bundle)
-        {
-            if (bundle.getFullPathName() == bundleFile.getFullPathName())
-            {
-                beforeBundleEvaluated();
-            }
-        };
-
-        appRoot.afterBundleEval = [=] (const juce::File& bundle)
-        {
-            if (bundle.getFullPathName() == bundleFile.getFullPathName())
-            {
-                afterBundleEvaluated();
-            }
-        };
-    }
 }
