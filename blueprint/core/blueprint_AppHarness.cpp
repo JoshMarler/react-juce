@@ -16,11 +16,12 @@ namespace blueprint
 {
 
     //==============================================================================
-    AppHarness::AppHarness(ReactApplicationRoot& appRoot)
+    AppHarness::AppHarness(ReactApplicationRoot& _appRoot)
+        : appRoot(_appRoot)
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
-        fileWatcher = std::make_unique<FileWatcher>([this, &appRoot]() {
+        fileWatcher = std::make_unique<FileWatcher>([this]() {
             appRoot.reset();
             appRoot.bindNativeRenderingHooks();
 
@@ -36,9 +37,6 @@ namespace blueprint
             if (onAfterAll) { onAfterAll(); }
         });
 
-#if JUCE_DEBUG
-        fileWatcher->start();
-#endif
     }
 
     //==============================================================================
@@ -48,10 +46,34 @@ namespace blueprint
             fileWatcher->watch(f);
     }
 
-    void AppHarness::start()
+    void AppHarness::watch (const std::vector<juce::File>& fs)
     {
         if (fileWatcher)
+        {
+            for (const auto& f : fs)
+            {
+                fileWatcher->watch(f);
+            }
+        }
+    }
+
+    void AppHarness::start()
+    {
+        if (onBeforeAll) { onBeforeAll(); }
+
+        for (const auto& f : fileWatcher->getWatchedFiles())
+        {
+            if (onBeforeEach) { onBeforeEach(f); }
+            appRoot.evaluate(f);
+            if (onAfterEach) { onAfterEach(f); }
+        }
+
+        if (onAfterAll) { onAfterAll(); }
+
+#if JUCE_DEBUG
+        if (fileWatcher)
             fileWatcher->start();
+#endif
     }
 
     void AppHarness::stop()

@@ -33,10 +33,12 @@ namespace blueprint
     {
     public:
         //==============================================================================
-        AppHarness(ReactApplicationRoot& appRoot);
+        AppHarness(ReactApplicationRoot& _appRoot);
 
         //==============================================================================
         void watch (const juce::File& f);
+        void watch (const std::vector<juce::File>& fs);
+
         void start();
         void stop();
 
@@ -184,6 +186,7 @@ namespace blueprint
 
     private:
         //==============================================================================
+        ReactApplicationRoot& appRoot;
         std::unique_ptr<FileWatcher> fileWatcher;
 
         //==============================================================================

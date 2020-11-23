@@ -29,18 +29,13 @@ namespace blueprint
         for (auto& p : proc.getParameters())
             p->addListener(this);
 
-        // Setup the hot reloading callbacks
+        // Set up the hot reloading callbacks
         harness.onBeforeAll = [this]() { beforeBundleEvaluated(); };
         harness.onAfterAll = [this]() { afterBundleEvaluated(); };
 
-        // TODO: Should we just watch a bunch of files and then ask the harness to `start` manuall?
-        // Which will then run the callback hooks in order while evaluating? That skips this manual
-        // step here
+        // Set up the file watching and kick off the initial render
         harness.watch(bundleFile);
-
-        beforeBundleEvaluated();
-        appRoot.evaluate(bundleFile);
-        afterBundleEvaluated();
+        harness.start();
 
         // Add ReactApplicationRoot as child component
         addAndMakeVisible(appRoot);

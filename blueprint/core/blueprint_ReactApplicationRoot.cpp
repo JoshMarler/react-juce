@@ -201,8 +201,8 @@ namespace blueprint
         });
 
         engine->registerNativeMethod("__BlueprintNative__", "resetAfterCommit", [this](const juce::var::NativeFunctionArgs& args) {
-            // TODO, something else... traverse for dirty
-            // yoga nodes
+            // TODO, something else... traverse for dirty yoga nodes
+            juce::ignoreUnused(args);
             viewManager.performRootShadowTreeLayout();
             return juce::var::undefined();
         });
