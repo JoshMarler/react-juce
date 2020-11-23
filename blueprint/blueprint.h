@@ -90,10 +90,10 @@
  #pragma GCC diagnostic pop
 #endif
 
+#include "core/blueprint_AppHarness.h"
 #include "core/blueprint_EcmascriptEngine.h"
 #include "core/blueprint_CanvasView.h"
 #include "core/blueprint_GenericEditor.h"
-#include "core/blueprint_HotReloadingHarness.h"
 #include "core/blueprint_ImageView.h"
 #include "core/blueprint_FileWatcher.h"
 #include "core/blueprint_RawTextView.h"

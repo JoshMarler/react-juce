@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    blueprint_HotReloadingHarness.cpp
+    blueprint_AppHarness.cpp
     Created: 21 Nov 2020 11:27:37am
 
   ==============================================================================
@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "blueprint_HotReloadingHarness.h"
+#include "blueprint_AppHarness.h"
 
 
 namespace blueprint
 {
 
     //==============================================================================
-    HotReloadingHarness::HotReloadingHarness(ReactApplicationRoot& appRoot)
+    AppHarness::AppHarness(ReactApplicationRoot& appRoot)
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
@@ -42,19 +42,19 @@ namespace blueprint
     }
 
     //==============================================================================
-    void HotReloadingHarness::watch (const juce::File& f)
+    void AppHarness::watch (const juce::File& f)
     {
         if (fileWatcher)
             fileWatcher->watch(f);
     }
 
-    void HotReloadingHarness::start()
+    void AppHarness::start()
     {
         if (fileWatcher)
             fileWatcher->start();
     }
 
-    void HotReloadingHarness::stop()
+    void AppHarness::stop()
     {
         if (fileWatcher)
             fileWatcher->stop();

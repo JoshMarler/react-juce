@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    blueprint_HotReloadingHarness.h
+    blueprint_AppHarness.h
     Created: 21 Nov 2020 11:27:37am
 
   ==============================================================================
@@ -17,10 +17,10 @@
 namespace blueprint
 {
 
-    /** The HotReloadingHarness is a simple class which composes over your ReactApplicationRoot
+    /** The AppHarness is a simple class which composes over your ReactApplicationRoot
      *  to provide file watching and hot reloading behavior for the bundle files your app evaluates.
      *
-     *  To use, you should only need to make a HotReloadingHarness, set it to `watch()` any
+     *  To use, you should only need to make a AppHarness, set it to `watch()` any
      *  of your files, and then call `start()` (called automatically in Debug builds).
      *
      *  For custom behavior, you can attach callbacks at each of the four reloading stages:
@@ -29,11 +29,11 @@ namespace blueprint
      *    onAfterEach – Invoked after evaluating each watched bundle
      *    onAfterAll – Invoked after evaluatingg all watched bundles
      */
-    class HotReloadingHarness
+    class AppHarness
     {
     public:
         //==============================================================================
-        HotReloadingHarness(ReactApplicationRoot& appRoot);
+        AppHarness(ReactApplicationRoot& appRoot);
 
         //==============================================================================
         void watch (const juce::File& f);
@@ -187,7 +187,7 @@ namespace blueprint
         std::unique_ptr<FileWatcher> fileWatcher;
 
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HotReloadingHarness)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppHarness)
     };
 
 }
