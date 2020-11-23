@@ -18,7 +18,7 @@ namespace blueprint
         : juce::AudioProcessorEditor (proc)
         , engine(std::make_shared<EcmascriptEngine>())
         , appRoot(engine)
-        , harness(appRoot, engine)
+        , harness(appRoot)
         , valueTreeState(vts)
     {
         // Sanity check
@@ -29,13 +29,18 @@ namespace blueprint
         for (auto& p : proc.getParameters())
             p->addListener(this);
 
-        // Setup the ReactApplicationRoot callbacks and evaluate the supplied JS code/bundle
-        registerAppRootCallbacks();
+        // Setup the hot reloading callbacks
+        harness.onBeforeAll = [this]() { beforeBundleEvaluated(); };
+        harness.onAfterAll = [this]() { afterBundleEvaluated(); };
+
+        // TODO: Should we just watch a bunch of files and then ask the harness to `start` manuall?
+        // Which will then run the callback hooks in order while evaluating? That skips this manual
+        // step here
         harness.watch(bundleFile);
 
-        beforeBundleEvaluated(nullptr);
+        beforeBundleEvaluated();
         appRoot.evaluate(bundleFile);
-        afterBundleEvaluated(nullptr);
+        afterBundleEvaluated();
 
         // Add ReactApplicationRoot as child component
         addAndMakeVisible(appRoot);
@@ -101,7 +106,7 @@ namespace blueprint
     }
 
     //==============================================================================
-    void BlueprintGenericEditor::beforeBundleEvaluated(std::shared_ptr<blueprint::EcmascriptEngine> /* engine */)
+    void BlueprintGenericEditor::beforeBundleEvaluated()
     {
         // If we have a valueTreeState, bind parameter methods to the new app root
         if (valueTreeState != nullptr)
@@ -140,23 +145,11 @@ namespace blueprint
         }
     }
 
-    void BlueprintGenericEditor::afterBundleEvaluated(std::shared_ptr<blueprint::EcmascriptEngine> engine)
+    void BlueprintGenericEditor::afterBundleEvaluated()
     {
         // Push current parameter values into the bundle on load
         for (auto& p : processor.getParameters())
             parameterValueChanged(p->getParameterIndex(), p->getValue());
     }
 
-    void BlueprintGenericEditor::registerAppRootCallbacks()
-    {
-        harness.beforeBundleEval = [=] (std::shared_ptr<blueprint::EcmascriptEngine> engine, const juce::File& bundle)
-        {
-            beforeBundleEvaluated(engine);
-        };
-
-        harness.afterBundleEval = [=] (std::shared_ptr<blueprint::EcmascriptEngine> engine, const juce::File& bundle)
-        {
-            afterBundleEvaluated(engine);
-        };
-    }
 }

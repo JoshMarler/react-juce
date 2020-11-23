@@ -16,31 +16,6 @@ namespace blueprint
 {
 
     //==============================================================================
-    HotReloadingHarness::HotReloadingHarness(ReactApplicationRoot& appRoot, std::shared_ptr<EcmascriptEngine> ee)
-    {
-        JUCE_ASSERT_MESSAGE_THREAD
-
-        fileWatcher = std::make_unique<FileWatcher>([this, &appRoot, ee]() {
-            appRoot.reset();
-            appRoot.bindNativeRenderingHooks();
-
-            // TODO: I could imagine support 4 hooks here: beforeAll, beforeEach, afterEach, beforeAll,
-            // where the middle two callbacks actually get specific references to _which_ bundle
-            if (beforeBundleEval)
-                beforeBundleEval(ee, juce::File());
-
-            for (auto& f : fileWatcher->getWatchedFiles())
-                ee->evaluate(f);
-
-            if (afterBundleEval)
-                afterBundleEval(ee, juce::File());
-        });
-
-#if JUCE_DEBUG
-        fileWatcher->start();
-#endif
-    }
-
     HotReloadingHarness::HotReloadingHarness(ReactApplicationRoot& appRoot)
     {
         JUCE_ASSERT_MESSAGE_THREAD
@@ -49,14 +24,16 @@ namespace blueprint
             appRoot.reset();
             appRoot.bindNativeRenderingHooks();
 
-            if (beforeBundleEval)
-                beforeBundleEval(nullptr, juce::File());
+            if (onBeforeAll) { onBeforeAll(); }
 
-            for (auto& f : fileWatcher->getWatchedFiles())
+            for (const auto& f : fileWatcher->getWatchedFiles())
+            {
+                if (onBeforeEach) { onBeforeEach(f); }
                 appRoot.evaluate(f);
+                if (onAfterEach) { onAfterEach(f); }
+            }
 
-            if (afterBundleEval)
-                afterBundleEval(nullptr, juce::File());
+            if (onAfterAll) { onAfterAll(); }
         });
 
 #if JUCE_DEBUG

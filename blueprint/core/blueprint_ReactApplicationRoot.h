@@ -21,34 +21,25 @@ namespace blueprint
 {
 
     //==============================================================================
-    /** The ReactApplicationRoot class prepares and maintains a Duktape evaluation
-        context with the relevant hooks for supporting the Blueprint render
-        backend.
-
-        ReactApplicationRoot provides some useful facilities in debug builds with
-        JUCE_DEBUG defined.
-
-        Firstly, ReactApplicationRoot will automatically watch bundle
-        files (added via ReactApplicationRoot::evaluate) for changes and reload said
-        bundle in the event of a change/recompile. This allows for hot-reload functionality.
-
-        Secondly, ReactApplicationRoot provides debug functionality similar to React Native.
-        Users can hit CTRL-D/CMD-D when the ReactApplicationRoot component has focus,
-        causing the application to suspend execution and await connection from a debug client.
-        See the WIKI for details on setting up and connecting a JS debugger.
-
-        Finally, ReactApplicationRoot implements a generic error handler which will catch
-        errors from JavaScript code and display an error screen with an error trace/message.
-        This generic error handler is enabled by default in both debug and release builds.
-        Users of ReactApplicationRoot may which to override this handler by setting the
-        EcmascriptEngine::onUncaughtError callback after constructing a ReactApplicationRoot instance.
-        This can be useful to hide error details from users in production etc.
+    /** The ReactApplicationRoot class is the primary point of coordination between
+     *  the React.js reconciler and the native View heirarchy.
+     *
+     *  By default, ReactApplicationRoot implements a generic error handler which will
+     *  catch errors from JavaScript code and display an error screen with a stack trace
+     *  and error message. This generic error handler is enabled by default in Debug builds,
+     *  and in Release builds such errors will be thrown, with the intention that the end
+     *  user should catch and handle them appropriately.
+     *
+     *  ReactApplicationRoot also provides debug functionality similar to React Native.
+     *  Users can hit CTRL-D/CMD-D when the ReactApplicationRoot component has focus,
+     *  causing the application to suspend execution and await connection from a debug client.
+     *  See the documentation for details on setting up and connecting a debugger.
      */
     class ReactApplicationRoot : public View
     {
     public:
         //==============================================================================
-        ReactApplicationRoot(std::shared_ptr<EcmascriptEngine> ee);
+        explicit ReactApplicationRoot(std::shared_ptr<EcmascriptEngine> ee);
         ReactApplicationRoot();
 
         //==============================================================================
@@ -64,11 +55,10 @@ namespace blueprint
 #endif
 
         //==============================================================================
-        /** Evaluates a javascript bundle file in the Ecmascript engine.
+        /** Evaluates a javascript bundle file in the EcmascriptEngine.
          *
-         * With the default behavior, ReactApplicationRoot will watch the supplied bundle
-         * for changes and provide instant updates. If you're managing your own EcmascriptEngine,
-         * you'll need to manage hot reloading on your own.
+         * Provides default error handling to display the red screen with error
+         * message and stack trace.
          */
         juce::var evaluate(const juce::File& bundle);
 
@@ -117,7 +107,7 @@ namespace blueprint
         /** Displays the red error screen for the given error. */
         void handleRuntimeError(const EcmascriptEngine::Error& err);
 
-        /** Clears the EcmascriptEngine and the view table. */
+        /** Clears the internal EcmascriptEngine and view table. */
         void reset();
 
         /** Installs the rendering hooks needed by the React reconciler into the

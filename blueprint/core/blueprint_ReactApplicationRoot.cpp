@@ -20,18 +20,18 @@ namespace blueprint
         , engine(ee)
     {
         JUCE_ASSERT_MESSAGE_THREAD
-        bindNativeRenderingHooks();
-    }
+        jassert(ee != nullptr);
 
-    ReactApplicationRoot::ReactApplicationRoot()
-        : ReactApplicationRoot(std::make_shared<EcmascriptEngine>())
-    {
+        bindNativeRenderingHooks();
 
 #if JUCE_DEBUG
         // Enable keyboardFocus to support CTRL-D/CMD-D debug attachment.
         setWantsKeyboardFocus(true);
 #endif
     }
+
+    ReactApplicationRoot::ReactApplicationRoot()
+        : ReactApplicationRoot(std::make_shared<EcmascriptEngine>()) {}
 
     //==============================================================================
     void ReactApplicationRoot::resized()
@@ -200,10 +200,10 @@ namespace blueprint
             return juce::var(getViewId());
         });
 
-        engine.registerNativeMethod("__BlueprintNative__", "resetAfterCommit", [this](const juce::var::NativeFunctionArgs& args) {
+        engine->registerNativeMethod("__BlueprintNative__", "resetAfterCommit", [this](const juce::var::NativeFunctionArgs& args) {
             // TODO, something else... traverse for dirty
             // yoga nodes
-            getViewManager().performRootShadowTreeLayout();
+            viewManager.performRootShadowTreeLayout();
             return juce::var::undefined();
         });
     }

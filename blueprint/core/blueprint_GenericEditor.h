@@ -48,9 +48,8 @@ namespace blueprint
     private:
         //==============================================================================
         /** ReactApplicationRoot bundle eval callback functions */
-        void beforeBundleEvaluated(std::shared_ptr<blueprint::EcmascriptEngine>);
-        void afterBundleEvaluated(std::shared_ptr<blueprint::EcmascriptEngine>);
-        void registerAppRootCallbacks();
+        void beforeBundleEvaluated();
+        void afterBundleEvaluated();
 
         //==============================================================================
         std::shared_ptr<EcmascriptEngine>     engine;

@@ -30,6 +30,8 @@ namespace blueprint
 
         void watch (const juce::File& f)
         {
+            JUCE_ASSERT_MESSAGE_THREAD
+
             jassert(f.existsAsFile());
 
             // If we're already watching that bundle, nothing to do
