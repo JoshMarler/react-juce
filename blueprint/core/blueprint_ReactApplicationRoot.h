@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include <optional>
-
 #include "blueprint_EcmascriptEngine.h"
 #include "blueprint_FileWatcher.h"
 #include "blueprint_View.h"
@@ -41,6 +39,17 @@ namespace blueprint
         //==============================================================================
         explicit ReactApplicationRoot(std::shared_ptr<EcmascriptEngine> ee);
         ReactApplicationRoot();
+
+        //==============================================================================
+        /** The main rendering interface. */
+        juce::var createViewInstance (const juce::String& viewType);
+        juce::var createTextViewInstance (const juce::String& textValue);
+        juce::var setViewProperty (const ViewId viewId, const juce::String& name, const juce::var& value);
+        juce::var setRawTextValue (const ViewId viewId, const juce::String& value);
+        juce::var addChild (const ViewId parentId, const ViewId childId, int index);
+        juce::var removeChild (const ViewId parentId, const ViewId childId);
+        juce::var getRootInstanceId();
+        juce::var resetAfterCommit();
 
         //==============================================================================
         /** Override the default resized behavior. */
@@ -114,11 +123,39 @@ namespace blueprint
          *  EcmascriptEngine environment.
          *
          *  Should be called after every `reset` and before evaluating the bundle.
-         *  When using the default ReactApplicationRoot, this happens automatically.
          */
         void bindNativeRenderingHooks();
 
     private:
+        //==============================================================================
+        template <int NumParams, typename MethodType>
+        juce::var invokeFromNativeFunction (MethodType method, const juce::var::NativeFunctionArgs& args)
+        {
+            static_assert (NumParams <= 4);
+
+            if (args.numArguments != NumParams)
+                return juce::var::undefined();
+
+            if constexpr (NumParams == 0)    return (this->*method)();
+            if constexpr (NumParams == 1)    return (this->*method)(args.arguments[0]);
+            if constexpr (NumParams == 2)    return (this->*method)(args.arguments[0], args.arguments[1]);
+            if constexpr (NumParams == 3)    return (this->*method)(args.arguments[0], args.arguments[1], args.arguments[2]);
+            if constexpr (NumParams == 4)    return (this->*method)(args.arguments[0], args.arguments[1], args.arguments[2], args.arguments[3]);
+
+            return {};
+        }
+
+        template <int NumParams, typename MethodType>
+        void addMethodBinding (const char* ns, const char* name, MethodType method) {
+            engine->registerNativeMethod(
+                ns,
+                name,
+                [this, method] (const juce::var::NativeFunctionArgs& args) -> juce::var {
+                    return invokeFromNativeFunction<NumParams>(method, args);
+                }
+            );
+        }
+
         //==============================================================================
         ViewManager viewManager;
 
