@@ -25,9 +25,20 @@ namespace blueprint
         jassert (bundle.existsAsFile());
         bundleFile = bundle;
 
-        // Bind parameter listeners
-        for (auto& p : proc.getParameters())
+        // Now we set up parameter listeners and register their current values.
+        auto& params = processor.getParameters();
+        paramReadouts.resize(params.size());
+
+        for (auto& p : params)
+        {
+            const auto index = p->getParameterIndex();
+            const auto value = p->getValue();
+
+            paramReadouts[index].value = value;
+            paramReadouts[index].dirty = true;
+
             p->addListener(this);
+        }
 
         // Set up the hot reloading callbacks
         harness.onBeforeAll = [this]() { beforeBundleEvaluated(); };
@@ -42,6 +53,9 @@ namespace blueprint
 
         // Set an arbitrary size, should be overridden from outside the constructor
         setSize(400, 200);
+
+        // Lastly, start our timer for reporting meter and parameter values
+        startTimerHz(30);
     }
 
     BlueprintGenericEditor::~BlueprintGenericEditor()
@@ -55,36 +69,52 @@ namespace blueprint
     //==============================================================================
     void BlueprintGenericEditor::parameterValueChanged (int parameterIndex, float newValue)
     {
-        // Collect some information about the parameter to push into the engine
-        const auto& p = processor.getParameters()[parameterIndex];
-        juce::String id = p->getName(100);
-
-        if (auto* x = dynamic_cast<juce::AudioProcessorParameterWithID*>(p))
-            id = x->paramID;
-
-        float defaultValue = p->getDefaultValue();
-        const juce::String stringValue = p->getText(newValue, 0);
-
-        // Dispatch parameter value updates to the javascript engine at 30Hz
-        throttleMap.throttle(parameterIndex, 1000.0 / 30.0, [=]() mutable {
-            juce::MessageManager::callAsync([=]() mutable {
-                appRoot.dispatchEvent(
-                    "parameterValueChange",
-                    parameterIndex,
-                    id,
-                    defaultValue,
-                    newValue,
-                    stringValue
-                );
-            });
-        });
+        // This callback often runs on the realtime thread. To avoid any blocking
+        // or non-deterministic operations, we simply set some atomic values in our
+        // paramReadouts list. The timer running on the PluginEditor will check to
+        // propagate the updated values to the javascript interface.
+        paramReadouts[parameterIndex].value = newValue;
+        paramReadouts[parameterIndex].dirty = true;
     }
 
     void BlueprintGenericEditor::parameterGestureChanged (int parameterIndex, bool gestureIsStarting)
     {
-        // We don't need to worry so much about throttling gesture events since they happen far
-        // more slowly than value changes
-        appRoot.dispatchEvent("parameterGestureChange", parameterIndex, gestureIsStarting);
+        // Our generic editor doesn't do anything with this information yet, but
+        // we'll happily take a pull request if you need something here :).
+    }
+
+    //==============================================================================
+    void BlueprintGenericEditor::timerCallback()
+    {
+        // Iterate here to dispatch any updated parameter values
+        for (int i = 0; i < paramReadouts.size(); ++i)
+        {
+            auto& pr = paramReadouts[i];
+
+            if (pr.dirty)
+            {
+                const float value = pr.value.load();
+                pr.dirty = false;
+
+                const auto& p = processor.getParameters()[i];
+                juce::String id = p->getName(100);
+
+                if (auto* x = dynamic_cast<juce::AudioProcessorParameterWithID*>(p))
+                    id = x->paramID;
+
+                float defaultValue = p->getDefaultValue();
+                juce::String stringValue = p->getText(value, 0);
+
+                appRoot.dispatchEvent(
+                    "parameterValueChange",
+                    i,
+                    id,
+                    defaultValue,
+                    value,
+                    stringValue
+                );
+            }
+        }
     }
 
     //==============================================================================

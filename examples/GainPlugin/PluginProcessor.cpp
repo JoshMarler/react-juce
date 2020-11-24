@@ -174,13 +174,6 @@ void GainPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
         if (muted)
             buffer.applyGain(0.0f);
     }
-
-    // We'll also report peak values for our meter. This isn't an ideal way to do this
-    // as the rate between the audio processing callback and the timer on which the
-    // editor reads these values could mean missing peaks in the visual display, but
-    // this is a simple example plugin so let's not worry about it.
-    lcPeak.store(buffer.getMagnitude(0, 0, buffer.getNumSamples()));
-    rcPeak.store(buffer.getMagnitude(1, 0, buffer.getNumSamples()));
 }
 
 //==============================================================================
@@ -191,15 +184,7 @@ bool GainPluginAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* GainPluginAudioProcessor::createEditor()
 {
-    // The GainPlugin example has two different editors available to demonstrate
-    // different approaches. The first is a familiar approach using the
-    // AudioProcessorEditor file that the Projucer scaffolding tool sets up for you,
-    // with some manual effort to load the javascript bundle and install some custom
-    // hooks for the plugin (such as reporting gain meter values). Uncomment the line
-    // below to enable that approach.
-    // return new GainPluginAudioProcessorEditor (*this);
-
-    // The second example uses the BlueprintGenericEditor, which is a default
+    // The GainPlugin example uses the BlueprintGenericEditor, which is a default
     // AudioProcessorEditor included in Blueprint that will automatically bootstrap
     // your React root, install some native method hooks for parameter interaction
     // if you provide an AudioProcessorValueTreeState, and manage hot reloading

@@ -11,7 +11,6 @@
 
 #include "blueprint_AppHarness.h"
 #include "blueprint_ReactApplicationRoot.h"
-#include "blueprint_ThrottleMap.h"
 
 
 namespace blueprint
@@ -26,19 +25,23 @@ namespace blueprint
      *  development tools.
      */
     class BlueprintGenericEditor
-        : public juce::AudioProcessorEditor,
-          public juce::AudioProcessorParameter::Listener
+        : public juce::AudioProcessorEditor
+        , public juce::AudioProcessorParameter::Listener
+        , public juce::Timer
     {
     public:
         //==============================================================================
         BlueprintGenericEditor (juce::AudioProcessor&, const juce::File&, juce::AudioProcessorValueTreeState* = nullptr);
-
         ~BlueprintGenericEditor() override;
 
         //==============================================================================
         /** Implement the AudioProcessorParameter::Listener interface. */
         void parameterValueChanged (int parameterIndex, float newValue) override;
         void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override;
+
+        //==============================================================================
+        /** Override the timer interface. */
+        void timerCallback() override;
 
         //==============================================================================
         /** Override the component interface. */
@@ -59,8 +62,24 @@ namespace blueprint
         juce::File                            bundleFile;
         juce::AudioProcessorValueTreeState*   valueTreeState;
 
-        // For parameter updates to the script engine
-        ThrottleMap throttleMap;
+        //==============================================================================
+        // The plugin editor holds an array of parameter value readouts which are
+        // propagated to the user interface. During parameter value changes on the
+        // realtime thread, we capture the values in this array of structs, then at
+        // 30Hz propagate the value changes via dispatching events to the jsui.
+        struct ParameterReadout {
+            std::atomic<float> value = 0.0;
+            std::atomic<bool> dirty = false;
+
+            ParameterReadout() = default;
+
+            ParameterReadout(const ParameterReadout& other) {
+                value = other.value.load();
+                dirty = other.dirty.load();
+            }
+        };
+
+        std::vector<ParameterReadout> paramReadouts;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlueprintGenericEditor)
