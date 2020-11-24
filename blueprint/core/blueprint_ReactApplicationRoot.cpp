@@ -34,6 +34,52 @@ namespace blueprint
         : ReactApplicationRoot(std::make_shared<EcmascriptEngine>()) {}
 
     //==============================================================================
+    juce::var ReactApplicationRoot::createViewInstance (const juce::String& viewType)
+    {
+        return juce::var(viewManager.createViewInstance(viewType));
+    }
+
+    juce::var ReactApplicationRoot::createTextViewInstance (const juce::String& textValue)
+    {
+        return juce::var(viewManager.createTextViewInstance(textValue));
+    }
+
+    juce::var ReactApplicationRoot::setViewProperty (const ViewId viewId, const juce::String& name, const juce::var& value)
+    {
+        viewManager.setViewProperty(viewId, name, value);
+        return juce::var::undefined();
+    }
+
+    juce::var ReactApplicationRoot::setRawTextValue (const ViewId viewId, const juce::String& value)
+    {
+        viewManager.setRawTextValue(viewId, value);
+        return juce::var::undefined();
+    }
+
+    juce::var ReactApplicationRoot::addChild (const ViewId parentId, const ViewId childId, int index)
+    {
+        viewManager.addChild(parentId, childId, index);
+        return juce::var::undefined();
+    }
+
+    juce::var ReactApplicationRoot::removeChild (const ViewId parentId, const ViewId childId)
+    {
+        viewManager.removeChild(parentId, childId);
+        return juce::var::undefined();
+    }
+
+    juce::var ReactApplicationRoot::getRootInstanceId()
+    {
+        return juce::var(getViewId());
+    }
+
+    juce::var ReactApplicationRoot::resetAfterCommit()
+    {
+        viewManager.performRootShadowTreeLayout();
+        return juce::var::undefined();
+    }
+
+    //==============================================================================
     void ReactApplicationRoot::resized()
     {
         viewManager.performRootShadowTreeLayout();
@@ -130,82 +176,18 @@ namespace blueprint
 
     void ReactApplicationRoot::bindNativeRenderingHooks()
     {
-        engine->registerNativeProperty("__BlueprintNative__", juce::JSON::parse("{}"));
+        const auto ns = "__BlueprintNative__";
 
-        engine->registerNativeMethod("__BlueprintNative__", "createViewInstance", [this](const juce::var::NativeFunctionArgs& args) {
-            jassert (args.numArguments == 1);
+        engine->registerNativeProperty(ns, juce::JSON::parse("{}"));
 
-            auto viewType = args.arguments[0].toString();
-            ViewId viewId = viewManager.createViewInstance(viewType);
-
-            return juce::var(viewId);
-        });
-
-        engine->registerNativeMethod("__BlueprintNative__", "createTextViewInstance", [this](const juce::var::NativeFunctionArgs& args) {
-            jassert (args.numArguments == 1);
-
-            auto textValue = args.arguments[0].toString();
-            auto viewId = viewManager.createTextViewInstance(textValue);
-
-            return juce::var(viewId);
-        });
-
-        engine->registerNativeMethod("__BlueprintNative__", "setViewProperty", [this](const juce::var::NativeFunctionArgs& args) {
-            jassert (args.numArguments == 3);
-
-            ViewId viewId = args.arguments[0];
-            auto propertyName = args.arguments[1].toString();
-            auto propertyValue = args.arguments[2];
-
-            viewManager.setViewProperty(viewId, propertyName, propertyValue);
-            return juce::var::undefined();
-        });
-
-        engine->registerNativeMethod("__BlueprintNative__", "setRawTextValue", [this](const juce::var::NativeFunctionArgs& args) {
-            jassert (args.numArguments == 2);
-
-            ViewId viewId = args.arguments[0];
-            auto textValue = args.arguments[1].toString();
-
-            viewManager.setRawTextValue(viewId, textValue);
-            return juce::var::undefined();
-        });
-
-        engine->registerNativeMethod("__BlueprintNative__", "addChild", [this](const juce::var::NativeFunctionArgs& args) {
-            jassert (args.numArguments >= 2);
-
-            ViewId parentId = args.arguments[0];
-            ViewId childId = args.arguments[1];
-            int index = -1;
-
-            if (args.numArguments > 2)
-                index = args.arguments[2];
-
-            viewManager.addChild(parentId, childId, index);
-            return juce::var::undefined();
-        });
-
-        engine->registerNativeMethod("__BlueprintNative__", "removeChild", [this](const juce::var::NativeFunctionArgs& args) {
-            jassert (args.numArguments == 2);
-
-            ViewId parentId = args.arguments[0];
-            ViewId childId = args.arguments[1];
-
-            viewManager.removeChild(parentId, childId);
-            return juce::var::undefined();
-        });
-
-        engine->registerNativeMethod("__BlueprintNative__", "getRootInstanceId", [this](const juce::var::NativeFunctionArgs& args) {
-            jassert (args.numArguments == 0);
-            return juce::var(getViewId());
-        });
-
-        engine->registerNativeMethod("__BlueprintNative__", "resetAfterCommit", [this](const juce::var::NativeFunctionArgs& args) {
-            // TODO, something else... traverse for dirty yoga nodes
-            juce::ignoreUnused(args);
-            viewManager.performRootShadowTreeLayout();
-            return juce::var::undefined();
-        });
+        addMethodBinding<1>(ns, "createViewInstance", &ReactApplicationRoot::createViewInstance);
+        addMethodBinding<1>(ns, "createTextViewInstance", &ReactApplicationRoot::createTextViewInstance);
+        addMethodBinding<3>(ns, "setViewProperty", &ReactApplicationRoot::setViewProperty);
+        addMethodBinding<2>(ns, "setRawTextValue", &ReactApplicationRoot::setRawTextValue);
+        addMethodBinding<3>(ns, "addChild", &ReactApplicationRoot::addChild);
+        addMethodBinding<2>(ns, "removeChild", &ReactApplicationRoot::removeChild);
+        addMethodBinding<0>(ns, "getRootInstanceId", &ReactApplicationRoot::getRootInstanceId);
+        addMethodBinding<0>(ns, "resetAfterCommit", &ReactApplicationRoot::resetAfterCommit);
     }
 
 }
