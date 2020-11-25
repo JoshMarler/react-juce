@@ -15,6 +15,9 @@ class Slider extends Component {
     this._onMouseDown = this._onMouseDown.bind(this);
     this._onMouseUp = this._onMouseUp.bind(this);
     this._onMouseDrag = this._onMouseDrag.bind(this);
+    this._onTouchStart = this._onTouchStart.bind(this);
+    this._onTouchMove = this._onTouchMove.bind(this);
+    this._onTouchEnd = this._onTouchEnd.bind(this);
     this._renderVectorGraphics = this._renderVectorGraphics.bind(this);
     this._onParameterValueChange = this._onParameterValueChange.bind(this);
 
@@ -25,6 +28,9 @@ class Slider extends Component {
     const paramState = ParameterValueStore.getParameterState(this.props.paramId);
     const initialValue = typeof paramState.currentValue === 'number' ?
       paramState.currentValue : 0.0;
+
+    this.touchStarted = false;
+    this.ongoingTouchId = -1;
 
     this.state = {
       width: 0,
@@ -62,8 +68,30 @@ class Slider extends Component {
     global.beginParameterChangeGesture(this.props.paramId);
   }
 
+  _onTouchStart(e) {
+    if (this.touchStarted) {
+      return;
+    }
+
+    this.touchStarted = true;
+    this.ongoingTouchId = e.changedTouches[0].identifier;
+
+    this._onMouseDown(e.touches[0]);
+  }
+
   _onMouseUp(e) {
     global.endParameterChangeGesture(this.props.paramId);
+  }
+
+  _onTouchEnd(e) {
+    e.changedTouches.map((touchmove, index) =>{
+      if (this.ongoingTouchId !== touchmove.identifier) {
+        return;
+      }
+    this._onMouseUp(e);
+    this.touchStarted = false;
+    this.ongoingTouchId = -1;
+    })
   }
 
   _onMouseDrag(e) {
@@ -79,6 +107,15 @@ class Slider extends Component {
     if (typeof this.props.paramId === 'string' && this.props.paramId.length > 0) {
       global.setParameterValueNotifyingHost(this.props.paramId, value);
     }
+  }
+
+  _onTouchMove(e) {
+    e.changedTouches.map((touchmove, index) =>{
+      if (this.ongoingTouchId !== touchmove.identifier) {
+        return;
+      }
+      this._onMouseDrag(touchmove);
+    })
   }
 
   _onParameterValueChange(paramId) {
@@ -149,7 +186,10 @@ class Slider extends Component {
         onMeasure={this._onMeasure}
         onMouseDown={this._onMouseDown}
         onMouseUp={this._onMouseUp}
-        onMouseDrag={this._onMouseDrag}>
+        onMouseDrag={this._onMouseDrag}
+        onTouchStart={this._onTouchStart}
+        onTouchMove={this._onTouchMove}
+        onTouchEnd={this._onTouchEnd}>
         <Image {...styles.canvas} source={this._renderVectorGraphics(value, width, height)} />
         {this.props.children}
       </View>

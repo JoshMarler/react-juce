@@ -65,6 +65,33 @@ namespace blueprint
             }, view);
         }
 
+        juce::var makeViewEventFromTouchList(const juce::Array<blueprint::View::Touch*> &touches, const juce::Array<blueprint::View::Touch*> &targetTouches, const juce::Array<blueprint::View::Touch*> &changedTouches,  const blueprint::View &view)
+        {
+            juce::var touchesVar;
+            for(blueprint::View::Touch* t: touches)
+            {
+                touchesVar.append(t->getVar());
+            }
+
+            juce::var targetTouchesVar;
+            for(blueprint::View::Touch* t: targetTouches)
+            {
+                targetTouchesVar.append(t->getVar());
+            }
+
+            juce::var changedTouchesVar;
+            for(blueprint::View::Touch* t: changedTouches)
+            {
+                changedTouchesVar.append(t->getVar());
+            }
+
+            return makeViewEventObject({
+                {"touches", touchesVar},
+                {"targetTouches", targetTouchesVar},
+                {"changedTouches", changedTouchesVar},
+            }, view);
+        }
+
     }
 
     //==============================================================================
@@ -225,18 +252,93 @@ namespace blueprint
 
     void View::mouseDown (const juce::MouseEvent& e)
     {
-        dispatchViewEvent("onMouseDown", detail::makeViewEventObject(e, *this));
+        switch (e.source.getType())
+        {
+            case juce::MouseInputSource::InputSourceType::mouse:
+                dispatchViewEvent("onMouseDown", detail::makeViewEventObject(e, *this));
+                break;
+            case juce::MouseInputSource::InputSourceType::touch: {
+                Touch* t = new Touch(e.source.getIndex(), e.x, e.y, e.getScreenX(), e.getScreenY(), getViewId());
+                touches.add(t);
+                targetTouches.add(t);
+
+                int indexInChangedTouches = getTouchIndexInList(e.source.getIndex(), changedTouches);
+                if (indexInChangedTouches == -1)
+                    changedTouches.add(t);
+
+                dispatchViewEvent("onTouchStart", detail::makeViewEventFromTouchList(touches, targetTouches, changedTouches, *this));
+                changedTouches.clear();
+                break;
+            }
+            case juce::MouseInputSource::InputSourceType::pen:
+                break;
+            default:
+                break;
+        }
+
+
     }
 
     void View::mouseUp (const juce::MouseEvent& e)
     {
-        dispatchViewEvent("onMouseUp", detail::makeViewEventObject(e, *this));
+        switch (e.source.getType())
+        {
+            case juce::MouseInputSource::InputSourceType::mouse:
+                dispatchViewEvent("onMouseUp", detail::makeViewEventObject(e, *this));
+                break;
+            case juce::MouseInputSource::InputSourceType::touch: {
+                Touch* t = touches.removeAndReturn(getTouchIndexInList(e.source.getIndex(), touches));
+
+                int indexInTargetTouches = getTouchIndexInList(e.source.getIndex(), targetTouches);
+                if (indexInTargetTouches != -1)
+                    targetTouches.remove(indexInTargetTouches);
+
+                int indexInChangedTouches = getTouchIndexInList(e.source.getIndex(), changedTouches);
+                if (indexInChangedTouches == -1)
+                    changedTouches.add(t);
+
+                dispatchViewEvent("onTouchEnd", detail::makeViewEventFromTouchList(touches, targetTouches, changedTouches, *this));
+                changedTouches.clear();
+                break;
+            }
+            case juce::MouseInputSource::InputSourceType::pen:
+                break;
+            default:
+                break;
+        }
     }
 
     void View::mouseDrag (const juce::MouseEvent& e)
     {
-        // TODO: mouseDrag isn't a dom event... is it?
-        dispatchViewEvent("onMouseDrag", detail::makeViewEventObject(e, *this));
+        switch (e.source.getType())
+        {
+            case juce::MouseInputSource::InputSourceType::mouse:
+                // TODO: mouseDrag isn't a dom event... is it?
+                dispatchViewEvent("onMouseDrag", detail::makeViewEventObject(e, *this));
+                break;
+            case juce::MouseInputSource::InputSourceType::touch: {
+                Touch* t = getTouch(e.source.getIndex(), touches);
+                t->setCoordinatesFromEvent(e);
+                auto currentTargetUnderMouse = detail::getMouseEventRelatedTarget(e, *this);
+                int indexInTargetTouches = getTouchIndexInList(e.source.getIndex(), targetTouches);
+                if (indexInTargetTouches == -1 && t->target == currentTargetUnderMouse)
+                    targetTouches.add(t);
+                else if (indexInTargetTouches != -1 && t->target != currentTargetUnderMouse)
+                    targetTouches.remove(indexInTargetTouches);
+
+                int indexInChangedTouches = getTouchIndexInList(e.source.getIndex(), changedTouches);
+                if (indexInChangedTouches == -1)
+                    changedTouches.add(t);
+
+                dispatchViewEvent("onTouchMove", detail::makeViewEventFromTouchList(touches, targetTouches, changedTouches, *this));
+                changedTouches.clear();
+                break;
+            }
+            case juce::MouseInputSource::InputSourceType::pen:
+                break;
+            default:
+                break;
+        }
     }
 
     void View::mouseDoubleClick (const juce::MouseEvent& e)
