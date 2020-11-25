@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Touch } from '../lib/SyntheticEvents'
 
 export function bindCanvasContextProperties(ctx: any) {
   Object.defineProperty(ctx, 'fillStyle', {
@@ -59,13 +60,15 @@ export function bindCanvasContextProperties(ctx: any) {
 
 export interface CanvasProps {
   onMeasure?: (e: any) => void;
-  onDraw: (ctx: CanvasRenderingContext2D) => void;
+  onDraw: (ctx: CanvasRenderingContext2D, sizeState: object) => void;
   autoclear?: boolean;
+  ongoingTouches?: Array<Touch>;
 }
 
 interface CanvasState {
   width: number;
   height: number;
+  firstStroke?: boolean;
 }
 
 export class Canvas extends Component<CanvasProps, CanvasState> {
@@ -77,7 +80,8 @@ export class Canvas extends Component<CanvasProps, CanvasState> {
 
     this.state = {
       width: 0,
-      height: 0
+      height: 0,
+      firstStroke: true
     };
   }
 
@@ -100,7 +104,12 @@ export class Canvas extends Component<CanvasProps, CanvasState> {
         ctx.clearRect(0, 0, this.state.width, this.state.height);
       }
 
-      this.props.onDraw(ctx);
+      this.props.onDraw(ctx, this.state);
+      if(this.state.firstStroke) {
+        this.setState({
+          firstStroke: false
+        });
+      }
     }
   }
 

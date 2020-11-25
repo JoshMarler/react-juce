@@ -1,6 +1,7 @@
 import SyntheticEvents,
        { SyntheticMouseEvent,
-         SyntheticKeyboardEvent } from './SyntheticEvents'
+         SyntheticKeyboardEvent,
+         SyntheticTouchEvent } from './SyntheticEvents'
 import { macroPropertyGetters } from './MacroProperties';
 
 /* global __BlueprintNative__:false */
@@ -220,6 +221,8 @@ __BlueprintNative__.dispatchViewEvent = function dispatchEvent(viewId: string, e
       event = new SyntheticMouseEvent(event);
     else if (SyntheticEvents.isKeyboardEventHandler(eventType))
       event = new SyntheticKeyboardEvent(event);
+    else if (SyntheticEvents.isTouchEventHandler(eventType))
+      event = new SyntheticTouchEvent(event);
 
     // If mouseDown event we store the target viewId as the last view
     // to recieve a mouseDown for "onClick" book-keeping.

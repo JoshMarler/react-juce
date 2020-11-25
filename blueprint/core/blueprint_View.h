@@ -79,6 +79,72 @@ namespace blueprint
         /** Invokes, if exists, the respective view event handler. */
         void dispatchViewEvent (const juce::String& eventType, const juce::var& e);
 
+         //==============================================================================
+        /** Represents a Touch object. */
+        struct Touch
+        {
+            Touch (const int identifier, const int x, const int y, const int screenX, const int screenY, const juce::var target)
+                : identifier(identifier), x(x), y(y), screenX(x), screenY(screenY), target(target)
+            {}
+
+            void setCoordinatesFromEvent(const juce::MouseEvent& e)
+            {
+                x = e.x;
+                y = e.y;
+                screenX = e.getScreenX();
+                screenY = e.getScreenY();
+            }
+
+            juce::var getVar()
+            {
+                juce::String jsonString = "{\"identifier\": " + juce::String(identifier) + ",\"x\": " + juce::String(x)+ ",\"y\": " + juce::String(y)+ ",\"screenX\": " + juce::String(screenX)+ ",\"screenY\": " + juce::String(screenY)+ ",\"target\": " + target.toString() + "}";
+                return juce::JSON::parse(jsonString);
+            }
+
+            int identifier;
+            int x;
+            int y;
+            int screenX;
+            int screenY;
+            juce::var target;
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Touch)
+        };
+
+        /** Lists used to represent the properties of TouchEvents. */
+        juce::Array<Touch*> touches;
+        juce::Array<Touch*> targetTouches;
+        juce::Array<Touch*> changedTouches;
+
+        /** Retrieve a specific Touch object in an array of Touch objects, if it exists. */
+        static View::Touch* getTouch (const int touchIdentifier, juce::Array<Touch*> myList)
+        {
+            for (int i = 0; i < myList.size(); ++i)
+            {
+                Touch* t = myList.getUnchecked(i);
+
+                if (t->identifier == touchIdentifier)
+                    return t;
+            }
+
+            return nullptr;
+        }
+
+        /** Retrieve the index of a specific Touch object in an array of Touch objects, if it exists. */
+        static int getTouchIndexInList (const int touchIdentifier, juce::Array<Touch*> myList)
+        {
+            for (int i = 0; i < myList.size(); ++i)
+            {
+                Touch* t = myList.getUnchecked(i);
+
+                if (t->identifier == touchIdentifier)
+                    return i;
+            }
+
+            return -1;
+        }
+
+
     protected:
         //==============================================================================
         juce::NamedValueSet props;
