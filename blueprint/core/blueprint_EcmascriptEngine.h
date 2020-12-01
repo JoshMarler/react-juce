@@ -20,12 +20,12 @@ namespace blueprint
      *  with an interface implemented by Duktape, but which may be implemented by one of
      *  many embedded engines in the future.
      */
-    class EcmascriptEngine : private juce::Timer
+    class EcmascriptEngine
     {
     public:
         //==============================================================================
         EcmascriptEngine();
-        ~EcmascriptEngine() override = default;
+        ~EcmascriptEngine() = default;
 
         //==============================================================================
         /** A helper struct for representing an error that occured within the Duktape
@@ -151,40 +151,8 @@ namespace blueprint
 
     private:
         //==============================================================================
-        void timerCallback() override;
-
-        //==============================================================================
-        struct LambdaHelper {
-            LambdaHelper(juce::var::NativeFunction fn, uint32_t _id);
-
-            static duk_ret_t invokeFromDukContext(duk_context* ctx);
-            static duk_ret_t invokeFromDukContextLightFunc(duk_context* ctx);
-            static duk_ret_t callbackFinalizer (duk_context* ctx);
-
-            juce::var::NativeFunction callback;
-            uint32_t id;
-        };
-
-        //==============================================================================
-        uint32_t nextHelperId = 0;
-        int32_t nextMagicInt = 0;
-        std::unordered_map<uint32_t, std::unique_ptr<LambdaHelper>> persistentReleasePool;
-        std::array<std::unique_ptr<LambdaHelper>, 255> temporaryReleasePool;
-
-        // The duk_context must be listed after the release pools so that it is destructed
-        // before the pools. That way, as the duk_context is being freed and finalizing all
-        // of our lambda helpers, our pools still exist for those code paths.
-        std::shared_ptr<duk_context> dukContext;
-
-        //==============================================================================
-        /** Helper for cleaning up native function temporaries. */
-        void removeLambdaHelper (LambdaHelper* helper);
-
-        /** Helper for pushing a juce::var to the duktape stack. */
-        void pushVarToDukStack (std::shared_ptr<duk_context> ctx, const juce::var& v, bool persistNativeFunctions = false);
-
-        /** Helper for reading from the duktape stack to a juce::var instance. */
-        juce::var readVarFromDukStack (std::shared_ptr<duk_context> ctx, duk_idx_t idx);
+        struct Pimpl;
+        std::unique_ptr<Pimpl> mPimpl;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EcmascriptEngine)
