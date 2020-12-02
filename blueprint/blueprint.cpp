@@ -16,31 +16,7 @@
  #error "Incorrect use of the Blueprint cpp file"
 #endif
 
-/* We're careful to include the duktape source files before the module header
- * file because `duktape.c` sets certain preprocessor definitions that enable
- * necessary features in the duktape header. We need those defines to preempt
- * the loading of the duktape header. This also, therefore, is the place for
- * custom preprocessor definitions.
- *
- * We force Duktape to use a time provider on Windows that is compatible with
- * Windows 7 SP1. It looks like W7SP1 is quite happy with plugins built with
- * the 8.1 SDK, but the GetSystemTimePreciseAsFileTime() call used in here is
- * just not supported without the 8.1 dll available.
- */
-#if defined (_WIN32) || defined (_WIN64)
-#define DUK_USE_DATE_NOW_WINDOWS 1
-#endif
-
-/*
- * For whatever reason it is necessary to define this to resolve errors caused by both
- * duktape and juce including parts of the winsock2 API. There may be a better way to
- * resolve this.
- */
-#if defined (_WIN32) || defined (_WIN64)
-#define _WINSOCKAPI_
-#endif
-
-// Disable compiler warnings for external source files (duktape & yoga)
+// Disable compiler warnings for external source files (yoga)
 #if _MSC_VER
   #pragma warning(push)
   #pragma warning(disable : 4018) // signed/unsigned mismatch
@@ -73,22 +49,6 @@
  #pragma GCC diagnostic ignored "-Wswitch-enum"
  #pragma GCC diagnostic ignored "-Wunused-variable"
  #pragma GCC diagnostic ignored "-Wredundant-decls"
-#endif
-
-
-// We rely on the JUCE_DEBUG macro in duk_config.h at the moment to determine
-// when we enable duktape debug features. This is a bit of a hack to make this
-// work. We should be able to do better and may do so once we enable custom duktape
-// configs.
-#include <juce_core/system/juce_TargetPlatform.h>
-
-#include "duktape/src-noline/duktape.c"
-#include "duktape/extras/console/duk_console.c"
-
-#if defined (_WIN32) || defined (_WIN64)
-    #include "duktape/examples/debug-trans-socket/duk_trans_socket_windows.c"
-#else
-    #include "duktape/examples/debug-trans-socket/duk_trans_socket_unix.c"
 #endif
 
 #include "blueprint.h"

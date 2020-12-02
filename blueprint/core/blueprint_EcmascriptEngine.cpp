@@ -7,6 +7,80 @@
   ==============================================================================
 */
 
+/* We're careful to include the duktape source files before the module header
+ * file because `duktape.c` sets certain preprocessor definitions that enable
+ * necessary features in the duktape header. We need those defines to preempt
+ * the loading of the duktape header. This also, therefore, is the place for
+ * custom preprocessor definitions.
+ *
+ * We force Duktape to use a time provider on Windows that is compatible with
+ * Windows 7 SP1. It looks like W7SP1 is quite happy with plugins built with
+ * the 8.1 SDK, but the GetSystemTimePreciseAsFileTime() call used in here is
+ * just not supported without the 8.1 dll available.
+ */
+#if defined (_WIN32) || defined (_WIN64)
+#define DUK_USE_DATE_NOW_WINDOWS 1
+#endif
+
+/*
+ * For whatever reason it is necessary to define this to resolve errors caused by both
+ * duktape and juce including parts of the winsock2 API. There may be a better way to
+ * resolve this.
+ */
+#if defined (_WIN32) || defined (_WIN64)
+#define _WINSOCKAPI_
+#endif
+
+#if _MSC_VER
+ #pragma warning(push)
+#elif __clang__
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wextra-semi"
+ #pragma clang diagnostic ignored "-Wsign-conversion"
+ #pragma clang diagnostic ignored "-Wswitch-enum"
+ #pragma clang diagnostic ignored "-Wunused-parameter"
+ #if __clang_major__ > 10
+  #pragma clang diagnostic ignored "-Wc++98-compat-extra-semi"
+  #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+ #else
+  #pragma clang diagnostic ignored "-Wconversion"
+ #endif
+#elif __GNUC__
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #pragma GCC diagnostic ignored "-Wsign-conversion"
+ #pragma GCC diagnostic ignored "-Wswitch-enum"
+ #pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
+// We rely on the JUCE_DEBUG macro in duk_config.h at the moment to determine
+// when we enable duktape debug features. This is a bit of a hack to make this
+// work. We should be able to do better and may do so once we enable custom duktape
+// configs.
+#include <juce_core/system/juce_TargetPlatform.h>
+
+#include <duktape/src-noline/duktape.c>
+#include <duktape/extras/console/duk_console.c>
+
+#if defined (_WIN32) || defined (_WIN64)
+    #include <duktape/examples/debug-trans-socket/duk_trans_socket_windows.c>
+#else
+    #include <duktape/examples/debug-trans-socket/duk_trans_socket_unix.c>
+#endif
+
+#include <duktape/src-noline/duktape.h>
+#include <duktape/extras/console/duk_console.h>
+#include <duktape/examples/debug-trans-socket/duk_trans_socket.h>
+
+#if _MSC_VER
+#elif __clang__
+ #pragma clang diagnostic pop
+#elif __GNUC__
+ #pragma GCC diagnostic pop
+#endif
+
+#include "blueprint_EcmascriptEngine.h"
+
 
 namespace blueprint
 {
