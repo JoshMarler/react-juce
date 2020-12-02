@@ -2858,7 +2858,7 @@ typedef struct duk_hthread duk_context;
  * so refuse to compile.  Relax this if -ffast-math is tested to work.
  */
 #if defined(__FAST_MATH__)
-//#error __FAST_MATH__ defined, refusing to compile
+#error __FAST_MATH__ defined, refusing to compile
 #endif
 
 /*
