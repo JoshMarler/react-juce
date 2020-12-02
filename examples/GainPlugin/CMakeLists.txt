@@ -41,6 +41,11 @@ juce_generate_juce_header(GainPlugin)
 # that will be built into the target. This is a standard CMake command.
 target_sources(GainPlugin PRIVATE PluginProcessor.cpp)
 
+# Add an explicit include path here so that Blueprint's EcmascriptEngine can find
+# the included Duktape source. You can optionally point this elsewhere if you'd like to
+# include a custom Duktape build.
+target_include_directories(GainPlugin PRIVATE blueprint/)
+
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
 # project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use
 # of compile definitions to switch certain features on/off, so if there's a particular feature you
