@@ -80,6 +80,7 @@
 #endif
 
 #include "blueprint_EcmascriptEngine.h"
+#include "blueprint_TimeoutFunctionManager.h"
 
 
 namespace blueprint
@@ -163,6 +164,8 @@ namespace blueprint
             duk_push_pointer(ctxRawPtr, (void *) this);
             duk_put_prop_string(ctxRawPtr, -2, DUK_HIDDEN_SYMBOL("__EcmascriptEngineInstance__"));
             duk_pop(ctxRawPtr);
+
+            registerTimerGlobals();
         }
 
         //==============================================================================
@@ -266,6 +269,25 @@ namespace blueprint
             return result;
         }
 
+        void registerTimerGlobals()
+        {
+          const auto setTimeout = juce::var::NativeFunction([this](const juce::var::NativeFunctionArgs& args) {
+            return timeoutsManager.newTimeout(args);
+          });
+          registerNativeProperty("setTimeout", setTimeout);
+
+          const auto setInterval = juce::var::NativeFunction([this](const juce::var::NativeFunctionArgs& args) {
+            return timeoutsManager.newInterval(args);
+          });
+          registerNativeProperty("setInterval", setInterval);
+
+          const auto clearTimeout = juce::var::NativeFunction([this](const juce::var::NativeFunctionArgs& args) {
+            return timeoutsManager.clearTimeout(args);
+          });
+          registerNativeProperty("clearTimeout", clearTimeout);
+          registerNativeProperty("clearInterval", clearTimeout);
+        }
+
         void reset()
         {
             auto* ctxRawPtr = dukContext.get();
@@ -278,6 +300,9 @@ namespace blueprint
             // Clear the LambdaHelper release pool as duktape does not call object
             // finalizers in the event of an evaluation error or duk_pcall failure.
             persistentReleasePool.clear();
+
+            timeoutsManager.reset();
+            registerTimerGlobals();
         }
 
         //==============================================================================
@@ -348,12 +373,24 @@ namespace blueprint
                 for (int i = 0; i < nargs; ++i)
                     args.push_back(engine->readVarFromDukStack(engine->dukContext, i));
 
+                juce::var result;
+
                 // Now we can invoke the user method with its arguments
-                auto result = std::invoke(helper->callback, juce::var::NativeFunctionArgs(
-                    juce::var(),
-                    args.data(),
-                    static_cast<int>(args.size())
-                ));
+                try
+                {
+                    result = std::invoke(helper->callback, juce::var::NativeFunctionArgs(
+                        juce::var(),
+                        args.data(),
+                        static_cast<int>(args.size())
+                    ));
+                }
+                catch (Error& err)
+                {
+                    duk_push_current_function(ctx);
+                    err.stack = duk_safe_to_stacktrace(ctx, -1);
+                    err.context = detail::getContextDump(ctx);
+                    throw err;
+                }
 
                 // For an undefined result, return 0 to notify the duktape interpreter
                 if (result.isUndefined())
@@ -692,6 +729,7 @@ namespace blueprint
         int32_t nextMagicInt = 0;
         std::unordered_map<uint32_t, std::unique_ptr<LambdaHelper>> persistentReleasePool;
         std::array<std::unique_ptr<LambdaHelper>, 255> temporaryReleasePool;
+        TimeoutFunctionManager<Error> timeoutsManager;
 
         // The duk_context must be listed after the release pools so that it is destructed
         // before the pools. That way, as the duk_context is being freed and finalizing all

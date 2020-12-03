@@ -2,8 +2,6 @@
 import 'core-js/es6/set';
 import 'core-js/es6/map';
 
-import './lib/polyfill';
-
 import BlueprintBackend from './lib/BlueprintBackend';
 import BlueprintRenderer, { BlueprintTracedRenderer } from './lib/BlueprintRenderer';
 
