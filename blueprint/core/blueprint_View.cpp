@@ -165,46 +165,22 @@ namespace blueprint
 
     void View::paint (juce::Graphics& g)
     {
-        if (props.contains("border-path"))
+        //TODO: Feels like this can probably be smarter.
+        if (props.contains("border-svg") && props["border-svg"].toString().isNotEmpty())
         {
-            juce::Path p = juce::Drawable::parseSVGPath(props["border-path"].toString());
+            const juce::String source = props["border-svg"].toString();
 
-            if (props.contains("border-color"))
-            {
-                juce::Colour c = juce::Colour::fromString(props["border-color"].toString());
-                float borderWidth = props.getWithDefault("border-width", 1.0);
+            auto drawable = juce::Drawable::createFromImageData(
+                    source.toRawUTF8(),
+                    source.getNumBytesAsUTF8());
 
-                g.setColour(c);
-                g.strokePath(p, juce::PathStrokeType(borderWidth));
-            }
-
-            g.reduceClipRegion(p);
+            //TODO: Additional work for opacity or is current setAlpha implementation enough?
+            drawable->drawWithin(g, getLocalBounds().toFloat(), juce::RectanglePlacement::centred, 1.0f);
         }
-        else if (props.contains("border-color") && props.contains("border-width"))
-        {
-            juce::Path border;
-            auto c = juce::Colour::fromString(props["border-color"].toString());
-            float borderWidth = props["border-width"];
-
-            // Note this little bounds trick. When a Path is stroked, the line width extends
-            // outwards in both directions from the coordinate line. If the coordinate
-            // line is the exact bounding box then the component clipping makes the corners
-            // appear to have different radii on the interior and exterior of the box.
-            auto borderBounds = getLocalBounds().toFloat().reduced(borderWidth * 0.5f);
-            auto width  = borderBounds.getWidth();
-            auto height = borderBounds.getHeight();
-            auto minLength = std::min(width, height);
-            float borderRadius = getResolvedLengthProperty("border-radius", minLength);
-
-            border.addRoundedRectangle(borderBounds, borderRadius);
-            g.setColour(c);
-            g.strokePath(border, juce::PathStrokeType(borderWidth));
-            g.reduceClipRegion(border);
-        }
-
-        if (props.contains("background-color"))
+        else if (props.contains("background-color"))
         {
             juce::Colour c = juce::Colour::fromString(props["background-color"].toString());
+
 
             if (!c.isTransparent())
                 g.fillAll(c);
