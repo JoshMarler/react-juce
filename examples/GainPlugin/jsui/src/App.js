@@ -1,14 +1,17 @@
 import AnimatedFlexBoxExample from './AnimatedFlexBox';
 import Label from './Label';
 import Meter from './Meter';
-import React, { Component } from 'react';
-import Slider from './Slider';
 import ParameterToggleButton from './ParameterToggleButton'
+import ParameterSlider from './ParameterSlider'
+
+import React, { Component } from 'react';
+
 import {
   Canvas,
   Image,
   Text,
   View,
+  Slider,
 } from 'react-juce';
 
 
@@ -51,13 +54,21 @@ class App extends Component {
     const muteBackgroundColor = this.state.muted ? 'ff66FDCF' : 'ff17191f';
     const muteTextColor = this.state.muted ? 'ff17191f' : 'ff66FDCF';
 
+    const sliderFillColor  = 'ff66FDCF';
+    const sliderTrackColor = 'ff626262';
+
     return (
       <View {...styles.container}>
         <View {...styles.content}>
           <Image source={require('./logo.png')} {...styles.logo} />
-          <Slider paramId="MainGain" {...styles.knob}>
+          <ParameterSlider
+            paramId="MainGain"
+            onDraw={Slider.drawRotary(sliderTrackColor, sliderFillColor)}
+            mapDragGestureToValue={Slider.rotaryGestureMap}
+            {...styles.knob}
+          >
             <Label paramId="MainGain" {...styles.label} />
-          </Slider>
+          </ParameterSlider>
           <Meter {...styles.meter} />
           <Canvas {...styles.canvas} animate={true} onDraw={animatedDraw} />
           <ParameterToggleButton
@@ -102,9 +113,12 @@ const styles = {
   knob: {
     'min-width': 100.0,
     'min-height': 100.0,
-    'width': '50%',
-    'height': '50%',
+    'width': '55%',
+    'height': '55%',
     'margin-top': 15,
+    'margin-bottom': 15,
+    'justify-content': 'center',
+    'align-items': 'center',
   },
   label: {
     'flex': 1.0,

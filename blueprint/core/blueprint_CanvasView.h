@@ -419,11 +419,7 @@ namespace blueprint
                         //TODO; Handle antiClockWise
                         //bool        antiClockWise = args.arguments[5];
 
-                        const float width  = radius * 2;
-                        const float height = radius * 2;
-
-                        path.addArc(x, y, width, height, startAngle, endAngle);
-
+                        path.addCentredArc(x, y, radius, radius, 0.0f, startAngle, endAngle, false);
                         return juce::var();
                     }
             });
