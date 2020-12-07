@@ -150,7 +150,9 @@ namespace blueprint
         DBG("");
         DBG(err.what());
 
-        errorText = std::make_unique<juce::AttributedString>(err.stack);
+        errorText = std::make_unique<juce::AttributedString>(err.what());
+        errorText->append("\n\n");
+        errorText->append(err.stack);
 
 #if JUCE_WINDOWS
         errorText->setFont(juce::Font("Lucida Console", 18, juce::Font::FontStyleFlags::plain));

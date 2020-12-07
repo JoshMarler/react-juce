@@ -14,6 +14,5 @@
     "skipLibCheck": true,
     "jsx": "react"
   },
-  "include": ["./src/**/*"],
-  "exclude": ["./src/lib/polyfill.js"]
+  "include": ["./src/**/*"]
 }

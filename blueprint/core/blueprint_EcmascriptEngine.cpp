@@ -252,8 +252,101 @@ namespace blueprint
             return result;
         }
 
+        struct TimeoutFunctionManager : private juce::MultiTimer
+        {
+            ~TimeoutFunctionManager() override {
+                for(const auto &[id, timer] : timeoutFunctions)
+                    stopTimer(id);
+            }
+
+            juce::var clearTimeout(const int id)
+            {
+                stopTimer(id);
+                const auto f = timeoutFunctions.find(id);
+                if(f != timeoutFunctions.cend())
+                    timeoutFunctions.erase(f);
+                return juce::var();
+            }
+
+            int newTimeout(const juce::var::NativeFunction f, const int timeoutMillis, const std::vector<juce::var>&& args, const bool repeats=false)
+            {
+                static int nextId = 0;
+                timeoutFunctions.emplace(nextId, TimeoutFunction(f, std::move(args), repeats));
+                startTimer(nextId, timeoutMillis);
+                return nextId++;
+            }
+
+            void timerCallback(int id) override
+            {
+                const auto f = timeoutFunctions.find(id);
+                if(f != timeoutFunctions.cend())
+                {
+                    const auto cb = f->second;
+                    std::invoke(cb.f, juce::var::NativeFunctionArgs(juce::var(), cb.args.data(), static_cast<int>(cb.args.size())));
+                    if(!cb.repeats)
+                    {
+                        stopTimer(id);
+                        timeoutFunctions.erase(f);
+                    }
+                }
+            }
+
+            private:
+                struct TimeoutFunction
+                {
+                    TimeoutFunction(const juce::var::NativeFunction _f, const std::vector<juce::var> &&_args, const bool _repeats=false)
+                    : f(_f), args(std::move(_args)), repeats(_repeats) {}
+
+                    const juce::var::NativeFunction f;
+                    std::vector<juce::var> args;
+                    const bool repeats;
+                };
+
+                std::map<int, TimeoutFunction> timeoutFunctions;
+        };
+
+        // IsSetter is true for setTimeout / setInterval
+        // and false for clearTimeout / clearInterval
+        template <bool IsSetter = false, bool Repeats = false, typename MethodType>
+        void registerNativeTimerFunction(const char* name, MethodType method)
+        {
+            registerNativeProperty(name, juce::var::NativeFunction([this, name, method] (const juce::var::NativeFunctionArgs& _args) -> juce::var {
+                if constexpr (IsSetter)
+                {
+                    if(_args.numArguments < 2 || !_args.arguments[0].isMethod() || !_args.arguments[1].isDouble())
+                        throw Error(juce::String(name) + " requires a callback and time in milliseconds");
+                    // build a vector holding all additional arguments
+                    std::vector<juce::var> args(_args.numArguments - 2);
+                    for(auto i=2; i<_args.numArguments; i++)
+                        args[i-2] = _args.arguments[i];
+                    return (this->timeoutsManager.get()->*method)(_args.arguments[0].getNativeFunction(), _args.arguments[1], std::move(args), Repeats);
+                }
+                else
+                {
+                    if(_args.numArguments < 1 || !_args.arguments[0].isDouble())
+                        throw Error(juce::String(name) + " requires an integer ID of the timer to clear");
+                    return (this->timeoutsManager.get()->*method)(_args.arguments[0]);
+                }
+            }));
+        }
+
+        void registerTimerGlobals()
+        {
+            registerNativeTimerFunction<true>(
+                "setTimeout", &TimeoutFunctionManager::newTimeout
+            );
+            registerNativeTimerFunction<true, true>(
+                "setInterval", &TimeoutFunctionManager::newTimeout
+            );
+            registerNativeTimerFunction("clearTimeout", &TimeoutFunctionManager::clearTimeout);
+            registerNativeTimerFunction("clearInterval", &TimeoutFunctionManager::clearTimeout);
+        }
+
         void reset()
         {
+            // Clear out any timer callbacks
+            timeoutsManager = std::make_unique<TimeoutFunctionManager>();
+
             // Allocate a new js heap
             dukContext = std::shared_ptr<duk_context>(
                 duk_create_heap (nullptr, nullptr, nullptr, nullptr, detail::fatalErrorHandler),
@@ -272,6 +365,9 @@ namespace blueprint
 
             // Clear out any lambdas attached to the previous context instance
             persistentReleasePool.clear();
+
+            // Register our various timeout-related native functions
+            registerTimerGlobals();
         }
 
         //==============================================================================
@@ -342,12 +438,22 @@ namespace blueprint
                 for (int i = 0; i < nargs; ++i)
                     args.push_back(engine->readVarFromDukStack(engine->dukContext, i));
 
+                juce::var result;
+
                 // Now we can invoke the user method with its arguments
-                auto result = std::invoke(helper->callback, juce::var::NativeFunctionArgs(
-                    juce::var(),
-                    args.data(),
-                    static_cast<int>(args.size())
-                ));
+                try
+                {
+                    result = std::invoke(helper->callback, juce::var::NativeFunctionArgs(
+                        juce::var(),
+                        args.data(),
+                        static_cast<int>(args.size())
+                    ));
+                }
+                catch (Error& err)
+                {
+                    duk_push_error_object(ctx, DUK_ERR_TYPE_ERROR, err.what());
+                    return duk_throw(ctx);
+                }
 
                 // For an undefined result, return 0 to notify the duktape interpreter
                 if (result.isUndefined())
@@ -686,6 +792,7 @@ namespace blueprint
         int32_t nextMagicInt = 0;
         std::unordered_map<uint32_t, std::unique_ptr<LambdaHelper>> persistentReleasePool;
         std::array<std::unique_ptr<LambdaHelper>, 255> temporaryReleasePool;
+        std::unique_ptr<TimeoutFunctionManager> timeoutsManager;
 
         // The duk_context must be listed after the release pools so that it is destructed
         // before the pools. That way, as the duk_context is being freed and finalizing all
