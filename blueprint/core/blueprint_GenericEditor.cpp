@@ -87,7 +87,7 @@ namespace blueprint
     void BlueprintGenericEditor::timerCallback()
     {
         // Iterate here to dispatch any updated parameter values
-        for (int i = 0; i < paramReadouts.size(); ++i)
+        for (size_t i = 0; i < paramReadouts.size(); ++i)
         {
             auto& pr = paramReadouts[i];
 
@@ -107,7 +107,7 @@ namespace blueprint
 
                 appRoot.dispatchEvent(
                     "parameterValueChange",
-                    i,
+                    static_cast<int>(i),
                     id,
                     defaultValue,
                     value,
