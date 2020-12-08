@@ -11,7 +11,7 @@
     name:               Blueprint
     description:        A React.js render backend targeting JUCE Components.
     minimumCppStandard: 17
-    dependencies:       juce_core, juce_graphics, juce_gui_basics
+    dependencies:       juce_gui_basics
     searchpaths:        ./duktape/src-noline/ ./yoga
    END_JUCE_MODULE_DECLARATION
 *******************************************************************************/
@@ -20,11 +20,11 @@
 
 #define BLUEPRINT_H_INCLUDED
 
-
-#include <juce_core/juce_core.h>
-#include <juce_graphics/juce_graphics.h>
 #include <juce_gui_basics/juce_gui_basics.h>
-#include <juce_audio_processors/juce_audio_processors.h>
+
+#if JUCE_MODULE_AVAILABLE_juce_audio_processors
+    #include <juce_audio_processors/juce_audio_processors.h>
+#endif
 
 #include "yoga/yoga/YGMacros.h"
 
@@ -93,7 +93,11 @@
 #include "core/blueprint_AppHarness.h"
 #include "core/blueprint_EcmascriptEngine.h"
 #include "core/blueprint_CanvasView.h"
-#include "core/blueprint_GenericEditor.h"
+
+#if JUCE_MODULE_AVAILABLE_juce_audio_processors
+    #include "core/blueprint_GenericEditor.h"
+#endif
+
 #include "core/blueprint_ImageView.h"
 #include "core/blueprint_FileWatcher.h"
 #include "core/blueprint_RawTextView.h"
