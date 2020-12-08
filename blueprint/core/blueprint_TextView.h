@@ -1,52 +1,35 @@
-/*
-  ==============================================================================
-
-    blueprint_TextView.h
-    Created: 28 Nov 2018 3:27:27pm
-
-  ==============================================================================
-*/
-
 #pragma once
-
-#include "blueprint_View.h"
-
 
 namespace blueprint
 {
-
-    //==============================================================================
     /** The TextView class is a core container abstraction for declaring text components
         within Blueprint's layout system.
-     */
-    class TextView : public View
+    */
+    class TextView final : public View
     {
     public:
         //==============================================================================
+        /** */
         TextView() = default;
 
         //==============================================================================
         /** Assembles a Font from the current node properties. */
-        juce::Font getFont()
+        juce::Font getFont() const
         {
-            float fontHeight = props.getWithDefault("font-size", 12.0f);
-            int textStyleFlags = props.getWithDefault("font-style", 0);
+            const auto fontHeight = static_cast<float> (props.getWithDefault ("font-size", 12.0f));
 
             juce::Font f (fontHeight);
 
-            if (props.contains("font-family"))
-                f = juce::Font (props["font-family"], fontHeight, textStyleFlags);
+            if (props.contains ("font-family"))
+                f = juce::Font (props["font-family"], fontHeight, static_cast<int> (props.getWithDefault ("font-style", 0)));
 
-            f.setExtraKerningFactor(props.getWithDefault("kerning-factor", 0.0));
+            f.setExtraKerningFactor (props.getWithDefault ("kerning-factor", 0.0));
             return f;
         }
 
         /** Constructs a TextLayout from all the children string values. */
-        juce::TextLayout getTextLayout (float maxWidth)
+        juce::TextLayout getTextLayout (float maxWidth) const
         {
-            juce::String hexColor = props.getWithDefault("color", "ff000000");
-            juce::Colour colour = juce::Colour::fromString(hexColor);
-            int just = props.getWithDefault("justification", 1);
             juce::String text;
 
             // TODO: Right now a <Text> element maps 1:1 to a TextView instance,
@@ -56,53 +39,43 @@ namespace blueprint
             // map to a juce::AttributedString and carry their own properties. This allows
             // bolding single words inline, for example, and setting line-height, etc.
             for (auto& c : getChildren())
-                if (RawTextView* v = dynamic_cast<RawTextView*>(c))
-                    text += v->getText();
+                if (auto* v = dynamic_cast<RawTextView*>(c))
+                    text << v->getText();
 
             juce::AttributedString as (text);
             juce::TextLayout tl;
 
             as.setLineSpacing(props.getWithDefault("line-spacing", 1.0f));
             as.setFont(getFont());
-            as.setColour(colour);
-            as.setJustification(just);
+            as.setColour(juce::Colour::fromString (props.getWithDefault ("color", "ff000000").toString()));
+            as.setJustification (static_cast<int> (props.getWithDefault ("justification", 1)));
 
-            if (props.contains("word-wrap"))
+            if (props.contains ("word-wrap"))
             {
-                int wwValue = props["word-wrap"];
-
-                switch (wwValue)
+                switch (static_cast<int> (props["word-wrap"]))
                 {
-                    case 0:
-                        as.setWordWrap(juce::AttributedString::WordWrap::none);
-                        break;
-                    case 2:
-                        as.setWordWrap(juce::AttributedString::WordWrap::byChar);
-                        break;
-                    case 1:
-                    default:
-                        as.setWordWrap(juce::AttributedString::WordWrap::byWord);
-                        break;
-
+                    case 0:     as.setWordWrap (juce::AttributedString::WordWrap::none); break;
+                    case 2:     as.setWordWrap (juce::AttributedString::WordWrap::byChar); break;
+                    default:    as.setWordWrap (juce::AttributedString::WordWrap::byWord); break;
                 }
             }
 
-            tl.createLayout(as, maxWidth);
+            tl.createLayout (as, maxWidth);
             return tl;
         }
 
         //==============================================================================
+        /** @internal */
         void paint (juce::Graphics& g) override
         {
-            auto floatBounds = getLocalBounds().toFloat();
+            const auto floatBounds = getLocalBounds().toFloat();
 
-            View::paint(g);
-            getTextLayout(floatBounds.getWidth()).draw(g, floatBounds);
+            View::paint (g);
+            getTextLayout (floatBounds.getWidth()).draw (g, floatBounds);
         }
 
     private:
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextView)
     };
-
 }

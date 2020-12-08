@@ -1,39 +1,22 @@
-/*
-  ==============================================================================
-
-    blueprint_ReactApplicationRoot.h
-    Created: 9 Dec 2018 10:20:37am
-
-  ==============================================================================
-*/
-
 #pragma once
-
-#include "blueprint_EcmascriptEngine.h"
-#include "blueprint_FileWatcher.h"
-#include "blueprint_View.h"
-#include "blueprint_ViewManager.h"
-
 
 namespace blueprint
 {
-
-    //==============================================================================
     /** The ReactApplicationRoot class is the primary point of coordination between
-     *  the React.js reconciler and the native View heirarchy.
-     *
-     *  By default, ReactApplicationRoot implements a generic error handler which will
-     *  catch errors from JavaScript code and display an error screen with a stack trace
-     *  and error message. This generic error handler is enabled by default in Debug builds,
-     *  and in Release builds such errors will be thrown, with the intention that the end
-     *  user should catch and handle them appropriately.
-     *
-     *  ReactApplicationRoot also provides debug functionality similar to React Native.
-     *  Users can hit CTRL-D/CMD-D when the ReactApplicationRoot component has focus,
-     *  causing the application to suspend execution and await connection from a debug client.
-     *  See the documentation for details on setting up and connecting a debugger.
-     */
-    class ReactApplicationRoot : public View
+        the React.js reconciler and the native View heirarchy.
+
+        By default, ReactApplicationRoot implements a generic error handler which will
+        catch errors from JavaScript code and display an error screen with a stack trace
+        and error message. This generic error handler is enabled by default in Debug builds,
+        and in Release builds such errors will be thrown, with the intention that the end
+        user should catch and handle them appropriately.
+
+        ReactApplicationRoot also provides debug functionality similar to React Native.
+        Users can hit CTRL-D/CMD-D when the ReactApplicationRoot component has focus,
+        causing the application to suspend execution and await connection from a debug client.
+        See the documentation for details on setting up and connecting a debugger.
+    */
+    class ReactApplicationRoot final : public View
     {
     public:
         //==============================================================================
@@ -52,23 +35,11 @@ namespace blueprint
         juce::var resetAfterCommit();
 
         //==============================================================================
-        /** Override the default resized behavior. */
-        void resized() override;
-
-        /** Override the default paint behavior. */
-        void paint(juce::Graphics& g) override;
-
-#if JUCE_DEBUG
-        /** In debug builds, we add a keypress handler to toggle debugging. */
-        bool keyPressed(const juce::KeyPress& key) override;
-#endif
-
-        //==============================================================================
         /** Evaluates a javascript bundle file in the EcmascriptEngine.
-         *
-         * Provides default error handling to display the red screen with error
-         * message and stack trace.
-         */
+
+            Provides default error handling to display the red screen with error
+            message and stack trace.
+        */
         juce::var evaluate(const juce::File& bundle);
 
         /** Install a custom view type into the view manager. */
@@ -83,12 +54,15 @@ namespace blueprint
             // We early return here in the event that we're currently showing the red error
             // screen. This prevents subsequent errors caused by dispatching events with an
             // incorrect engine state from overwriting the first error message.
-            if (errorText)
+            if (errorText != nullptr)
                 return;
 
-            try {
+            try
+            {
                 engine->invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
-            } catch (const EcmascriptEngine::Error& err) {
+            }
+            catch (const EcmascriptEngine::Error& err)
+            {
                 handleRuntimeError(err);
             }
         }
@@ -102,65 +76,73 @@ namespace blueprint
             // We early return here in the event that we're currently showing the red error
             // screen. This prevents subsequent errors caused by dispatching events with an
             // incorrect engine state from overwriting the first error message.
-            if (errorText)
+            if (errorText != nullptr)
                 return;
 
-            try {
+            try
+            {
                 engine->invoke("__BlueprintNative__.dispatchViewEvent", std::forward<T>(args)...);
-            } catch (const EcmascriptEngine::Error& err) {
+            }
+            catch (const EcmascriptEngine::Error& err)
+            {
                 handleRuntimeError(err);
             }
         }
 
         //==============================================================================
         /** Displays the red error screen for the given error. */
-        void handleRuntimeError(const EcmascriptEngine::Error& err);
+        void handleRuntimeError (const EcmascriptEngine::Error& err);
 
         /** Clears the internal EcmascriptEngine and view table. */
         void reset();
 
         /** Installs the rendering hooks needed by the React reconciler into the
-         *  EcmascriptEngine environment.
-         *
-         *  Should be called after every `reset` and before evaluating the bundle.
-         */
+            EcmascriptEngine environment.
+
+            Should be called after every `reset` and before evaluating the bundle.
+        */
         void bindNativeRenderingHooks();
+
+        //==============================================================================
+        void resized() override;
+        void paint (juce::Graphics& g) override;
+
+       #if JUCE_DEBUG || DOXYGEN
+        /** In debug builds, we add a keypress handler to toggle debugging. */
+        bool keyPressed (const juce::KeyPress& key) override;
+       #endif
 
     private:
         //==============================================================================
-        template <int NumParams, typename MethodType>
-        juce::var invokeFromNativeFunction (MethodType method, const juce::var::NativeFunctionArgs& args)
-        {
-            static_assert (NumParams <= 4);
-
-            if (args.numArguments != NumParams)
-                return juce::var::undefined();
-
-            if constexpr (NumParams == 0)    return (this->*method)();
-            if constexpr (NumParams == 1)    return (this->*method)(args.arguments[0]);
-            if constexpr (NumParams == 2)    return (this->*method)(args.arguments[0], args.arguments[1]);
-            if constexpr (NumParams == 3)    return (this->*method)(args.arguments[0], args.arguments[1], args.arguments[2]);
-            if constexpr (NumParams == 4)    return (this->*method)(args.arguments[0], args.arguments[1], args.arguments[2], args.arguments[3]);
-
-            return {};
-        }
-
-        template <int NumParams, typename MethodType>
-        void addMethodBinding (const char* ns, const char* name, MethodType method) {
-            engine->registerNativeMethod(
-                ns,
-                name,
-                [this, method] (const juce::var::NativeFunctionArgs& args) -> juce::var {
-                    return invokeFromNativeFunction<NumParams>(method, args);
-                }
-            );
-        }
+        ViewManager viewManager;
+        std::shared_ptr<EcmascriptEngine> engine;
+        std::unique_ptr<juce::AttributedString> errorText;
 
         //==============================================================================
-        ViewManager viewManager;
+        template<int numParams, typename MethodType>
+        juce::var invokeFromNativeFunction (MethodType method, const juce::var::NativeFunctionArgs& args)
+        {
+            static_assert (numParams >= 0 && numParams <= 4);
 
-        std::shared_ptr<EcmascriptEngine>       engine;
-        std::unique_ptr<juce::AttributedString> errorText;
+            if (args.numArguments != numParams)
+                return juce::var::undefined();
+
+            if constexpr (numParams == 0) return (this->*method)();
+            if constexpr (numParams == 1) return (this->*method)(args.arguments[0]);
+            if constexpr (numParams == 2) return (this->*method)(args.arguments[0], args.arguments[1]);
+            if constexpr (numParams == 3) return (this->*method)(args.arguments[0], args.arguments[1], args.arguments[2]);
+            if constexpr (numParams == 4) return (this->*method)(args.arguments[0], args.arguments[1], args.arguments[2], args.arguments[3]);
+        }
+
+        template<int numParams, typename MethodType>
+        void addMethodBinding (const char* ns, const char* name, MethodType method)
+        {
+            engine->registerNativeMethod (ns, name,
+                                          [this, method] (const juce::var::NativeFunctionArgs& args)
+                                          {
+                                              return invokeFromNativeFunction<numParams>(method, args);
+                                          });
+        }
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReactApplicationRoot)

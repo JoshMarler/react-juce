@@ -1,0 +1,37 @@
+* text eol=crlf
+*.sh text eol=lf
+
+*.7z binary
+*.aif binary
+*.aiff binary
+*.asf binary
+*.eot binary
+*.fla binary
+*.flac binary
+*.flv binary
+*.gif binary
+*.gz binary
+*.ico binary
+*.jpeg binary
+*.jpg binary
+*.mid binary
+*.mov binary
+*.mp2 binary
+*.mp3 binary
+*.mp4 binary
+*.ogg binary
+*.otc binary
+*.otf binary
+*.pdf binary
+*.png binary
+*.pyc binary
+*.swf binary
+*.tga binary
+*.ttc binary
+*.ttf binary
+*.wav binary
+*.wma binary
+*.wm binary
+*.wmv binary
+*.woff binary
+*.zip binary

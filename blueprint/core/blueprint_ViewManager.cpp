@@ -1,35 +1,17 @@
-/*
-  ==============================================================================
-
-    blueprint_ViewManager.cpp
-    Created: 21 May 2020 15:32:00am
-
-  ==============================================================================
-*/
-
-#include "blueprint_ViewManager.h"
-#include "blueprint_CanvasView.h"
-#include "blueprint_ImageView.h"
-#include "blueprint_ScrollView.h"
-#include "blueprint_ScrollViewContentShadowView.h"
-#include "blueprint_TextView.h"
-#include "blueprint_TextShadowView.h"
-
 namespace blueprint
 {
-
     namespace
     {
-
         /** A quick helper for registering view types. */
         template <typename ViewType, typename ShadowViewType>
         struct GenericViewFactory
         {
-            ViewManager::ViewPair operator()() {
+            ViewManager::ViewPair operator()()
+            {
                 auto view = std::make_unique<ViewType>();
                 auto shadowView = std::make_unique<ShadowViewType>(view.get());
 
-                return {std::move(view), std::move(shadowView)};
+                return { std::move(view), std::move(shadowView) };
             }
         };
 
@@ -86,19 +68,19 @@ namespace blueprint
 
         // ShadowView::setProperty returns true when a layout prop
         // has been set.  Otherwise set on the view and repaint
-        if(!shadow->setProperty(name, value)) {
-          view->setProperty(name, value);
-          view->repaint();
+        if(! shadow->setProperty(name, value))
+        {
+            view->setProperty(name, value);
+            view->repaint();
         }
     }
 
     void ViewManager::setRawTextValue(ViewId viewId, const juce::String& value)
     {
-        View* view = getViewHandle(viewId).first;
+        auto* view = getViewHandle(viewId).first;
 
         if (auto* rawTextView = dynamic_cast<RawTextView*>(view))
         {
-            // Update text
             rawTextView->setText(value);
 
             if (auto* parent = dynamic_cast<TextView*>(rawTextView->getParentComponent()))
@@ -197,9 +179,7 @@ namespace blueprint
             // ScrollView mounting a juce::Viewport which is a juce::Component but
             // not a juce::View. Such elements aren't in our table and can be skipped
             if (auto* childView = dynamic_cast<View*>(child))
-            {
                 enumerateChildViewIds(ids, childView);
-            }
         }
 
         ids.push_back(v->getViewId());
@@ -207,14 +187,11 @@ namespace blueprint
 
     void ViewManager::performRootShadowTreeLayout()
     {
-        ShadowView* root = shadowViewTable[rootId].get();
-        jassert(root);
+        auto* root = shadowViewTable[rootId].get();
+        jassert(root != nullptr);
 
-        juce::Rectangle<float> rootBounds = root->getAssociatedView()->getLocalBounds().toFloat();
-        const float width = rootBounds.getWidth();
-        const float height = rootBounds.getHeight();
-
-        root->computeViewLayout(width, height);
+        const auto rootBounds = root->getAssociatedView()->getLocalBounds().toFloat();
+        root->computeViewLayout (rootBounds.getWidth(), rootBounds.getHeight());
         root->flushViewLayout();
     }
 
@@ -261,7 +238,7 @@ namespace blueprint
     juce::Identifier ViewManager::getRootViewRefId()
     {
        View* root = shadowViewTable[rootId]->getAssociatedView();
-       jassert(root);
+       jassert(root != nullptr);
 
        return root->getRefId();
     }

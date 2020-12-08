@@ -1,26 +1,16 @@
-/*
-  ==============================================================================
-
-    blueprint_View.cpp
-    Created: 26 Nov 2018 3:38:37am
-
-  ==============================================================================
-*/
-
-
 namespace blueprint
 {
-
     namespace detail
     {
         juce::var getMouseEventRelatedTarget(const juce::MouseEvent& e, const blueprint::View& view)
         {
-            juce::Component *topParent              = view.getTopLevelComponent();
-            const juce::MouseEvent topRelativeEvent = e.getEventRelativeTo(topParent);
+            auto* topParent = view.getTopLevelComponent();
+            jassert (topParent != nullptr);
 
-            juce::Component *componentUnderMouse = topParent->getComponentAt(topRelativeEvent.x, topRelativeEvent.y);
+            const auto topRelativeEvent = e.getEventRelativeTo(topParent);
 
-            if (auto v = dynamic_cast<blueprint::View*>(componentUnderMouse))
+            auto* componentUnderMouse = topParent->getComponentAt (topRelativeEvent.x, topRelativeEvent.y);
+            if (auto* v = dynamic_cast<blueprint::View*>(componentUnderMouse))
                 return v->getViewId();
 
             // return null relatedTarget if event occurred from a non-View component.
@@ -64,7 +54,6 @@ namespace blueprint
                 {"keyCode", ke.getKeyCode()},
             }, view);
         }
-
     }
 
     //==============================================================================
@@ -86,12 +75,12 @@ namespace blueprint
         {
             switch (static_cast<int> (value))
             {
-                case 0:      setInterceptsMouseClicks (false, false);  break;
-                case 1:      setInterceptsMouseClicks (true,  true);   break;
-                case 2:      setInterceptsMouseClicks (true,  false);  break;
-                case 3:      setInterceptsMouseClicks (false, true);   break;
+                case 0:     setInterceptsMouseClicks (false, false);  break;
+                case 1:     setInterceptsMouseClicks (true,  true);   break;
+                case 2:     setInterceptsMouseClicks (true,  false);  break;
+                case 3:     setInterceptsMouseClicks (false, true);   break;
 
-                default:     setInterceptsMouseClicks (true,  true);   break;
+                default:    setInterceptsMouseClicks (true,  true);   break;
             }
         }
 
@@ -107,7 +96,6 @@ namespace blueprint
 
     void View::addChild (View* childView, int index)
     {
-        // Add the child view to our component heirarchy.
         addAndMakeVisible(childView, index);
     }
 
@@ -120,22 +108,22 @@ namespace blueprint
         // Update transforms
         if (props.contains(transformMatrix))
         {
-            const juce::var& matrix = props[transformMatrix];
-            if(matrix.isArray() && matrix.getArray()->size() >= 16) {
-              const juce::Array<juce::var> &m = *matrix.getArray();
+            const auto& matrix = props[transformMatrix];
 
-              auto cxRelParent = cachedFloatBounds.getX() + cachedFloatBounds.getWidth() * 0.5f;
-              auto cyRelParent = cachedFloatBounds.getY() + cachedFloatBounds.getHeight() * 0.5f;
+            if(matrix.isArray() && matrix.getArray()->size() >= 16)
+            {
+                const auto &m = *matrix.getArray();
 
-              const auto translateToOrigin = juce::AffineTransform::translation(cxRelParent * -1.0f, cyRelParent * -1.0f);
-              // set 2d homogeneous matrix using 3d homogeneous matrix
-              const auto transform = juce::AffineTransform(
-                m[0], m[1], m[3],
-                m[4], m[5], m[7]
-              );
-              const auto translateFromOrigin = juce::AffineTransform::translation(cxRelParent, cyRelParent);
+                auto cxRelParent = cachedFloatBounds.getX() + cachedFloatBounds.getWidth() * 0.5f;
+                auto cyRelParent = cachedFloatBounds.getY() + cachedFloatBounds.getHeight() * 0.5f;
 
-              setTransform(translateToOrigin.followedBy(transform).followedBy(translateFromOrigin));
+                const auto translateToOrigin = juce::AffineTransform::translation(cxRelParent * -1.0f, cyRelParent * -1.0f);
+
+                // set 2d homogeneous matrix using 3d homogeneous matrix
+                const auto transform = juce::AffineTransform(m[0], m[1], m[3], m[4], m[5], m[7]);
+                const auto translateFromOrigin = juce::AffineTransform::translation(cxRelParent, cyRelParent);
+
+                setTransform(translateToOrigin.followedBy(transform).followedBy(translateFromOrigin));
             }
         }
     }
@@ -143,36 +131,32 @@ namespace blueprint
     //==============================================================================
     float View::getResolvedLengthProperty (const juce::String& name, float axisLength)
     {
-        float ret = 0;
-
         if (props.contains(name))
         {
             const auto& v = props[name];
 
             if (v.isString() && v.toString().trim().endsWithChar('%'))
             {
-                float pctVal = v.toString().retainCharacters("-1234567890.").getFloatValue();
-                ret = axisLength * (pctVal / 100.0f);
+                const auto pctVal = v.toString().retainCharacters("-1234567890.").getFloatValue();
+                return axisLength * (pctVal / 100.0f);
             }
-            else
-            {
-                ret = (float) v;
-            }
+
+            return (float) v;
         }
 
-        return ret;
+        return 0.0f;
     }
 
     void View::paint (juce::Graphics& g)
     {
         if (props.contains("border-path"))
         {
-            juce::Path p = juce::Drawable::parseSVGPath(props["border-path"].toString());
+            auto p = juce::Drawable::parseSVGPath(props["border-path"].toString());
 
             if (props.contains("border-color"))
             {
-                juce::Colour c = juce::Colour::fromString(props["border-color"].toString());
-                float borderWidth = props.getWithDefault("border-width", 1.0);
+                auto c = juce::Colour::fromString(props["border-color"].toString());
+                auto borderWidth = (float) props.getWithDefault("border-width", 1.0f);
 
                 g.setColour(c);
                 g.strokePath(p, juce::PathStrokeType(borderWidth));
@@ -182,31 +166,31 @@ namespace blueprint
         }
         else if (props.contains("border-color") && props.contains("border-width"))
         {
-            juce::Path border;
-            auto c = juce::Colour::fromString(props["border-color"].toString());
-            float borderWidth = props["border-width"];
+            const auto c = juce::Colour::fromString(props["border-color"].toString());
+            const auto borderWidth = (float) props["border-width"];
 
             // Note this little bounds trick. When a Path is stroked, the line width extends
             // outwards in both directions from the coordinate line. If the coordinate
             // line is the exact bounding box then the component clipping makes the corners
             // appear to have different radii on the interior and exterior of the box.
-            auto borderBounds = getLocalBounds().toFloat().reduced(borderWidth * 0.5f);
-            auto width  = borderBounds.getWidth();
-            auto height = borderBounds.getHeight();
-            auto minLength = std::min(width, height);
-            float borderRadius = getResolvedLengthProperty("border-radius", minLength);
+            const auto borderBounds = getLocalBounds().toFloat().reduced(borderWidth * 0.5f);
+            const auto width  = borderBounds.getWidth();
+            const auto height = borderBounds.getHeight();
+            const auto minLength = std::min(width, height);
+            const auto borderRadius = getResolvedLengthProperty("border-radius", minLength);
 
+            juce::Path border;
             border.addRoundedRectangle(borderBounds, borderRadius);
+
             g.setColour(c);
-            g.strokePath(border, juce::PathStrokeType(borderWidth));
+            g.strokePath (border, juce::PathStrokeType { borderWidth });
             g.reduceClipRegion(border);
         }
 
         if (props.contains("background-color"))
         {
-            juce::Colour c = juce::Colour::fromString(props["background-color"].toString());
-
-            if (!c.isTransparent())
+            const auto c = juce::Colour::fromString(props["background-color"].toString());
+            if (! c.isTransparent())
                 g.fillAll(c);
         }
     }
@@ -214,12 +198,9 @@ namespace blueprint
     //==============================================================================
     void View::resized()
     {
-        auto w = cachedFloatBounds.getWidth();
-        auto h = cachedFloatBounds.getHeight();
-
         dispatchViewEvent("onMeasure", detail::makeViewEventObject({
-            {"width", w},
-            {"height", h}
+            {"width", cachedFloatBounds.getWidth() },
+            {"height", cachedFloatBounds.getHeight() }
         }, *this));
     }
 
@@ -266,5 +247,4 @@ namespace blueprint
         if (auto *parent = findParentComponentOfClass<ReactApplicationRoot>())
             parent->dispatchViewEvent(getViewId(), eventType, e);
     }
-
 }

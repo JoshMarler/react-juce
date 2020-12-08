@@ -1,3 +1,13 @@
+# Compiled object files
+*.slo
+*.lo
+*.o
+*.obj
+*.tlog
+*.log
+
+.vscode
+
 ._*
 *.mode1v3
 *.pbxuser

@@ -1,50 +1,34 @@
-/*
-  ==============================================================================
-
-    blueprint_EcmascriptEngine.h
-    Created: 24 Oct 2019 3:08:39pm
-
-  ==============================================================================
-*/
-
 #pragma once
-
-#include <unordered_map>
-
 
 namespace blueprint
 {
-
-    //==============================================================================
     /** The EcmascriptEngine provides a flexible ECMAScript 5 compliant JavaScript engine
-     *  with an interface implemented by Duktape, but which may be implemented by one of
-     *  many embedded engines in the future.
-     */
-    class EcmascriptEngine : private juce::Timer
+        with an interface implemented by Duktape, but which may be implemented by one of
+        many embedded engines in the future.
+    */
+    class EcmascriptEngine final : private juce::Timer
     {
     public:
         //==============================================================================
         EcmascriptEngine();
-        ~EcmascriptEngine() override = default;
 
         //==============================================================================
-        /** A helper struct for representing an error that occured within the Duktape
-         *  engine.
-         *
-         *  We provide the JavaScript stack trace in the `stack` member.
-         */
-        struct Error : public std::runtime_error {
+        /** A helper struct for representing an error that occured within the Duktape engine.
+
+            We provide the JavaScript stack trace in the `stack` member.
+        */
+        struct Error final : public std::runtime_error
+        {
             Error(const juce::String& msg)
-                : std::runtime_error(msg.toStdString()) {}
+                : std::runtime_error (msg.toStdString()) {}
 
             Error(const juce::String& msg, const juce::String& _stack)
-                : std::runtime_error(msg.toStdString()), stack(_stack) {}
+                : std::runtime_error (msg.toStdString()), stack (_stack) {}
 
             Error(const juce::String& msg, const juce::String& _stack, const juce::String& _context)
-                : std::runtime_error(msg.toStdString()), stack(_stack), context(_context) {}
+                : std::runtime_error (msg.toStdString()), stack (_stack), context (_context) {}
 
-            juce::String stack;
-            juce::String context;
+            juce::String stack, context;
         };
 
         /** A helper struct for representing an error that occured within the Duktape
@@ -53,18 +37,25 @@ namespace blueprint
          *  In the event this error is thrown, the engine is to be considered
          *  unrecoverable, and it is up to the user to address how to proceed.
          */
-        struct FatalError : public std::runtime_error {
-            FatalError(const juce::String& msg)
-                : std::runtime_error(msg.toStdString()) {}
+        struct FatalError final : public std::runtime_error
+        {
+            FatalError (const juce::String& msg)
+                : std::runtime_error (msg.toStdString()) {}
         };
 
         //==============================================================================
         /** Evaluates the given code in the interpreter, returning the result.
-         *
-         *  @returns juce::var result of the evaluation
-         *  @throws EcmascriptEngine::Error in the event of an evaluation error
-         */
+
+            @returns juce::var result of the evaluation
+            @throws EcmascriptEngine::Error in the event of an evaluation error
+        */
         juce::var evaluate (const juce::String& code);
+
+        /** Evaluates the given code in the interpreter, returning the result.
+
+            @returns juce::var result of the evaluation
+            @throws EcmascriptEngine::Error in the event of an evaluation error
+        */
         juce::var evaluate (const juce::File& code);
 
         //==============================================================================
@@ -72,22 +63,22 @@ namespace blueprint
         void registerNativeMethod (const juce::String&, juce::var::NativeFunction fn);
 
         /** Registers a native method by the given name on the target object.
-         *
-         *  The provided target name may be any expression that leaves the target
-         *  object on the top of the stack. For example:
-         *
-         *  ```
-         *  registerNativeMethod("global", "hello", []() {
-         *      std::cout << "World!" << std::endl;
-         *      return juce::var();
-         *  });
-         *  ```
-         *
-         *  is equivalent to calling the previous `registerNativeMethod` overload
-         *  with just the "hello" and function arguments.
-         *
-         *  @throws EcmascriptEngine::Error in the event of an evaluation error
-         */
+
+            The provided target name may be any expression that leaves the target
+            object on the top of the stack. For example:
+
+            ```
+            registerNativeMethod("global", "hello", []() {
+                std::cout << "World!" << std::endl;
+                return juce::var();
+            });
+            ```
+
+            is equivalent to calling the previous `registerNativeMethod` overload
+            with just the "hello" and function arguments.
+
+            @throws EcmascriptEngine::Error in the event of an evaluation error
+        */
         void registerNativeMethod (const juce::String&, const juce::String&, juce::var::NativeFunction fn);
 
         //==============================================================================
@@ -95,48 +86,53 @@ namespace blueprint
         void registerNativeProperty (const juce::String&, const juce::var&);
 
         /** Registers a native value by the given name on the target object.
-         *
-         *  The provided target name may be any expression that leaves the target
-         *  object on the top of the stack. For example, the following three
-         *  examples have equivalent behavior:
-         *
-         *  ```
-         *  registerNativeProperty("global", "hello", "world");
-         *  registerNativeProperty("hello", "world");
-         *  evaluate("global.hello = \"world\";");
-         *  ```
-         *
-         *  @throws EcmascriptEngine::Error in the event of an evaluation error
-         */
+
+            The provided target name may be any expression that leaves the target
+            object on the top of the stack. For example, the following three
+            examples have equivalent behaviour:
+
+            ```
+            registerNativeProperty("global", "hello", "world");
+            registerNativeProperty("hello", "world");
+            evaluate("global.hello = \"world\";");
+            ```
+
+            @throws EcmascriptEngine::Error in the event of an evaluation error
+        */
         void registerNativeProperty (const juce::String&, const juce::String&, const juce::var&);
 
         //==============================================================================
         /** Invokes a method, applying the given args, inside the interpreter.
-         *
-         *  This is similar in function to `Function.prototype.apply()`. The provided
-         *  method name may be any expression that leaves the target function on the
-         *  top of the stack. For example:
-         *
-         *  `invoke("BlueprintNative.dispatchViewEvent", args);`
-         *
-         *  @returns juce::var result of the invocation
-         *  @throws EcmascriptEngine::Error in the event of an error
-         */
+
+            This is similar in function to `Function.prototype.apply()`. The provided
+            method name may be any expression that leaves the target function on the
+            top of the stack. For example:
+
+            `invoke("BlueprintNative.dispatchViewEvent", args);`
+
+            @returns juce::var result of the invocation
+            @throws EcmascriptEngine::Error in the event of an error
+        */
         juce::var invoke (const juce::String& name, const std::vector<juce::var>& vargs);
 
         /** Invokes a method with the given args inside the interpreter.
-         *
-         *  This is similar in function to `Function.prototype.call()`. The provided
-         *  method name may be any expression that leaves the target function on the
-         *  top of the stack. For example:
-         *
-         *  `invoke("BlueprintNative.dispatchViewEvent", "click");`
-         *
-         *  @returns juce::var result of the invocation
-         *  @throws EcmascriptEngine::Error in the event of an error
-         */
+
+            This is similar in function to `Function.prototype.call()`. The provided
+            method name may be any expression that leaves the target function on the
+            top of the stack. For example:
+
+            `invoke("BlueprintNative.dispatchViewEvent", "click");`
+
+            @returns juce::var result of the invocation
+            @throws EcmascriptEngine::Error in the event of an error
+        */
         template <typename... T>
-        juce::var invoke (const juce::String& name, T... args);
+        juce::var invoke (const juce::String& name, T... args)
+        {
+            // Pack the args and push them to the alternate `invoke` implementation
+            std::vector<juce::var> vargs { args... };
+            return invoke (name, vargs);
+        }
 
         //==============================================================================
         /** Resets the internal Duktape context, clearing the value stack and destroying native callbacks. */
@@ -154,7 +150,8 @@ namespace blueprint
         void timerCallback() override;
 
         //==============================================================================
-        struct LambdaHelper {
+        struct LambdaHelper
+        {
             LambdaHelper(juce::var::NativeFunction fn, uint32_t _id);
 
             static duk_ret_t invokeFromDukContext(duk_context* ctx);
@@ -171,9 +168,10 @@ namespace blueprint
         std::unordered_map<uint32_t, std::unique_ptr<LambdaHelper>> persistentReleasePool;
         std::array<std::unique_ptr<LambdaHelper>, 255> temporaryReleasePool;
 
-        // The duk_context must be listed after the release pools so that it is destructed
-        // before the pools. That way, as the duk_context is being freed and finalizing all
-        // of our lambda helpers, our pools still exist for those code paths.
+        /** The duk_context must be listed after the release pools so that it is destructed
+            before the pools. That way, as the duk_context is being freed and finalizing all
+            of our lambda helpers, our pools still exist for those code paths.
+        */
         std::shared_ptr<duk_context> dukContext;
 
         //==============================================================================
@@ -189,14 +187,4 @@ namespace blueprint
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EcmascriptEngine)
     };
-
-    //==============================================================================
-    template <typename... T>
-    juce::var EcmascriptEngine::invoke (const juce::String& name, T... args)
-    {
-        // Pack the args and push them to the alternate `invoke` implementation
-        std::vector<juce::var> vargs { args... };
-        return invoke(name, vargs);
-    }
-
 }

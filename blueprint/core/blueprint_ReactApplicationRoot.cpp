@@ -1,20 +1,5 @@
-/*
-  ==============================================================================
-
-    blueprint_ReactApplicationRoot.cpp
-    Created: 9 Dec 2018 10:20:37am
-
-  ==============================================================================
-*/
-
-#pragma once
-
-#include "blueprint_ReactApplicationRoot.h"
-
-
 namespace blueprint
 {
-
     ReactApplicationRoot::ReactApplicationRoot(std::shared_ptr<EcmascriptEngine> ee)
         : viewManager(this)
         , engine(ee)
@@ -24,10 +9,10 @@ namespace blueprint
 
         bindNativeRenderingHooks();
 
-#if JUCE_DEBUG
+       #if JUCE_DEBUG
         // Enable keyboardFocus to support CTRL-D/CMD-D debug attachment.
         setWantsKeyboardFocus(true);
-#endif
+       #endif
     }
 
     ReactApplicationRoot::ReactApplicationRoot()
@@ -36,12 +21,12 @@ namespace blueprint
     //==============================================================================
     juce::var ReactApplicationRoot::createViewInstance (const juce::String& viewType)
     {
-        return juce::var(viewManager.createViewInstance(viewType));
+        return viewManager.createViewInstance(viewType);
     }
 
     juce::var ReactApplicationRoot::createTextViewInstance (const juce::String& textValue)
     {
-        return juce::var(viewManager.createTextViewInstance(textValue));
+        return viewManager.createTextViewInstance(textValue);
     }
 
     juce::var ReactApplicationRoot::setViewProperty (const ViewId viewId, const juce::String& name, const juce::var& value)
@@ -70,7 +55,7 @@ namespace blueprint
 
     juce::var ReactApplicationRoot::getRootInstanceId()
     {
-        return juce::var(getViewId());
+        return getViewId();
     }
 
     juce::var ReactApplicationRoot::resetAfterCommit()
@@ -98,7 +83,7 @@ namespace blueprint
         }
     }
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     bool ReactApplicationRoot::keyPressed(const juce::KeyPress& key)
     {
         const auto startDebugCommand = juce::KeyPress('d', juce::ModifierKeys::commandModifier, 0);
@@ -108,7 +93,7 @@ namespace blueprint
 
         return true;
     }
-#endif
+   #endif
 
     //==============================================================================
     juce::var ReactApplicationRoot::evaluate(const juce::File& bundle)
@@ -122,7 +107,7 @@ namespace blueprint
         catch (const EcmascriptEngine::Error& err)
         {
             handleRuntimeError(err);
-            return juce::var();
+            return {};
         }
     }
 
@@ -135,30 +120,25 @@ namespace blueprint
     //==============================================================================
     void ReactApplicationRoot::handleRuntimeError(const EcmascriptEngine::Error& err)
     {
-#if ! JUCE_DEBUG
+       #if ! JUCE_DEBUG
         // In release builds, we don't catch errors and show the red screen,
         // we allow the exception to raise up to the user to be handled properly
         // for a production app.
         throw err;
-#endif
+       #endif
 
         JUCE_ASSERT_MESSAGE_THREAD
 
-        DBG("");
-        DBG("==== Error in JavaScript runtime. Context: ====");
-        DBG(err.context);
-        DBG("");
-        DBG(err.what());
+        juce::Logger::writeToLog ("\n==== Error in JavaScript runtime. Context: ====\n" + err.context + juce::newLine + err.what());
+        errorText = std::make_unique<juce::AttributedString> (err.stack);
 
-        errorText = std::make_unique<juce::AttributedString>(err.stack);
-
-#if JUCE_WINDOWS
-        errorText->setFont(juce::Font("Lucida Console", 18, juce::Font::FontStyleFlags::plain));
-#elif JUCE_MAC
-        errorText->setFont(juce::Font("Monaco", 18, juce::Font::FontStyleFlags::plain));
-#else
-        errorText->setFont(18);
-#endif
+       #if JUCE_WINDOWS
+        errorText->setFont ({ "Lucida Console", 18, juce::Font::FontStyleFlags::plain });
+       #elif JUCE_MAC
+        errorText->setFont ({ "Monaco", 18, juce::Font::FontStyleFlags::plain });
+       #else
+        errorText->setFont (18.0f);
+       #endif
 
         // Lastly, kill the ViewManager to tear down existing views and prevent
         // further view interaction
@@ -189,5 +169,4 @@ namespace blueprint
         addMethodBinding<0>(ns, "getRootInstanceId", &ReactApplicationRoot::getRootInstanceId);
         addMethodBinding<0>(ns, "resetAfterCommit", &ReactApplicationRoot::resetAfterCommit);
     }
-
 }

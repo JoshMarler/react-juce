@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="OdPNX4" name="TestRunner" projectType="consoleapp" jucerVersion="5.4.1"
-              cppLanguageStandard="17">
+<JUCERPROJECT id="OdPNX4" name="TestRunner" projectType="consoleapp" cppLanguageStandard="17"
+              displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="H2UTgv" name="TestRunner">
     <GROUP id="{AD8CB862-7B07-2F5D-2CBD-BCBA94CDF41C}" name="Source">
       <FILE id="aUOVVy" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" extraDefs="BLUEPRINT_INCLUDE_TESTS=1">
+    <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug"/>
         <CONFIGURATION isDebug="0" name="Release"/>
@@ -30,6 +30,94 @@
         <MODULEPATH id="blueprint" path="../../../blueprint"/>
       </MODULEPATHS>
     </XCODE_MAC>
+    <VS2019 targetFolder="Builds/VisualStudio2019">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../ext/juce/modules"/>
+        <MODULEPATH id="blueprint" path="../../../blueprint"/>
+      </MODULEPATHS>
+    </VS2019>
+    <VS2017 targetFolder="Builds/VisualStudio2017">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../ext/juce/modules"/>
+        <MODULEPATH id="blueprint" path="../../../blueprint"/>
+      </MODULEPATHS>
+    </VS2017>
+    <VS2015 targetFolder="Builds/VisualStudio2015">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../ext/juce/modules"/>
+        <MODULEPATH id="blueprint" path="../../../blueprint"/>
+      </MODULEPATHS>
+    </VS2015>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../ext/juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../ext/juce/modules"/>
+        <MODULEPATH id="blueprint" path="../../../blueprint"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="blueprint" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
@@ -49,6 +137,8 @@
   </MODULES>
   <LIVE_SETTINGS>
     <OSX/>
+    <WINDOWS/>
   </LIVE_SETTINGS>
-  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" BLUEPRINT_INCLUDE_TESTS="1"
+               BLUEPRINT_INCLUDE_UNIT_TESTS="1"/>
 </JUCERPROJECT>
