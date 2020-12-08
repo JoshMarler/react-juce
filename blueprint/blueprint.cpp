@@ -116,7 +116,11 @@
 
 #include "core/blueprint_AppHarness.cpp"
 #include "core/blueprint_EcmascriptEngine.cpp"
-#include "core/blueprint_GenericEditor.cpp"
+
+#if JUCE_MODULE_AVAILABLE_juce_audio_processors
+    #include "core/blueprint_GenericEditor.cpp"
+#endif
+
 #include "core/blueprint_ReactApplicationRoot.cpp"
 #include "core/blueprint_ShadowView.cpp"
 #include "core/blueprint_TextShadowView.cpp"
