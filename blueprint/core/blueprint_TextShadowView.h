@@ -1,36 +1,23 @@
-/*
-  ==============================================================================
-
-    blueprint_TextShadowView.h
-    Created: 17 Apr 2019 8:38:37am
-
-  ==============================================================================
-*/
-
 #pragma once
-
-#include "blueprint_ShadowView.h"
-#include "blueprint_View.h"
-
 
 namespace blueprint
 {
-
-    //==============================================================================
     /** We use this method to measure the size of a given string so that the
-     *  text container knows what size to take.
-     */
-    YGSize measureTextNode(YGNodeRef, float, YGMeasureMode, float, YGMeasureMode);
+        text container knows what size to take.
+    */
+    YGSize measureTextNode (YGNodeRef node,
+                            float width, YGMeasureMode widthMode,
+                            float height, YGMeasureMode heightMode);
 
     //==============================================================================
-    /** The TextShadowView extends a ShadowView to provide specialized behavior
-     *  for measuring text content, as text layout is removed from the FlexBox
-     *  flow.
-     */
-    class TextShadowView : public ShadowView
+    /** The TextShadowView extends a ShadowView to provide specialized behaviour
+        for measuring text content, as text layout is removed from the FlexBox flow.
+    */
+    class TextShadowView final : public ShadowView
     {
     public:
         //==============================================================================
+        /** */
         TextShadowView(View* _view) : ShadowView(_view)
         {
             YGNodeSetContext(yogaNode, this);
@@ -38,7 +25,14 @@ namespace blueprint
         }
 
         //==============================================================================
-        /** Set a property on the shadow view. */
+        /** Sets a flag to indicate that this node needs to be measured at the next layout pass. */
+        void markDirty()
+        {
+            YGNodeMarkDirty(yogaNode);
+        }
+
+        //==============================================================================
+        /** @internal */
         bool setProperty (const juce::String& name, const juce::var& value) override
         {
             const bool layoutPropertyWasSet = ShadowView::setProperty(name, value);
@@ -51,26 +45,20 @@ namespace blueprint
             return layoutPropertyWasSet;
         }
 
-        /** Override the default ShadowView behavior to explicitly error. */
+        /** @internal */
         void addChild (ShadowView* childView, int index = -1) override
         {
             juce::ignoreUnused (index);
 
             if (childView != nullptr)
             {
+                jassertfalse;
                 throw std::logic_error("TextShadowView cannot take children.");
             }
-        }
-
-        /** Sets a flag to indicate that this node needs to be measured at the next layout pass. */
-        void markDirty()
-        {
-            YGNodeMarkDirty(yogaNode);
         }
 
     private:
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextShadowView)
     };
-
 }

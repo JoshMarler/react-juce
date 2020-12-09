@@ -1,163 +1,170 @@
-/*
-  ==============================================================================
-
-    blueprint_ShadowView.h
-    Created: 17 Apr 2019 8:38:37am
-
-  ==============================================================================
-*/
-
 #pragma once
-
-#include "blueprint_View.h"
 
 #define BP_SPREAD_SETTER_PERCENT(setter) setter, setter##Percent
 #define BP_SPREAD_SETTER_AUTO(setter) BP_SPREAD_SETTER_PERCENT(setter), setter##Auto
 
 namespace blueprint
 {
+    /** */
+    struct BoundsAnimator final : public juce::Timer
+    {
+        //==============================================================================
+        /** */
+        using StepCallback = std::function<void (juce::Rectangle<float>)>;
 
-    struct BoundsAnimator : public juce::Timer {
-        using StepCallback = std::function<void(juce::Rectangle<float>)>;
-
-        enum class EasingType {
-            Linear,
-            QuadraticIn,
-            QuadraticOut,
-            QuadraticInOut,
+        //==============================================================================
+        /** */
+        enum class EasingType
+        {
+            linear,
+            quadraticIn,
+            quadraticOut,
+            quadraticInOut,
         };
 
-        juce::Rectangle<float> start;
-        juce::Rectangle<float> dest;
-        StepCallback callback;
-        double duration;
-        double startTime;
-        int frameRate = 45;
-        EasingType easingType = EasingType::Linear;
-
-        BoundsAnimator(double durationMs, int frameRateToUse, EasingType et,
-                       juce::Rectangle<float> startRect, juce::Rectangle<float> destRect,
-                       StepCallback cb)
-            : start(startRect)
-            , dest(destRect)
-            , callback(std::move (cb))
-            , duration(durationMs)
-            , frameRate(frameRateToUse)
-            , easingType(et)
+        //==============================================================================
+        /** */
+        BoundsAnimator (double durationMs, int frameRateToUse, EasingType et,
+                        juce::Rectangle<float> startRect, juce::Rectangle<float> destRect,
+                        StepCallback cb) :
+            start (startRect),
+            dest (destRect),
+            callback (std::move (cb)),
+            duration (durationMs),
+            frameRate (frameRateToUse),
+            easingType (et)
         {
             startTime = juce::Time::getMillisecondCounterHiRes();
-            startTimerHz(45);
+            startTimerHz (45);
         }
 
-        ~BoundsAnimator() override {
-            stopTimer();
-        }
-
-        static constexpr float  lerp (float a, float b, double t)  { return a + (static_cast<float> (t) * (b - a)); }
-
-        void timerCallback() override {
-            auto now = juce::Time::getMillisecondCounterHiRes();
-            double t = std::clamp((now - startTime) / duration, 0.0, 1.0);
+        //==============================================================================
+        void timerCallback() override
+        {
+            const auto now = juce::Time::getMillisecondCounterHiRes();
+            auto t = std::clamp ((now - startTime) / duration, 0.0, 1.0);
 
             // Super helpful cheat sheet: https://gist.github.com/gre/1650294
-            switch (easingType) {
-                case EasingType::Linear:
-                    break;
-                case EasingType::QuadraticIn:
-                    t = t * t;
-                    break;
-                case EasingType::QuadraticOut:
-                    t = t * (2.0 - t);
-                    break;
-                case EasingType::QuadraticInOut:
-                    t = (t < 0.5) ? (2.0 * t * t) : (-1.0 + (4.0 - 2.0 * t) * t);
-                    break;
+            switch (easingType)
+            {
+                case EasingType::quadraticIn:       t = juce::square (t); break;
+                case EasingType::quadraticOut:      t = t * (2.0 - t); break;
+                case EasingType::quadraticInOut:    t = (t < 0.5) ? (2.0 * t * t) : (-1.0 + (4.0 - 2.0 * t) * t); break;
+
+                case EasingType::linear:
                 default:
                     break;
             }
 
-            if (t >= 0.9999) {
-                callback(dest);
+            if (t >= 0.9999)
+            {
+                callback (dest);
                 stopTimer();
                 return;
             }
 
-            callback({
-                lerp(start.getX(), dest.getX(), t),
-                lerp(start.getY(), dest.getY(), t),
-                lerp(start.getWidth(), dest.getWidth(), t),
-                lerp(start.getHeight(), dest.getHeight(), t),
+            callback
+            ({
+                juce::jmap (static_cast<float> (t), start.getX(), dest.getX()),
+                juce::jmap (static_cast<float> (t), start.getY(), dest.getY()),
+                juce::jmap (static_cast<float> (t), start.getWidth(), dest.getWidth()),
+                juce::jmap (static_cast<float> (t), start.getHeight(), dest.getHeight()),
             });
         }
+
+        juce::Rectangle<float> start, dest;
+        StepCallback callback;
+        double duration = 0.0, startTime = 0.0;
+        int frameRate = 45;
+        EasingType easingType = EasingType::linear;
     };
 
+    //==============================================================================
     template <typename Setter, typename ...Args>
-    const auto getYogaNodeFloatSetter(Setter setter, Args... args) {
-      return [=](const juce::var& value, YGNodeRef node) {
-        if(value.isDouble()) {
-          setter(node, args..., (float) value);
-          return true;
-        }
-        return false;
-      };
+    const auto getYogaNodeFloatSetter (Setter setter, Args... args)
+    {
+        return [=] (const juce::var& value, YGNodeRef node)
+        {
+            if (value.isDouble())
+            {
+                setter (node, args..., (float) value);
+                return true;
+            }
+
+            return false;
+        };
     }
 
     template <typename Setter, typename SetterPercent, typename ...Args>
-    const auto getYogaNodeDimensionSetter(Setter setter, SetterPercent setterPercent, Args... args) {
-      return [=, floatSetter = getYogaNodeFloatSetter(setter, args...)](const juce::var& value, YGNodeRef node) {
-        if (floatSetter(value, node))
-          return true;
-        if (value.isString() && value.toString().contains("%"))
+    const auto getYogaNodeDimensionSetter (Setter setter, SetterPercent setterPercent, Args... args)
+    {
+        return [=, floatSetter = getYogaNodeFloatSetter(setter, args...)] (const juce::var& value, YGNodeRef node)
         {
-          juce::String strVal = value.toString().retainCharacters("-1234567890.");
-          setterPercent(node, args..., strVal.getFloatValue());
-          return true;
-        }
-        setter(node, args..., YGUndefined);
-        return true;
-      };
+            if (floatSetter (value, node))
+                return true;
+
+            if (value.isString() && value.toString().contains ("%"))
+            {
+                setterPercent(node, args..., value.toString().retainCharacters ("-1234567890.").getFloatValue());
+                return true;
+            }
+
+            setter(node, args..., YGUndefined);
+            return true;
+        };
     }
 
     template <typename Setter, typename SetterPercent, typename SetterAuto, typename ...Args>
-    const auto getYogaNodeDimensionAutoSetter(Setter setter, SetterPercent setterPercent, SetterAuto setterAuto, Args... args) {
-      return [=, nonAutoSetter = getYogaNodeDimensionSetter(setter, setterPercent, args...)](const juce::var& value, YGNodeRef node) {
-        if (value.isString() && value.toString() == "auto") {
-          setterAuto(node, args...);
-          return true;
-        }
-        return nonAutoSetter(value, node);
-      };
+    const auto getYogaNodeDimensionAutoSetter (Setter setter, SetterPercent setterPercent, SetterAuto setterAuto, Args... args)
+    {
+        return [=, nonAutoSetter = getYogaNodeDimensionSetter(setter, setterPercent, args...)] (const juce::var& value, YGNodeRef node)
+        {
+            if (value.isString() && value.toString() == "auto")
+            {
+                setterAuto (node, args...);
+                return true;
+            }
+
+            return nonAutoSetter (value, node);
+        };
     }
 
     template <typename Setter, typename EnumMap>
-    const auto getYogaNodeEnumSetter(Setter setter, EnumMap &map) {
-      return [=](const juce::var& value, YGNodeRef node) {                       \
-        const auto val = map.find(value);
-        if(val == map.end()) {
-          // TODO catch further up to add the key at which we tried
-          // to set this enum property to the message and rethrow
-          throw std::invalid_argument("Invalid property: " + value.toString().toStdString());
-        }
-        setter(node, val->second);
-        return true;
-      };
+    const auto getYogaNodeEnumSetter (Setter setter, EnumMap &map)
+    {
+        return [=] (const juce::var& value, YGNodeRef node)
+        {
+            const auto val = map.find (value);
+            if (val == map.end())
+            {
+                // TODO catch further up to add the key at which we tried
+                // to set this enum property to the message and rethrow
+                throw std::invalid_argument ("Invalid property: " + value.toString().toStdString());
+            }
+
+            setter (node, val->second);
+            return true;
+        };
     }
 
     //==============================================================================
     /** The ShadowView class decouples layout constraints from the actual View instances
         so that our View tree and ShadowView tree might differ (i.e. in the case of raw
         text nodes), and so that our View may remain more simple.
-     */
+    */
     class ShadowView
     {
     public:
         //==============================================================================
-        ShadowView(View* _view) : view(_view)
+        /** */
+        ShadowView(View* v) :
+            view (v)
         {
             YGConfigSetUseWebDefaults(YGConfigGetDefault(), true);
             yogaNode = YGNodeNew();
         }
 
+        /** */
         virtual ~ShadowView()
         {
             YGNodeFree(yogaNode);
@@ -187,100 +194,98 @@ namespace blueprint
         /** Removes a child component from the children array. */
         virtual void removeChild (ShadowView* childView)
         {
-            auto it = std::find(children.begin(), children.end(), childView);
+            const auto it = std::find (children.begin(), children.end(), childView);
 
             if (it != children.end())
             {
-                YGNodeRemoveChild(yogaNode, childView->yogaNode);
-                children.erase(it);
+                YGNodeRemoveChild (yogaNode, childView->yogaNode);
+                children.erase (it);
             }
         }
 
         //==============================================================================
-        /** Returns a pointer to the View instance shadowed by this node. */
-        View* getAssociatedView() { return view; }
+        /** @returns a pointer to the View instance shadowed by this node. */
+        View* getAssociatedView() const noexcept { return view; }
 
-        /** Returns the layout bounds held by the internal yogaNode. */
-        juce::Rectangle<float> getCachedLayoutBounds()
+        /** @returns the layout bounds held by the internal yogaNode. */
+        juce::Rectangle<float> getCachedLayoutBounds() const
         {
-            return {
-                YGNodeLayoutGetLeft(yogaNode),
-                YGNodeLayoutGetTop(yogaNode),
-                YGNodeLayoutGetWidth(yogaNode),
-                YGNodeLayoutGetHeight(yogaNode)
+            return
+            {
+                YGNodeLayoutGetLeft (yogaNode),
+                YGNodeLayoutGetTop (yogaNode),
+                YGNodeLayoutGetWidth (yogaNode),
+                YGNodeLayoutGetHeight (yogaNode)
             };
         }
 
         /** Recursively computes the shadow tree layout. */
-        void computeViewLayout(const float width, const float height)
+        void computeViewLayout (float width, float height)
         {
-            // Compute the new layout values
-            YGNodeCalculateLayout(yogaNode, width, height, YGDirectionInherit);
+            YGNodeCalculateLayout (yogaNode, width, height, YGDirectionInherit);
         }
 
-        /** Recursive traversal of the shadow tree, flushing layout bounds to
-            the associated view components.
-         */
+        /** Recursive traversal of the shadow tree,
+            flushing layout bounds to the associated view components.
+        */
         virtual void flushViewLayout()
         {
-#ifdef DEBUG
-            if (props.contains("debug"))
-                YGNodePrint(yogaNode, (YGPrintOptions) (YGPrintOptionsLayout
-                                                        | YGPrintOptionsStyle
-                                                        | YGPrintOptionsChildren));
-#endif
+           #if JUCE_DEBUG
+            if (props.contains ("debug"))
+                YGNodePrint (yogaNode, (YGPrintOptions) (YGPrintOptionsLayout | YGPrintOptionsStyle | YGPrintOptionsChildren));
+           #endif
 
-            if (props.contains("layoutAnimated"))
+            if (props.contains ("layoutAnimated"))
             {
+                // Default parameters
                 if (props["layoutAnimated"].isBool() && props["layoutAnimated"])
                 {
-                    // Default parameters
-                    return flushViewLayoutAnimated(50.0, 45, BoundsAnimator::EasingType::Linear);
+                    flushViewLayoutAnimated (50.0, 45, BoundsAnimator::EasingType::linear);
+                    return;
                 }
 
                 if (props["layoutAnimated"].isObject())
                 {
-                    double const durationMs = props["layoutAnimated"].getProperty("duration", 50.0);
-                    double const frameRate = props["layoutAnimated"].getProperty("frameRate", 45);
-                    int const et = props["layoutAnimated"].getProperty("easing", 0);
+                    const auto et = static_cast<int> (props["layoutAnimated"].getProperty ("easing", 0));
 
-                    return flushViewLayoutAnimated(durationMs, static_cast<int> (frameRate), static_cast<BoundsAnimator::EasingType>(et));
+                    flushViewLayoutAnimated (static_cast<double> (props["layoutAnimated"].getProperty ("duration", 50.0)),
+                                             static_cast<int> (props["layoutAnimated"].getProperty ("frameRate", 45)),
+                                             static_cast<BoundsAnimator::EasingType> (et));
+                    return;
                 }
             }
 
-            view->setFloatBounds(getCachedLayoutBounds());
-            view->setBounds(getCachedLayoutBounds().toNearestInt());
+            view->setFloatBounds (getCachedLayoutBounds());
+            view->setBounds (getCachedLayoutBounds().toNearestInt());
 
             for (auto& child : children)
                 child->flushViewLayout();
         }
 
         /** Recursive traversal of the shadow tree, flushing layout bounds to the
-         *  associated view components smoothly over time. This recursive step allows
-         *  an animation of a component subtree by just marking the parent as animated.
-         */
-        virtual void flushViewLayoutAnimated(double const durationMs, int const frameRate, BoundsAnimator::EasingType const et)
+            associated view components smoothly over time. This recursive step allows
+            an animation of a component subtree by just marking the parent as animated.
+        */
+        virtual void flushViewLayoutAnimated (double durationMs, int frameRate, BoundsAnimator::EasingType et)
         {
-            auto viewCurrentBounds = view->getBounds().toFloat();
-            auto viewDestinationBounds = getCachedLayoutBounds();
-
             animator = std::make_unique<BoundsAnimator>(
                 durationMs,
                 frameRate,
                 et,
-                viewCurrentBounds,
-                viewDestinationBounds,
-                [safeView = juce::Component::SafePointer(view)](auto && stepBounds) {
-                    if (auto* v = safeView.getComponent()) {
+                view->getBounds().toFloat(),
+                getCachedLayoutBounds(),
+                [safeView = juce::Component::SafePointer(view)](auto && stepBounds)
+                {
+                    if (auto* v = safeView.getComponent())
+                    {
                         v->setFloatBounds(stepBounds);
                         v->setBounds(stepBounds.toNearestInt());
                     }
                 }
             );
 
-            for (auto& child : children) {
+            for (auto& child : children)
                 child->flushViewLayoutAnimated(durationMs, frameRate, et);
-            }
         }
 
     protected:
@@ -296,5 +301,4 @@ namespace blueprint
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShadowView)
     };
-
 }

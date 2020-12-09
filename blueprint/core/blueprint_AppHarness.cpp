@@ -1,85 +1,79 @@
-/*
-  ==============================================================================
-
-    blueprint_AppHarness.cpp
-    Created: 21 Nov 2020 11:27:37am
-
-  ==============================================================================
-*/
-
-#pragma once
-
-#include "blueprint_AppHarness.h"
-
-
 namespace blueprint
 {
-
     //==============================================================================
-    AppHarness::AppHarness(ReactApplicationRoot& _appRoot)
-        : appRoot(_appRoot)
+    AppHarness::AppHarness(ReactApplicationRoot& rar) :
+        appRoot (rar)
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
-        fileWatcher = std::make_unique<FileWatcher>([this]() {
+        fileWatcher = std::make_unique<FileWatcher> ([this]()
+        {
             appRoot.reset();
             appRoot.bindNativeRenderingHooks();
 
-            if (onBeforeAll) { onBeforeAll(); }
+            if (onBeforeAll != nullptr)
+                onBeforeAll();
 
             for (const auto& f : fileWatcher->getWatchedFiles())
             {
-                if (onBeforeEach) { onBeforeEach(f); }
-                appRoot.evaluate(f);
-                if (onAfterEach) { onAfterEach(f); }
+                if (onBeforeEach != nullptr)
+                    onBeforeEach (f);
+
+                appRoot.evaluate (f);
+
+                if (onAfterEach != nullptr)
+                    onAfterEach (f);
             }
 
-            if (onAfterAll) { onAfterAll(); }
+            if (onAfterAll != nullptr)
+                onAfterAll();
         });
-
     }
 
     //==============================================================================
     void AppHarness::watch (const juce::File& f)
     {
-        if (fileWatcher)
-            fileWatcher->watch(f);
+        if (fileWatcher != nullptr)
+            fileWatcher->watch (f);
     }
 
     void AppHarness::watch (const std::vector<juce::File>& fs)
     {
-        if (fileWatcher)
-        {
+        JUCE_ASSERT_MESSAGE_THREAD
+
+        if (fileWatcher != nullptr)
             for (const auto& f : fs)
-            {
-                fileWatcher->watch(f);
-            }
-        }
+                fileWatcher->watch (f);
     }
 
     void AppHarness::start()
     {
-        if (onBeforeAll) { onBeforeAll(); }
+        if (onBeforeAll != nullptr)
+            onBeforeAll();
 
         for (const auto& f : fileWatcher->getWatchedFiles())
         {
-            if (onBeforeEach) { onBeforeEach(f); }
-            appRoot.evaluate(f);
-            if (onAfterEach) { onAfterEach(f); }
+            if (onBeforeEach != nullptr)
+                onBeforeEach (f);
+
+            appRoot.evaluate (f);
+
+            if (onAfterEach != nullptr)
+                onAfterEach (f);
         }
 
-        if (onAfterAll) { onAfterAll(); }
+        if (onAfterAll != nullptr)
+            onAfterAll();
 
-#if JUCE_DEBUG
-        if (fileWatcher)
+       #if JUCE_DEBUG
+        if (fileWatcher != nullptr)
             fileWatcher->start();
-#endif
+       #endif
     }
 
     void AppHarness::stop()
     {
-        if (fileWatcher)
+        if (fileWatcher != nullptr)
             fileWatcher->stop();
     }
-
 }

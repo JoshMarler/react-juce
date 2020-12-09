@@ -1,23 +1,20 @@
-/*
-  ==============================================================================
+#include <JuceHeader.h>
 
-    This file was auto-generated!
-
-    It contains the basic startup code for a JUCE application.
-
-  ==============================================================================
-*/
-
-#include "../JuceLibraryCode/JuceHeader.h"
-
-//==============================================================================
-int main (int argc, char* argv[])
+int main()
 {
+    try
+    {
+        juce::ScopedJuceInitialiser_GUI scopedJuceInitialiser;
 
-    UnitTestRunner tr;
+        juce::UnitTestRunner tr;
+        tr.setPassesAreLogged (true);
+        tr.runAllTests();
+    }
+    catch (...)
+    {
+        jassertfalse;
+        return EXIT_FAILURE;
+    }
 
-    tr.setPassesAreLogged(true);
-    tr.runAllTests();
-
-    return 0;
+    return EXIT_SUCCESS;
 }

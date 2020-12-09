@@ -1,0 +1,7 @@
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_WARNINGS_MSVC
+
+#undef min
+#undef max
+#undef MIN
+#undef MAX
