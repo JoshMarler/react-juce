@@ -110,7 +110,6 @@ namespace blueprint
                 if (auto* textShadowView = dynamic_cast<TextShadowView*>(parentShadowView))
                 {
                     textShadowView->markDirty();
-                    performRootShadowTreeLayout();
                 }
 
                 // Then we need to paint, but the RawTextView has no idea how to paint its text,
@@ -144,8 +143,6 @@ namespace blueprint
             parentView->addChild(childView, index);
             parentShadowView->addChild(childShadowView, index);
         }
-
-        performRootShadowTreeLayout();
     }
 
     void ViewManager::removeChild(ViewId parentId, ViewId childId)
@@ -185,8 +182,6 @@ namespace blueprint
             for (auto& id : childIds)
                 shadowViewTable.erase(id);
         }
-
-        performRootShadowTreeLayout();
     }
 
     void ViewManager::enumerateChildViewIds (std::vector<ViewId>& ids, View* v)
