@@ -75,7 +75,7 @@ export class ViewInstance {
     this._children.push(childInstance);
 
     //@ts-ignore
-    return __BlueprintNative__.addChild(this._id, childInstance._id, -1);
+    return __BlueprintNative__.insertChild(this._id, childInstance._id, -1);
   }
 
   insertChild(childInstance: Instance, index: number): any {
@@ -84,7 +84,7 @@ export class ViewInstance {
     this._children.splice(index, 0, childInstance);
 
     //@ts-ignore
-    return __BlueprintNative__.addChild(this._id, childInstance._id, index);
+    return __BlueprintNative__.insertChild(this._id, childInstance._id, index);
   }
 
   removeChild(childInstance: Instance): any {

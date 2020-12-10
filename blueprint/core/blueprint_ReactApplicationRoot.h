@@ -46,7 +46,7 @@ namespace blueprint
         juce::var createTextViewInstance (const juce::String& textValue);
         juce::var setViewProperty (const ViewId viewId, const juce::String& name, const juce::var& value);
         juce::var setRawTextValue (const ViewId viewId, const juce::String& value);
-        juce::var addChild (const ViewId parentId, const ViewId childId, int index);
+        juce::var insertChild (const ViewId parentId, const ViewId childId, int index);
         juce::var removeChild (const ViewId parentId, const ViewId childId);
         juce::var getRootInstanceId();
         juce::var resetAfterCommit();
