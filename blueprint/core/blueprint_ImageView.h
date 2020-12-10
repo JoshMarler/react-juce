@@ -36,7 +36,8 @@ namespace blueprint
     {
     public:
         //==============================================================================
-        static inline juce::Identifier sourceProp = "source";
+        static inline juce::Identifier sourceProp    = "source";
+        static inline juce::Identifier placementProp = "placement";
 
         //==============================================================================
         ImageView() = default;
@@ -80,14 +81,14 @@ namespace blueprint
         {
             View::paint(g);
 
-            const float opacity = props.getWithDefault("opacity", 1.0f);
+            const float opacity = props.getWithDefault(opacityProp, 1.0f);
 
             // Without a specified placement, we just draw the drawable.
-            if (!props.contains("placement"))
+            if (!props.contains(placementProp))
                 return drawable->draw(g, opacity);
 
             // Otherwise we map placement strings to the appropriate flags
-            const int flags = props["placement"];
+            const int flags = props[placementProp];
             const juce::RectanglePlacement placement (flags);
 
             drawable->drawWithin(g, getLocalBounds().toFloat(), placement, opacity);
@@ -153,7 +154,7 @@ namespace blueprint
             {
                 throw std::runtime_error("Image received an invalid data url.");
             }
-            
+
             const auto base64EncodedData = source.substring(commaIndex + 1);
             juce::MemoryOutputStream outStream{};
 
@@ -166,7 +167,7 @@ namespace blueprint
 
             const auto mimeType = source.substring(5,semiIndex);
             auto fmt = prepareImageFormat(mimeType);
-            
+
             if (fmt == nullptr)
             {
                 throw std::runtime_error("Unsupported format.");
@@ -176,23 +177,23 @@ namespace blueprint
             {
                 throw std::runtime_error("Cannot understand the image.");
             }
-            
+
             inputStream.setPosition(0);
             return fmt->decodeImage(inputStream);
         }
-        
+
         std::unique_ptr<juce::ImageFileFormat> prepareImageFormat(const juce::String& mimeType) const
         {
             if (mimeType == "image/png")
             {
                 return std::make_unique<juce::PNGImageFormat>();
             }
-            
+
             if (mimeType == "image/jpeg")
             {
                 return std::make_unique<juce::JPEGImageFormat>();
             }
-            
+
             if (mimeType == "image/gif")
             {
                 return std::make_unique<juce::GIFImageFormat>();
