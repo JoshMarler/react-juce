@@ -82,7 +82,7 @@ namespace blueprint
     {
         props.set(name, value);
 
-        if (name == juce::StringRef ("interceptClickEvents"))
+        if (name == juce::StringRef (interceptClickEventsProp))
         {
             switch (static_cast<int> (value))
             {
@@ -95,13 +95,13 @@ namespace blueprint
             }
         }
 
-        if (name == juce::StringRef("onKeyPress"))
+        if (name == juce::StringRef(onKeyPressProp))
             setWantsKeyboardFocus(true);
 
-        if (name == juce::StringRef("opacity"))
+        if (name == juce::StringRef(opacityProp))
             setAlpha(static_cast<float> (value));
 
-        if (name == juce::StringRef("refId"))
+        if (name == juce::StringRef(refIdProp))
             _refId = juce::Identifier(value.toString());
     }
 
@@ -113,14 +113,12 @@ namespace blueprint
 
     void View::setFloatBounds(juce::Rectangle<float> bounds)
     {
-        static const juce::Identifier transformMatrix("transform-matrix");
-
         cachedFloatBounds = bounds;
 
         // Update transforms
-        if (props.contains(transformMatrix))
+        if (props.contains(transformMatrixProp))
         {
-            const juce::var& matrix = props[transformMatrix];
+            const juce::var& matrix = props[transformMatrixProp];
             if(matrix.isArray() && matrix.getArray()->size() >= 16) {
               const juce::Array<juce::var> &m = *matrix.getArray();
 
@@ -165,14 +163,14 @@ namespace blueprint
 
     void View::paint (juce::Graphics& g)
     {
-        if (props.contains("border-path"))
+        if (props.contains(borderPathProp))
         {
-            juce::Path p = juce::Drawable::parseSVGPath(props["border-path"].toString());
+            juce::Path p = juce::Drawable::parseSVGPath(props[borderPathProp].toString());
 
-            if (props.contains("border-color"))
+            if (props.contains(borderColorProp))
             {
-                juce::Colour c = juce::Colour::fromString(props["border-color"].toString());
-                float borderWidth = props.getWithDefault("border-width", 1.0);
+                juce::Colour c = juce::Colour::fromString(props[borderColorProp].toString());
+                float borderWidth = props.getWithDefault(borderWidthProp, 1.0);
 
                 g.setColour(c);
                 g.strokePath(p, juce::PathStrokeType(borderWidth));
@@ -180,11 +178,11 @@ namespace blueprint
 
             g.reduceClipRegion(p);
         }
-        else if (props.contains("border-color") && props.contains("border-width"))
+        else if (props.contains(borderColorProp) && props.contains(borderWidthProp))
         {
             juce::Path border;
-            auto c = juce::Colour::fromString(props["border-color"].toString());
-            float borderWidth = props["border-width"];
+            auto c = juce::Colour::fromString(props[borderColorProp].toString());
+            float borderWidth = props[borderWidthProp];
 
             // Note this little bounds trick. When a Path is stroked, the line width extends
             // outwards in both directions from the coordinate line. If the coordinate
@@ -194,7 +192,7 @@ namespace blueprint
             auto width  = borderBounds.getWidth();
             auto height = borderBounds.getHeight();
             auto minLength = std::min(width, height);
-            float borderRadius = getResolvedLengthProperty("border-radius", minLength);
+            float borderRadius = getResolvedLengthProperty(borderRadiusProp.toString(), minLength);
 
             border.addRoundedRectangle(borderBounds, borderRadius);
             g.setColour(c);
@@ -202,9 +200,9 @@ namespace blueprint
             g.reduceClipRegion(border);
         }
 
-        if (props.contains("background-color"))
+        if (props.contains(backgroundColorProp))
         {
-            juce::Colour c = juce::Colour::fromString(props["background-color"].toString());
+            juce::Colour c = juce::Colour::fromString(props[backgroundColorProp].toString());
 
             if (!c.isTransparent())
                 g.fillAll(c);

@@ -30,6 +30,20 @@ namespace blueprint
     {
     public:
         //==============================================================================
+        static const inline juce::Identifier interceptClickEventsProp = "interceptClickEvents";
+        static const inline juce::Identifier onKeyPressProp           = "onKeyPress";
+        static const inline juce::Identifier opacityProp              = "opacity";
+        static const inline juce::Identifier refIdProp                = "refId";
+        static const inline juce::Identifier transformMatrixProp      = "transform-matrix";
+
+        static const inline juce::Identifier backgroundColorProp      = "background-color";
+
+        static const inline juce::Identifier borderColorProp          = "border-color";
+        static const inline juce::Identifier borderPathProp           = "border-path";
+        static const inline juce::Identifier borderRadiusProp         = "border-radius";
+        static const inline juce::Identifier borderWidthProp          = "border-width";
+
+        //==============================================================================
         View() = default;
         ~View() override = default;
 

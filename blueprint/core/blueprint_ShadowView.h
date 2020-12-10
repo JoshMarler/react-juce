@@ -152,6 +152,13 @@ namespace blueprint
     {
     public:
         //==============================================================================
+        static const inline juce::Identifier debugProp          = "debug";
+        static const inline juce::Identifier durationProp       = "duration";
+        static const inline juce::Identifier easingProp         = "easing";
+        static const inline juce::Identifier frameRateProp      = "frameRate";
+        static const inline juce::Identifier layoutAnimatedProp = "layoutAnimated";
+
+        //==============================================================================
         ShadowView(View* _view) : view(_view)
         {
             YGConfigSetUseWebDefaults(YGConfigGetDefault(), true);
@@ -224,25 +231,25 @@ namespace blueprint
         virtual void flushViewLayout()
         {
 #ifdef DEBUG
-            if (props.contains("debug"))
+            if (props.contains(debugProp))
                 YGNodePrint(yogaNode, (YGPrintOptions) (YGPrintOptionsLayout
                                                         | YGPrintOptionsStyle
                                                         | YGPrintOptionsChildren));
 #endif
 
-            if (props.contains("layoutAnimated"))
+            if (props.contains(layoutAnimatedProp))
             {
-                if (props["layoutAnimated"].isBool() && props["layoutAnimated"])
+                if (props[layoutAnimatedProp].isBool() && props[layoutAnimatedProp])
                 {
                     // Default parameters
                     return flushViewLayoutAnimated(50.0, 45, BoundsAnimator::EasingType::Linear);
                 }
 
-                if (props["layoutAnimated"].isObject())
+                if (props[layoutAnimatedProp].isObject())
                 {
-                    double const durationMs = props["layoutAnimated"].getProperty("duration", 50.0);
-                    double const frameRate = props["layoutAnimated"].getProperty("frameRate", 45);
-                    int const et = props["layoutAnimated"].getProperty("easing", 0);
+                    double const durationMs = props[layoutAnimatedProp].getProperty(durationProp, 50.0);
+                    double const frameRate = props[layoutAnimatedProp].getProperty(frameRateProp, 45);
+                    int const et = props[layoutAnimatedProp].getProperty(easingProp, 0);
 
                     return flushViewLayoutAnimated(durationMs, static_cast<int> (frameRate), static_cast<BoundsAnimator::EasingType>(et));
                 }

@@ -23,30 +23,42 @@ namespace blueprint
     {
     public:
         //==============================================================================
+        static const inline juce::Identifier colorProp         = "color";
+
+        static const inline juce::Identifier fontSizeProp      = "font-size";
+        static const inline juce::Identifier fontStyleProp     = "font-style";
+        static const inline juce::Identifier fontFamilyProp    = "font-family";
+
+        static const inline juce::Identifier justificationProp = "justification";
+        static const inline juce::Identifier kerningFactorProp = "kerning-factor";
+        static const inline juce::Identifier lineSpacingProp   = "line-spacing";
+        static const inline juce::Identifier wordWrapProp      = "word-wrap";
+
+        //==============================================================================
         TextView() = default;
 
         //==============================================================================
         /** Assembles a Font from the current node properties. */
         juce::Font getFont()
         {
-            float fontHeight = props.getWithDefault("font-size", 12.0f);
-            int textStyleFlags = props.getWithDefault("font-style", 0);
+            float fontHeight = props.getWithDefault(fontSizeProp, 12.0f);
+            int textStyleFlags = props.getWithDefault(fontStyleProp, 0);
 
             juce::Font f (fontHeight);
 
-            if (props.contains("font-family"))
-                f = juce::Font (props["font-family"], fontHeight, textStyleFlags);
+            if (props.contains(fontFamilyProp))
+                f = juce::Font (props[fontFamilyProp], fontHeight, textStyleFlags);
 
-            f.setExtraKerningFactor(props.getWithDefault("kerning-factor", 0.0));
+            f.setExtraKerningFactor(props.getWithDefault(kerningFactorProp, 0.0));
             return f;
         }
 
         /** Constructs a TextLayout from all the children string values. */
         juce::TextLayout getTextLayout (float maxWidth)
         {
-            juce::String hexColor = props.getWithDefault("color", "ff000000");
+            juce::String hexColor = props.getWithDefault(colorProp, "ff000000");
             juce::Colour colour = juce::Colour::fromString(hexColor);
-            int just = props.getWithDefault("justification", 1);
+            int just = props.getWithDefault(justificationProp, 1);
             juce::String text;
 
             // TODO: Right now a <Text> element maps 1:1 to a TextView instance,
@@ -62,14 +74,14 @@ namespace blueprint
             juce::AttributedString as (text);
             juce::TextLayout tl;
 
-            as.setLineSpacing(props.getWithDefault("line-spacing", 1.0f));
+            as.setLineSpacing(props.getWithDefault(lineSpacingProp, 1.0f));
             as.setFont(getFont());
             as.setColour(colour);
             as.setJustification(just);
 
-            if (props.contains("word-wrap"))
+            if (props.contains(wordWrapProp))
             {
-                int wwValue = props["word-wrap"];
+                int wwValue = props[wordWrapProp];
 
                 switch (wwValue)
                 {
