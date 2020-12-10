@@ -72,21 +72,7 @@ namespace blueprint
     //==============================================================================
     EcmascriptEngine::EcmascriptEngine()
     {
-        // Allocate a new js heap
-        dukContext = std::shared_ptr<duk_context>(
-            duk_create_heap (nullptr, nullptr, nullptr, nullptr, detail::fatalErrorHandler),
-            duk_destroy_heap
-        );
-
-        // Add console.log support
-        auto* ctxRawPtr = dukContext.get();
-        duk_console_init(ctxRawPtr, DUK_CONSOLE_FLUSH);
-
-        // Install a pointer back to this EcmascriptEngine instance
-        duk_push_global_stash(ctxRawPtr);
-        duk_push_pointer(ctxRawPtr, (void *) this);
-        duk_put_prop_string(ctxRawPtr, -2, DUK_HIDDEN_SYMBOL("__EcmascriptEngineInstance__"));
-        duk_pop(ctxRawPtr);
+        reset();
     }
 
     //==============================================================================
@@ -203,16 +189,21 @@ namespace blueprint
 
     void EcmascriptEngine::reset()
     {
+        // Allocate a new js heap
+        dukContext = std::shared_ptr<duk_context>(
+            duk_create_heap (nullptr, nullptr, nullptr, nullptr, detail::fatalErrorHandler),
+            duk_destroy_heap
+        );
+
+        // Add console.log support
         auto* ctxRawPtr = dukContext.get();
+        duk_console_init(ctxRawPtr, DUK_CONSOLE_FLUSH);
 
-        // Clear out the stack so we can re-register native functions
-        // after we clear out the lambda release pool etc.
-        while (duk_get_top(ctxRawPtr))
-            duk_remove(ctxRawPtr, duk_get_top_index(ctxRawPtr));
-
-        // Clear the LambdaHelper release pool as duktape does not call object
-        // finalizers in the event of an evaluation error or duk_pcall failure.
-        persistentReleasePool.clear();
+        // Install a pointer back to this EcmascriptEngine instance
+        duk_push_global_stash(ctxRawPtr);
+        duk_push_pointer(ctxRawPtr, (void *) this);
+        duk_put_prop_string(ctxRawPtr, -2, DUK_HIDDEN_SYMBOL("__EcmascriptEngineInstance__"));
+        duk_pop(ctxRawPtr);
     }
 
     //==============================================================================
