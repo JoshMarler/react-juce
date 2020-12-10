@@ -56,9 +56,9 @@ namespace blueprint
         return juce::var::undefined();
     }
 
-    juce::var ReactApplicationRoot::addChild (const ViewId parentId, const ViewId childId, int index)
+    juce::var ReactApplicationRoot::insertChild (const ViewId parentId, const ViewId childId, int index)
     {
-        viewManager.addChild(parentId, childId, index);
+        viewManager.insertChild(parentId, childId, index);
         return juce::var::undefined();
     }
 
@@ -184,7 +184,7 @@ namespace blueprint
         addMethodBinding<1>(ns, "createTextViewInstance", &ReactApplicationRoot::createTextViewInstance);
         addMethodBinding<3>(ns, "setViewProperty", &ReactApplicationRoot::setViewProperty);
         addMethodBinding<2>(ns, "setRawTextValue", &ReactApplicationRoot::setRawTextValue);
-        addMethodBinding<3>(ns, "addChild", &ReactApplicationRoot::addChild);
+        addMethodBinding<3>(ns, "insertChild", &ReactApplicationRoot::insertChild);
         addMethodBinding<2>(ns, "removeChild", &ReactApplicationRoot::removeChild);
         addMethodBinding<0>(ns, "getRootInstanceId", &ReactApplicationRoot::getRootInstanceId);
         addMethodBinding<0>(ns, "resetAfterCommit", &ReactApplicationRoot::resetAfterCommit);

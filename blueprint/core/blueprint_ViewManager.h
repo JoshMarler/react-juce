@@ -57,8 +57,12 @@ namespace blueprint
          * */
         void setRawTextValue(ViewId viewId, const juce::String& value);
 
-        /** Adds a child View to the given parent View */
-        void addChild(ViewId parentId, ViewId childId, int index = -1);
+        /** Inserts/Appends a child View to the given parent View
+         *  Callers may call without supplying index (or with index = 1)
+         *  to append to the end of the parents child view list rather than
+         *  inserting.
+         * */
+        void insertChild(ViewId parentId, ViewId childId, int index = -1);
 
         /** Removes a child View from the given parent View */
         void removeChild (ViewId parentId, ViewId childId);

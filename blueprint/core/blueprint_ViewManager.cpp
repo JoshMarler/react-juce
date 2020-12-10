@@ -119,7 +119,7 @@ namespace blueprint
         }
     }
 
-    void ViewManager::addChild(ViewId parentId, ViewId childId, int index)
+    void ViewManager::insertChild(ViewId parentId, ViewId childId, int index)
     {
         // We probably don't want to be doing this!
         jassert(childId != rootId);
