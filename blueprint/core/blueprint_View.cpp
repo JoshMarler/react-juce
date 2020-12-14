@@ -82,7 +82,7 @@ namespace blueprint
     {
         props.set(name, value);
 
-        if (name == juce::StringRef (interceptClickEventsProp))
+        if (name == interceptClickEventsProp)
         {
             switch (static_cast<int> (value))
             {
@@ -95,13 +95,13 @@ namespace blueprint
             }
         }
 
-        if (name == juce::StringRef(onKeyPressProp))
+        if (name == onKeyPressProp)
             setWantsKeyboardFocus(true);
 
-        if (name == juce::StringRef(opacityProp))
+        if (name == opacityProp)
             setAlpha(static_cast<float> (value));
 
-        if (name == juce::StringRef(refIdProp))
+        if (name == refIdProp)
             _refId = juce::Identifier(value.toString());
     }
 
