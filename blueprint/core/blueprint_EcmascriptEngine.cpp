@@ -269,6 +269,9 @@ namespace blueprint
             duk_push_pointer(ctxRawPtr, (void *) this);
             duk_put_prop_string(ctxRawPtr, -2, DUK_HIDDEN_SYMBOL("__EcmascriptEngineInstance__"));
             duk_pop(ctxRawPtr);
+
+            // Clear out any lambdas attached to the previous context instance
+            persistentReleasePool.clear();
         }
 
         //==============================================================================
