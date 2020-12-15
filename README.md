@@ -14,8 +14,14 @@ to a 1.0 release.
 * We'll be renaming Blueprint to react-juce before beta (#34)
 * ~~Updating the examples and `npm init` template to point to npm instead of the local package~~
 * `ReactApplicationRoot::evaluate` and `ReactApplicationRoot::evaluateFile` (#115)
-* Refactoring the hot reloader and decoupling the EcmascriptEngine from ReactApplicationRoot (#65)
+* ~~Refactoring the hot reloader and decoupling the EcmascriptEngine from ReactApplicationRoot (#65)~~
 
+## Resources
+
+* Documentation: [Blueprint Docs & Getting Started](https://nick-thompson.github.io/blueprint/)
+* Discussions: [GitHub Discussions](https://github.com/nick-thompson/blueprint/discussions)
+* Community: [The Audio Programmer Discord Server](https://discord.gg/3H4wwVf49v)
+    * Join the `#blueprint` channel and say hi!
 
 ## Maintainers
 
@@ -30,10 +36,6 @@ Blueprint is a young project, but already it provides the framework on which the
 Besides that, you can check out the example code in the `examples/` directory. See the "Documentation" section
 below for building and running the demo plugin. If you have a project written with Blueprint that you want to share, get in touch! I would
 love to showcase your work.
-
-## Documentation
-
-See [Blueprint Docs & Getting Started](https://nick-thompson.github.io/blueprint/)
 
 ## Contributing
 Yes, please! I would be very happy to welcome your involvement. Take a look at the [open issues](https://github.com/nick-thompson/blueprint/issues)
