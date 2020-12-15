@@ -38,11 +38,7 @@ below for building and running the demo plugin. If you have a project written wi
 love to showcase your work.
 
 ## Contributing
-Yes, please! I would be very happy to welcome your involvement. Take a look at the [open issues](https://github.com/nick-thompson/blueprint/issues)
-or the [project tracker](https://github.com/nick-thompson/blueprint/projects/1) to see if there's outstanding work that you might
-be able to get started. Or feel free to propose an idea or offer feedback by [opening an issue](https://github.com/nick-thompson/blueprint/issues/new) as well.
-
-I don't have a formal style guide at the moment, so please try to match the present formatting in any code contributions.
+See [CONTRIBUTING.md](https://github.com/nick-thompson/blueprint/blob/master/CONTRIBUTING.md)
 
 ## License
 
