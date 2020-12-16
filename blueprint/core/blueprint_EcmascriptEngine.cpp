@@ -146,9 +146,12 @@ namespace blueprint
     //==============================================================================
     struct EcmascriptEngine::Pimpl : private juce::Timer
     {
-        Pimpl()
+        Pimpl() { reset(); }
+
+        ~Pimpl()
         {
-            reset();
+            // NB: Explicitly stopping the timer so as to avoid any late calls to derefenrencing a (cleaned up) context.
+            stopTimer();
         }
 
         //==============================================================================
@@ -304,13 +307,15 @@ namespace blueprint
 
         void debuggerDetach()
         {
-            duk_debugger_detach(dukContext.get());
+            if (auto* dc = dukContext.get())
+                duk_debugger_detach (dc);
         }
 
         //==============================================================================
         void timerCallback() override
         {
-            duk_debugger_cooperate(dukContext.get());
+            if (auto* dc = dukContext.get())
+                duk_debugger_cooperate (dc);
         }
 
         //==============================================================================
@@ -695,9 +700,20 @@ namespace blueprint
 
     //==============================================================================
     EcmascriptEngine::EcmascriptEngine()
-        : mPimpl(std::make_unique<Pimpl>()) {}
+        : mPimpl(std::make_unique<Pimpl>())
+    {
+        /** If you hit this, you're probably trying to run a console application.
 
-    EcmascriptEngine::~EcmascriptEngine() = default;
+            Please make use of juce::ScopedJuceInitialiser_GUI because this JS engine requires event loops.
+            Without the initialiser, the console app would always crash on exit,
+            and things will probably not get cleaned up.
+        */
+        jassert (juce::MessageManager::getInstanceWithoutCreating() != nullptr);
+    }
+
+    EcmascriptEngine::~EcmascriptEngine()
+    {
+    }
 
     //==============================================================================
     juce::var EcmascriptEngine::evaluateInline (const juce::String& code)

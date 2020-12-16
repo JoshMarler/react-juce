@@ -191,7 +191,7 @@ namespace blueprint
             auto borderBounds = getLocalBounds().toFloat().reduced(borderWidth * 0.5f);
             auto width  = borderBounds.getWidth();
             auto height = borderBounds.getHeight();
-            auto minLength = std::min(width, height);
+            auto minLength = juce::jmin(width, height);
             float borderRadius = getResolvedLengthProperty(borderRadiusProp.toString(), minLength);
 
             border.addRoundedRectangle(borderBounds, borderRadius);

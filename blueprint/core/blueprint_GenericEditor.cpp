@@ -77,7 +77,7 @@ namespace blueprint
         paramReadouts[parameterIndex].dirty = true;
     }
 
-    void BlueprintGenericEditor::parameterGestureChanged (int parameterIndex, bool gestureIsStarting)
+    void BlueprintGenericEditor::parameterGestureChanged (int, bool)
     {
         // Our generic editor doesn't do anything with this information yet, but
         // we'll happily take a pull request if you need something here :).
@@ -96,7 +96,7 @@ namespace blueprint
                 const float value = pr.value.load();
                 pr.dirty = false;
 
-                const auto& p = processor.getParameters()[i];
+                const auto& p = processor.getParameters()[(int) i];
                 juce::String id = p->getName(100);
 
                 if (auto* x = dynamic_cast<juce::AudioProcessorParameterWithID*>(p))
