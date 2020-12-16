@@ -26,6 +26,16 @@
     #include <juce_audio_processors/juce_audio_processors.h>
 #endif
 
+//==============================================================================
+#if JUCE_EXCEPTIONS_DISABLED
+    #error "Blueprint module requires exceptions to be enabled!"
+#endif
+
+#if ! JUCE_CXX17_IS_AVAILABLE
+    #error "Blueprint module requires a C++17 compatible toolchain!"
+#endif
+
+//==============================================================================
 #include "yoga/yoga/YGMacros.h"
 
 // This is a hacky workaround for an issue introduced in the YG_ENUM_BEGIN
