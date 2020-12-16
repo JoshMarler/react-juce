@@ -30,7 +30,28 @@ namespace blueprint
             for (const auto& f : fileWatcher->getWatchedFiles())
             {
                 if (onBeforeEach) { onBeforeEach(f); }
-                appRoot.evaluate(f);
+
+                try
+                {
+                    appRoot.evaluate(f);
+                }
+                catch (const EcmascriptEngine::Error& err)
+                {
+                    // We may fall in here in Release builds when ReactApplicationRoot hasn't
+                    // caught the error for us to show the red screen. In this case, we call
+                    // a user supplied error handler if we have one, else just break the loop
+                    // and await the next file change event.
+                    if (onEvalError)
+                    {
+                        onEvalError(err);
+                        break;
+                    }
+                    else
+                    {
+                        throw err;
+                    }
+                }
+
                 if (onAfterEach) { onAfterEach(f); }
             }
 
@@ -59,6 +80,58 @@ namespace blueprint
 
     void AppHarness::start()
     {
+        // Nothing to do if we haven't watched any files
+        if (fileWatcher == nullptr)
+            return;
+
+        if (onBeforeAll) { onBeforeAll(); }
+
+        for (const auto& f : fileWatcher->getWatchedFiles())
+        {
+            if (onBeforeEach) { onBeforeEach(f); }
+
+            try
+            {
+                appRoot.evaluate(f);
+            }
+            catch (const EcmascriptEngine::Error& err)
+            {
+                // We may fall in here in Release builds when ReactApplicationRoot hasn't
+                // caught the error for us to show the red screen. In this case, we call
+                // a user supplied error handler if we have one, else just break the loop
+                // and await the next file change event.
+                if (onEvalError)
+                {
+                    onEvalError(err);
+                    break;
+                }
+                else
+                {
+                    throw err;
+                }
+            }
+
+            if (onAfterEach) { onAfterEach(f); }
+        }
+
+        if (onAfterAll) { onAfterAll(); }
+
+        // Finally, kick off the file watch process
+        fileWatcher->start();
+    }
+
+    void AppHarness::stop()
+    {
+        if (fileWatcher)
+            fileWatcher->stop();
+    }
+
+    void AppHarness::once()
+    {
+        // Nothing to do if we haven't watched any files
+        if (fileWatcher == nullptr)
+            return;
+
         if (onBeforeAll) { onBeforeAll(); }
 
         for (const auto& f : fileWatcher->getWatchedFiles())
@@ -69,17 +142,6 @@ namespace blueprint
         }
 
         if (onAfterAll) { onAfterAll(); }
-
-#if JUCE_DEBUG
-        if (fileWatcher)
-            fileWatcher->start();
-#endif
-    }
-
-    void AppHarness::stop()
-    {
-        if (fileWatcher)
-            fileWatcher->stop();
     }
 
 }
