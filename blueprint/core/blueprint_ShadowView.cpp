@@ -65,9 +65,9 @@ namespace blueprint
 
     //==============================================================================
     class PropertySetterMap {
-      typedef juce::String K;
-      typedef juce::var V;
-      typedef std::function<bool(const V&, YGNodeRef)> F;
+      using K = juce::String;
+      using V = juce::var;
+      using F = std::function<bool(const V&, YGNodeRef)>;
       std::unordered_map<K, F> propertySetters;
 
       public:

@@ -20,7 +20,7 @@ namespace blueprint
     // and still match afterwards. So we map our Uuids into a signed 32-bit integer
     // type and leave Duktape to perform the appropriate cast through JavaScript's
     // double-width "Number" type.
-    typedef juce::int32 ViewId;
+    using ViewId = juce::int32;
 
     //==============================================================================
     /** The View class is the core component abstraction for Blueprint's declarative
