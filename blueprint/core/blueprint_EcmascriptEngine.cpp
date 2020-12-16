@@ -152,7 +152,7 @@ namespace blueprint
         }
 
         //==============================================================================
-        juce::var evaluate (const juce::String& code)
+        juce::var evaluateInline (const juce::String& code)
         {
             jassert(code.isNotEmpty());
             auto* ctxRawPtr = dukContext.get();
@@ -698,9 +698,9 @@ namespace blueprint
         : mPimpl(std::make_unique<Pimpl>()) {}
 
     //==============================================================================
-    juce::var EcmascriptEngine::evaluate (const juce::String& code)
+    juce::var EcmascriptEngine::evaluateInline (const juce::String& code)
     {
-        return mPimpl->evaluate(code);
+        return mPimpl->evaluateInline(code);
     }
 
     juce::var EcmascriptEngine::evaluate (const juce::File& code)

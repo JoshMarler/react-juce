@@ -70,7 +70,6 @@ namespace blueprint
          *     };
          *
          *     harness.watch(myAppBundle);
-         *     appRoot.evaluate(myAppBundle);
          *
          *     // Not strictly required if JUCE_DEBUG set.
          *     harness.start();
@@ -110,7 +109,6 @@ namespace blueprint
          *     };
          *
          *     harness.watch(myAppBundle);
-         *     appRoot.evaluate(myAppBundle);
          *
          *     // Not strictly required if JUCE_DEBUG set.
          *     harness.start();
@@ -143,7 +141,6 @@ namespace blueprint
          *     };
          *
          *     harness.watch(myAppBundle);
-         *     appRoot.evaluate(myAppBundle);
          *
          *     // Not strictly required if JUCE_DEBUG set.
          *     harness.start();
@@ -174,7 +171,6 @@ namespace blueprint
          *     };
          *
          *     harness.watch(myAppBundle);
-         *     appRoot.evaluate(myAppBundle);
          *
          *     // Not strictly required if JUCE_DEBUG set.
          *     harness.start();

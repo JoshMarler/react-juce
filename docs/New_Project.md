@@ -103,7 +103,7 @@ public:
         File bundle = sourceDir.getChildFile("jsui/build/js/main.js");
 
         addAndMakeVisible(appRoot);
-        appRoot.evaluate(bundle.loadFileAsString());
+        appRoot.evaluate(bundle);
 
         setSize(400, 300);
     }

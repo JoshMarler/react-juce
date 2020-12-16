@@ -64,7 +64,7 @@ namespace blueprint
          *  @returns juce::var result of the evaluation
          *  @throws EcmascriptEngine::Error in the event of an evaluation error
          */
-        juce::var evaluate (const juce::String& code);
+        juce::var evaluateInline (const juce::String& code);
         juce::var evaluate (const juce::File& code);
 
         //==============================================================================
