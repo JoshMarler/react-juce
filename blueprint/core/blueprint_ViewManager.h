@@ -33,8 +33,8 @@ namespace blueprint
         // We allow registering arbitrary view types with the React context by way of
         // a "ViewFactory" here which is a user-defined function that produces a View
         // and a corresponding ShadowView.
-        typedef std::pair<std::unique_ptr<View>, std::unique_ptr<ShadowView>> ViewPair;
-        typedef std::function<ViewPair()> ViewFactory;
+        using ViewPair = std::pair<std::unique_ptr<View>, std::unique_ptr<ShadowView>>;
+        using ViewFactory = std::function<ViewPair()>;
 
         //==============================================================================
         explicit ViewManager(View* rootView);
