@@ -12,7 +12,7 @@
     description:        A React.js render backend targeting JUCE Components.
     minimumCppStandard: 17
     dependencies:       juce_gui_basics
-    searchpaths:        ./ ./duktape/src-noline/ ./yoga
+    searchpaths:        ./ ./duktape/ ./duktape/src-noline/ ./yoga
    END_JUCE_MODULE_DECLARATION
 *******************************************************************************/
 
@@ -36,6 +36,24 @@
 #endif
 
 //==============================================================================
+/** Config: BLUEPRINT_COMPILE_UNIT_TESTS
+
+    If enabled, compiles Blueprint's unit tests in the application.
+*/
+#ifndef BLUEPRINT_COMPILE_UNIT_TESTS
+    #define BLUEPRINT_COMPILE_UNIT_TESTS 0
+#endif
+
+/** Config: BLUEPRINT_CREATE_GLOBAL_UNIT_TESTS
+
+    If enabled, instantiates unit tests globally.
+    You will want to disable this in console apps.
+*/
+#ifndef BLUEPRINT_CREATE_GLOBAL_UNIT_TESTS
+    #define BLUEPRINT_CREATE_GLOBAL_UNIT_TESTS BLUEPRINT_COMPILE_UNIT_TESTS
+#endif
+
+//==============================================================================
 #include "yoga/yoga/YGMacros.h"
 
 // This is a hacky workaround for an issue introduced in the YG_ENUM_BEGIN
@@ -51,7 +69,8 @@
 #endif
 
 #if _MSC_VER
- #pragma warning(push)
+ #pragma warning (push)
+ #pragma warning (disable : 4100 4244)
 #elif __clang__
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wextra-semi"
@@ -110,3 +129,7 @@
 #include "core/blueprint_TextView.h"
 #include "core/blueprint_View.h"
 #include "core/blueprint_ViewManager.h"
+
+#if BLUEPRINT_COMPILE_UNIT_TESTS
+    #include "tests/blueprint_EcmascriptEngineTests.h"
+#endif

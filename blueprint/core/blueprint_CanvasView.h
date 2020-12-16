@@ -320,7 +320,7 @@ namespace blueprint
                         const float cornerSize = args.arguments[4];
 
                         graphics->setColour(properties.strokeStyle.colour);
-                        graphics->drawRoundedRectangle(x, y, width, height, cornerSize, properties.lineWidth);
+                        graphics->drawRoundedRectangle(x, y, width, height, cornerSize, (float) properties.lineWidth);
 
                         return juce::var();
                     }

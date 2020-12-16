@@ -88,8 +88,8 @@ namespace blueprint
                 return drawable->draw(g, opacity);
 
             // Otherwise we map placement strings to the appropriate flags
-            const int flags = props[placementProp];
-            const juce::RectanglePlacement placement (flags);
+            const int existingFlags = props[placementProp];
+            const juce::RectanglePlacement placement (existingFlags);
 
             drawable->drawWithin(g, getLocalBounds().toFloat(), placement, opacity);
         }

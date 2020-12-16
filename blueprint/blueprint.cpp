@@ -25,6 +25,7 @@
   #pragma warning(disable : 4505) // unreferenced local function
   #pragma warning(disable : 4611) // object destruction is non-portable
   #pragma warning(disable : 4702) // unreachable code
+  #pragma warning(disable : 4100 4244 4459)
 #elif __clang__
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wextra-semi"
@@ -87,7 +88,3 @@
 #include "core/blueprint_View.cpp"
 #include "core/blueprint_ViewManager.cpp"
 #include "core/blueprint_ScrollView.cpp"
-
-#ifdef BLUEPRINT_INCLUDE_TESTS
-#include "tests/blueprint_EcmascriptEngineTests.cpp"
-#endif
