@@ -697,6 +697,8 @@ namespace blueprint
     EcmascriptEngine::EcmascriptEngine()
         : mPimpl(std::make_unique<Pimpl>()) {}
 
+    EcmascriptEngine::~EcmascriptEngine() = default;
+
     //==============================================================================
     juce::var EcmascriptEngine::evaluateInline (const juce::String& code)
     {

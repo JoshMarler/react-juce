@@ -27,7 +27,8 @@ namespace blueprint
      *    onBeforeAll – Invoked before evaluating any watched bundle
      *    onBeforeEach – Invoked before evaluating each watched bundle
      *    onAfterEach – Invoked after evaluating each watched bundle
-     *    onAfterAll – Invoked after evaluatingg all watched bundles
+     *    onAfterAll – Invoked after evaluating all watched bundles
+     *    onEvalError – Invoked for an uncaught exception during bundle evaluation
      */
     class AppHarness
     {
@@ -39,8 +40,19 @@ namespace blueprint
         void watch (const juce::File& f);
         void watch (const std::vector<juce::File>& fs);
 
+        /** Run the initial evaluation step and then watch for file changes. */
         void start();
+
+        /** Stop any running file watch. */
         void stop();
+
+        /** Run the initial evaluation step exactly once.
+         *
+         *  It may be helpful to use AppHarness::start in DEBUG builds when you want
+         *  hot reloading for development, then switch in RELEASE builds to using
+         *  AppHarness::once to ignore file watching when you don't need it.
+         */
+        void once();
 
         //==============================================================================
         /**
@@ -179,6 +191,30 @@ namespace blueprint
          * @endcode
          **/
         std::function<void(void)> onAfterAll;
+
+        /**
+         * Called for any uncaught exception during bundle evaluation.
+         *
+         * @code
+         *
+         *  MyEditor()
+         *     : engine(std::make_shared<EcmascriptEngine>())
+         *     , appRoot(engine)
+         *     , harness(appRoot)
+         * {
+         *     juce::File myAppBundle("/path/to/myAppBundle.js");
+         *
+         *     harness.onEvalError = [=](const EcmascriptEngine::Error& e) {
+         *         logError(e.what());
+         *     };
+         *
+         *     harness.watch(myAppBundle);
+         *     harness.start();
+         * }
+         *
+         * @endcode
+         **/
+        std::function<void(const EcmascriptEngine::Error&)> onEvalError;
 
     private:
         //==============================================================================

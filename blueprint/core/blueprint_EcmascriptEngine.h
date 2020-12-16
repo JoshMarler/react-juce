@@ -25,7 +25,7 @@ namespace blueprint
     public:
         //==============================================================================
         EcmascriptEngine();
-        ~EcmascriptEngine() = default;
+        ~EcmascriptEngine();
 
         //==============================================================================
         /** A helper struct for representing an error that occured within the Duktape

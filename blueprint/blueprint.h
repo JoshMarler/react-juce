@@ -12,7 +12,7 @@
     description:        A React.js render backend targeting JUCE Components.
     minimumCppStandard: 17
     dependencies:       juce_gui_basics
-    searchpaths:        ./duktape/src-noline/ ./yoga
+    searchpaths:        ./ ./duktape/src-noline/ ./yoga
    END_JUCE_MODULE_DECLARATION
 *******************************************************************************/
 
