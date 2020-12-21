@@ -1,3 +1,5 @@
+import { all as allCssProps } from 'known-css-properties';
+import camelCase from 'camelcase';
 import SyntheticEvents,
        { SyntheticMouseEvent,
          SyntheticKeyboardEvent } from './SyntheticEvents'
@@ -11,6 +13,13 @@ export type Instance = ViewInstance | RawTextViewInstance;
 let __rootViewInstance: ViewInstance | null = null;
 let __viewRegistry: Map<string, Instance> = new Map<string, Instance>();
 let __lastMouseDownViewId: string | null = null;
+
+// get any css properties not beginning with a "-",
+// and build a map from any camelCase versions to
+// the hyphenated version
+const cssPropsMap = allCssProps
+  .filter((s) => !s.startsWith("-") && s.includes("-"))
+  .reduce((acc, v) => Object.assign(acc, { [camelCase(v)]: v }), {});
 
 if (typeof window !== 'undefined') {
   // This is just a little shim so that I can build for web and run my renderer
@@ -101,6 +110,10 @@ export class ViewInstance {
   }
 
   setProperty(propKey: string, value: any): any {
+    // if the supplied propkey is a camelCase equivalent
+    // of a css prop, first convert it to kebab-case
+    propKey = cssPropsMap[propKey] || propKey;
+
     this._props = Object.assign({}, this._props, {
       [propKey]: value,
     });

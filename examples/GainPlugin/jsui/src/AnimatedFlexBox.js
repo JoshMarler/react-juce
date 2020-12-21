@@ -24,32 +24,32 @@ class AnimatedFlexBoxExample extends Component {
 
 const styles = {
   container: {
-    'width': '100%',
-    'height': '100%',
-    'background-color': 'ff17191f',
-    'justify-content': 'flex-start',
-    'align-content': 'flex-start',
-    'flex-wrap': 'wrap',
-    'layoutAnimated': {
-      'duration': 200.0,
-      'frameRate': 45,
-      'easing': View.EasingFunctions.quadraticInOut,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'ff17191f',
+    justifyContent: 'flex-start',
+    alignContent: 'flex-start',
+    flexWrap: 'wrap',
+    layoutAnimated: {
+      duration: 200.0,
+      frameRate: 45,
+      easing: View.EasingFunctions.quadraticInOut,
     },
   },
   cell: {
-    'flex': 0.0,
-    'width': 100.0,
-    'height': 100.0,
-    'justify-content': 'space-around',
-    'align-items': 'center',
-    'background-color': 'ff87898f',
-    'margin': 6.0,
-    'padding': 6.0,
+    flex: 0.0,
+    width: 100.0,
+    height: 100.0,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: 'ff87898f',
+    margin: 6.0,
+    padding: 6.0,
   },
   text: {
-    'font-size': 16.0,
-    'line-spacing': 1.6,
-    'justification': Text.JustificationFlags.centred,
+    fontSize: 16.0,
+    lineSpacing: 1.6,
+    justification: Text.JustificationFlags.centred,
   },
 };
 
