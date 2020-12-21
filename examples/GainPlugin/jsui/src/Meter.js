@@ -89,13 +89,13 @@ class Meter extends Component {
 
 const styles = {
   canvas: {
-    'flex': 1.0,
-    'height': '100%',
-    'width': '100%',
-    'position': 'absolute',
-    'left': 0.0,
-    'top': 0.0,
-    'interceptClickEvents': false,
+    flex: 1.0,
+    height: '100%',
+    width: '100%',
+    position: 'absolute',
+    left: 0.0,
+    top: 0.0,
+    interceptClickEvents: false,
   },
 };
 

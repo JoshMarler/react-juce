@@ -34,8 +34,10 @@
   },
   "dependencies": {
     "@babel/runtime-corejs3": "^7.11.2",
+    "camelcase": "^6.2.0",
     "core-js": "2.6.0",
     "invariant": "^2.2.4",
+    "known-css-properties": "^0.20.0",
     "matrix-js": "^1.5.1",
     "react-reconciler": "^0.17.2"
   },
