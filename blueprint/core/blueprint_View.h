@@ -11,7 +11,6 @@
 
 #include <map>
 
-
 namespace blueprint
 {
 
@@ -93,7 +92,18 @@ namespace blueprint
         /** Invokes, if exists, the respective view event handler. */
         void dispatchViewEvent (const juce::String& eventType, const juce::var& e);
 
+        //==============================================================================
+        /** Invokes an "exported" native method on the View instance */
+        juce::var invokeMethod(const juce::String &method, const juce::var::NativeFunctionArgs &args);
+
     protected:
+        //==============================================================================
+        /** Exports/Registers a method on this View instance so it may be called
+         *  directly from React. This is here to support calling ViewInstance functions
+         *  in React via component refs.
+         * */
+        void exportMethod(const juce::String &method, juce::var::NativeFunction fn);
+
         //==============================================================================
         juce::NamedValueSet props;
         juce::Rectangle<float> cachedFloatBounds;
@@ -102,6 +112,8 @@ namespace blueprint
         //==============================================================================
         juce::Uuid _viewId;
         juce::Identifier _refId;
+
+        std::unordered_map<juce::String, juce::var::NativeFunction> nativeMethods;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (View)
