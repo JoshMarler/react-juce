@@ -121,8 +121,25 @@ export class ViewInstance {
     // Our React Ref equivalent. This is needed
     // as it appears the 'ref' prop isn't passed through
     // to our renderer's setProperty from the reconciler.
+    // We wrap the ViewInstance in a proxy object here to allow
+    // invocation of native ViewInstance methods via React refs.
+    // If a property is not present on the ViewInstance object
+    // we assume the caller is attempting to access/invoke a
+    // native View method.
     if (propKey === 'viewRef') {
-      value.current = this;
+      value.current = new Proxy(this, {
+        get: function(target, prop, receiver) {
+          if (prop in target) {
+            return target[prop];
+          }
+
+          return function(...args) {
+            //@ts-ignore
+            return __BlueprintNative__.invokeViewMethod(target._id, prop, ...args);
+          };
+        }
+      });
+
       return;
     }
 

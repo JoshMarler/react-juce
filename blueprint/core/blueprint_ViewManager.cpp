@@ -224,6 +224,14 @@ namespace blueprint
         shadowViewTable[rootId] = std::make_unique<ShadowView>(nh.mapped()->getAssociatedView());
     }
 
+    juce::var ViewManager::invokeViewMethod(ViewId viewId, const juce::String &method, const juce::var::NativeFunctionArgs &args)
+    {
+        if (View *view = getViewHandle(viewId).first)
+            return view->invokeMethod(method, args);
+
+        throw std::logic_error("Caller attempted to invoke method on non-existent View instance");
+    }
+
     std::pair<View*, ShadowView*> ViewManager::getViewHandle (ViewId viewId)
     {
         if (viewId == rootId)
@@ -261,5 +269,3 @@ namespace blueprint
        return root->getRefId();
     }
 }
-
-

@@ -75,6 +75,11 @@ namespace blueprint
         /** Empties the internal view tables, deallocating every view except the root in the ViewManager heirarchy. */
         void clearViewTables();
 
+        /** Invokes an exported native method on the given View instance.
+         *  This method is used to allow JS code to invoke a native function on a ViewInstance using React refs.
+         **/
+        juce::var invokeViewMethod(ViewId viewId, const juce::String &method, const juce::var::NativeFunctionArgs &args);
+
         //==============================================================================
     private:
         void enumerateChildViewIds (std::vector<ViewId>& ids, View* v);

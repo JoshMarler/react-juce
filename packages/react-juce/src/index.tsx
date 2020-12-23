@@ -15,7 +15,7 @@ export * from './components/Text';
 export * from './components/Image';
 export * from './components/Button';
 export * from './components/Slider';
-
+export * from './components/ListView';
 export * from './lib/SyntheticEvents';
 
 let __renderStarted = false;

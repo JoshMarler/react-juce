@@ -29,7 +29,7 @@ namespace blueprint
         // This is prop configurable
         startTimerHz(30);
 
-        viewport.OnAreaChanged([this](const juce::Rectangle<int>& area)
+        viewport.onAreaChanged([this](const juce::Rectangle<int>& area)
         {
             lastScrollEvent.event = detail::makeScrollEventObject(area.getY(), area.getX());
             lastScrollEvent.dirty = true;
@@ -37,6 +37,8 @@ namespace blueprint
 
         addAndMakeVisible(viewport);
         viewport.setScrollBarsShown(true, true);
+
+        exportNativeMethods();
     }
 
     void ScrollView::setProperty (const juce::Identifier& name, const juce::var& value)
@@ -135,5 +137,18 @@ namespace blueprint
                 lastScrollEvent.dirty = false;
             }
         }
+    }
+
+    void ScrollView::exportNativeMethods()
+    {
+       exportMethod("scrollToPosition", [this] (const juce::var::NativeFunctionArgs &args) -> juce::var
+       {
+           jassert(args.numArguments == 2);
+           const int xPos = args.arguments[0];
+           const int yPos = args.arguments[1];
+
+           viewport.setViewPosition(xPos, yPos);
+           return juce::var::undefined();
+       });
     }
 }

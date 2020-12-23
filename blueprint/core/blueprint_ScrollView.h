@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include <utility>
-
 #include "blueprint_View.h"
 
 namespace blueprint
@@ -22,7 +20,7 @@ namespace blueprint
         methods delegate to a single child juce::Viewport.
      */
     class ScrollView : public View
-                     , public juce::Timer
+                     , private juce::Timer
     {
         //==============================================================================
         class ScrollViewViewport : public juce::Viewport
@@ -31,7 +29,7 @@ namespace blueprint
         public:
             ScrollViewViewport() = default;
 
-            void OnAreaChanged(OnAreaChangedCallback callback)
+            void onAreaChanged(OnAreaChangedCallback callback)
             {
                 onAreaChangedCallback = std::move(callback);
             }
@@ -80,10 +78,11 @@ namespace blueprint
     private:
         //==============================================================================
         void timerCallback() override;
+        void exportNativeMethods();
 
         //==============================================================================
-        ScrollViewViewport                   viewport;
-        ScrollEvent                          lastScrollEvent;
+        ScrollViewViewport viewport;
+        ScrollEvent        lastScrollEvent;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollView)

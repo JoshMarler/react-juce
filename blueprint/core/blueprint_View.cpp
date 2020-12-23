@@ -265,4 +265,20 @@ namespace blueprint
             parent->dispatchViewEvent(getViewId(), eventType, e);
     }
 
+    void View::exportMethod(const juce::String &method, juce::var::NativeFunction fn)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+        nativeMethods[method] = std::move(fn);
+    }
+
+    juce::var View::invokeMethod(const juce::String &method, const juce::var::NativeFunctionArgs &args)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+        auto it = nativeMethods.find(method);
+
+        if (it != nativeMethods.end())
+            return it->second(args);
+
+        throw std::logic_error("Caller attempted to invoke a non-existent View method");
+    }
 }

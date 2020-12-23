@@ -182,6 +182,16 @@ namespace blueprint
 
         engine->registerNativeProperty(ns, juce::JSON::parse("{}"));
 
+        engine->registerNativeMethod(ns, "invokeViewMethod", [this](const juce::var::NativeFunctionArgs& args) -> juce::var
+        {
+            jassert(args.numArguments >= 2);
+            const ViewId       viewId = args.arguments[0];
+            const juce::String method = args.arguments[1];
+
+            const juce::var::NativeFunctionArgs methodArgs(args.thisObject, args.arguments + 2, args.numArguments - 2);
+            return viewManager.invokeViewMethod(viewId, method, methodArgs);
+        });
+
         addMethodBinding<1>(ns, "createViewInstance", &ReactApplicationRoot::createViewInstance);
         addMethodBinding<1>(ns, "createTextViewInstance", &ReactApplicationRoot::createTextViewInstance);
         addMethodBinding<3>(ns, "setViewProperty", &ReactApplicationRoot::setViewProperty);
