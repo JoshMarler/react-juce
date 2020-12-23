@@ -65,16 +65,23 @@ function parseOverflowProp(overflowProp: string | undefined,
   return props;
 }
 
+export interface ScrollEvent {
+    scrollTop: number,
+    scrollLeft: number
+}
+
 export interface ScrollViewProps {
     'overflow'?: string;
     'overflow-x'?: string;
     'overflow-y'?: string;
     'scrollbar-color'?: string;
     'scrollbar-width'?: string | number;
-    'scroll-on-drag'?: boolean
+    'scroll-on-drag'?: boolean;
+    onScroll: (e: ScrollEvent) => void;
 }
 
-export function ScrollView(props: PropsWithChildren<ScrollViewProps>) {
+//TODO: Remove any once ViewProps typed
+export function ScrollView(props: PropsWithChildren<ScrollViewProps | any>) {
   const child = React.Children.only(props.children);
 
   invariant(

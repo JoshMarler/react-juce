@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "blueprint_View.h"
 
 namespace blueprint
@@ -20,7 +22,39 @@ namespace blueprint
         methods delegate to a single child juce::Viewport.
      */
     class ScrollView : public View
+                     , public juce::Timer
     {
+        //==============================================================================
+        class ScrollViewViewport : public juce::Viewport
+        {
+            using OnAreaChangedCallback = std::function<void(const juce::Rectangle<int>&)>;
+        public:
+            ScrollViewViewport() = default;
+
+            void OnAreaChanged(OnAreaChangedCallback callback)
+            {
+                onAreaChangedCallback = std::move(callback);
+            }
+
+            void visibleAreaChanged(const juce::Rectangle<int> &newArea) override
+            {
+                if (onAreaChangedCallback)
+                    onAreaChangedCallback(newArea);
+            }
+
+        private:
+             OnAreaChangedCallback onAreaChangedCallback;
+        };
+
+        //==============================================================================
+        struct ScrollEvent
+        {
+            juce::var event = juce::var();
+            bool      dirty = false;
+        };
+
+        //==============================================================================
+
     public:
         //==============================================================================
         // Props following CSS Scrollbars spec with some omissions/additions.
@@ -31,6 +65,7 @@ namespace blueprint
         static inline juce::Identifier scrollbarThumbColorProp = "scrollbar-thumb-color";
         static inline juce::Identifier scrollbarTrackColorProp = "scrollbar-track-color";
         static inline juce::Identifier scrollOnDragProp        = "scroll-on-drag";
+        static inline juce::Identifier onScrollProp            = "onScroll";
 
         //==============================================================================
         ScrollView();
@@ -44,7 +79,11 @@ namespace blueprint
 
     private:
         //==============================================================================
-        juce::Viewport viewport;
+        void timerCallback() override;
+
+        //==============================================================================
+        ScrollViewViewport                   viewport;
+        ScrollEvent                          lastScrollEvent;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollView)

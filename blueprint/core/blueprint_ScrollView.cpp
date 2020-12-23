@@ -11,8 +11,30 @@
 
 namespace blueprint
 {
+    namespace detail
+    {
+        juce::var makeScrollEventObject(float scrollTopPosition, float scrollLeftPosition)
+        {
+            juce::DynamicObject::Ptr obj = new juce::DynamicObject();
+            obj->setProperty("scrollTop", scrollTopPosition);
+            obj->setProperty("scrollLeft", scrollLeftPosition);
+            return obj.get();
+        }
+    }
+
+    //==============================================================================
     ScrollView::ScrollView()
     {
+        // Use a default scrollEvent rate of 30Hz.
+        // This is prop configurable
+        startTimerHz(30);
+
+        viewport.OnAreaChanged([this](const juce::Rectangle<int>& area)
+        {
+            lastScrollEvent.event = detail::makeScrollEventObject(area.getY(), area.getX());
+            lastScrollEvent.dirty = true;
+        });
+
         addAndMakeVisible(viewport);
         viewport.setScrollBarsShown(true, true);
     }
@@ -77,7 +99,7 @@ namespace blueprint
         if (name == scrollOnDragProp)
         {
             if (!props[scrollOnDragProp].isBool())
-                throw std::invalid_argument("Invalid prop value. Prop \'scoll-on-drag\' must be a bool.");
+                throw std::invalid_argument("Invalid prop value. Prop \'scroll-on-drag\' must be a bool.");
 
             const bool scrollOnDrag = props[scrollOnDragProp];
             viewport.setScrollOnDragEnabled(scrollOnDrag);
@@ -96,5 +118,22 @@ namespace blueprint
         const auto &bounds = getLocalBounds();
         viewport.setBounds(bounds);
         View::resized();
+    }
+
+    void ScrollView::timerCallback()
+    {
+        if (lastScrollEvent.dirty)
+        {
+            if (props.contains(onScrollProp) && props[onScrollProp].isMethod())
+            {
+                std::array<juce::var, 1> args { lastScrollEvent.event };
+                juce::var::NativeFunctionArgs nfArgs(juce::var(), args.data(), static_cast<int>(args.size()));
+
+                std::invoke(props[onScrollProp].getNativeFunction(), nfArgs);
+
+                // Update lastScrollEvent dirty flag so it isn't raised again
+                lastScrollEvent.dirty = false;
+            }
+        }
     }
 }
