@@ -316,9 +316,7 @@ namespace blueprint
                     if(_args.numArguments < 2 || !_args.arguments[0].isMethod() || !_args.arguments[1].isDouble())
                         throw Error(juce::String(name) + " requires a callback and time in milliseconds");
                     // build a vector holding all additional arguments
-                    std::vector<juce::var> args(_args.numArguments - 2);
-                    for(auto i=2; i<_args.numArguments; i++)
-                        args[i-2] = _args.arguments[i];
+                    std::vector<juce::var> args(_args.arguments + 2, _args.arguments + _args.numArguments);
                     return (this->timeoutsManager.get()->*method)(_args.arguments[0].getNativeFunction(), _args.arguments[1], std::move(args), Repeats);
                 }
                 else
