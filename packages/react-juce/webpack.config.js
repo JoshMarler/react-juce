@@ -41,7 +41,10 @@ module.exports = env => {
             },
             {
               test: /\.js$/,
-              include: path.resolve(__dirname, 'node_modules', 'matrix-js'),
+              include: [
+                path.resolve(__dirname, 'node_modules', 'matrix-js'),
+                path.resolve(__dirname, 'node_modules', 'camelcase'),
+              ],
               use: [
                 {
                   loader: "awesome-typescript-loader",
