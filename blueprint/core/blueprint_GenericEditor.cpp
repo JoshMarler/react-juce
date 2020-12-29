@@ -14,12 +14,11 @@ namespace blueprint
 {
 
     //==============================================================================
-    BlueprintGenericEditor::BlueprintGenericEditor (juce::AudioProcessor& proc, const juce::File& bundle, juce::AudioProcessorValueTreeState* vts)
+    BlueprintGenericEditor::BlueprintGenericEditor (juce::AudioProcessor& proc, const juce::File& bundle)
         : juce::AudioProcessorEditor (proc)
         , engine(std::make_shared<EcmascriptEngine>())
         , appRoot(engine)
         , harness(appRoot)
-        , valueTreeState(vts)
     {
         // Sanity check
         jassert (bundle.existsAsFile());
@@ -31,6 +30,11 @@ namespace blueprint
 
         for (auto& p : params)
         {
+            // Store the parameter ID for easy lookup in gesture lambdas
+            if (auto paramWithID = dynamic_cast<juce::AudioProcessorParameterWithID*>(p)) {
+                parameters.emplace(paramWithID->paramID, p);
+            }
+
             const auto index = p->getParameterIndex();
             const auto value = p->getValue();
 
@@ -133,41 +137,35 @@ namespace blueprint
     //==============================================================================
     void BlueprintGenericEditor::beforeBundleEvaluated()
     {
-        // If we have a valueTreeState, bind parameter methods to the new app root
-        if (valueTreeState != nullptr)
-        {
-            engine->registerNativeMethod(
-                "beginParameterChangeGesture",
-                [this](const juce::var::NativeFunctionArgs& args) {
-                    if (auto* parameter = valueTreeState->getParameter(args.arguments[0].toString()))
-                        parameter->beginChangeGesture();
+        engine->registerNativeMethod(
+            "beginParameterChangeGesture",
+            [this](const juce::var::NativeFunctionArgs& args) {
+                if (auto it = parameters.find (args.arguments[0].toString()); it != parameters.cend())
+                    it->second->beginChangeGesture();
 
-                    return juce::var::undefined();
-                }
-            );
+                return juce::var::undefined();
+            }
+        );
 
-            engine->registerNativeMethod(
-                "setParameterValueNotifyingHost",
-                [this](const juce::var::NativeFunctionArgs& args) {
-                    if (auto* parameter = valueTreeState->getParameter(args.arguments[0].toString()))
-                        parameter->setValueNotifyingHost(args.arguments[1]);
+        engine->registerNativeMethod(
+            "setParameterValueNotifyingHost",
+            [this](const juce::var::NativeFunctionArgs& args) {
+                if (auto it = parameters.find (args.arguments[0].toString()); it != parameters.cend())
+                    it->second->setValueNotifyingHost(args.arguments[1]);
 
-                    return juce::var::undefined();
-                }
-            );
+                return juce::var::undefined();
+            }
+        );
 
-            engine->registerNativeMethod(
-                "endParameterChangeGesture",
-                [this](const juce::var::NativeFunctionArgs& args) {
-                    const juce::String& paramId = args.arguments[0].toString();
+        engine->registerNativeMethod(
+            "endParameterChangeGesture",
+            [this](const juce::var::NativeFunctionArgs& args) {
+                if (auto it = parameters.find (args.arguments[0].toString()); it != parameters.cend())
+                    it->second->endChangeGesture();
 
-                    if (auto* parameter = valueTreeState->getParameter(paramId))
-                        parameter->endChangeGesture();
-
-                    return juce::var::undefined();
-                }
-            );
-        }
+                return juce::var::undefined();
+            }
+        );
     }
 
     void BlueprintGenericEditor::afterBundleEvaluated()

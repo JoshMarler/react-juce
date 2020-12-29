@@ -31,7 +31,7 @@ namespace blueprint
     {
     public:
         //==============================================================================
-        BlueprintGenericEditor (juce::AudioProcessor&, const juce::File&, juce::AudioProcessorValueTreeState* = nullptr);
+        BlueprintGenericEditor (juce::AudioProcessor&, const juce::File&);
         ~BlueprintGenericEditor() override;
 
         //==============================================================================
@@ -60,7 +60,11 @@ namespace blueprint
         AppHarness                            harness;
 
         juce::File                            bundleFile;
-        juce::AudioProcessorValueTreeState*   valueTreeState;
+
+        // We keep a map of the parameter IDs and their associated parameter pointers
+        // to have a quick lookup in beforeBundleEvaluated where lambdas are called
+        // with a param ID 
+        std::map<juce::String, juce::AudioProcessorParameter*> parameters;
 
         //==============================================================================
         // The plugin editor holds an array of parameter value readouts which are
