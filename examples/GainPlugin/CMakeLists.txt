@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(GainPlugin VERSION 0.1.0)
 
-add_subdirectory(juce)
-
-# Adding any custom modules you might have:
-juce_add_module(blueprint)
-
 # `juce_add_plugin` adds a static library target with the name passed as the first argument.
 # This target is a normal CMake target, but has a lot of extra properties set
 # up by default. As well as this shared code static library, this function adds targets for each of
