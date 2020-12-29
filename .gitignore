@@ -8,6 +8,7 @@
 
 .vscode/
 .cache/
+/build
 
 examples/TestRunner/Builds
 
