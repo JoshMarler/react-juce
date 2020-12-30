@@ -99,8 +99,9 @@ public:
     {
         // First thing we have to do is load our javascript bundle from the build
         // directory so that we can evaluate it within our appRot.
-        File sourceDir = File(__FILE__).getParentDirectory();
-        File bundle = sourceDir.getChildFile("jsui/build/js/main.js");
+
+        // TODO: Replace this with the appropriate path to your javascript bundle!
+        File bundle = File("/path/to/your/jsui/build/js/main.js");
 
         addAndMakeVisible(appRoot);
         appRoot.evaluate(bundle);

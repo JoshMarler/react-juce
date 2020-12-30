@@ -190,7 +190,7 @@ AudioProcessorEditor* GainPluginAudioProcessor::createEditor()
     // if you provide an AudioProcessorValueTreeState, and manage hot reloading
     // of the source bundle. You can always start with the BlueprintGenericEditor
     // then switch to a custom editor when you need more explicit control.
-    File sourceDir = File(__FILE__).getParentDirectory();
+    File sourceDir = File(GAINPLUGIN_SOURCE_DIR);
     File bundle = sourceDir.getChildFile("jsui/build/js/main.js");
 
     auto* editor = new blueprint::BlueprintGenericEditor(*this, bundle);

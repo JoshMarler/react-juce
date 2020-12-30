@@ -8,9 +8,10 @@
 
 .vscode/
 .cache/
-/build
 
+build
 examples/TestRunner/Builds
+examples/**/build
 
 ._*
 *.mode1v3
@@ -43,7 +44,6 @@ contents.xcworkspacedata
 .dirstamp
 profile
 node_modules
-examples/**/build
 **/MacOSX/build
 **/iOS/build
 **/IDEWorkspaceChecks.plist
