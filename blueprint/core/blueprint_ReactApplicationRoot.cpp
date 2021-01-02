@@ -11,13 +11,10 @@
 
 #include "blueprint_ReactApplicationRoot.h"
 
-
 namespace blueprint
 {
-
     ReactApplicationRoot::ReactApplicationRoot(std::shared_ptr<EcmascriptEngine> ee)
-        : viewManager(this)
-        , engine(ee)
+        : viewManager(this), engine(ee)
     {
         JUCE_ASSERT_MESSAGE_THREAD
         jassert(ee != nullptr);
@@ -34,35 +31,35 @@ namespace blueprint
         : ReactApplicationRoot(std::make_shared<EcmascriptEngine>()) {}
 
     //==============================================================================
-    juce::var ReactApplicationRoot::createViewInstance (const juce::String& viewType)
+    juce::var ReactApplicationRoot::createViewInstance(const juce::String& viewType)
     {
         return juce::var(viewManager.createViewInstance(viewType));
     }
 
-    juce::var ReactApplicationRoot::createTextViewInstance (const juce::String& textValue)
+    juce::var ReactApplicationRoot::createTextViewInstance(const juce::String& textValue)
     {
         return juce::var(viewManager.createTextViewInstance(textValue));
     }
 
-    juce::var ReactApplicationRoot::setViewProperty (const ViewId viewId, const juce::String& name, const juce::var& value)
+    juce::var ReactApplicationRoot::setViewProperty(const ViewId viewId, const juce::String& name, const juce::var& value)
     {
         viewManager.setViewProperty(viewId, name, value);
         return juce::var::undefined();
     }
 
-    juce::var ReactApplicationRoot::setRawTextValue (const ViewId viewId, const juce::String& value)
+    juce::var ReactApplicationRoot::setRawTextValue(const ViewId viewId, const juce::String& value)
     {
         viewManager.setRawTextValue(viewId, value);
         return juce::var::undefined();
     }
 
-    juce::var ReactApplicationRoot::insertChild (const ViewId parentId, const ViewId childId, int index)
+    juce::var ReactApplicationRoot::insertChild(const ViewId parentId, const ViewId childId, int index)
     {
         viewManager.insertChild(parentId, childId, index);
         return juce::var::undefined();
     }
 
-    juce::var ReactApplicationRoot::removeChild (const ViewId parentId, const ViewId childId)
+    juce::var ReactApplicationRoot::removeChild(const ViewId parentId, const ViewId childId)
     {
         viewManager.removeChild(parentId, childId);
         return juce::var::undefined();
@@ -182,10 +179,9 @@ namespace blueprint
 
         engine->registerNativeProperty(ns, juce::JSON::parse("{}"));
 
-        engine->registerNativeMethod(ns, "invokeViewMethod", [this](const juce::var::NativeFunctionArgs& args) -> juce::var
-        {
+        engine->registerNativeMethod(ns, "invokeViewMethod", [this](const juce::var::NativeFunctionArgs& args) -> juce::var {
             jassert(args.numArguments >= 2);
-            const ViewId       viewId = args.arguments[0];
+            const ViewId viewId = args.arguments[0];
             const juce::String method = args.arguments[1];
 
             const juce::var::NativeFunctionArgs methodArgs(args.thisObject, args.arguments + 2, args.numArguments - 2);
@@ -202,4 +198,4 @@ namespace blueprint
         addMethodBinding<0>(ns, "resetAfterCommit", &ReactApplicationRoot::resetAfterCommit);
     }
 
-}
+} // namespace blueprint

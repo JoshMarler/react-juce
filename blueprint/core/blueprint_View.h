@@ -13,7 +13,6 @@
 
 namespace blueprint
 {
-
     // Internally we use a juce::Uuid for uniquely identifying views, but we
     // need that same identifier to make a transit through JavaScript land
     // and still match afterwards. So we map our Uuids into a signed 32-bit integer
@@ -30,17 +29,17 @@ namespace blueprint
     public:
         //==============================================================================
         static const inline juce::Identifier interceptClickEventsProp = "interceptClickEvents";
-        static const inline juce::Identifier onKeyPressProp           = "onKeyPress";
-        static const inline juce::Identifier opacityProp              = "opacity";
-        static const inline juce::Identifier refIdProp                = "refId";
-        static const inline juce::Identifier transformMatrixProp      = "transform-matrix";
+        static const inline juce::Identifier onKeyPressProp = "onKeyPress";
+        static const inline juce::Identifier opacityProp = "opacity";
+        static const inline juce::Identifier refIdProp = "refId";
+        static const inline juce::Identifier transformMatrixProp = "transform-matrix";
 
-        static const inline juce::Identifier backgroundColorProp      = "background-color";
+        static const inline juce::Identifier backgroundColorProp = "background-color";
 
-        static const inline juce::Identifier borderColorProp          = "border-color";
-        static const inline juce::Identifier borderPathProp           = "border-path";
-        static const inline juce::Identifier borderRadiusProp         = "border-radius";
-        static const inline juce::Identifier borderWidthProp          = "border-width";
+        static const inline juce::Identifier borderColorProp = "border-color";
+        static const inline juce::Identifier borderPathProp = "border-path";
+        static const inline juce::Identifier borderRadiusProp = "border-radius";
+        static const inline juce::Identifier borderWidthProp = "border-width";
 
         //==============================================================================
         View() = default;
@@ -54,47 +53,47 @@ namespace blueprint
         juce::Identifier getRefId() const;
 
         /** Set a property on the native view. */
-        virtual void setProperty (const juce::Identifier&, const juce::var&);
+        virtual void setProperty(const juce::Identifier&, const juce::var&);
 
         /** Adds a child component behind the existing children. */
-        virtual void addChild (View* childView, int index = -1);
+        virtual void addChild(View* childView, int index = -1);
 
         /** Updates the cached float layout bounds from the shadow tree. */
-        void setFloatBounds (juce::Rectangle<float> bounds);
+        void setFloatBounds(juce::Rectangle<float> bounds);
 
         //==============================================================================
         /** Resolves a property to a specific point value or 0 if not present. */
-        float getResolvedLengthProperty (const juce::String& name, float axisLength);
+        float getResolvedLengthProperty(const juce::String& name, float axisLength);
 
         /** Override the default Component method with default paint behaviors. */
-        void paint (juce::Graphics& g) override;
+        void paint(juce::Graphics& g) override;
 
         //==============================================================================
         /** Dispatches a resized event to the React application. */
         void resized() override;
 
         /** Dispatches a mouseDown event to the React application. */
-        void mouseDown (const juce::MouseEvent& e) override;
+        void mouseDown(const juce::MouseEvent& e) override;
 
         /** Dispatches a mouseUp event to the React application. */
-        void mouseUp (const juce::MouseEvent& e) override;
+        void mouseUp(const juce::MouseEvent& e) override;
 
         /** Dispatches a mouseDrag event to the React application. */
-        void mouseDrag (const juce::MouseEvent& e) override;
+        void mouseDrag(const juce::MouseEvent& e) override;
 
         /** Dispatches a mouseDoubleClick event to the React application. */
-        void mouseDoubleClick (const juce::MouseEvent& e) override;
+        void mouseDoubleClick(const juce::MouseEvent& e) override;
 
         /** Dispatches a keyPress event to the React application. */
-        bool keyPressed (const juce::KeyPress& e) override;
+        bool keyPressed(const juce::KeyPress& e) override;
 
         //==============================================================================
         /** Invokes, if exists, the respective view event handler. */
-        void dispatchViewEvent (const juce::String& eventType, const juce::var& e);
+        void dispatchViewEvent(const juce::String& eventType, const juce::var& e);
 
         //==============================================================================
         /** Invokes an "exported" native method on the View instance */
-        juce::var invokeMethod(const juce::String &method, const juce::var::NativeFunctionArgs &args);
+        juce::var invokeMethod(const juce::String& method, const juce::var::NativeFunctionArgs& args);
 
     protected:
         //==============================================================================
@@ -102,7 +101,7 @@ namespace blueprint
          *  directly from React. This is here to support calling ViewInstance functions
          *  in React via component refs.
          * */
-        void exportMethod(const juce::String &method, juce::var::NativeFunction fn);
+        void exportMethod(const juce::String& method, juce::var::NativeFunction fn);
 
         //==============================================================================
         juce::NamedValueSet props;
@@ -116,7 +115,7 @@ namespace blueprint
         std::unordered_map<juce::String, juce::var::NativeFunction> nativeMethods;
 
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (View)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(View)
     };
 
-}
+} // namespace blueprint

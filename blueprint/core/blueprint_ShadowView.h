@@ -16,11 +16,12 @@
 
 namespace blueprint
 {
-
-    struct BoundsAnimator : public juce::Timer {
+    struct BoundsAnimator : public juce::Timer
+    {
         using StepCallback = std::function<void(juce::Rectangle<float>)>;
 
-        enum class EasingType {
+        enum class EasingType
+        {
             Linear,
             QuadraticIn,
             QuadraticOut,
@@ -35,32 +36,28 @@ namespace blueprint
         int frameRate = 45;
         EasingType easingType = EasingType::Linear;
 
-        BoundsAnimator(double durationMs, int frameRateToUse, EasingType et,
-                       juce::Rectangle<float> startRect, juce::Rectangle<float> destRect,
-                       StepCallback cb)
-            : start(startRect)
-            , dest(destRect)
-            , callback(std::move (cb))
-            , duration(durationMs)
-            , frameRate(frameRateToUse)
-            , easingType(et)
+        BoundsAnimator(double durationMs, int frameRateToUse, EasingType et, juce::Rectangle<float> startRect, juce::Rectangle<float> destRect, StepCallback cb)
+            : start(startRect), dest(destRect), callback(std::move(cb)), duration(durationMs), frameRate(frameRateToUse), easingType(et)
         {
             startTime = juce::Time::getMillisecondCounterHiRes();
             startTimerHz(45);
         }
 
-        ~BoundsAnimator() override {
+        ~BoundsAnimator() override
+        {
             stopTimer();
         }
 
-        static constexpr float  lerp (float a, float b, double t)  { return a + (static_cast<float> (t) * (b - a)); }
+        static constexpr float lerp(float a, float b, double t) { return a + (static_cast<float>(t) * (b - a)); }
 
-        void timerCallback() override {
+        void timerCallback() override
+        {
             auto now = juce::Time::getMillisecondCounterHiRes();
             double t = std::clamp((now - startTime) / duration, 0.0, 1.0);
 
             // Super helpful cheat sheet: https://gist.github.com/gre/1650294
-            switch (easingType) {
+            switch (easingType)
+            {
                 case EasingType::Linear:
                     break;
                 case EasingType::QuadraticIn:
@@ -76,7 +73,8 @@ namespace blueprint
                     break;
             }
 
-            if (t >= 0.9999) {
+            if (t >= 0.9999)
+            {
                 callback(dest);
                 stopTimer();
                 return;
@@ -91,56 +89,63 @@ namespace blueprint
         }
     };
 
-    template <typename Setter, typename ...Args>
-    const auto getYogaNodeFloatSetter(Setter setter, Args... args) {
-      return [=](const juce::var& value, YGNodeRef node) {
-        if(value.isDouble()) {
-          setter(node, args..., (float) value);
-          return true;
-        }
-        return false;
-      };
+    template <typename Setter, typename... Args>
+    const auto getYogaNodeFloatSetter(Setter setter, Args... args)
+    {
+        return [=](const juce::var& value, YGNodeRef node) {
+            if (value.isDouble())
+            {
+                setter(node, args..., (float) value);
+                return true;
+            }
+            return false;
+        };
     }
 
-    template <typename Setter, typename SetterPercent, typename ...Args>
-    const auto getYogaNodeDimensionSetter(Setter setter, SetterPercent setterPercent, Args... args) {
-      return [=, floatSetter = getYogaNodeFloatSetter(setter, args...)](const juce::var& value, YGNodeRef node) {
-        if (floatSetter(value, node))
-          return true;
-        if (value.isString() && value.toString().contains("%"))
-        {
-          juce::String strVal = value.toString().retainCharacters("-1234567890.");
-          setterPercent(node, args..., strVal.getFloatValue());
-          return true;
-        }
-        setter(node, args..., YGUndefined);
-        return true;
-      };
+    template <typename Setter, typename SetterPercent, typename... Args>
+    const auto getYogaNodeDimensionSetter(Setter setter, SetterPercent setterPercent, Args... args)
+    {
+        return [=, floatSetter = getYogaNodeFloatSetter(setter, args...)](const juce::var& value, YGNodeRef node) {
+            if (floatSetter(value, node))
+                return true;
+            if (value.isString() && value.toString().contains("%"))
+            {
+                juce::String strVal = value.toString().retainCharacters("-1234567890.");
+                setterPercent(node, args..., strVal.getFloatValue());
+                return true;
+            }
+            setter(node, args..., YGUndefined);
+            return true;
+        };
     }
 
-    template <typename Setter, typename SetterPercent, typename SetterAuto, typename ...Args>
-    const auto getYogaNodeDimensionAutoSetter(Setter setter, SetterPercent setterPercent, SetterAuto setterAuto, Args... args) {
-      return [=, nonAutoSetter = getYogaNodeDimensionSetter(setter, setterPercent, args...)](const juce::var& value, YGNodeRef node) {
-        if (value.isString() && value.toString() == "auto") {
-          setterAuto(node, args...);
-          return true;
-        }
-        return nonAutoSetter(value, node);
-      };
+    template <typename Setter, typename SetterPercent, typename SetterAuto, typename... Args>
+    const auto getYogaNodeDimensionAutoSetter(Setter setter, SetterPercent setterPercent, SetterAuto setterAuto, Args... args)
+    {
+        return [=, nonAutoSetter = getYogaNodeDimensionSetter(setter, setterPercent, args...)](const juce::var& value, YGNodeRef node) {
+            if (value.isString() && value.toString() == "auto")
+            {
+                setterAuto(node, args...);
+                return true;
+            }
+            return nonAutoSetter(value, node);
+        };
     }
 
     template <typename Setter, typename EnumMap>
-    const auto getYogaNodeEnumSetter(Setter setter, EnumMap &map) {
-      return [=](const juce::var& value, YGNodeRef node) {                       \
-        const auto val = map.find(value);
-        if(val == map.end()) {
-          // TODO catch further up to add the key at which we tried
-          // to set this enum property to the message and rethrow
-          throw std::invalid_argument("Invalid property: " + value.toString().toStdString());
-        }
-        setter(node, val->second);
-        return true;
-      };
+    const auto getYogaNodeEnumSetter(Setter setter, EnumMap& map)
+    {
+        return [=](const juce::var& value, YGNodeRef node) {
+            const auto val = map.find(value);
+            if (val == map.end())
+            {
+                // TODO catch further up to add the key at which we tried
+                // to set this enum property to the message and rethrow
+                throw std::invalid_argument("Invalid property: " + value.toString().toStdString());
+            }
+            setter(node, val->second);
+            return true;
+        };
     }
 
     //==============================================================================
@@ -152,10 +157,10 @@ namespace blueprint
     {
     public:
         //==============================================================================
-        static const inline juce::Identifier debugProp          = "debug";
-        static const inline juce::Identifier durationProp       = "duration";
-        static const inline juce::Identifier easingProp         = "easing";
-        static const inline juce::Identifier frameRateProp      = "frameRate";
+        static const inline juce::Identifier debugProp = "debug";
+        static const inline juce::Identifier durationProp = "duration";
+        static const inline juce::Identifier easingProp = "easing";
+        static const inline juce::Identifier frameRateProp = "frameRate";
         static const inline juce::Identifier layoutAnimatedProp = "layoutAnimated";
 
         //==============================================================================
@@ -172,10 +177,10 @@ namespace blueprint
 
         //==============================================================================
         /** Set a property on the shadow view. */
-        virtual bool setProperty (const juce::String& name, const juce::var& newValue);
+        virtual bool setProperty(const juce::String& name, const juce::var& newValue);
 
         /** Adds a child component behind the existing children. */
-        virtual void addChild (ShadowView* childView, int index = -1)
+        virtual void addChild(ShadowView* childView, int index = -1)
         {
             if (index == -1)
             {
@@ -184,15 +189,15 @@ namespace blueprint
             }
             else
             {
-                jassert (juce::isPositiveAndNotGreaterThan(index, YGNodeGetChildCount(yogaNode)));
+                jassert(juce::isPositiveAndNotGreaterThan(index, YGNodeGetChildCount(yogaNode)));
 
-                YGNodeInsertChild(yogaNode, childView->yogaNode, static_cast<uint32_t> (index));
+                YGNodeInsertChild(yogaNode, childView->yogaNode, static_cast<uint32_t>(index));
                 children.insert(children.begin() + index, childView);
             }
         }
 
         /** Removes a child component from the children array. */
-        virtual void removeChild (ShadowView* childView)
+        virtual void removeChild(ShadowView* childView)
         {
             auto it = std::find(children.begin(), children.end(), childView);
 
@@ -232,9 +237,7 @@ namespace blueprint
         {
 #ifdef DEBUG
             if (props.contains(debugProp))
-                YGNodePrint(yogaNode, (YGPrintOptions) (YGPrintOptionsLayout
-                                                        | YGPrintOptionsStyle
-                                                        | YGPrintOptionsChildren));
+                YGNodePrint(yogaNode, (YGPrintOptions)(YGPrintOptionsLayout | YGPrintOptionsStyle | YGPrintOptionsChildren));
 #endif
 
             if (props.contains(layoutAnimatedProp))
@@ -251,7 +254,7 @@ namespace blueprint
                     double const frameRate = props[layoutAnimatedProp].getProperty(frameRateProp, 45);
                     int const et = props[layoutAnimatedProp].getProperty(easingProp, 0);
 
-                    return flushViewLayoutAnimated(durationMs, static_cast<int> (frameRate), static_cast<BoundsAnimator::EasingType>(et));
+                    return flushViewLayoutAnimated(durationMs, static_cast<int>(frameRate), static_cast<BoundsAnimator::EasingType>(et));
                 }
             }
 
@@ -277,15 +280,16 @@ namespace blueprint
                 et,
                 viewCurrentBounds,
                 viewDestinationBounds,
-                [safeView = juce::Component::SafePointer(view)](auto && stepBounds) {
-                    if (auto* v = safeView.getComponent()) {
+                [safeView = juce::Component::SafePointer(view)](auto&& stepBounds) {
+                    if (auto* v = safeView.getComponent())
+                    {
                         v->setFloatBounds(stepBounds);
                         v->setBounds(stepBounds.toNearestInt());
                     }
-                }
-            );
+                });
 
-            for (auto& child : children) {
+            for (auto& child : children)
+            {
                 child->flushViewLayoutAnimated(durationMs, frameRate, et);
             }
         }
@@ -301,7 +305,7 @@ namespace blueprint
 
     private:
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShadowView)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ShadowView)
     };
 
-}
+} // namespace blueprint

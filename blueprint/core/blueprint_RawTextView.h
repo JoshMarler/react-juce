@@ -11,10 +11,8 @@
 
 #include "blueprint_View.h"
 
-
 namespace blueprint
 {
-
     //==============================================================================
     /** The RawTextView class is more or less a wrapper around a string that asserts
         itself as a leaf node in the tree by refusing a resize and painting nothing.
@@ -34,13 +32,14 @@ namespace blueprint
         RawTextView(const juce::String& text) : _text(text) {}
 
         //==============================================================================
-        void setProperty (const juce::Identifier&, const juce::var&) override
+        void setProperty(const juce::Identifier&, const juce::var&) override
         {
             throw std::logic_error("A RawTextView can't receive properties.");
         }
 
         //==============================================================================
-        void setText (const juce::String& text) {
+        void setText(const juce::String& text)
+        {
             _text = text;
         }
 
@@ -54,7 +53,7 @@ namespace blueprint
         juce::String _text;
 
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RawTextView)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RawTextView)
     };
 
-}
+} // namespace blueprint

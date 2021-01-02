@@ -9,10 +9,8 @@
 
 #pragma once
 
-
 namespace blueprint
 {
-
     //==============================================================================
     /** Helper class which watches files for changes and triggers a user supplied
      *  callback in thte event of a file change.
@@ -22,13 +20,13 @@ namespace blueprint
     public:
         using FileChangedCallback = std::function<void(void)>;
 
-        explicit FileWatcher (FileChangedCallback && callback)
+        explicit FileWatcher(FileChangedCallback&& callback)
             : onFileChanged(std::move(callback)) {}
 
         void start() { startTimer(50); }
         void stop() { stopTimer(); }
 
-        void watch (const juce::File& f)
+        void watch(const juce::File& f)
         {
             JUCE_ASSERT_MESSAGE_THREAD
 
@@ -92,8 +90,8 @@ namespace blueprint
         // insertion order retained. In the event of a file change, we want to
         // re-evaluate all bundles within the cleaned engine in the same order
         // we started with.
-        std::map<juce::File, juce::Time>            watchedFiles;
-        FileChangedCallback                         onFileChanged;
+        std::map<juce::File, juce::Time> watchedFiles;
+        FileChangedCallback onFileChanged;
     };
 
-}
+} // namespace blueprint

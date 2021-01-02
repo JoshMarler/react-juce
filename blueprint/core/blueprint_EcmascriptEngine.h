@@ -11,10 +11,8 @@
 
 #include <unordered_map>
 
-
 namespace blueprint
 {
-
     //==============================================================================
     /** The EcmascriptEngine provides a flexible ECMAScript 5 compliant JavaScript engine
      *  with an interface implemented by Duktape, but which may be implemented by one of
@@ -33,7 +31,8 @@ namespace blueprint
          *
          *  We provide the JavaScript stack trace in the `stack` member.
          */
-        struct Error : public std::runtime_error {
+        struct Error : public std::runtime_error
+        {
             Error(const juce::String& msg)
                 : std::runtime_error(msg.toStdString()) {}
 
@@ -53,7 +52,8 @@ namespace blueprint
          *  In the event this error is thrown, the engine is to be considered
          *  unrecoverable, and it is up to the user to address how to proceed.
          */
-        struct FatalError : public std::runtime_error {
+        struct FatalError : public std::runtime_error
+        {
             FatalError(const juce::String& msg)
                 : std::runtime_error(msg.toStdString()) {}
         };
@@ -64,12 +64,12 @@ namespace blueprint
          *  @returns juce::var result of the evaluation
          *  @throws EcmascriptEngine::Error in the event of an evaluation error
          */
-        juce::var evaluateInline (const juce::String& code);
-        juce::var evaluate (const juce::File& code);
+        juce::var evaluateInline(const juce::String& code);
+        juce::var evaluate(const juce::File& code);
 
         //==============================================================================
         /** Registers a native method by the given name in the global namespace. */
-        void registerNativeMethod (const juce::String&, juce::var::NativeFunction fn);
+        void registerNativeMethod(const juce::String&, juce::var::NativeFunction fn);
 
         /** Registers a native method by the given name on the target object.
          *
@@ -88,11 +88,11 @@ namespace blueprint
          *
          *  @throws EcmascriptEngine::Error in the event of an evaluation error
          */
-        void registerNativeMethod (const juce::String&, const juce::String&, juce::var::NativeFunction fn);
+        void registerNativeMethod(const juce::String&, const juce::String&, juce::var::NativeFunction fn);
 
         //==============================================================================
         /** Registers a native value by the given name in the global namespace. */
-        void registerNativeProperty (const juce::String&, const juce::var&);
+        void registerNativeProperty(const juce::String&, const juce::var&);
 
         /** Registers a native value by the given name on the target object.
          *
@@ -108,7 +108,7 @@ namespace blueprint
          *
          *  @throws EcmascriptEngine::Error in the event of an evaluation error
          */
-        void registerNativeProperty (const juce::String&, const juce::String&, const juce::var&);
+        void registerNativeProperty(const juce::String&, const juce::String&, const juce::var&);
 
         //==============================================================================
         /** Invokes a method, applying the given args, inside the interpreter.
@@ -122,7 +122,7 @@ namespace blueprint
          *  @returns juce::var result of the invocation
          *  @throws EcmascriptEngine::Error in the event of an error
          */
-        juce::var invoke (const juce::String& name, const std::vector<juce::var>& vargs);
+        juce::var invoke(const juce::String& name, const std::vector<juce::var>& vargs);
 
         /** Invokes a method with the given args inside the interpreter.
          *
@@ -136,7 +136,7 @@ namespace blueprint
          *  @throws EcmascriptEngine::Error in the event of an error
          */
         template <typename... T>
-        juce::var invoke (const juce::String& name, T... args);
+        juce::var invoke(const juce::String& name, T... args);
 
         //==============================================================================
         /** Resets the internal Duktape context, clearing the value stack and destroying native callbacks. */
@@ -155,16 +155,16 @@ namespace blueprint
         std::unique_ptr<Pimpl> mPimpl;
 
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EcmascriptEngine)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EcmascriptEngine)
     };
 
     //==============================================================================
     template <typename... T>
-    juce::var EcmascriptEngine::invoke (const juce::String& name, T... args)
+    juce::var EcmascriptEngine::invoke(const juce::String& name, T... args)
     {
         // Pack the args and push them to the alternate `invoke` implementation
-        std::vector<juce::var> vargs { args... };
+        std::vector<juce::var> vargs{ args... };
         return invoke(name, vargs);
     }
 
-}
+} // namespace blueprint

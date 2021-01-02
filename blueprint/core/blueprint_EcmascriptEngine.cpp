@@ -18,7 +18,7 @@
  * the 8.1 SDK, but the GetSystemTimePreciseAsFileTime() call used in here is
  * just not supported without the 8.1 dll available.
  */
-#if defined (_WIN32) || defined (_WIN64)
+#if defined(_WIN32) || defined(_WIN64)
 #define DUK_USE_DATE_NOW_WINDOWS 1
 #endif
 
@@ -27,30 +27,30 @@
  * duktape and juce including parts of the winsock2 API. There may be a better way to
  * resolve this.
  */
-#if defined (_WIN32) || defined (_WIN64)
+#if defined(_WIN32) || defined(_WIN64)
 #define _WINSOCKAPI_
 #endif
 
 #if _MSC_VER
- #pragma warning(push)
+#pragma warning(push)
 #elif __clang__
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wextra-semi"
- #pragma clang diagnostic ignored "-Wsign-conversion"
- #pragma clang diagnostic ignored "-Wswitch-enum"
- #pragma clang diagnostic ignored "-Wunused-parameter"
- #if __clang_major__ > 10
-  #pragma clang diagnostic ignored "-Wc++98-compat-extra-semi"
-  #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
- #else
-  #pragma clang diagnostic ignored "-Wconversion"
- #endif
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wextra-semi"
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#pragma clang diagnostic ignored "-Wswitch-enum"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#if __clang_major__ > 10
+#pragma clang diagnostic ignored "-Wc++98-compat-extra-semi"
+#pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+#else
+#pragma clang diagnostic ignored "-Wconversion"
+#endif
 #elif __GNUC__
- #pragma GCC diagnostic push
- #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
- #pragma GCC diagnostic ignored "-Wsign-conversion"
- #pragma GCC diagnostic ignored "-Wswitch-enum"
- #pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
 
 // We rely on the JUCE_DEBUG macro in duk_config.h at the moment to determine
@@ -59,36 +59,33 @@
 // configs.
 #include <juce_core/system/juce_TargetPlatform.h>
 
-#include <duktape/src-noline/duktape.c>
 #include <duktape/extras/console/duk_console.c>
+#include <duktape/src-noline/duktape.c>
 
-#if defined (_WIN32) || defined (_WIN64)
-    #include <duktape/examples/debug-trans-socket/duk_trans_socket_windows.c>
+#if defined(_WIN32) || defined(_WIN64)
+#include <duktape/examples/debug-trans-socket/duk_trans_socket_windows.c>
 #else
-    #include <duktape/examples/debug-trans-socket/duk_trans_socket_unix.c>
+#include <duktape/examples/debug-trans-socket/duk_trans_socket_unix.c>
 #endif
 
-#include <duktape/src-noline/duktape.h>
-#include <duktape/extras/console/duk_console.h>
 #include <duktape/examples/debug-trans-socket/duk_trans_socket.h>
+#include <duktape/extras/console/duk_console.h>
+#include <duktape/src-noline/duktape.h>
 
 #if _MSC_VER
 #elif __clang__
- #pragma clang diagnostic pop
+#pragma clang diagnostic pop
 #elif __GNUC__
- #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 
 #include "blueprint_EcmascriptEngine.h"
 
-
 namespace blueprint
 {
-
     namespace detail
     {
-
-        static void fatalErrorHandler (void* udata, const char* msg)
+        static void fatalErrorHandler(void* udata, const char* msg)
         {
             (void) udata; // Ignored in this case, silence warning
             throw EcmascriptEngine::FatalError(msg);
@@ -141,7 +138,7 @@ namespace blueprint
             }
         }
 
-    }
+    } // namespace detail
 
     //==============================================================================
     struct EcmascriptEngine::Pimpl : private juce::Timer
@@ -155,14 +152,17 @@ namespace blueprint
         }
 
         //==============================================================================
-        juce::var evaluateInline (const juce::String& code)
+        juce::var evaluateInline(const juce::String& code)
         {
             jassert(code.isNotEmpty());
             auto* ctxRawPtr = dukContext.get();
 
-            try {
+            try
+            {
                 detail::safeEvalString(ctxRawPtr, code);
-            } catch (Error const& err) {
+            }
+            catch (Error const& err)
+            {
                 reset();
                 throw err;
             }
@@ -173,16 +173,19 @@ namespace blueprint
             return result;
         }
 
-        juce::var evaluate (const juce::File& code)
+        juce::var evaluate(const juce::File& code)
         {
             jassert(code.existsAsFile());
             jassert(code.loadFileAsString().isNotEmpty());
             auto* ctxRawPtr = dukContext.get();
 
-            try {
+            try
+            {
                 detail::safeCompileFile(ctxRawPtr, code);
                 detail::safeCall(ctxRawPtr, 0);
-            } catch (Error const& err) {
+            }
+            catch (Error const& err)
+            {
                 reset();
                 throw err;
             }
@@ -195,7 +198,7 @@ namespace blueprint
         }
 
         //==============================================================================
-        void registerNativeProperty (const juce::String& name, const juce::var& value)
+        void registerNativeProperty(const juce::String& name, const juce::var& value)
         {
             auto* ctxRawPtr = dukContext.get();
 
@@ -205,13 +208,16 @@ namespace blueprint
             duk_pop(ctxRawPtr);
         }
 
-        void registerNativeProperty (const juce::String& target, const juce::String& name, const juce::var& value)
+        void registerNativeProperty(const juce::String& target, const juce::String& name, const juce::var& value)
         {
             auto* ctxRawPtr = dukContext.get();
 
-            try {
+            try
+            {
                 detail::safeEvalString(ctxRawPtr, target);
-            } catch (Error const& err) {
+            }
+            catch (Error const& err)
+            {
                 reset();
                 throw err;
             }
@@ -223,14 +229,16 @@ namespace blueprint
         }
 
         //==============================================================================
-        juce::var invoke (const juce::String& name, const std::vector<juce::var>& vargs)
+        juce::var invoke(const juce::String& name, const std::vector<juce::var>& vargs)
         {
             auto* ctxRawPtr = dukContext.get();
 
-            try {
+            try
+            {
                 detail::safeEvalString(ctxRawPtr, name);
 
-                if (!duk_is_function(ctxRawPtr, -1)) {
+                if (! duk_is_function(ctxRawPtr, -1))
+                {
                     throw Error("Invocation failed, target is not a function.");
                 }
 
@@ -243,7 +251,9 @@ namespace blueprint
 
                 // Invocation
                 detail::safeCall(ctxRawPtr, nargs);
-            } catch (Error const& err) {
+            }
+            catch (Error const& err)
+            {
                 reset();
                 throw err;
             }
@@ -257,8 +267,9 @@ namespace blueprint
 
         struct TimeoutFunctionManager : private juce::MultiTimer
         {
-            ~TimeoutFunctionManager() override {
-                for(const auto &[id, timer] : timeoutFunctions)
+            ~TimeoutFunctionManager() override
+            {
+                for (const auto& [id, timer] : timeoutFunctions)
                     stopTimer(id);
             }
 
@@ -266,12 +277,12 @@ namespace blueprint
             {
                 stopTimer(id);
                 const auto f = timeoutFunctions.find(id);
-                if(f != timeoutFunctions.cend())
+                if (f != timeoutFunctions.cend())
                     timeoutFunctions.erase(f);
                 return juce::var();
             }
 
-            int newTimeout(const juce::var::NativeFunction f, const int timeoutMillis, const std::vector<juce::var>&& args, const bool repeats=false)
+            int newTimeout(const juce::var::NativeFunction f, const int timeoutMillis, const std::vector<juce::var>&& args, const bool repeats = false)
             {
                 static int nextId = 0;
                 timeoutFunctions.emplace(nextId, TimeoutFunction(f, std::move(args), repeats));
@@ -282,11 +293,11 @@ namespace blueprint
             void timerCallback(int id) override
             {
                 const auto f = timeoutFunctions.find(id);
-                if(f != timeoutFunctions.cend())
+                if (f != timeoutFunctions.cend())
                 {
                     const auto cb = f->second;
                     std::invoke(cb.f, juce::var::NativeFunctionArgs(juce::var(), cb.args.data(), static_cast<int>(cb.args.size())));
-                    if(!cb.repeats)
+                    if (! cb.repeats)
                     {
                         stopTimer(id);
                         timeoutFunctions.erase(f);
@@ -294,18 +305,18 @@ namespace blueprint
                 }
             }
 
-            private:
-                struct TimeoutFunction
-                {
-                    TimeoutFunction(const juce::var::NativeFunction _f, const std::vector<juce::var> &&_args, const bool _repeats=false)
+        private:
+            struct TimeoutFunction
+            {
+                TimeoutFunction(const juce::var::NativeFunction _f, const std::vector<juce::var>&& _args, const bool _repeats = false)
                     : f(_f), args(std::move(_args)), repeats(_repeats) {}
 
-                    const juce::var::NativeFunction f;
-                    std::vector<juce::var> args;
-                    const bool repeats;
-                };
+                const juce::var::NativeFunction f;
+                std::vector<juce::var> args;
+                const bool repeats;
+            };
 
-                std::map<int, TimeoutFunction> timeoutFunctions;
+            std::map<int, TimeoutFunction> timeoutFunctions;
         };
 
         // IsSetter is true for setTimeout / setInterval
@@ -313,32 +324,30 @@ namespace blueprint
         template <bool IsSetter = false, bool Repeats = false, typename MethodType>
         void registerNativeTimerFunction(const char* name, MethodType method)
         {
-            registerNativeProperty(name, juce::var::NativeFunction([this, name, method] (const juce::var::NativeFunctionArgs& _args) -> juce::var {
-                if constexpr (IsSetter)
-                {
-                    if(_args.numArguments < 2 || !_args.arguments[0].isMethod() || !_args.arguments[1].isDouble())
-                        throw Error(juce::String(name) + " requires a callback and time in milliseconds");
-                    // build a vector holding all additional arguments
-                    std::vector<juce::var> args(_args.arguments + 2, _args.arguments + _args.numArguments);
-                    return (this->timeoutsManager.get()->*method)(_args.arguments[0].getNativeFunction(), _args.arguments[1], std::move(args), Repeats);
-                }
-                else
-                {
-                    if(_args.numArguments < 1 || !_args.arguments[0].isDouble())
-                        throw Error(juce::String(name) + " requires an integer ID of the timer to clear");
-                    return (this->timeoutsManager.get()->*method)(_args.arguments[0]);
-                }
-            }));
+            registerNativeProperty(name, juce::var::NativeFunction([this, name, method](const juce::var::NativeFunctionArgs& _args) -> juce::var {
+                                       if constexpr (IsSetter)
+                                       {
+                                           if (_args.numArguments < 2 || ! _args.arguments[0].isMethod() || ! _args.arguments[1].isDouble())
+                                               throw Error(juce::String(name) + " requires a callback and time in milliseconds");
+                                           // build a vector holding all additional arguments
+                                           std::vector<juce::var> args(_args.arguments + 2, _args.arguments + _args.numArguments);
+                                           return (this->timeoutsManager.get()->*method)(_args.arguments[0].getNativeFunction(), _args.arguments[1], std::move(args), Repeats);
+                                       }
+                                       else
+                                       {
+                                           if (_args.numArguments < 1 || ! _args.arguments[0].isDouble())
+                                               throw Error(juce::String(name) + " requires an integer ID of the timer to clear");
+                                           return (this->timeoutsManager.get()->*method)(_args.arguments[0]);
+                                       }
+                                   }));
         }
 
         void registerTimerGlobals()
         {
             registerNativeTimerFunction<true>(
-                "setTimeout", &TimeoutFunctionManager::newTimeout
-            );
+                "setTimeout", &TimeoutFunctionManager::newTimeout);
             registerNativeTimerFunction<true, true>(
-                "setInterval", &TimeoutFunctionManager::newTimeout
-            );
+                "setInterval", &TimeoutFunctionManager::newTimeout);
             registerNativeTimerFunction("clearTimeout", &TimeoutFunctionManager::clearTimeout);
             registerNativeTimerFunction("clearInterval", &TimeoutFunctionManager::clearTimeout);
         }
@@ -350,9 +359,8 @@ namespace blueprint
 
             // Allocate a new js heap
             dukContext = std::shared_ptr<duk_context>(
-                duk_create_heap (nullptr, nullptr, nullptr, nullptr, detail::fatalErrorHandler),
-                duk_destroy_heap
-            );
+                duk_create_heap(nullptr, nullptr, nullptr, nullptr, detail::fatalErrorHandler),
+                duk_destroy_heap);
 
             // Add console.log support
             auto* ctxRawPtr = dukContext.get();
@@ -360,7 +368,7 @@ namespace blueprint
 
             // Install a pointer back to this EcmascriptEngine instance
             duk_push_global_stash(ctxRawPtr);
-            duk_push_pointer(ctxRawPtr, (void *) this);
+            duk_push_pointer(ctxRawPtr, (void*) this);
             duk_put_prop_string(ctxRawPtr, -2, DUK_HIDDEN_SYMBOL("__EcmascriptEngineInstance__"));
             duk_pop(ctxRawPtr);
 
@@ -379,15 +387,15 @@ namespace blueprint
             duk_trans_socket_init();
             duk_trans_socket_waitconn();
 
-            duk_debugger_attach(ctxRawPtr,
+            duk_debugger_attach(
+                ctxRawPtr,
                 duk_trans_socket_read_cb,
                 duk_trans_socket_write_cb,
                 duk_trans_socket_peek_cb,
                 duk_trans_socket_read_flush_cb,
                 duk_trans_socket_write_flush_cb,
                 nullptr,
-                [](duk_context*, void* data)
-                {
+                [](duk_context*, void* data) {
                     duk_trans_socket_finish();
 
                     auto engine = static_cast<EcmascriptEngine::Pimpl*>(data);
@@ -402,18 +410,19 @@ namespace blueprint
         void debuggerDetach()
         {
             if (auto* dc = dukContext.get())
-                duk_debugger_detach (dc);
+                duk_debugger_detach(dc);
         }
 
         //==============================================================================
         void timerCallback() override
         {
             if (auto* dc = dukContext.get())
-                duk_debugger_cooperate (dc);
+                duk_debugger_cooperate(dc);
         }
 
         //==============================================================================
-        struct LambdaHelper {
+        struct LambdaHelper
+        {
             LambdaHelper(juce::var::NativeFunction fn, uint32_t _id)
                 : callback(std::move(fn)), id(_id) {}
 
@@ -446,11 +455,7 @@ namespace blueprint
                 // Now we can invoke the user method with its arguments
                 try
                 {
-                    result = std::invoke(helper->callback, juce::var::NativeFunctionArgs(
-                        juce::var(),
-                        args.data(),
-                        static_cast<int>(args.size())
-                    ));
+                    result = std::invoke(helper->callback, juce::var::NativeFunctionArgs(juce::var(), args.data(), static_cast<int>(args.size())));
                 }
                 catch (Error& err)
                 {
@@ -479,23 +484,19 @@ namespace blueprint
                 // Retrieve the lambda helper
                 duk_push_current_function(ctx);
                 const auto magic = duk_get_magic(ctx, -1);
-                auto& helper = engine->temporaryReleasePool[static_cast<size_t> (magic + 128)];
+                auto& helper = engine->temporaryReleasePool[static_cast<size_t>(magic + 128)];
                 duk_pop(ctx);
 
                 // Now we can collect our args
                 const auto nargs = duk_get_top(ctx);
                 std::vector<juce::var> args;
-                args.reserve(static_cast<size_t> (nargs));
+                args.reserve(static_cast<size_t>(nargs));
 
                 for (int i = 0; i < nargs; ++i)
                     args.push_back(engine->readVarFromDukStack(engine->dukContext, i));
 
                 // Now we can invoke the user method with its arguments
-                const auto result = std::invoke(helper->callback, juce::var::NativeFunctionArgs(
-                    juce::var(),
-                    args.data(),
-                    static_cast<int>(args.size())
-                ));
+                const auto result = std::invoke(helper->callback, juce::var::NativeFunctionArgs(juce::var(), args.data(), static_cast<int>(args.size())));
 
                 // For an undefined result, return 0 to notify the duktape interpreter
                 if (result.isUndefined())
@@ -506,7 +507,7 @@ namespace blueprint
                 return 1;
             }
 
-            static duk_ret_t callbackFinalizer (duk_context* ctx)
+            static duk_ret_t callbackFinalizer(duk_context* ctx)
             {
                 // First we have to retrieve the actual function pointer and our engine pointer
                 // See: https://duktape.org/guide.html#hidden-symbol-properties
@@ -536,13 +537,13 @@ namespace blueprint
 
         //==============================================================================
         /** Helper for cleaning up native function temporaries. */
-        void removeLambdaHelper (LambdaHelper* helper)
+        void removeLambdaHelper(LambdaHelper* helper)
         {
             persistentReleasePool.erase(helper->id);
         }
 
         /** Helper for pushing a juce::var to the duktape stack. */
-        void pushVarToDukStack (std::shared_ptr<duk_context> ctx, const juce::var& v, bool persistNativeFunctions = false)
+        void pushVarToDukStack(std::shared_ptr<duk_context> ctx, const juce::var& v, bool persistNativeFunctions = false)
         {
             auto* ctxRawPtr = dukContext.get();
 
@@ -594,16 +595,16 @@ namespace blueprint
 
                     // Now we assign the pointers as properties of the wrapper function
                     auto helper = std::make_unique<LambdaHelper>(v.getNativeFunction(), nextHelperId++);
-                    duk_push_pointer(ctxRawPtr, (void *) helper.get());
+                    duk_push_pointer(ctxRawPtr, (void*) helper.get());
                     duk_put_prop_string(ctxRawPtr, -2, DUK_HIDDEN_SYMBOL("LambdaHelperPtr"));
-                    duk_push_pointer(ctxRawPtr, (void *) this);
+                    duk_push_pointer(ctxRawPtr, (void*) this);
                     duk_put_prop_string(ctxRawPtr, -2, DUK_HIDDEN_SYMBOL("EnginePtr"));
 
                     // Now we prepare the finalizer
                     duk_push_c_function(ctxRawPtr, LambdaHelper::callbackFinalizer, 1);
-                    duk_push_pointer(ctxRawPtr, (void *) helper.get());
+                    duk_push_pointer(ctxRawPtr, (void*) helper.get());
                     duk_put_prop_string(ctxRawPtr, -2, DUK_HIDDEN_SYMBOL("LambdaHelperPtr"));
-                    duk_push_pointer(ctxRawPtr, (void *) this);
+                    duk_push_pointer(ctxRawPtr, (void*) this);
                     duk_put_prop_string(ctxRawPtr, -2, DUK_HIDDEN_SYMBOL("EnginePtr"));
                     duk_set_finalizer(ctxRawPtr, -2);
 
@@ -623,7 +624,7 @@ namespace blueprint
                     auto magic = nextMagicInt++;
 
                     duk_push_c_lightfunc(ctxRawPtr, LambdaHelper::invokeFromDukContextLightFunc, DUK_VARARGS, 15, magic);
-                    temporaryReleasePool[static_cast<size_t> (magic + 128)] = std::move(helper);
+                    temporaryReleasePool[static_cast<size_t>(magic + 128)] = std::move(helper);
 
                     if (nextMagicInt >= 127)
                         nextMagicInt = -128;
@@ -637,7 +638,7 @@ namespace blueprint
         }
 
         /** Helper for reading from the duktape stack to a juce::var instance. */
-        juce::var readVarFromDukStack (std::shared_ptr<duk_context> ctx, duk_idx_t idx)
+        juce::var readVarFromDukStack(std::shared_ptr<duk_context> ctx, duk_idx_t idx)
         {
             auto* ctxRawPtr = dukContext.get();
             juce::var value;
@@ -681,13 +682,15 @@ namespace blueprint
 
                     if (duk_is_function(ctxRawPtr, idx) || duk_is_lightfunc(ctxRawPtr, idx))
                     {
-                        struct CallbackHelper {
+                        struct CallbackHelper
+                        {
                             CallbackHelper(std::weak_ptr<duk_context> _weakContext)
-                                : weakContext(_weakContext)
-                                , funcId(juce::String("__blueprintCallback__") + juce::Uuid().toString()) {}
+                                : weakContext(_weakContext), funcId(juce::String("__blueprintCallback__") + juce::Uuid().toString()) {}
 
-                            ~CallbackHelper() {
-                                if (auto spt = weakContext.lock()) {
+                            ~CallbackHelper()
+                            {
+                                if (auto spt = weakContext.lock())
+                                {
                                     duk_push_global_stash(spt.get());
                                     duk_del_prop_string(spt.get(), -1, funcId.toRawUTF8());
                                     duk_pop(spt.get());
@@ -709,12 +712,12 @@ namespace blueprint
 
                         // Next we create a var::NativeFunction that captures the function
                         // id and knows how to invoke it
-                        value = juce::var::NativeFunction {
+                        value = juce::var::NativeFunction{
                             [this, weakContext = std::weak_ptr<duk_context>(ctx), helper](const juce::var::NativeFunctionArgs& args) -> juce::var {
                                 auto sharedContext = weakContext.lock();
 
                                 // If our context disappeared, we return early
-                                if (!sharedContext)
+                                if (! sharedContext)
                                     return juce::var();
 
                                 auto* rawPtr = sharedContext.get();
@@ -724,7 +727,7 @@ namespace blueprint
                                 duk_push_global_stash(rawPtr);
                                 duk_get_prop_string(rawPtr, -1, helper->funcId.toRawUTF8());
 
-                                if (!(duk_is_lightfunc(rawPtr, -1) || duk_is_function(rawPtr, -1)))
+                                if (! (duk_is_lightfunc(rawPtr, -1) || duk_is_function(rawPtr, -1)))
                                     throw Error("Global callback not found.", "", detail::getContextDump(rawPtr));
 
                                 // Push the args to the duktape stack
@@ -734,9 +737,12 @@ namespace blueprint
                                     pushVarToDukStack(sharedContext, args.arguments[i]);
 
                                 // Invocation
-                                try {
+                                try
+                                {
                                     detail::safeCall(rawPtr, args.numArguments);
-                                } catch (Error const& err) {
+                                }
+                                catch (Error const& err)
+                                {
                                     reset();
                                     throw err;
                                 }
@@ -813,7 +819,7 @@ namespace blueprint
             Without the initialiser, the console app would always crash on exit,
             and things will probably not get cleaned up.
         */
-        jassert (juce::MessageManager::getInstanceWithoutCreating() != nullptr);
+        jassert(juce::MessageManager::getInstanceWithoutCreating() != nullptr);
     }
 
     EcmascriptEngine::~EcmascriptEngine()
@@ -821,40 +827,40 @@ namespace blueprint
     }
 
     //==============================================================================
-    juce::var EcmascriptEngine::evaluateInline (const juce::String& code)
+    juce::var EcmascriptEngine::evaluateInline(const juce::String& code)
     {
         return mPimpl->evaluateInline(code);
     }
 
-    juce::var EcmascriptEngine::evaluate (const juce::File& code)
+    juce::var EcmascriptEngine::evaluate(const juce::File& code)
     {
         return mPimpl->evaluate(code);
     }
 
     //==============================================================================
-    void EcmascriptEngine::registerNativeMethod (const juce::String& name, juce::var::NativeFunction fn)
+    void EcmascriptEngine::registerNativeMethod(const juce::String& name, juce::var::NativeFunction fn)
     {
         registerNativeProperty(name, juce::var(fn));
     }
 
-    void EcmascriptEngine::registerNativeMethod (const juce::String& target, const juce::String& name, juce::var::NativeFunction fn)
+    void EcmascriptEngine::registerNativeMethod(const juce::String& target, const juce::String& name, juce::var::NativeFunction fn)
     {
         registerNativeProperty(target, name, juce::var(fn));
     }
 
     //==============================================================================
-    void EcmascriptEngine::registerNativeProperty (const juce::String& name, const juce::var& value)
+    void EcmascriptEngine::registerNativeProperty(const juce::String& name, const juce::var& value)
     {
         mPimpl->registerNativeProperty(name, value);
     }
 
-    void EcmascriptEngine::registerNativeProperty (const juce::String& target, const juce::String& name, const juce::var& value)
+    void EcmascriptEngine::registerNativeProperty(const juce::String& target, const juce::String& name, const juce::var& value)
     {
         mPimpl->registerNativeProperty(target, name, value);
     }
 
     //==============================================================================
-    juce::var EcmascriptEngine::invoke (const juce::String& name, const std::vector<juce::var>& vargs)
+    juce::var EcmascriptEngine::invoke(const juce::String& name, const std::vector<juce::var>& vargs)
     {
         return mPimpl->invoke(name, vargs);
     }
@@ -875,4 +881,4 @@ namespace blueprint
         mPimpl->debuggerDetach();
     }
 
-}
+} // namespace blueprint

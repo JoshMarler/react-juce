@@ -11,8 +11,8 @@
 
 #include <map>
 
-#include "blueprint_View.h"
 #include "blueprint_ShadowView.h"
+#include "blueprint_View.h"
 
 namespace blueprint
 {
@@ -65,7 +65,7 @@ namespace blueprint
         void insertChild(ViewId parentId, ViewId childId, int index = -1);
 
         /** Removes a child View from the given parent View */
-        void removeChild (ViewId parentId, ViewId childId);
+        void removeChild(ViewId parentId, ViewId childId);
 
         /** Recursively computes the shadow tree layout on the root ShadowView, then traverses the tree
             flushing new layout bounds to the associated view components.
@@ -78,26 +78,26 @@ namespace blueprint
         /** Invokes an exported native method on the given View instance.
          *  This method is used to allow JS code to invoke a native function on a ViewInstance using React refs.
          **/
-        juce::var invokeViewMethod(ViewId viewId, const juce::String &method, const juce::var::NativeFunctionArgs &args);
+        juce::var invokeViewMethod(ViewId viewId, const juce::String& method, const juce::var::NativeFunctionArgs& args);
 
         //==============================================================================
     private:
-        void enumerateChildViewIds (std::vector<ViewId>& ids, View* v);
+        void enumerateChildViewIds(std::vector<ViewId>& ids, View* v);
 
         /** Returns a pointer pair to the view associated to the given id. */
-        std::pair<View*, ShadowView*> getViewHandle (ViewId viewId);
+        std::pair<View*, ShadowView*> getViewHandle(ViewId viewId);
 
         /** Walks the view table, returning the first view with a `refId`
          *  whose value equals the provided id.
          */
-        View* getViewByRefId (const juce::Identifier& refId);
+        View* getViewByRefId(const juce::Identifier& refId);
 
         /** Helper function to return refId of the root view */
         juce::Identifier getRootViewRefId();
 
-        ViewId                                        rootId;
-        std::map<ViewId, std::unique_ptr<View>>       viewTable;
+        ViewId rootId;
+        std::map<ViewId, std::unique_ptr<View>> viewTable;
         std::map<ViewId, std::unique_ptr<ShadowView>> shadowViewTable;
-        std::map<juce::String, ViewFactory>           viewFactories;
+        std::map<juce::String, ViewFactory> viewFactories;
     };
-}
+} // namespace blueprint

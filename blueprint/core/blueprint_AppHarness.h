@@ -13,10 +13,8 @@
 #include "blueprint_FileWatcher.h"
 #include "blueprint_ReactApplicationRoot.h"
 
-
 namespace blueprint
 {
-
     /** The AppHarness is a simple class which composes over your ReactApplicationRoot
      *  to provide file watching and hot reloading behavior for the bundle files your app evaluates.
      *
@@ -37,8 +35,8 @@ namespace blueprint
         AppHarness(ReactApplicationRoot& _appRoot);
 
         //==============================================================================
-        void watch (const juce::File& f);
-        void watch (const std::vector<juce::File>& fs);
+        void watch(const juce::File& f);
+        void watch(const std::vector<juce::File>& fs);
 
         /** Run the initial evaluation step and then watch for file changes. */
         void start();
@@ -222,7 +220,7 @@ namespace blueprint
         std::unique_ptr<FileWatcher> fileWatcher;
 
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppHarness)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AppHarness)
     };
 
-}
+} // namespace blueprint
