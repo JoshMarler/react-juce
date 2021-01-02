@@ -11,10 +11,8 @@
 
 #include "blueprint_AppHarness.h"
 
-
 namespace blueprint
 {
-
     //==============================================================================
     AppHarness::AppHarness(ReactApplicationRoot& _appRoot)
         : appRoot(_appRoot)
@@ -25,11 +23,17 @@ namespace blueprint
             appRoot.reset();
             appRoot.bindNativeRenderingHooks();
 
-            if (onBeforeAll) { onBeforeAll(); }
+            if (onBeforeAll)
+            {
+                onBeforeAll();
+            }
 
             for (const auto& f : fileWatcher->getWatchedFiles())
             {
-                if (onBeforeEach) { onBeforeEach(f); }
+                if (onBeforeEach)
+                {
+                    onBeforeEach(f);
+                }
 
                 try
                 {
@@ -52,22 +56,27 @@ namespace blueprint
                     }
                 }
 
-                if (onAfterEach) { onAfterEach(f); }
+                if (onAfterEach)
+                {
+                    onAfterEach(f);
+                }
             }
 
-            if (onAfterAll) { onAfterAll(); }
+            if (onAfterAll)
+            {
+                onAfterAll();
+            }
         });
-
     }
 
     //==============================================================================
-    void AppHarness::watch (const juce::File& f)
+    void AppHarness::watch(const juce::File& f)
     {
         if (fileWatcher)
             fileWatcher->watch(f);
     }
 
-    void AppHarness::watch (const std::vector<juce::File>& fs)
+    void AppHarness::watch(const std::vector<juce::File>& fs)
     {
         if (fileWatcher)
         {
@@ -84,11 +93,17 @@ namespace blueprint
         if (fileWatcher == nullptr)
             return;
 
-        if (onBeforeAll) { onBeforeAll(); }
+        if (onBeforeAll)
+        {
+            onBeforeAll();
+        }
 
         for (const auto& f : fileWatcher->getWatchedFiles())
         {
-            if (onBeforeEach) { onBeforeEach(f); }
+            if (onBeforeEach)
+            {
+                onBeforeEach(f);
+            }
 
             try
             {
@@ -111,10 +126,16 @@ namespace blueprint
                 }
             }
 
-            if (onAfterEach) { onAfterEach(f); }
+            if (onAfterEach)
+            {
+                onAfterEach(f);
+            }
         }
 
-        if (onAfterAll) { onAfterAll(); }
+        if (onAfterAll)
+        {
+            onAfterAll();
+        }
 
         // Finally, kick off the file watch process
         fileWatcher->start();
@@ -132,16 +153,28 @@ namespace blueprint
         if (fileWatcher == nullptr)
             return;
 
-        if (onBeforeAll) { onBeforeAll(); }
+        if (onBeforeAll)
+        {
+            onBeforeAll();
+        }
 
         for (const auto& f : fileWatcher->getWatchedFiles())
         {
-            if (onBeforeEach) { onBeforeEach(f); }
+            if (onBeforeEach)
+            {
+                onBeforeEach(f);
+            }
             appRoot.evaluate(f);
-            if (onAfterEach) { onAfterEach(f); }
+            if (onAfterEach)
+            {
+                onAfterEach(f);
+            }
         }
 
-        if (onAfterAll) { onAfterAll(); }
+        if (onAfterAll)
+        {
+            onAfterAll();
+        }
     }
 
-}
+} // namespace blueprint

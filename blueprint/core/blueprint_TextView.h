@@ -11,10 +11,8 @@
 
 #include "blueprint_View.h"
 
-
 namespace blueprint
 {
-
     //==============================================================================
     /** The TextView class is a core container abstraction for declaring text components
         within Blueprint's layout system.
@@ -23,16 +21,16 @@ namespace blueprint
     {
     public:
         //==============================================================================
-        static const inline juce::Identifier colorProp         = "color";
+        static const inline juce::Identifier colorProp = "color";
 
-        static const inline juce::Identifier fontSizeProp      = "font-size";
-        static const inline juce::Identifier fontStyleProp     = "font-style";
-        static const inline juce::Identifier fontFamilyProp    = "font-family";
+        static const inline juce::Identifier fontSizeProp = "font-size";
+        static const inline juce::Identifier fontStyleProp = "font-style";
+        static const inline juce::Identifier fontFamilyProp = "font-family";
 
         static const inline juce::Identifier justificationProp = "justification";
         static const inline juce::Identifier kerningFactorProp = "kerning-factor";
-        static const inline juce::Identifier lineSpacingProp   = "line-spacing";
-        static const inline juce::Identifier wordWrapProp      = "word-wrap";
+        static const inline juce::Identifier lineSpacingProp = "line-spacing";
+        static const inline juce::Identifier wordWrapProp = "word-wrap";
 
         //==============================================================================
         TextView() = default;
@@ -44,17 +42,17 @@ namespace blueprint
             float fontHeight = props.getWithDefault(fontSizeProp, 12.0f);
             int textStyleFlags = props.getWithDefault(fontStyleProp, 0);
 
-            juce::Font f (fontHeight);
+            juce::Font f(fontHeight);
 
             if (props.contains(fontFamilyProp))
-                f = juce::Font (props[fontFamilyProp], fontHeight, textStyleFlags);
+                f = juce::Font(props[fontFamilyProp], fontHeight, textStyleFlags);
 
             f.setExtraKerningFactor(props.getWithDefault(kerningFactorProp, 0.0));
             return f;
         }
 
         /** Constructs a TextLayout from all the children string values. */
-        juce::TextLayout getTextLayout (float maxWidth)
+        juce::TextLayout getTextLayout(float maxWidth)
         {
             juce::String hexColor = props.getWithDefault(colorProp, "ff000000");
             juce::Colour colour = juce::Colour::fromString(hexColor);
@@ -71,7 +69,7 @@ namespace blueprint
                 if (RawTextView* v = dynamic_cast<RawTextView*>(c))
                     text += v->getText();
 
-            juce::AttributedString as (text);
+            juce::AttributedString as(text);
             juce::TextLayout tl;
 
             as.setLineSpacing(props.getWithDefault(lineSpacingProp, 1.0f));
@@ -95,7 +93,6 @@ namespace blueprint
                     default:
                         as.setWordWrap(juce::AttributedString::WordWrap::byWord);
                         break;
-
                 }
             }
 
@@ -104,7 +101,7 @@ namespace blueprint
         }
 
         //==============================================================================
-        void paint (juce::Graphics& g) override
+        void paint(juce::Graphics& g) override
         {
             auto floatBounds = getLocalBounds().toFloat();
 
@@ -114,7 +111,7 @@ namespace blueprint
 
     private:
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextView)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextView)
     };
 
-}
+} // namespace blueprint

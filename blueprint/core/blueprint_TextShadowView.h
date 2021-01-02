@@ -12,10 +12,8 @@
 #include "blueprint_ShadowView.h"
 #include "blueprint_View.h"
 
-
 namespace blueprint
 {
-
     //==============================================================================
     /** We use this method to measure the size of a given string so that the
      *  text container knows what size to take.
@@ -39,7 +37,7 @@ namespace blueprint
 
         //==============================================================================
         /** Set a property on the shadow view. */
-        bool setProperty (const juce::String& name, const juce::var& value) override
+        bool setProperty(const juce::String& name, const juce::var& value) override
         {
             const bool layoutPropertyWasSet = ShadowView::setProperty(name, value);
 
@@ -52,9 +50,9 @@ namespace blueprint
         }
 
         /** Override the default ShadowView behavior to explicitly error. */
-        void addChild (ShadowView* childView, int index = -1) override
+        void addChild(ShadowView* childView, int index = -1) override
         {
-            juce::ignoreUnused (index);
+            juce::ignoreUnused(index);
 
             if (childView != nullptr)
             {
@@ -70,7 +68,7 @@ namespace blueprint
 
     private:
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextShadowView)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextShadowView)
     };
 
-}
+} // namespace blueprint

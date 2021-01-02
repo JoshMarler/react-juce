@@ -11,7 +11,6 @@
 
 #include "blueprint_View.h"
 
-
 namespace blueprint
 {
     namespace
@@ -19,14 +18,12 @@ namespace blueprint
         // juce::URL::isWellFormed is currently not a complete
         // implementation, so we have this slightly more robust check
         // for now.
-        bool isWellFormedURL(const juce::URL &url)
+        bool isWellFormedURL(const juce::URL& url)
         {
-            return url.isWellFormed()  &&
-                   url.getScheme().isNotEmpty() &&
-                   !url.toString(false).startsWith("data");
+            return url.isWellFormed() && url.getScheme().isNotEmpty() && ! url.toString(false).startsWith("data");
         }
 
-    }
+    } // namespace
 
     //==============================================================================
     /** The ImageView class is a core view for drawing images within Blueprint's
@@ -36,21 +33,21 @@ namespace blueprint
     {
     public:
         //==============================================================================
-        static inline juce::Identifier sourceProp    = "source";
+        static inline juce::Identifier sourceProp = "source";
         static inline juce::Identifier placementProp = "placement";
 
         //==============================================================================
         ImageView() = default;
 
         //==============================================================================
-        void setProperty (const juce::Identifier& name, const juce::var& value) override
+        void setProperty(const juce::Identifier& name, const juce::var& value) override
         {
             View::setProperty(name, value);
 
             if (name == sourceProp)
             {
-                const juce::String source    = value.toString();
-                const juce::URL    sourceURL = source;
+                const juce::String source = value.toString();
+                const juce::URL sourceURL = source;
 
                 if (isWellFormedURL(sourceURL))
                 {
@@ -67,42 +64,40 @@ namespace blueprint
                 else // If not a URL treat source prop as inline SVG/Image data
                 {
                     drawable = std::unique_ptr<juce::Drawable>(
-                            juce::Drawable::createFromImageData(
-                                    source.toRawUTF8(),
-                                    source.getNumBytesAsUTF8()
-                            )
-                    );
+                        juce::Drawable::createFromImageData(
+                            source.toRawUTF8(),
+                            source.getNumBytesAsUTF8()));
                 }
             }
         }
 
         //==============================================================================
-        void paint (juce::Graphics& g) override
+        void paint(juce::Graphics& g) override
         {
             View::paint(g);
 
             const float opacity = props.getWithDefault(opacityProp, 1.0f);
 
             // Without a specified placement, we just draw the drawable.
-            if (!props.contains(placementProp))
+            if (! props.contains(placementProp))
                 return drawable->draw(g, opacity);
 
             // Otherwise we map placement strings to the appropriate flags
             const int existingFlags = props[placementProp];
-            const juce::RectanglePlacement placement (existingFlags);
+            const juce::RectanglePlacement placement(existingFlags);
 
             drawable->drawWithin(g, getLocalBounds().toFloat(), placement, opacity);
         }
 
     private:
         //==============================================================================
-        juce::Image loadImageFromURL(const juce::URL &url) const
+        juce::Image loadImageFromURL(const juce::URL& url) const
         {
             if (url.isLocalFile())
             {
                 const juce::File imageFile = url.getLocalFile();
 
-                if (!imageFile.existsAsFile())
+                if (! imageFile.existsAsFile())
                 {
                     const juce::String errorString = "Image file does not exist: " + imageFile.getFullPathName();
                     throw std::logic_error(errorString.toStdString());
@@ -158,14 +153,14 @@ namespace blueprint
             const auto base64EncodedData = source.substring(commaIndex + 1);
             juce::MemoryOutputStream outStream{};
 
-            if(!juce::Base64::convertFromBase64(outStream, base64EncodedData))
+            if (! juce::Base64::convertFromBase64(outStream, base64EncodedData))
             {
                 throw std::runtime_error("Image failed to convert data url.");
             }
 
-            juce::MemoryInputStream inputStream (outStream.getData(), outStream.getDataSize(), false);
+            juce::MemoryInputStream inputStream(outStream.getData(), outStream.getDataSize(), false);
 
-            const auto mimeType = source.substring(5,semiIndex);
+            const auto mimeType = source.substring(5, semiIndex);
             auto fmt = prepareImageFormat(mimeType);
 
             if (fmt == nullptr)
@@ -173,7 +168,7 @@ namespace blueprint
                 throw std::runtime_error("Unsupported format.");
             }
 
-            if (!fmt->canUnderstand(inputStream))
+            if (! fmt->canUnderstand(inputStream))
             {
                 throw std::runtime_error("Cannot understand the image.");
             }
@@ -205,7 +200,6 @@ namespace blueprint
         std::unique_ptr<juce::Drawable> drawable;
 
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageView)
-
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ImageView)
     };
-}
+} // namespace blueprint

@@ -12,28 +12,27 @@
 #include "blueprint_ImageView.h"
 #include "blueprint_ScrollView.h"
 #include "blueprint_ScrollViewContentShadowView.h"
-#include "blueprint_TextView.h"
 #include "blueprint_TextShadowView.h"
+#include "blueprint_TextView.h"
 
 namespace blueprint
 {
-
     namespace
     {
-
         /** A quick helper for registering view types. */
         template <typename ViewType, typename ShadowViewType>
         struct GenericViewFactory
         {
-            ViewManager::ViewPair operator()() {
+            ViewManager::ViewPair operator()()
+            {
                 auto view = std::make_unique<ViewType>();
                 auto shadowView = std::make_unique<ShadowViewType>(view.get());
 
-                return {std::move(view), std::move(shadowView)};
+                return { std::move(view), std::move(shadowView) };
             }
         };
 
-    }
+    } // namespace
 
     ViewManager::ViewManager(View* rootView)
         : rootId(rootView->getViewId())
@@ -49,18 +48,18 @@ namespace blueprint
         registerViewType("ScrollViewContentView", GenericViewFactory<View, ScrollViewContentShadowView>());
     }
 
-    void ViewManager::registerViewType(const juce::String &typeId, ViewFactory f)
+    void ViewManager::registerViewType(const juce::String& typeId, ViewFactory f)
     {
         // If you hit this jassert, you're trying to register a type which
         // has already been registered!
-        jassert (viewFactories.find(typeId) == viewFactories.end());
+        jassert(viewFactories.find(typeId) == viewFactories.end());
         viewFactories[typeId] = f;
     }
 
     ViewId ViewManager::createViewInstance(const juce::String& viewType)
     {
         // We can't create a view instance of a type that hasn't been registered.
-        jassert (viewFactories.find(viewType) != viewFactories.end());
+        jassert(viewFactories.find(viewType) != viewFactories.end());
 
         auto [view, shadowView] = viewFactories[viewType]();
         ViewId vid = view->getViewId();
@@ -86,9 +85,10 @@ namespace blueprint
 
         // ShadowView::setProperty returns true when a layout prop
         // has been set.  Otherwise set on the view and repaint
-        if(!shadow->setProperty(name, value)) {
-          view->setProperty(name, value);
-          view->repaint();
+        if (! shadow->setProperty(name, value))
+        {
+            view->setProperty(name, value);
+            view->repaint();
         }
     }
 
@@ -132,8 +132,8 @@ namespace blueprint
             // If we're trying to append a child to a text view, it will be raw text
             // with no accompanying shadow view, and we'll need to mark the parent
             // TextShadowView dirty before the subsequent layout pass.
-            jassert (dynamic_cast<RawTextView*>(childView) != nullptr);
-            jassert (childShadowView == nullptr);
+            jassert(dynamic_cast<RawTextView*>(childView) != nullptr);
+            jassert(childShadowView == nullptr);
 
             parentView->addChild(childView, index);
             dynamic_cast<TextShadowView*>(parentShadowView)->markDirty();
@@ -184,7 +184,7 @@ namespace blueprint
         }
     }
 
-    void ViewManager::enumerateChildViewIds (std::vector<ViewId>& ids, View* v)
+    void ViewManager::enumerateChildViewIds(std::vector<ViewId>& ids, View* v)
     {
         for (auto* child : v->getChildren())
         {
@@ -224,28 +224,28 @@ namespace blueprint
         shadowViewTable[rootId] = std::make_unique<ShadowView>(nh.mapped()->getAssociatedView());
     }
 
-    juce::var ViewManager::invokeViewMethod(ViewId viewId, const juce::String &method, const juce::var::NativeFunctionArgs &args)
+    juce::var ViewManager::invokeViewMethod(ViewId viewId, const juce::String& method, const juce::var::NativeFunctionArgs& args)
     {
-        if (View *view = getViewHandle(viewId).first)
+        if (View* view = getViewHandle(viewId).first)
             return view->invokeMethod(method, args);
 
         throw std::logic_error("Caller attempted to invoke method on non-existent View instance");
     }
 
-    std::pair<View*, ShadowView*> ViewManager::getViewHandle (ViewId viewId)
+    std::pair<View*, ShadowView*> ViewManager::getViewHandle(ViewId viewId)
     {
         if (viewId == rootId)
-            return {shadowViewTable[viewId]->getAssociatedView(), shadowViewTable[viewId].get()};
+            return { shadowViewTable[viewId]->getAssociatedView(), shadowViewTable[viewId].get() };
 
         if (viewTable.find(viewId) != viewTable.end())
-            return {viewTable[viewId].get(), shadowViewTable[viewId].get()};
+            return { viewTable[viewId].get(), shadowViewTable[viewId].get() };
 
         // If we land here, you asked for a view that we don't have.
         jassertfalse;
-        return {nullptr, nullptr};
+        return { nullptr, nullptr };
     }
 
-    View* ViewManager::getViewByRefId (const juce::Identifier& refId)
+    View* ViewManager::getViewByRefId(const juce::Identifier& refId)
     {
         if (refId == getRootViewRefId())
             return shadowViewTable[rootId]->getAssociatedView();
@@ -263,9 +263,9 @@ namespace blueprint
 
     juce::Identifier ViewManager::getRootViewRefId()
     {
-       View* root = shadowViewTable[rootId]->getAssociatedView();
-       jassert(root);
+        View* root = shadowViewTable[rootId]->getAssociatedView();
+        jassert(root);
 
-       return root->getRefId();
+        return root->getRefId();
     }
-}
+} // namespace blueprint

@@ -12,10 +12,8 @@
 #include "blueprint_ShadowView.h"
 #include "blueprint_View.h"
 
-
 namespace blueprint
 {
-
     //==============================================================================
     /** The ScrollViewContentShadowView extends a ShadowView to provide specialized
      *  behavior for flushing layout bounds to the content element of a ScrolLView.
@@ -49,7 +47,7 @@ namespace blueprint
 
     private:
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollViewContentShadowView)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScrollViewContentShadowView)
     };
 
-}
+} // namespace blueprint

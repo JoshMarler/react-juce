@@ -7,18 +7,16 @@
   ==============================================================================
 */
 
-
 namespace blueprint
 {
-
     namespace detail
     {
         juce::var getMouseEventRelatedTarget(const juce::MouseEvent& e, const blueprint::View& view)
         {
-            juce::Component *topParent              = view.getTopLevelComponent();
+            juce::Component* topParent = view.getTopLevelComponent();
             const juce::MouseEvent topRelativeEvent = e.getEventRelativeTo(topParent);
 
-            juce::Component *componentUnderMouse = topParent->getComponentAt(topRelativeEvent.x, topRelativeEvent.y);
+            juce::Component* componentUnderMouse = topParent->getComponentAt(topRelativeEvent.x, topRelativeEvent.y);
 
             if (auto v = dynamic_cast<blueprint::View*>(componentUnderMouse))
                 return v->getViewId();
@@ -28,7 +26,7 @@ namespace blueprint
         }
 
         /** A little helper for DynamicObject construction. */
-        juce::var makeViewEventObject (const juce::NamedValueSet& props, const blueprint::View& view)
+        juce::var makeViewEventObject(const juce::NamedValueSet& props, const blueprint::View& view)
         {
             auto* o = new juce::DynamicObject();
 
@@ -43,29 +41,29 @@ namespace blueprint
         }
 
         /** Another little helper for DynamicObject construction. */
-        juce::var makeViewEventObject (const juce::MouseEvent& me, const blueprint::View &view)
+        juce::var makeViewEventObject(const juce::MouseEvent& me, const blueprint::View& view)
         {
             // TODO: Get all of it!
-            return makeViewEventObject({
-                {"x", me.x},
-                {"y", me.y},
-                {"screenX", me.getScreenX()},
-                {"screenY", me.getScreenY()},
-                {"relatedTarget", getMouseEventRelatedTarget(me, view)}
-            }, view);
+            return makeViewEventObject({ { "x", me.x },
+                                         { "y", me.y },
+                                         { "screenX", me.getScreenX() },
+                                         { "screenY", me.getScreenY() },
+                                         { "relatedTarget", getMouseEventRelatedTarget(me, view) } },
+                                       view);
         }
 
         /** And another little helper for DynamicObject construction. */
-        juce::var makeViewEventObject (const juce::KeyPress& ke, const blueprint::View &view)
+        juce::var makeViewEventObject(const juce::KeyPress& ke, const blueprint::View& view)
         {
             // TODO: Get all of it!
             return makeViewEventObject({
-                {"key", juce::String(ke.getTextCharacter())},
-                {"keyCode", ke.getKeyCode()},
-            }, view);
+                                           { "key", juce::String(ke.getTextCharacter()) },
+                                           { "keyCode", ke.getKeyCode() },
+                                       },
+                                       view);
         }
 
-    }
+    } // namespace detail
 
     //==============================================================================
     ViewId View::getViewId() const
@@ -78,20 +76,30 @@ namespace blueprint
         return _refId;
     }
 
-    void View::setProperty (const juce::Identifier& name, const juce::var& value)
+    void View::setProperty(const juce::Identifier& name, const juce::var& value)
     {
         props.set(name, value);
 
         if (name == interceptClickEventsProp)
         {
-            switch (static_cast<int> (value))
+            switch (static_cast<int>(value))
             {
-                case 0:      setInterceptsMouseClicks (false, false);  break;
-                case 1:      setInterceptsMouseClicks (true,  true);   break;
-                case 2:      setInterceptsMouseClicks (true,  false);  break;
-                case 3:      setInterceptsMouseClicks (false, true);   break;
+                case 0:
+                    setInterceptsMouseClicks(false, false);
+                    break;
+                case 1:
+                    setInterceptsMouseClicks(true, true);
+                    break;
+                case 2:
+                    setInterceptsMouseClicks(true, false);
+                    break;
+                case 3:
+                    setInterceptsMouseClicks(false, true);
+                    break;
 
-                default:     setInterceptsMouseClicks (true,  true);   break;
+                default:
+                    setInterceptsMouseClicks(true, true);
+                    break;
             }
         }
 
@@ -99,13 +107,13 @@ namespace blueprint
             setWantsKeyboardFocus(true);
 
         if (name == opacityProp)
-            setAlpha(static_cast<float> (value));
+            setAlpha(static_cast<float>(value));
 
         if (name == refIdProp)
             _refId = juce::Identifier(value.toString());
     }
 
-    void View::addChild (View* childView, int index)
+    void View::addChild(View* childView, int index)
     {
         // Add the child view to our component heirarchy.
         addAndMakeVisible(childView, index);
@@ -119,27 +127,26 @@ namespace blueprint
         if (props.contains(transformMatrixProp))
         {
             const juce::var& matrix = props[transformMatrixProp];
-            if(matrix.isArray() && matrix.getArray()->size() >= 16) {
-              const juce::Array<juce::var> &m = *matrix.getArray();
+            if (matrix.isArray() && matrix.getArray()->size() >= 16)
+            {
+                const juce::Array<juce::var>& m = *matrix.getArray();
 
-              auto cxRelParent = cachedFloatBounds.getX() + cachedFloatBounds.getWidth() * 0.5f;
-              auto cyRelParent = cachedFloatBounds.getY() + cachedFloatBounds.getHeight() * 0.5f;
+                auto cxRelParent = cachedFloatBounds.getX() + cachedFloatBounds.getWidth() * 0.5f;
+                auto cyRelParent = cachedFloatBounds.getY() + cachedFloatBounds.getHeight() * 0.5f;
 
-              const auto translateToOrigin = juce::AffineTransform::translation(cxRelParent * -1.0f, cyRelParent * -1.0f);
-              // set 2d homogeneous matrix using 3d homogeneous matrix
-              const auto transform = juce::AffineTransform(
-                m[0], m[1], m[3],
-                m[4], m[5], m[7]
-              );
-              const auto translateFromOrigin = juce::AffineTransform::translation(cxRelParent, cyRelParent);
+                const auto translateToOrigin = juce::AffineTransform::translation(cxRelParent * -1.0f, cyRelParent * -1.0f);
+                // set 2d homogeneous matrix using 3d homogeneous matrix
+                const auto transform = juce::AffineTransform(
+                    m[0], m[1], m[3], m[4], m[5], m[7]);
+                const auto translateFromOrigin = juce::AffineTransform::translation(cxRelParent, cyRelParent);
 
-              setTransform(translateToOrigin.followedBy(transform).followedBy(translateFromOrigin));
+                setTransform(translateToOrigin.followedBy(transform).followedBy(translateFromOrigin));
             }
         }
     }
 
     //==============================================================================
-    float View::getResolvedLengthProperty (const juce::String& name, float axisLength)
+    float View::getResolvedLengthProperty(const juce::String& name, float axisLength)
     {
         float ret = 0;
 
@@ -161,7 +168,7 @@ namespace blueprint
         return ret;
     }
 
-    void View::paint (juce::Graphics& g)
+    void View::paint(juce::Graphics& g)
     {
         if (props.contains(borderPathProp))
         {
@@ -189,7 +196,7 @@ namespace blueprint
             // line is the exact bounding box then the component clipping makes the corners
             // appear to have different radii on the interior and exterior of the box.
             auto borderBounds = getLocalBounds().toFloat().reduced(borderWidth * 0.5f);
-            auto width  = borderBounds.getWidth();
+            auto width = borderBounds.getWidth();
             auto height = borderBounds.getHeight();
             auto minLength = juce::jmin(width, height);
             float borderRadius = getResolvedLengthProperty(borderRadiusProp.toString(), minLength);
@@ -204,7 +211,7 @@ namespace blueprint
         {
             juce::Colour c = juce::Colour::fromString(props[backgroundColorProp].toString());
 
-            if (!c.isTransparent())
+            if (! c.isTransparent())
                 g.fillAll(c);
         }
     }
@@ -215,34 +222,31 @@ namespace blueprint
         auto w = cachedFloatBounds.getWidth();
         auto h = cachedFloatBounds.getHeight();
 
-        dispatchViewEvent("onMeasure", detail::makeViewEventObject({
-            {"width", w},
-            {"height", h}
-        }, *this));
+        dispatchViewEvent("onMeasure", detail::makeViewEventObject({ { "width", w }, { "height", h } }, *this));
     }
 
-    void View::mouseDown (const juce::MouseEvent& e)
+    void View::mouseDown(const juce::MouseEvent& e)
     {
         dispatchViewEvent("onMouseDown", detail::makeViewEventObject(e, *this));
     }
 
-    void View::mouseUp (const juce::MouseEvent& e)
+    void View::mouseUp(const juce::MouseEvent& e)
     {
         dispatchViewEvent("onMouseUp", detail::makeViewEventObject(e, *this));
     }
 
-    void View::mouseDrag (const juce::MouseEvent& e)
+    void View::mouseDrag(const juce::MouseEvent& e)
     {
         // TODO: mouseDrag isn't a dom event... is it?
         dispatchViewEvent("onMouseDrag", detail::makeViewEventObject(e, *this));
     }
 
-    void View::mouseDoubleClick (const juce::MouseEvent& e)
+    void View::mouseDoubleClick(const juce::MouseEvent& e)
     {
         dispatchViewEvent("onMouseDoubleClick", detail::makeViewEventObject(e, *this));
     }
 
-    bool View::keyPressed (const juce::KeyPress& key)
+    bool View::keyPressed(const juce::KeyPress& key)
     {
         dispatchViewEvent("onKeyPress", detail::makeViewEventObject(key, *this));
 
@@ -257,21 +261,21 @@ namespace blueprint
         return true;
     }
 
-    void View::dispatchViewEvent (const juce::String& eventType, const juce::var& e)
+    void View::dispatchViewEvent(const juce::String& eventType, const juce::var& e)
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
-        if (auto *parent = findParentComponentOfClass<ReactApplicationRoot>())
+        if (auto* parent = findParentComponentOfClass<ReactApplicationRoot>())
             parent->dispatchViewEvent(getViewId(), eventType, e);
     }
 
-    void View::exportMethod(const juce::String &method, juce::var::NativeFunction fn)
+    void View::exportMethod(const juce::String& method, juce::var::NativeFunction fn)
     {
         JUCE_ASSERT_MESSAGE_THREAD
         nativeMethods[method] = std::move(fn);
     }
 
-    juce::var View::invokeMethod(const juce::String &method, const juce::var::NativeFunctionArgs &args)
+    juce::var View::invokeMethod(const juce::String& method, const juce::var::NativeFunctionArgs& args)
     {
         JUCE_ASSERT_MESSAGE_THREAD
         auto it = nativeMethods.find(method);
@@ -281,4 +285,4 @@ namespace blueprint
 
         throw std::logic_error("Caller attempted to invoke a non-existent View method");
     }
-}
+} // namespace blueprint

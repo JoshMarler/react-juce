@@ -9,19 +9,14 @@
 
 #pragma once
 
-
 namespace blueprint
 {
-
     //==============================================================================
-    BlueprintGenericEditor::BlueprintGenericEditor (juce::AudioProcessor& proc, const juce::File& bundle)
-        : juce::AudioProcessorEditor (proc)
-        , engine(std::make_shared<EcmascriptEngine>())
-        , appRoot(engine)
-        , harness(appRoot)
+    BlueprintGenericEditor::BlueprintGenericEditor(juce::AudioProcessor& proc, const juce::File& bundle)
+        : juce::AudioProcessorEditor(proc), engine(std::make_shared<EcmascriptEngine>()), appRoot(engine), harness(appRoot)
     {
         // Sanity check
-        jassert (bundle.existsAsFile());
+        jassert(bundle.existsAsFile());
         bundleFile = bundle;
 
         // Now we set up parameter listeners and register their current values.
@@ -31,7 +26,8 @@ namespace blueprint
         for (auto& p : params)
         {
             // Store the parameter ID for easy lookup in gesture lambdas
-            if (auto paramWithID = dynamic_cast<juce::AudioProcessorParameterWithID*>(p)) {
+            if (auto paramWithID = dynamic_cast<juce::AudioProcessorParameterWithID*>(p))
+            {
                 parameters.emplace(paramWithID->paramID, p);
             }
 
@@ -71,7 +67,7 @@ namespace blueprint
     }
 
     //==============================================================================
-    void BlueprintGenericEditor::parameterValueChanged (int parameterIndex, float newValue)
+    void BlueprintGenericEditor::parameterValueChanged(int parameterIndex, float newValue)
     {
         // This callback often runs on the realtime thread. To avoid any blocking
         // or non-deterministic operations, we simply set some atomic values in our
@@ -81,7 +77,7 @@ namespace blueprint
         paramReadouts[parameterIndex].dirty = true;
     }
 
-    void BlueprintGenericEditor::parameterGestureChanged (int, bool)
+    void BlueprintGenericEditor::parameterGestureChanged(int, bool)
     {
         // Our generic editor doesn't do anything with this information yet, but
         // we'll happily take a pull request if you need something here :).
@@ -115,8 +111,7 @@ namespace blueprint
                     id,
                     defaultValue,
                     value,
-                    stringValue
-                );
+                    stringValue);
             }
         }
     }
@@ -140,32 +135,29 @@ namespace blueprint
         engine->registerNativeMethod(
             "beginParameterChangeGesture",
             [this](const juce::var::NativeFunctionArgs& args) {
-                if (auto it = parameters.find (args.arguments[0].toString()); it != parameters.cend())
+                if (auto it = parameters.find(args.arguments[0].toString()); it != parameters.cend())
                     it->second->beginChangeGesture();
 
                 return juce::var::undefined();
-            }
-        );
+            });
 
         engine->registerNativeMethod(
             "setParameterValueNotifyingHost",
             [this](const juce::var::NativeFunctionArgs& args) {
-                if (auto it = parameters.find (args.arguments[0].toString()); it != parameters.cend())
+                if (auto it = parameters.find(args.arguments[0].toString()); it != parameters.cend())
                     it->second->setValueNotifyingHost(args.arguments[1]);
 
                 return juce::var::undefined();
-            }
-        );
+            });
 
         engine->registerNativeMethod(
             "endParameterChangeGesture",
             [this](const juce::var::NativeFunctionArgs& args) {
-                if (auto it = parameters.find (args.arguments[0].toString()); it != parameters.cend())
+                if (auto it = parameters.find(args.arguments[0].toString()); it != parameters.cend())
                     it->second->endChangeGesture();
 
                 return juce::var::undefined();
-            }
-        );
+            });
     }
 
     void BlueprintGenericEditor::afterBundleEvaluated()
@@ -175,4 +167,4 @@ namespace blueprint
             parameterValueChanged(p->getParameterIndex(), p->getValue());
     }
 
-}
+} // namespace blueprint

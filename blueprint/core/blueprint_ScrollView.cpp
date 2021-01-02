@@ -20,7 +20,7 @@ namespace blueprint
             obj->setProperty("scrollLeft", scrollLeftPosition);
             return obj.get();
         }
-    }
+    } // namespace detail
 
     //==============================================================================
     ScrollView::ScrollView()
@@ -29,8 +29,7 @@ namespace blueprint
         // This is prop configurable
         startTimerHz(30);
 
-        viewport.onAreaChanged([this](const juce::Rectangle<int>& area)
-        {
+        viewport.onAreaChanged([this](const juce::Rectangle<int>& area) {
             lastScrollEvent.event = detail::makeScrollEventObject(area.getY(), area.getX());
             lastScrollEvent.dirty = true;
         });
@@ -41,17 +40,22 @@ namespace blueprint
         exportNativeMethods();
     }
 
-    void ScrollView::setProperty (const juce::Identifier& name, const juce::var& value)
+    void ScrollView::setProperty(const juce::Identifier& name, const juce::var& value)
     {
         View::setProperty(name, value);
 
         auto showX = viewport.isHorizontalScrollBarShown();
         auto showY = viewport.isVerticalScrollBarShown();
 
-        auto overflowCheck = [](const juce::String& p, const juce::String &v)
-        {
-            if (juce::StringRef("scroll") == v) { return true; }
-            if (juce::StringRef("hidden") == v) { return false; }
+        auto overflowCheck = [](const juce::String& p, const juce::String& v) {
+            if (juce::StringRef("scroll") == v)
+            {
+                return true;
+            }
+            if (juce::StringRef("hidden") == v)
+            {
+                return false;
+            }
 
             const juce::String e = "Invalid prop value. Prop '" + p + "' must be a string of 'hidden' or 'scroll'";
             throw std::invalid_argument(e.toStdString());
@@ -71,7 +75,7 @@ namespace blueprint
 
         if (name == scrollBarWidthProp)
         {
-            if (!props[scrollBarWidthProp].isDouble())
+            if (! props[scrollBarWidthProp].isDouble())
                 throw std::invalid_argument("Invalid prop value. Prop \'scollbar-width\' must be a number.");
 
             const int thickness = props[scrollBarWidthProp];
@@ -80,7 +84,7 @@ namespace blueprint
 
         if (name == scrollbarThumbColorProp)
         {
-            if (!props[scrollbarThumbColorProp].isString())
+            if (! props[scrollbarThumbColorProp].isString())
                 throw std::invalid_argument("Invalid prop value. Prop \'scrollbar-thumb-color\' must be a color string.");
 
             const auto thumbColor = juce::Colour::fromString(props[scrollbarThumbColorProp].toString());
@@ -90,7 +94,7 @@ namespace blueprint
 
         if (name == scrollbarTrackColorProp)
         {
-            if (!props[scrollbarTrackColorProp].isString())
+            if (! props[scrollbarTrackColorProp].isString())
                 throw std::invalid_argument("Invalid prop value. Prop \'scrollbar-track-color\' must be a color string.");
 
             const auto trackColor = juce::Colour::fromString(props[scrollbarTrackColorProp].toString());
@@ -100,7 +104,7 @@ namespace blueprint
 
         if (name == scrollOnDragProp)
         {
-            if (!props[scrollOnDragProp].isBool())
+            if (! props[scrollOnDragProp].isBool())
                 throw std::invalid_argument("Invalid prop value. Prop \'scroll-on-drag\' must be a bool.");
 
             const bool scrollOnDrag = props[scrollOnDragProp];
@@ -108,16 +112,16 @@ namespace blueprint
         }
     }
 
-    void ScrollView::addChild (View* childView, int index)
+    void ScrollView::addChild(View* childView, int index)
     {
-        juce::ignoreUnused (index);
-        jassert (viewport.getViewedComponent() == nullptr);
+        juce::ignoreUnused(index);
+        jassert(viewport.getViewedComponent() == nullptr);
         viewport.setViewedComponent(childView, false);
     }
 
     void ScrollView::resized()
     {
-        const auto &bounds = getLocalBounds();
+        const auto& bounds = getLocalBounds();
         viewport.setBounds(bounds);
         View::resized();
     }
@@ -128,7 +132,7 @@ namespace blueprint
         {
             if (props.contains(onScrollProp) && props[onScrollProp].isMethod())
             {
-                std::array<juce::var, 1> args { lastScrollEvent.event };
+                std::array<juce::var, 1> args{ lastScrollEvent.event };
                 juce::var::NativeFunctionArgs nfArgs(juce::var(), args.data(), static_cast<int>(args.size()));
 
                 std::invoke(props[onScrollProp].getNativeFunction(), nfArgs);
@@ -141,14 +145,13 @@ namespace blueprint
 
     void ScrollView::exportNativeMethods()
     {
-       exportMethod("scrollToPosition", [this] (const juce::var::NativeFunctionArgs &args) -> juce::var
-       {
-           jassert(args.numArguments == 2);
-           const int xPos = args.arguments[0];
-           const int yPos = args.arguments[1];
+        exportMethod("scrollToPosition", [this](const juce::var::NativeFunctionArgs& args) -> juce::var {
+            jassert(args.numArguments == 2);
+            const int xPos = args.arguments[0];
+            const int yPos = args.arguments[1];
 
-           viewport.setViewPosition(xPos, yPos);
-           return juce::var::undefined();
-       });
+            viewport.setViewPosition(xPos, yPos);
+            return juce::var::undefined();
+        });
     }
-}
+} // namespace blueprint

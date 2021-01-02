@@ -12,10 +12,8 @@
 #include "blueprint_AppHarness.h"
 #include "blueprint_ReactApplicationRoot.h"
 
-
 namespace blueprint
 {
-
     //==============================================================================
     /** The BlueprintGenericEditor is a default AudioProcessorEditor with preinstalled functionality
      *  for working with Blueprint.
@@ -25,19 +23,19 @@ namespace blueprint
      *  development tools.
      */
     class BlueprintGenericEditor
-        : public juce::AudioProcessorEditor
-        , public juce::AudioProcessorParameter::Listener
-        , public juce::Timer
+        : public juce::AudioProcessorEditor,
+          public juce::AudioProcessorParameter::Listener,
+          public juce::Timer
     {
     public:
         //==============================================================================
-        BlueprintGenericEditor (juce::AudioProcessor&, const juce::File&);
+        BlueprintGenericEditor(juce::AudioProcessor&, const juce::File&);
         ~BlueprintGenericEditor() override;
 
         //==============================================================================
         /** Implement the AudioProcessorParameter::Listener interface. */
-        void parameterValueChanged (int parameterIndex, float newValue) override;
-        void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override;
+        void parameterValueChanged(int parameterIndex, float newValue) override;
+        void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override;
 
         //==============================================================================
         /** Override the timer interface. */
@@ -46,7 +44,7 @@ namespace blueprint
         //==============================================================================
         /** Override the component interface. */
         void resized() override;
-        void paint (juce::Graphics&) override;
+        void paint(juce::Graphics&) override;
 
     private:
         //==============================================================================
@@ -55,15 +53,15 @@ namespace blueprint
         void afterBundleEvaluated();
 
         //==============================================================================
-        std::shared_ptr<EcmascriptEngine>     engine;
-        ReactApplicationRoot                  appRoot;
-        AppHarness                            harness;
+        std::shared_ptr<EcmascriptEngine> engine;
+        ReactApplicationRoot appRoot;
+        AppHarness harness;
 
-        juce::File                            bundleFile;
+        juce::File bundleFile;
 
         // We keep a map of the parameter IDs and their associated parameter pointers
         // to have a quick lookup in beforeBundleEvaluated where lambdas are called
-        // with a param ID 
+        // with a param ID
         std::map<juce::String, juce::AudioProcessorParameter*> parameters;
 
         //==============================================================================
@@ -71,13 +69,15 @@ namespace blueprint
         // propagated to the user interface. During parameter value changes on the
         // realtime thread, we capture the values in this array of structs, then at
         // 30Hz propagate the value changes via dispatching events to the jsui.
-        struct ParameterReadout {
+        struct ParameterReadout
+        {
             std::atomic<float> value = 0.0;
             std::atomic<bool> dirty = false;
 
             ParameterReadout() = default;
 
-            ParameterReadout(const ParameterReadout& other) {
+            ParameterReadout(const ParameterReadout& other)
+            {
                 value = other.value.load();
                 dirty = other.dirty.load();
             }
@@ -86,7 +86,7 @@ namespace blueprint
         std::vector<ParameterReadout> paramReadouts;
 
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlueprintGenericEditor)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlueprintGenericEditor)
     };
 
-}
+} // namespace blueprint

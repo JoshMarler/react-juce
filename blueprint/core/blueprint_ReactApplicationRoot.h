@@ -14,10 +14,8 @@
 #include "blueprint_View.h"
 #include "blueprint_ViewManager.h"
 
-
 namespace blueprint
 {
-
     //==============================================================================
     /** The ReactApplicationRoot class is the primary point of coordination between
      *  the React.js reconciler and the native View heirarchy.
@@ -42,12 +40,12 @@ namespace blueprint
 
         //==============================================================================
         /** The main rendering interface. */
-        juce::var createViewInstance (const juce::String& viewType);
-        juce::var createTextViewInstance (const juce::String& textValue);
-        juce::var setViewProperty (const ViewId viewId, const juce::String& name, const juce::var& value);
-        juce::var setRawTextValue (const ViewId viewId, const juce::String& value);
-        juce::var insertChild (const ViewId parentId, const ViewId childId, int index);
-        juce::var removeChild (const ViewId parentId, const ViewId childId);
+        juce::var createViewInstance(const juce::String& viewType);
+        juce::var createTextViewInstance(const juce::String& textValue);
+        juce::var setViewProperty(const ViewId viewId, const juce::String& name, const juce::var& value);
+        juce::var setRawTextValue(const ViewId viewId, const juce::String& value);
+        juce::var insertChild(const ViewId parentId, const ViewId childId, int index);
+        juce::var removeChild(const ViewId parentId, const ViewId childId);
         juce::var getRootInstanceId();
         juce::var resetAfterCommit();
 
@@ -76,7 +74,7 @@ namespace blueprint
 
         /** Dispatches an event through Blueprint's EventBridge. */
         template <typename... T>
-        void dispatchEvent (const juce::String& eventType, T... args)
+        void dispatchEvent(const juce::String& eventType, T... args)
         {
             JUCE_ASSERT_MESSAGE_THREAD
 
@@ -86,16 +84,19 @@ namespace blueprint
             if (errorText)
                 return;
 
-            try {
+            try
+            {
                 engine->invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
-            } catch (const EcmascriptEngine::Error& err) {
+            }
+            catch (const EcmascriptEngine::Error& err)
+            {
                 handleRuntimeError(err);
             }
         }
 
         /** Dispatches a view event through Blueprint's internal event replayer. */
         template <typename... T>
-        void dispatchViewEvent (T... args)
+        void dispatchViewEvent(T... args)
         {
             JUCE_ASSERT_MESSAGE_THREAD
 
@@ -105,9 +106,12 @@ namespace blueprint
             if (errorText)
                 return;
 
-            try {
+            try
+            {
                 engine->invoke("__BlueprintNative__.dispatchViewEvent", std::forward<T>(args)...);
-            } catch (const EcmascriptEngine::Error& err) {
+            }
+            catch (const EcmascriptEngine::Error& err)
+            {
                 handleRuntimeError(err);
             }
         }
@@ -129,40 +133,45 @@ namespace blueprint
     private:
         //==============================================================================
         template <int NumParams, typename MethodType>
-        juce::var invokeFromNativeFunction (MethodType method, const juce::var::NativeFunctionArgs& args)
+        juce::var invokeFromNativeFunction(MethodType method, const juce::var::NativeFunctionArgs& args)
         {
-            static_assert (NumParams <= 4);
+            static_assert(NumParams <= 4);
 
             if (args.numArguments != NumParams)
                 return juce::var::undefined();
 
-            if constexpr (NumParams == 0)    return (this->*method)();
-            if constexpr (NumParams == 1)    return (this->*method)(args.arguments[0]);
-            if constexpr (NumParams == 2)    return (this->*method)(args.arguments[0], args.arguments[1]);
-            if constexpr (NumParams == 3)    return (this->*method)(args.arguments[0], args.arguments[1], args.arguments[2]);
-            if constexpr (NumParams == 4)    return (this->*method)(args.arguments[0], args.arguments[1], args.arguments[2], args.arguments[3]);
+            if constexpr (NumParams == 0)
+                return (this->*method)();
+            if constexpr (NumParams == 1)
+                return (this->*method)(args.arguments[0]);
+            if constexpr (NumParams == 2)
+                return (this->*method)(args.arguments[0], args.arguments[1]);
+            if constexpr (NumParams == 3)
+                return (this->*method)(args.arguments[0], args.arguments[1], args.arguments[2]);
+            if constexpr (NumParams == 4)
+                return (this->*method)(args.arguments[0], args.arguments[1], args.arguments[2], args.arguments[3]);
 
             return {};
         }
 
         template <int NumParams, typename MethodType>
-        void addMethodBinding (const char* ns, const char* name, MethodType method) {
+        void addMethodBinding(const char* ns, const char* name, MethodType method)
+        {
             engine->registerNativeMethod(
                 ns,
                 name,
-                [this, method] (const juce::var::NativeFunctionArgs& args) -> juce::var {
+                [this, method](const juce::var::NativeFunctionArgs& args) -> juce::var {
                     return invokeFromNativeFunction<NumParams>(method, args);
-                }
-            );
+                });
         }
 
         //==============================================================================
         ViewManager viewManager;
 
-        std::shared_ptr<EcmascriptEngine>       engine;
+        std::shared_ptr<EcmascriptEngine> engine;
         std::unique_ptr<juce::AttributedString> errorText;
 
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReactApplicationRoot)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ReactApplicationRoot)
     };
-}
+} // namespace blueprint
