@@ -8,6 +8,7 @@
 */
 
 #include "View.h"
+#include "Utils.h"
 
 
 namespace reactjuce
@@ -171,7 +172,8 @@ namespace reactjuce
 
             if (props.contains(borderColorProp))
             {
-                juce::Colour c = juce::Colour::fromString(props[borderColorProp].toString());
+                juce::StringRef colorString = props[borderColorProp].toString();
+                juce::Colour c = juce::Colour::fromString(colorString);
                 float borderWidth = props.getWithDefault(borderWidthProp, 1.0);
 
                 g.setColour(c);
@@ -183,7 +185,8 @@ namespace reactjuce
         else if (props.contains(borderColorProp) && props.contains(borderWidthProp))
         {
             juce::Path border;
-            auto c = juce::Colour::fromString(props[borderColorProp].toString());
+            juce::StringRef colorString = props[borderColorProp].toString();
+            auto c = juce::Colour::fromString(colorString);
             float borderWidth = props[borderWidthProp];
 
             // Note this little bounds trick. When a Path is stroked, the line width extends
@@ -204,10 +207,18 @@ namespace reactjuce
 
         if (props.contains(backgroundColorProp))
         {
-            juce::Colour c = juce::Colour::fromString(props[backgroundColorProp].toString());
-
-            if (!c.isTransparent())
-                g.fillAll(c);
+            auto colorProp = props[backgroundColorProp];
+            auto colorVariant = detail::makeColorVariant(colorProp, getLocalBounds());
+            if(const auto color (std::get_if<juce::Colour>(&colorVariant)); color)
+            {
+                if (!color->isTransparent())
+                    g.fillAll(*color);
+            }
+            else if(const auto gradient (std::get_if<juce::ColourGradient>(&colorVariant)); gradient)
+            {
+                g.setGradientFill(*gradient);
+                g.fillAll();
+            }
         }
     }
 

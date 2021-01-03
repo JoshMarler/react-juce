@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import Colors from "../lib/MacroProperties/Colors";
 
 // TODO: Need to explicitly bind this to members?
 export class CanvasRenderingContext {
@@ -18,17 +19,15 @@ export class CanvasRenderingContext {
 
   //================================================================================
   // Properties
-  //
-  // TODO: Once color string prop PR in switch fontStyle/strokeStyle to
-  //       colors.colorStringToAlphaHex(value)
-  //
   // TODO: Support fillStyle/strokeStyle pattern.
   // TODO: Support fillStyle/strokeStyle gradient.
   set fillStyle(value: string) {
+    value = Colors.colorStringToAlphaHex(value);
     this._drawCommands.push(["setFillStyle", value]);
   }
 
   set strokeStyle(value: string) {
+    value = Colors.colorStringToAlphaHex(value);
     this._drawCommands.push(["setStrokeStyle", value]);
   }
 
