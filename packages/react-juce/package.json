@@ -36,6 +36,7 @@
   "dependencies": {
     "@babel/runtime-corejs3": "^7.11.2",
     "camelcase": "^6.2.0",
+    "color-string": "^1.5.4",
     "core-js": "2.6.0",
     "invariant": "^2.2.4",
     "known-css-properties": "^0.20.0",

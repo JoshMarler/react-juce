@@ -25,8 +25,8 @@ class ParameterToggleButton extends Component {
         ? paramState.currentValue
         : 0.0;
 
-    this.defaultBorderColor = "ff66FDCF";
-    this.hoverBorderColor = "ff66CFFD";
+    this.defaultBorderColor = "#66FDCF";
+    this.hoverBorderColor = "#66CFFD";
 
     this.state = {
       defaultValue: initialDefaultValue,

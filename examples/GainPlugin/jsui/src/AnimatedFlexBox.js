@@ -38,7 +38,7 @@ const styles = {
   container: {
     width: "100%",
     height: "100%",
-    backgroundColor: "ff17191f",
+    backgroundColor: "#17191f",
     justifyContent: "flex-start",
     alignContent: "flex-start",
     flexWrap: "wrap",
@@ -54,7 +54,7 @@ const styles = {
     height: 100.0,
     justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: "ff87898f",
+    backgroundColor: "#87898f",
     margin: 6.0,
     padding: 6.0,
   },

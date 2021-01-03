@@ -51,7 +51,7 @@ class Label extends Component {
 
 const styles = {
   labelText: {
-    color: "ff626262",
+    color: "#626262",
     fontSize: 16.0,
     lineSpacing: 1.6,
   },
