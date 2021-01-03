@@ -13,7 +13,7 @@ namespace blueprint
 
     namespace detail
     {
-        juce::var getMouseEventRelatedTarget(const juce::MouseEvent& e, const blueprint::View& view)
+        static juce::var getMouseEventRelatedTarget(const juce::MouseEvent& e, const blueprint::View& view)
         {
             juce::Component *topParent              = view.getTopLevelComponent();
             const juce::MouseEvent topRelativeEvent = e.getEventRelativeTo(topParent);
@@ -28,7 +28,7 @@ namespace blueprint
         }
 
         /** A little helper for DynamicObject construction. */
-        juce::var makeViewEventObject (const juce::NamedValueSet& props, const blueprint::View& view)
+        static juce::var makeViewEventObject (const juce::NamedValueSet& props, const blueprint::View& view)
         {
             auto* o = new juce::DynamicObject();
 
@@ -43,7 +43,7 @@ namespace blueprint
         }
 
         /** Another little helper for DynamicObject construction. */
-        juce::var makeViewEventObject (const juce::MouseEvent& me, const blueprint::View &view)
+        static juce::var makeViewEventObject (const juce::MouseEvent& me, const blueprint::View &view)
         {
             // TODO: Get all of it!
             return makeViewEventObject({
@@ -56,7 +56,7 @@ namespace blueprint
         }
 
         /** And another little helper for DynamicObject construction. */
-        juce::var makeViewEventObject (const juce::KeyPress& ke, const blueprint::View &view)
+        static juce::var makeViewEventObject (const juce::KeyPress& ke, const blueprint::View &view)
         {
             // TODO: Get all of it!
             return makeViewEventObject({

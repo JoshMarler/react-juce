@@ -34,7 +34,6 @@
  #pragma clang diagnostic ignored "-Wshorten-64-to-32"
  #pragma clang diagnostic ignored "-Wshadow-field-in-constructor"
  #pragma clang diagnostic ignored "-Wsign-conversion"
- #pragma clang diagnostic ignored "-Wused-but-marked-unused"
  #pragma clang diagnostic ignored "-Wformat-nonliteral"
  #if __clang_major__ > 10
   #pragma clang diagnostic ignored "-Wc++98-compat-extra-semi"

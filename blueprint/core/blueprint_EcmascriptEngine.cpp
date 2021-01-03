@@ -39,6 +39,8 @@
  #pragma clang diagnostic ignored "-Wsign-conversion"
  #pragma clang diagnostic ignored "-Wswitch-enum"
  #pragma clang diagnostic ignored "-Wunused-parameter"
+ #pragma clang diagnostic ignored "-Wused-but-marked-unused"
+ #pragma clang diagnostic ignored "-Wformat-nonliteral"
  #if __clang_major__ > 10
   #pragma clang diagnostic ignored "-Wc++98-compat-extra-semi"
   #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
