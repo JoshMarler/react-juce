@@ -58,6 +58,15 @@ export class ViewInstance {
     this._children = [];
     this._props = props;
     this._parent = parent;
+
+    //TODO: This has been added to resolve a bug in
+    //      our Button component when calling contains()
+    //      on a viewRef. This is a result of wrapping our
+    //      viewRefs in a Proxy object which means this is
+    //      no longer bound to the original ViewInstance object
+    //      during the contains call. Ideally we would use Reflect.get()
+    //      here but Duktape does not fully support Reflect at the moment.
+    this.contains = this.contains.bind(this);
   }
 
   getViewId(): string {
