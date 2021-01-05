@@ -16,7 +16,14 @@
 * [Slider](components/Slider.md)
 * [ListView](components/ListView.md)
 * [ScrollView](components/ScrollView.md)
+* [Style Properties](components/Styles.md)
+* [Synthetic Events](components/Events.md)
 
 ## Native
 * [Custom Native Components](native/Custom_Native_Components.md)
-* [JS/C++ Interop](native/Interop.md)
+* [JS/Native Interop](native/Interop.md)
+
+## Have a Question?
+* [GitHub Discussions](https://github.com/nick-thompson/blueprint/discussions)
+* [Discord Chatroom](https://discord.gg/3H4wwVf49v)
+* [Open an Issue](https://github.com/nick-thompson/blueprint/issues)
