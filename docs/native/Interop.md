@@ -1,6 +1,7 @@
 # JavaScript/Native Interop
 
 There are generally two ways to cross the Native/JavaScript boundary:
+
 1. You can pass C++ values and functions into JavaScript, and JavaScript values and functions into C++ directly or via an event model
 2. Or, you can create a custom native View and render it in your React component tree
 
