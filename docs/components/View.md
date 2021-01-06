@@ -40,7 +40,7 @@ const styles = {
 #### onMeasure
 
 A callback which will be invoked any time the `View`'s layout calculation changes.
-The callback should accept a single argument, a `SyntheticEvent` object holding
+The callback should accept a single argument, a [SyntheticEvent](Events.md) object holding
 a `width` and `height` property reflecting the new size of the `View`.
 
 | Type | Required | Supported |
@@ -50,7 +50,7 @@ a `width` and `height` property reflecting the new size of the `View`.
 #### onMouseDown
 
 A callback which will be invoked in response to a mouse button down event on the
-underlying native component. The callback should accept a single argument, a `SyntheticMouseEvent`
+underlying native component. The callback should accept a single argument, a [SyntheticMouseEvent](Events.md)
 object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent).
 
 | Type | Required | Supported |
@@ -60,7 +60,7 @@ object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/
 #### onMouseUp
 
 A callback which will be invoked in response to a mouse button up event on the
-underlying native component. The callback should accept a single argument, a `SyntheticMouseEvent`
+underlying native component. The callback should accept a single argument, a [SyntheticMouseEvent](Events.md)
 object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent).
 
 | Type | Required | Supported |
@@ -70,7 +70,7 @@ object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/
 #### onMouseDoubleClick
 
 A callback which will be invoked in response to a mouse button double click on the
-underlying native component. The callback should accept a single argument, a `SyntheticMouseEvent`
+underlying native component. The callback should accept a single argument, a [SyntheticMouseEvent](Events.md)
 object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent).
 
 | Type | Required | Supported |
@@ -80,7 +80,7 @@ object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/
 #### onKeyPress
 
 A callback which will be invoked in response to a key press event while the
-underlying native component has focus. The callback should accept a single argument, a `SyntheticKeyboardEvent`
+underlying native component has focus. The callback should accept a single argument, a [SyntheticKeyboardEvent](Events.md)
 object similar in interface to [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent).
 
 | Type | Required | Supported |
