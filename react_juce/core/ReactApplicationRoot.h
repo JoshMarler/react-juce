@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "blueprint_EcmascriptEngine.h"
-#include "blueprint_FileWatcher.h"
-#include "blueprint_View.h"
-#include "blueprint_ViewManager.h"
+#include "EcmascriptEngine.h"
+#include "FileWatcher.h"
+#include "View.h"
+#include "ViewManager.h"
 
 
 namespace blueprint

@@ -7,13 +7,14 @@
   ==============================================================================
 */
 
-#include "blueprint_ViewManager.h"
-#include "blueprint_CanvasView.h"
-#include "blueprint_ImageView.h"
-#include "blueprint_ScrollView.h"
-#include "blueprint_ScrollViewContentShadowView.h"
-#include "blueprint_TextView.h"
-#include "blueprint_TextShadowView.h"
+#include "ViewManager.h"
+#include "CanvasView.h"
+#include "ImageView.h"
+#include "ScrollView.h"
+#include "ScrollViewContentShadowView.h"
+#include "TextView.h"
+#include "TextShadowView.h"
+
 
 namespace blueprint
 {

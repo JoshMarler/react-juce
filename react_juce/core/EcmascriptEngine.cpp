@@ -81,7 +81,7 @@
  #pragma GCC diagnostic pop
 #endif
 
-#include "blueprint_EcmascriptEngine.h"
+#include "EcmascriptEngine.h"
 
 
 namespace blueprint

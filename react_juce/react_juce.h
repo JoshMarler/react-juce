@@ -5,11 +5,11 @@
  * JUCE Module Format.txt file in the JUCE directory.
 
    BEGIN_JUCE_MODULE_DECLARATION
-    ID:                 blueprint
+    ID:                 react_juce
     vendor:             Nick Thompson
     version:            0.1.0
-    name:               Blueprint
-    description:        A React.js render backend targeting JUCE Components.
+    name:               React-JUCE
+    description:        Write cross-platform native apps with React.js and JUCE
     minimumCppStandard: 17
     dependencies:       juce_gui_basics
     searchpaths:        ./ ./duktape/ ./duktape/src-noline/ ./yoga
@@ -28,11 +28,11 @@
 
 //==============================================================================
 #if JUCE_EXCEPTIONS_DISABLED
-    #error "Blueprint module requires exceptions to be enabled!"
+    #error "React-JUCE module requires exceptions to be enabled!"
 #endif
 
 #if ! JUCE_CXX17_IS_AVAILABLE
-    #error "Blueprint module requires a C++17 compatible toolchain!"
+    #error "React-JUCE module requires a C++17 compatible toolchain!"
 #endif
 
 //==============================================================================
@@ -110,26 +110,26 @@
  #pragma GCC diagnostic pop
 #endif
 
-#include "core/blueprint_AppHarness.h"
-#include "core/blueprint_EcmascriptEngine.h"
-#include "core/blueprint_CanvasView.h"
+#include "core/AppHarness.h"
+#include "core/EcmascriptEngine.h"
+#include "core/CanvasView.h"
 
 #if JUCE_MODULE_AVAILABLE_juce_audio_processors
-    #include "core/blueprint_GenericEditor.h"
+    #include "core/GenericEditor.h"
 #endif
 
-#include "core/blueprint_ImageView.h"
-#include "core/blueprint_FileWatcher.h"
-#include "core/blueprint_RawTextView.h"
-#include "core/blueprint_ReactApplicationRoot.h"
-#include "core/blueprint_ScrollView.h"
-#include "core/blueprint_ScrollViewContentShadowView.h"
-#include "core/blueprint_ShadowView.h"
-#include "core/blueprint_TextShadowView.h"
-#include "core/blueprint_TextView.h"
-#include "core/blueprint_View.h"
-#include "core/blueprint_ViewManager.h"
+#include "core/ImageView.h"
+#include "core/FileWatcher.h"
+#include "core/RawTextView.h"
+#include "core/ReactApplicationRoot.h"
+#include "core/ScrollView.h"
+#include "core/ScrollViewContentShadowView.h"
+#include "core/ShadowView.h"
+#include "core/TextShadowView.h"
+#include "core/TextView.h"
+#include "core/View.h"
+#include "core/ViewManager.h"
 
 #if BLUEPRINT_COMPILE_UNIT_TESTS
-    #include "tests/blueprint_EcmascriptEngineTests.h"
+    #include "tests/EcmascriptEngineTests.h"
 #endif

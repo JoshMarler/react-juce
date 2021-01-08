@@ -7,7 +7,8 @@
   ==============================================================================
 */
 
-#include "blueprint_ScrollView.h"
+#include "ScrollView.h"
+
 
 namespace blueprint
 {

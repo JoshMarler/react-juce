@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "blueprint_ShadowView.h"
-#include "blueprint_View.h"
+#include "ShadowView.h"
+#include "View.h"
 
 
 namespace blueprint

@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "blueprint_AppHarness.h"
-#include "blueprint_ReactApplicationRoot.h"
+#include "AppHarness.h"
+#include "ReactApplicationRoot.h"
 
 
 namespace blueprint

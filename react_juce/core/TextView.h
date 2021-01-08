@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "blueprint_View.h"
+#include "View.h"
 
 
 namespace blueprint

@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "blueprint_EcmascriptEngine.h"
-#include "blueprint_FileWatcher.h"
-#include "blueprint_ReactApplicationRoot.h"
+#include "EcmascriptEngine.h"
+#include "FileWatcher.h"
+#include "ReactApplicationRoot.h"
 
 
 namespace blueprint

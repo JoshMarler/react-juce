@@ -7,7 +7,7 @@
   ==============================================================================
 */
 
-#pragma once
+#include "GenericEditor.h"
 
 
 namespace blueprint

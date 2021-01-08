@@ -11,8 +11,9 @@
 
 #include <map>
 
-#include "blueprint_View.h"
-#include "blueprint_ShadowView.h"
+#include "View.h"
+#include "ShadowView.h"
+
 
 namespace blueprint
 {

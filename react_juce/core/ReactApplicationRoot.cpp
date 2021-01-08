@@ -7,9 +7,7 @@
   ==============================================================================
 */
 
-#pragma once
-
-#include "blueprint_ReactApplicationRoot.h"
+#include "ReactApplicationRoot.h"
 
 
 namespace blueprint

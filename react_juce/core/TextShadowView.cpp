@@ -7,7 +7,7 @@
   ==============================================================================
 */
 
-#pragma once
+#include "TextShadowView.h"
 
 
 namespace blueprint

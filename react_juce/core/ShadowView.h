@@ -9,7 +9,8 @@
 
 #pragma once
 
-#include "blueprint_View.h"
+#include "View.h"
+
 
 #define BP_SPREAD_SETTER_PERCENT(setter) setter, setter##Percent
 #define BP_SPREAD_SETTER_AUTO(setter) BP_SPREAD_SETTER_PERCENT(setter), setter##Auto

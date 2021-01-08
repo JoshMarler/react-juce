@@ -7,9 +7,7 @@
   ==============================================================================
 */
 
-#pragma once
-
-#include "blueprint_AppHarness.h"
+#include "AppHarness.h"
 
 
 namespace blueprint

@@ -51,7 +51,7 @@
  #pragma GCC diagnostic ignored "-Wredundant-decls"
 #endif
 
-#include "blueprint.h"
+#include "react_juce.h"
 
 #include "yoga/yoga/log.cpp"
 #include "yoga/yoga/event/event.cpp"
@@ -74,16 +74,16 @@
  #pragma GCC diagnostic pop
 #endif
 
-#include "core/blueprint_AppHarness.cpp"
-#include "core/blueprint_EcmascriptEngine.cpp"
+#include "core/AppHarness.cpp"
+#include "core/EcmascriptEngine.cpp"
 
 #if JUCE_MODULE_AVAILABLE_juce_audio_processors
-    #include "core/blueprint_GenericEditor.cpp"
+    #include "core/GenericEditor.cpp"
 #endif
 
-#include "core/blueprint_ReactApplicationRoot.cpp"
-#include "core/blueprint_ShadowView.cpp"
-#include "core/blueprint_TextShadowView.cpp"
-#include "core/blueprint_View.cpp"
-#include "core/blueprint_ViewManager.cpp"
-#include "core/blueprint_ScrollView.cpp"
+#include "core/ReactApplicationRoot.cpp"
+#include "core/ShadowView.cpp"
+#include "core/TextShadowView.cpp"
+#include "core/View.cpp"
+#include "core/ViewManager.cpp"
+#include "core/ScrollView.cpp"
