@@ -18,10 +18,10 @@ juce_add_plugin(GainPlugin
     # IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
     # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
     # COPY_PLUGIN_AFTER_BUILD TRUE/FALSE        # Should the plugin be installed to a default location after building?
-    PLUGIN_MANUFACTURER_CODE Juce               # A four-character manufacturer id with at least one upper-case character
+    PLUGIN_MANUFACTURER_CODE Reju               # A four-character manufacturer id with at least one upper-case character
     PLUGIN_CODE Dem0                            # A unique four-character plugin id with at least one upper-case character
     FORMATS AU VST3 Standalone                  # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
-    PRODUCT_NAME "BlueprintGainPlugin")         # The name of the final executable, which can differ from the target name
+    PRODUCT_NAME "ReactJUCEGainPlugin")         # The name of the final executable, which can differ from the target name
 
 # `juce_generate_juce_header` will create a JuceHeader.h for a given target, which will be generated
 # into your build tree. This should be included with `#include <JuceHeader.h>`. The include path for
@@ -39,7 +39,7 @@ target_sources(GainPlugin PRIVATE PluginProcessor.cpp)
 # Add an explicit include path here so that Blueprint's EcmascriptEngine can find
 # the included Duktape source. You can optionally point this elsewhere if you'd like to
 # include a custom Duktape build.
-target_include_directories(GainPlugin PRIVATE blueprint/)
+target_include_directories(GainPlugin PRIVATE react_juce/)
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
 # project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use
@@ -70,4 +70,4 @@ target_link_libraries(GainPlugin PRIVATE
     juce::juce_audio_utils
     juce::juce_graphics
     juce::juce_gui_basics
-    blueprint)
+    react_juce)
