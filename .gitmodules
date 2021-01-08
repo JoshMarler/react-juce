@@ -2,5 +2,5 @@
 	path = ext/juce
 	url = ../../juce-framework/JUCE.git
 [submodule "yoga"]
-	path = blueprint/yoga
+	path = react_juce/yoga
 	url = ../../facebook/yoga.git
