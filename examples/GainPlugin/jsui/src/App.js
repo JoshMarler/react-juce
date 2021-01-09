@@ -142,7 +142,6 @@ const styles = {
     alignItems: 'center',
     borderRadius: 5.0,
     borderWidth: 2.0,
-    borderColor: 'ff66FDCF',
     marginTop: 10,
     minWidth: 30.0,
     minHeight: 30.0,
