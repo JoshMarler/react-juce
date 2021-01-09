@@ -10,6 +10,8 @@ export interface ButtonProps {
   onClick: (e: SyntheticMouseEvent) => void;
   onMouseDown?: (e: SyntheticMouseEvent) => void;
   onMouseUp?: (e: SyntheticMouseEvent) => void;
+  onMouseEnter?: (e: SyntheticMouseEvent) => void;
+  onMouseLeave?: (e: SyntheticMouseEvent) => void;
 }
 
 type ButtonState = {
@@ -84,14 +86,26 @@ export class Button extends Component<ButtonProps, ButtonState> {
     }
   }
 
+  handleEnter = (e: SyntheticMouseEvent): void => {
+    if (typeof this.props.onMouseEnter === 'function')
+      this.props.onMouseEnter.call(null, e);
+  }
+
+  handleLeave = (e: SyntheticMouseEvent): void => {
+    if (typeof this.props.onMouseLeave === 'function')
+      this.props.onMouseLeave.call(null, e);
+  }
+
   render = () => {
-    const { onMouseDown, onMouseUp, onClick, ...other } = this.props;
+    const { onMouseDown, onMouseUp, onClick, onMouseEnter, onMouseLeave, ...other } = this.props;
     const opacity = this.state.down ? 0.8 : 1.0;
 
     return (
       <View
         onMouseDown={this.handleDown}
         onMouseUp={this.handleUp}
+        onMouseEnter={this.handleEnter}
+        onMouseLeave={this.handleLeave}
         opacity={opacity}
         viewRef={this._ref}
         {...other}

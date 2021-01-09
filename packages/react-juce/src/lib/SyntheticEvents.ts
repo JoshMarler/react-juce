@@ -63,6 +63,8 @@ export default {
 
     return k === 'onmousedown' ||
       k == 'onmouseup' ||
+      k == 'onmouseenter' ||
+      k == 'onmouseleave' ||
       k == 'onmousedrag' ||
       k == 'onmouseclick';
   },

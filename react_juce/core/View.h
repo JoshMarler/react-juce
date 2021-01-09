@@ -80,6 +80,12 @@ namespace blueprint
         /** Dispatches a mouseUp event to the React application. */
         void mouseUp (const juce::MouseEvent& e) override;
 
+        /** Dispatches a mouseEnter event to the React application. */
+        void mouseEnter (const juce::MouseEvent& e) override;
+
+        /** Dispatches a mouseLeave event to the React application. */
+        void mouseExit (const juce::MouseEvent& e) override;
+
         /** Dispatches a mouseDrag event to the React application. */
         void mouseDrag (const juce::MouseEvent& e) override;
 

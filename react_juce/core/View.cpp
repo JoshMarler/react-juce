@@ -233,6 +233,16 @@ namespace blueprint
         dispatchViewEvent("onMouseUp", detail::makeViewEventObject(e, *this));
     }
 
+    void View::mouseEnter (const juce::MouseEvent& e)
+    {
+        dispatchViewEvent("onMouseEnter", detail::makeViewEventObject(e, *this));
+    }
+
+    void View::mouseExit (const juce::MouseEvent& e)
+    {
+        dispatchViewEvent("onMouseLeave", detail::makeViewEventObject(e, *this));
+    }
+
     void View::mouseDrag (const juce::MouseEvent& e)
     {
         // TODO: mouseDrag isn't a dom event... is it?
