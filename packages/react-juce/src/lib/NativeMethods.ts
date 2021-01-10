@@ -1,14 +1,27 @@
+let Native = global['__BlueprintNative__'] || {};
+let DefaultExport = Native;
 
-//@ts-ignore
-export default new Proxy(__BlueprintNative__, {
-  get(target, propKey, receiver) {
-    if (target.hasOwnProperty(propKey) && typeof target[propKey] === 'function') {
-      return function __nativeWrapper__(...args: any): void {
-        target[propKey].call(null, ...args);
+declare var process : {
+  env: {
+    NODE_ENV: string
+  }
+};
+
+if (process.env.NODE_ENV !== 'production') {
+  // @ts-ignore
+  DefaultExport = new Proxy(Native, {
+    get: function (target, propKey, receiver) {
+      if (target.hasOwnProperty(propKey) && typeof target[propKey] === 'function') {
+        return function __NativeMethodWrapper__(...args: any): void {
+          target[propKey].call(null, ...args);
+        }
+      }
+
+      return function __NativeMethodWrapper__() {
+        console.warn(`WARNING: Attempt to access undefined native method ${target}`);
       }
     }
+  });
+}
 
-    console.warn('WARNING: Attempt to access an undefined NativeMethod.');
-    return function noop() {};
-  }
-});
+export default DefaultExport;

@@ -1,11 +1,10 @@
 import { all as allCssProps } from 'known-css-properties';
 import camelCase from 'camelcase';
+import NativeMethods from './NativeMethods';
 import SyntheticEvents,
        { SyntheticMouseEvent,
          SyntheticKeyboardEvent } from './SyntheticEvents'
 import { macroPropertyGetters } from './MacroProperties';
-
-/* global __BlueprintNative__:false */
 
 //TODO: Keep this union or introduce a common base class ViewInstanceBase?
 export type Instance = ViewInstance | RawTextViewInstance;
@@ -20,30 +19,6 @@ let __lastMouseDownViewId: string | null = null;
 const cssPropsMap = allCssProps
   .filter((s) => !s.startsWith("-") && s.includes("-"))
   .reduce((acc, v) => Object.assign(acc, { [camelCase(v)]: v }), {});
-
-if (typeof window !== 'undefined') {
-  // This is just a little shim so that I can build for web and run my renderer
-  // in the browser, which can be helpful for debugging my renderer implementation.
-
-  //@ts-ignore
-  window.__BlueprintNative__ = {
-    appendChild(parent: ViewInstance, child: Instance) {
-      // noop
-    },
-    getRootInstanceId() {
-      return 'rootinstanceid';
-    },
-    createViewInstance() {
-      return 'someviewinstanceid';
-    },
-    createTextViewInstance() {
-      return 'sometextviewinstanceid';
-    },
-    setViewProperty() {
-      // Noop
-    },
-  };
-}
 
 export class ViewInstance {
   private _id: string;
@@ -93,7 +68,7 @@ export class ViewInstance {
     this._children.push(childInstance);
 
     //@ts-ignore
-    return __BlueprintNative__.insertChild(this._id, childInstance._id, -1);
+    return NativeMethods.insertChild(this._id, childInstance._id, -1);
   }
 
   insertChild(childInstance: Instance, index: number): any {
@@ -102,7 +77,7 @@ export class ViewInstance {
     this._children.splice(index, 0, childInstance);
 
     //@ts-ignore
-    return __BlueprintNative__.insertChild(this._id, childInstance._id, index);
+    return NativeMethods.insertChild(this._id, childInstance._id, index);
   }
 
   removeChild(childInstance: Instance): any {
@@ -114,7 +89,7 @@ export class ViewInstance {
     __viewRegistry.delete(childInstance.getViewId());
 
       //@ts-ignore
-      return __BlueprintNative__.removeChild(this._id, childInstance._id);
+      return NativeMethods.removeChild(this._id, childInstance._id);
     }
   }
 
@@ -144,7 +119,7 @@ export class ViewInstance {
 
           return function(...args) {
             //@ts-ignore
-            return __BlueprintNative__.invokeViewMethod(target._id, prop, ...args);
+            return NativeMethods.invokeViewMethod(target._id, prop, ...args);
           };
         }
       });
@@ -155,12 +130,12 @@ export class ViewInstance {
     if (macroPropertyGetters.hasOwnProperty(propKey)) {
       for (const [k, v] of macroPropertyGetters[propKey](value))
         //@ts-ignore
-        __BlueprintNative__.setViewProperty(this._id, k, v);
+        NativeMethods.setViewProperty(this._id, k, v);
       return;
     }
 
     //@ts-ignore
-    return __BlueprintNative__.setViewProperty(this._id, propKey, value);
+    return NativeMethods.setViewProperty(this._id, propKey, value);
   }
 
   contains(node: Instance): boolean {
@@ -203,7 +178,7 @@ export class RawTextViewInstance {
   setTextValue(text: string): any {
     this._text = text;
     //@ts-ignore
-    return __BlueprintNative__.setRawTextValue(this._id, text);
+    return NativeMethods.setRawTextValue(this._id, text);
   }
 }
 
@@ -212,7 +187,7 @@ function __getRootContainer(): ViewInstance {
     return __rootViewInstance;
 
   //@ts-ignore
-  const id = __BlueprintNative__.getRootInstanceId();
+  const id = NativeMethods.getRootInstanceId();
   __rootViewInstance = new ViewInstance(id, 'View');
 
   return __rootViewInstance;
@@ -241,7 +216,7 @@ function __bubbleEvent(view: Instance, eventType: string, event: any): void {
 }
 
 //@ts-ignore
-__BlueprintNative__.dispatchViewEvent = function dispatchEvent(viewId: string, eventType: string, event: any) {
+NativeMethods.dispatchViewEvent = function dispatchEvent(viewId: string, eventType: string, event: any) {
   if (__viewRegistry.hasOwnProperty(viewId)) {
     const instance = __viewRegistry[viewId];
 
@@ -272,7 +247,7 @@ __BlueprintNative__.dispatchViewEvent = function dispatchEvent(viewId: string, e
       __bubbleEvent(instance, eventType, event);
 
       if (__lastMouseDownViewId && viewId === __lastMouseDownViewId) {
-      	__lastMouseDownViewId = null;
+        __lastMouseDownViewId = null;
         __bubbleEvent(instance, "onClick", event);
       }
       return;
@@ -288,7 +263,7 @@ export default {
   },
   createViewInstance(viewType: string, props: any, parentInstance: ViewInstance): ViewInstance {
     //@ts-ignore
-    const id = __BlueprintNative__.createViewInstance(viewType);
+    const id = NativeMethods.createViewInstance(viewType);
     const instance = new ViewInstance(id, viewType, props, parentInstance);
 
     __viewRegistry[id] = instance;
@@ -296,7 +271,7 @@ export default {
   },
   createTextViewInstance(text: string, parentInstance: ViewInstance) {
     //@ts-ignore
-    const id       = __BlueprintNative__.createTextViewInstance(text);
+    const id       = NativeMethods.createTextViewInstance(text);
     const instance = new RawTextViewInstance(id, text, parentInstance);
 
     __viewRegistry[id] = instance;
@@ -304,6 +279,6 @@ export default {
   },
   resetAfterCommit() {
     //@ts-ignore
-    return __BlueprintNative__.resetAfterCommit();
+    return NativeMethods.resetAfterCommit();
   },
 };

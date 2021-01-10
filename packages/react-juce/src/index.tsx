@@ -5,7 +5,6 @@ import 'core-js/es6/map';
 import BlueprintBackend from './lib/BlueprintBackend';
 import BlueprintRenderer, { BlueprintTracedRenderer } from './lib/BlueprintRenderer';
 
-export { default as NativeMethods } from './lib/NativeMethods';
 export { default as EventBridge } from './lib/EventBridge';
 
 export * from './components/View';
