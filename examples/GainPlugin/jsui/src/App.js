@@ -57,7 +57,7 @@ class App extends Component {
     const sliderFillColor  = 'ff66FDCF';
     const sliderTrackColor = 'ff626262';
 
-    const logo_url = "https://placekitten.com/1000/200";
+    const logo_url = "https://placekitten.com/1600/400";
     //const logo_png = require('./logo.png');
     //const logo_svg = require('./logo.svg');
 
@@ -73,6 +73,8 @@ class App extends Component {
           >
             <Label paramId="MainGain" {...styles.label} />
           </ParameterSlider>
+          <Meter {...styles.meter} />	
+          <Canvas {...styles.canvas} animate={true} onDraw={animatedDraw} />
           <ParameterToggleButton
             paramId="MainMute"
             onToggled={this._onMuteToggled}

@@ -129,7 +129,7 @@ namespace blueprint
         /**
          * 
          */
-        void addDownloadJob(std::function<void()> downloadJob);
+        juce::ThreadPool& getThreadPool();
 
     private:
         //==============================================================================
@@ -165,7 +165,7 @@ namespace blueprint
         ViewManager viewManager;
 
         // This will be used by components to asynchronously download content from an web url.
-        juce::ThreadPool downloadManager{ 1 };
+        juce::ThreadPool threadPool;
 
         std::shared_ptr<EcmascriptEngine>       engine;
         std::unique_ptr<juce::AttributedString> errorText;

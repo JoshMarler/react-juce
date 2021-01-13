@@ -9,6 +9,19 @@
 
 #include "ImageView.h"
 
+namespace
+{
+    // juce::URL::isWellFormed is currently not a complete
+    // implementation, so we have this slightly more robust check
+    // for now.
+    bool isWellFormedURL(const juce::URL& url)
+    {
+        return url.isWellFormed() &&
+            url.getScheme().isNotEmpty() &&
+            !url.toString(false).startsWith("data");
+    }
+
+}
 
 namespace blueprint
 {
@@ -91,45 +104,42 @@ namespace blueprint
     //==============================================================================
     void ImageView::downloadImageAsync(const juce::String& source)
     {
-        // Add a thread to the thread pool on ReactApplicationRoot
-        // The class listens to the download and the onFinish() callback will be called
-        // when download is finished.
-
         // Allow only one download at the same time for a given ImageView.
-        if (imageDownloader != nullptr && imageDownloader->isRunning())
+        if (downloading)
             return;
 
         if (auto* appRoot = findParentComponentOfClass<ReactApplicationRoot>())
         {
-            appRoot->addDownloadJob([this, source] ()
+            appRoot->getThreadPool().addJob([this, source] ()
             {
-                imageDownloader.reset(new ImageDownloader(source));
-                // Image has been downloaded successfully, we can assign the drawable.
-                imageDownloader->onSuccess = [this](juce::Image& image)
-                {
-                    juce::MessageManager::callAsync([this, image]() 
-                        {
-                            auto drawableImg = std::make_unique<juce::DrawableImage>();
-                            drawableImg->setImage(image);
-                            drawable = std::move(drawableImg);
-                            repaint();
+                downloading = true;
+                juce::MemoryBlock mb;
 
-                            shouldDownloadImage = false;
-                        }
-                    );
-                };
-                // Manage the error case.
-                imageDownloader->onError = [this]()
-                {
-                    // Call an onError prop function ?
+                if (!juce::URL(source).readEntireBinaryStream(mb)) {
+                    downloading = false;
                     shouldDownloadImage = true;
-                };
+                    throw std::runtime_error("Failed to fetch the image!");
+                }
 
-                imageDownloader->start();
+                auto image = juce::ImageFileFormat::loadFrom(mb.getData(), mb.getSize());
+                if (!image.isNull()) {
+                    juce::MessageManager::callAsync([this, image]()
+                    {
+                        auto drawableImg = std::make_unique<juce::DrawableImage>();
+                        drawableImg->setImage(image);
+                        drawable = std::move(drawableImg);
+                        repaint();
+
+                        shouldDownloadImage = false;
+                    });
+                }
+
+                downloading = false;
             });
         }
         else
         {
+            // This means it will be called later on parentHierarchyChanged.
             shouldDownloadImage = true;
         }
     }
