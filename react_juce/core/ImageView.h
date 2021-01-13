@@ -10,25 +10,10 @@
 #pragma once
 
 #include "View.h"
-#include "ImageDownloader.h"
 
 
 namespace blueprint
 {
-    namespace
-    {
-        // juce::URL::isWellFormed is currently not a complete
-        // implementation, so we have this slightly more robust check
-        // for now.
-        bool isWellFormedURL(const juce::URL &url)
-        {
-            return url.isWellFormed()  &&
-                   url.getScheme().isNotEmpty() &&
-                   !url.toString(false).startsWith("data");
-        }
-
-    }
-
     //==============================================================================
     /** The ImageView class is a core view for drawing images within Blueprint's
         layout system.
@@ -39,7 +24,8 @@ namespace blueprint
         //==============================================================================
         static inline juce::Identifier sourceProp    = "source";
         static inline juce::Identifier placementProp = "placement";
-        static inline juce::Identifier onloadProp    = "onLoad";
+        static inline juce::Identifier onloadProp    = "onLoad";  // TODO: implement
+        static inline juce::Identifier onerrorProp   = "onError"; // TODO: implement
 
         //==============================================================================
         ImageView() = default;
@@ -58,10 +44,11 @@ namespace blueprint
 
         //==============================================================================
         std::unique_ptr<juce::Drawable> drawable;
-
-        std::unique_ptr<ImageDownloader> imageDownloader;
+        
+        // To manage the download thread
         bool shouldDownloadImage{ false };
-
+        bool downloading{ false };
+        
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageView)
     };
