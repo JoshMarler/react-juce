@@ -118,6 +118,7 @@
     #include "core/GenericEditor.h"
 #endif
 
+#include "core/ImageDownloader.h"
 #include "core/ImageView.h"
 #include "core/FileWatcher.h"
 #include "core/RawTextView.h"

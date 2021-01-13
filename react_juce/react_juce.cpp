@@ -87,3 +87,4 @@
 #include "core/View.cpp"
 #include "core/ViewManager.cpp"
 #include "core/ScrollView.cpp"
+#include "core/ImageView.cpp"

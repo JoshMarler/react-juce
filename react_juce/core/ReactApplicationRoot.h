@@ -126,6 +126,11 @@ namespace blueprint
          */
         void bindNativeRenderingHooks();
 
+        /**
+         * 
+         */
+        void addDownloadJob(std::function<void()> downloadJob);
+
     private:
         //==============================================================================
         template <int NumParams, typename MethodType>
@@ -158,6 +163,9 @@ namespace blueprint
 
         //==============================================================================
         ViewManager viewManager;
+
+        // This will be used by components to asynchronously download content from an web url.
+        juce::ThreadPool downloadManager{ 1 };
 
         std::shared_ptr<EcmascriptEngine>       engine;
         std::unique_ptr<juce::AttributedString> errorText;

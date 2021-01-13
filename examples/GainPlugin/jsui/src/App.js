@@ -57,10 +57,14 @@ class App extends Component {
     const sliderFillColor  = 'ff66FDCF';
     const sliderTrackColor = 'ff626262';
 
+    const logo_url = "https://placekitten.com/1000/200";
+    //const logo_png = require('./logo.png');
+    //const logo_svg = require('./logo.svg');
+
     return (
       <View {...styles.container}>
         <View {...styles.content}>
-          <Image source={require('./logo.png')} {...styles.logo} />
+          <Image source={logo_url} {...styles.logo} />
           <ParameterSlider
             paramId="MainGain"
             onDraw={Slider.drawRotary(sliderTrackColor, sliderFillColor)}
@@ -69,8 +73,6 @@ class App extends Component {
           >
             <Label paramId="MainGain" {...styles.label} />
           </ParameterSlider>
-          <Meter {...styles.meter} />
-          <Canvas {...styles.canvas} animate={true} onDraw={animatedDraw} />
           <ParameterToggleButton
             paramId="MainMute"
             onToggled={this._onMuteToggled}
@@ -142,6 +144,7 @@ const styles = {
     alignItems: 'center',
     borderRadius: 5.0,
     borderWidth: 2.0,
+    borderColor: 'ff66FDCF',
     marginTop: 10,
     minWidth: 30.0,
     minHeight: 30.0,
