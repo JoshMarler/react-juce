@@ -200,4 +200,9 @@ namespace blueprint
         addMethodBinding<0>(ns, "resetAfterCommit", &ReactApplicationRoot::resetAfterCommit);
     }
 
+    void ReactApplicationRoot::addDownloadJob(std::function<void()> downloadJob)
+    {
+        downloadManager.addJob(downloadJob);
+    }
+
 }
