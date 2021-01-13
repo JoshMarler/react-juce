@@ -57,7 +57,7 @@ class App extends Component {
     const sliderFillColor  = 'ff66FDCF';
     const sliderTrackColor = 'ff626262';
 
-    const logo_url = "https://placekitten.com/1600/400";
+    const logo_url = "https://raw.githubusercontent.com/nick-thompson/blueprint/master/examples/GainPlugin/jsui/src/logo.png";
     //const logo_png = require('./logo.png');
     //const logo_svg = require('./logo.svg');
 
