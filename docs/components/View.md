@@ -69,7 +69,7 @@ object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/
 
 #### onMouseEnter
 
-A callback which will be invoked in response to a mouse entering the local bounds of a native component. 
+A callback which will be invoked in response to a mouse entering the local bounds of a native component.
 The callback should accept a single argument, a `SyntheticMouseEvent`
 object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent).
 
@@ -79,7 +79,7 @@ object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/
 
 #### onMouseLeave
 
-A callback which will be invoked in response to a mouse leaving the local bounds of a native component. 
+A callback which will be invoked in response to a mouse leaving the local bounds of a native component.
 The callback should accept a single argument, a `SyntheticMouseEvent`
 object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent).
 
