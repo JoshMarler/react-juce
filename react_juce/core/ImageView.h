@@ -38,6 +38,8 @@ namespace blueprint
     private:
         //==============================================================================
         void downloadImageAsync(const juce::String& source);
+        void sendOnErrorCallback();
+        void setDrawableImage(const juce::Image& image);
         juce::Image loadImageFromFileURL(const juce::URL& url) const;
         juce::Image loadImageFromDataURL(const juce::String& source) const;
         std::unique_ptr<juce::ImageFileFormat> prepareImageFormat(const juce::String& mimeType) const;
@@ -47,7 +49,6 @@ namespace blueprint
         
         // To manage the download thread
         bool shouldDownloadImage{ false };
-        bool downloading{ false };
         
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageView)

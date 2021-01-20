@@ -27,6 +27,18 @@ function animatedDraw(ctx) {
   ctx.fillRect(0, 0, width, 2);
 }
 
+// Example of callback for image onLoad/onError
+function imageLoaded()
+{
+    console.log("Image is loaded!");
+}
+
+function imageError(error)
+{
+    console.log(error.name);
+    console.log(error.message);
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -64,7 +76,7 @@ class App extends Component {
     return (
       <View {...styles.container}>
         <View {...styles.content}>
-          <Image source={logo_url} {...styles.logo} />
+          <Image source={logo_url} onLoad={imageLoaded} onError={imageError} {...styles.logo} />
           <ParameterSlider
             paramId="MainGain"
             onDraw={Slider.drawRotary(sliderTrackColor, sliderFillColor)}

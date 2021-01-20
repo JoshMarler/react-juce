@@ -8,6 +8,7 @@
 */
 
 #include "ImageView.h"
+#include "Utils.h"
 
 namespace
 {
@@ -40,13 +41,20 @@ namespace blueprint
                 // Web images are downloaded in a separate thread to avoid blocking.
                 if (sourceURL.isProbablyAWebsiteURL(sourceURL.toString(false)))
                 {
-                    downloadImageAsync(source);
+                    const auto sourceHash = juce::DefaultHashFunctions::generateHash(source, 1024);
+                    const auto& cachedImage = juce::ImageCache::getFromHashCode(sourceHash);
+                    if (cachedImage.isValid())
+                    {
+                        setDrawableImage(cachedImage);
+                    }
+                    else
+                    {
+                        downloadImageAsync(source);
+                    }
                 }
                 else if (sourceURL.isLocalFile())
                 {
-                    auto drawableImg = std::make_unique<juce::DrawableImage>();
-                    drawableImg->setImage(loadImageFromFileURL(sourceURL));
-                    drawable = std::move(drawableImg);
+                    setDrawableImage(loadImageFromFileURL(sourceURL));
                 }
                 else
                 {
@@ -56,9 +64,7 @@ namespace blueprint
             }
             else if (source.startsWith("data:image/")) // juce::URL does not currently handle Data URLs
             {
-                auto drawableImg = std::make_unique<juce::DrawableImage>();
-                drawableImg->setImage(loadImageFromDataURL(source));
-                drawable = std::move(drawableImg);
+                setDrawableImage(loadImageFromDataURL(source));
             }
             else // If not a URL treat source prop as inline SVG/Image data
             {
@@ -104,44 +110,76 @@ namespace blueprint
     //==============================================================================
     void ImageView::downloadImageAsync(const juce::String& source)
     {
-        // Allow only one download at the same time for a given ImageView.
-        if (downloading)
-            return;
-
         if (auto* appRoot = findParentComponentOfClass<ReactApplicationRoot>())
         {
             appRoot->getThreadPool().addJob([this, source] ()
             {
-                downloading = true;
                 juce::MemoryBlock mb;
 
-                if (!juce::URL(source).readEntireBinaryStream(mb)) {
-                    downloading = false;
+                // Did we reach the URL?
+                if (!juce::URL(source).readEntireBinaryStream(mb)) 
+                {
                     shouldDownloadImage = true;
-                    throw std::runtime_error("Failed to fetch the image!");
+                    juce::MessageManager::callAsync([this]() { sendOnErrorCallback(); });
+                    return;
                 }
 
                 auto image = juce::ImageFileFormat::loadFrom(mb.getData(), mb.getSize());
-                if (!image.isNull()) {
-                    juce::MessageManager::callAsync([this, image]()
+                if (image.isValid()) 
+                {
+                    juce::MessageManager::callAsync([this, image, source]()
                     {
-                        auto drawableImg = std::make_unique<juce::DrawableImage>();
-                        drawableImg->setImage(image);
-                        drawable = std::move(drawableImg);
-                        repaint();
+                        // Add the freshly downloaded image to the cache.
+                        auto sourceHash = juce::DefaultHashFunctions::generateHash(source, 1024);
+                        juce::ImageCache::addImageToCache(image, sourceHash);
 
-                        shouldDownloadImage = false;
+                        // At this point, there may be multiple downloads happening at the same time,
+                        // so we need to be sure the one that's just finished matches the current sourceProp.
+                        if (source == props[sourceProp].toString())
+                        {
+                            setDrawableImage(image);
+                            repaint();
+
+                            shouldDownloadImage = false;
+                        }
                     });
                 }
-
-                downloading = false;
+                else
+                {
+                    // The URL was valid but was not pointing to a valid image.
+                    juce::MessageManager::callAsync([this]() { sendOnErrorCallback(); });
+                }
             });
         }
         else
         {
-            // This means it will be called later on parentHierarchyChanged.
+            // It will be called later on parentHierarchyChanged.
             shouldDownloadImage = true;
         }
+    }
+
+    //==============================================================================
+    void ImageView::sendOnErrorCallback()
+    {
+        // Send an error callback to JS.
+        if (props.contains(onerrorProp) && props[onerrorProp].isMethod())
+        {
+            std::vector<juce::var> jsArgs{ {detail::makeErrorObject("ImageViewError", "Failed to load image resource")} };
+            juce::var::NativeFunctionArgs nfArgs(juce::var(), jsArgs.data(), static_cast<int>(jsArgs.size()));
+            std::invoke(props[onerrorProp].getNativeFunction(), nfArgs);
+        }
+    }
+
+    //==============================================================================
+    void ImageView::setDrawableImage(const juce::Image& image)
+    {
+        auto drawableImg = std::make_unique<juce::DrawableImage>();
+        drawableImg->setImage(image);
+        drawable = std::move(drawableImg);
+
+        // Notify JS that image is loaded.
+        if (props.contains(onloadProp) && props[onloadProp].isMethod())
+            std::invoke(props[onloadProp].getNativeFunction(), juce::var::NativeFunctionArgs(juce::var(), {}, 0));
     }
 
     //==============================================================================
