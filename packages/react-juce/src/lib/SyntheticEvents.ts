@@ -1,4 +1,4 @@
-import { Instance } from "./BlueprintBackend";
+import { Instance } from "./Backend";
 
 export class SyntheticEvent {
   public  bubbles: boolean;

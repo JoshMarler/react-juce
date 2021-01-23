@@ -1,4 +1,4 @@
-let Native = global['__BlueprintNative__'] || {};
+let Native = global['__NativeBindings__'] || {};
 let DefaultExport = Native;
 
 declare var process : {

@@ -1,6 +1,6 @@
 import MethodTracer from './MethodTracer';
 import ReactReconciler from 'react-reconciler';
-import BlueprintBackend, {ViewInstance, RawTextViewInstance} from './BlueprintBackend';
+import Backend, {ViewInstance, RawTextViewInstance} from './Backend';
 
 import invariant from 'invariant';
 
@@ -43,7 +43,7 @@ const HostConfig = {
 
   prepareForCommit: (...args: any) => {},
   resetAfterCommit: (...args: any) => {
-    BlueprintBackend.resetAfterCommit();
+    Backend.resetAfterCommit();
   },
 
   /** Called to determine whether or not a new text value can be set on an
@@ -73,7 +73,7 @@ const HostConfig = {
       'Nesting elements inside of <Text> is currently not supported.'
     );
 
-    return BlueprintBackend.createViewInstance(elementType, props, rootContainerInstance);
+    return Backend.createViewInstance(elementType, props, rootContainerInstance);
   },
 
   /** Create a new text node. */
@@ -86,7 +86,7 @@ const HostConfig = {
       'Raw text strings must be rendered within a <Text> element.'
     );
 
-    return BlueprintBackend.createTextViewInstance(text, rootContainerInstance);
+    return Backend.createTextViewInstance(text, rootContainerInstance);
   },
 
   /** Mount the child to its container. */
@@ -209,4 +209,4 @@ const HostConfig = {
 //TODO: Applied ts-ignore here as TS complains about missing functions on HostConfig
 //@ts-ignore
 export default ReactReconciler(HostConfig);
-export const BlueprintTracedRenderer = ReactReconciler(new Proxy(HostConfig, MethodTracer));
+export const TracedRenderer = ReactReconciler(new Proxy(HostConfig, MethodTracer));

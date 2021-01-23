@@ -1,6 +1,6 @@
 import React, { Component, PropsWithChildren, ReactElement } from 'react';
 
-import { ViewInstance } from "../lib/BlueprintBackend";
+import { ViewInstance } from "../lib/Backend";
 import { ScrollView, ScrollEvent } from './ScrollView';
 
 import invariant from 'invariant';

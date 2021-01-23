@@ -176,7 +176,7 @@ namespace reactjuce
 
     void ReactApplicationRoot::bindNativeRenderingHooks()
     {
-        const auto ns = "__BlueprintNative__";
+        const auto ns = "__NativeBindings__";
 
         engine->registerNativeProperty(ns, juce::JSON::parse("{}"));
 

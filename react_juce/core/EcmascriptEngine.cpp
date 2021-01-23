@@ -689,7 +689,7 @@ namespace reactjuce
                         struct CallbackHelper {
                             CallbackHelper(std::weak_ptr<duk_context> _weakContext)
                                 : weakContext(_weakContext)
-                                , funcId(juce::String("__blueprintCallback__") + juce::Uuid().toString()) {}
+                                , funcId(juce::String("__NativeCallback__") + juce::Uuid().toString()) {}
 
                             ~CallbackHelper() {
                                 if (auto spt = weakContext.lock()) {

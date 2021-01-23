@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import { View } from './View'
 import { SyntheticMouseEvent } from '../lib/SyntheticEvents'
-import { ViewInstance } from "../lib/BlueprintBackend";
+import { ViewInstance } from "../lib/Backend";
 
 //TODO: Once ViewProps work is complete we can probably
 //      remove this in favour of ViewProps.

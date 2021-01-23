@@ -17,7 +17,7 @@ var targetDir = path.resolve(args[0]);
 var packageDir = path.resolve(__dirname, '..');
 var templateDir = path.resolve(packageDir, 'template');
 
-console.log('Initializing a Blueprint template in:', chalk.green(targetDir));
+console.log('Initializing a React-JUCE template in:', chalk.green(targetDir));
 console.log('Directory tree will be created if it does not exist.');
 
 fs.mkdirp(targetDir, function(err) {
@@ -45,14 +45,14 @@ fs.mkdirp(targetDir, function(err) {
 
       console.log();
       console.log(`
-${chalk.blue('Success!')} Initialized a Blueprint template in ${chalk.green(targetDir)}
+${chalk.blue('Success!')} Initialized a React-JUCE template in ${chalk.green(targetDir)}
 
 You can now get started by typing:
 
 ${chalk.blue('cd')} ${args[0]}
 ${chalk.blue('npm start')}
 
-Then adding the blueprint::ReactApplicationRoot component to your project.
+Then adding the reactjuce::ReactApplicationRoot component to your project.
       `);
     });
   });

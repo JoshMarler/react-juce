@@ -87,7 +87,7 @@ namespace reactjuce
                 return;
 
             try {
-                engine->invoke("__BlueprintNative__.dispatchEvent", eventType, std::forward<T>(args)...);
+                engine->invoke("__NativeBindings__.dispatchEvent", eventType, std::forward<T>(args)...);
             } catch (const EcmascriptEngine::Error& err) {
                 handleRuntimeError(err);
             }
@@ -106,7 +106,7 @@ namespace reactjuce
                 return;
 
             try {
-                engine->invoke("__BlueprintNative__.dispatchViewEvent", std::forward<T>(args)...);
+                engine->invoke("__NativeBindings__.dispatchViewEvent", std::forward<T>(args)...);
             } catch (const EcmascriptEngine::Error& err) {
                 handleRuntimeError(err);
             }
@@ -126,9 +126,7 @@ namespace reactjuce
          */
         void bindNativeRenderingHooks();
 
-        /**
-         * 
-         */
+        /** Get a handle to the internal threadpool. */
         juce::ThreadPool& getThreadPool();
 
     private:

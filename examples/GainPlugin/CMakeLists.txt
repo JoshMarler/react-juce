@@ -36,7 +36,7 @@ juce_generate_juce_header(GainPlugin)
 # that will be built into the target. This is a standard CMake command.
 target_sources(GainPlugin PRIVATE PluginProcessor.cpp)
 
-# Add an explicit include path here so that Blueprint's EcmascriptEngine can find
+# Add an explicit include path here so that React-juce's EcmascriptEngine can find
 # the included Duktape source. You can optionally point this elsewhere if you'd like to
 # include a custom Duktape build.
 target_include_directories(GainPlugin PRIVATE react_juce/)

@@ -2,8 +2,8 @@
 import 'core-js/es6/set';
 import 'core-js/es6/map';
 
-import BlueprintBackend from './lib/BlueprintBackend';
-import BlueprintRenderer, { BlueprintTracedRenderer } from './lib/BlueprintRenderer';
+import Backend from './lib/Backend';
+import Renderer, { TracedRenderer } from './lib/Renderer';
 
 export { default as EventBridge } from './lib/EventBridge';
 
@@ -18,12 +18,12 @@ export * from './components/ListView';
 export * from './lib/SyntheticEvents';
 
 let __renderStarted = false;
-let __preferredRenderer = BlueprintRenderer;
+let __preferredRenderer = Renderer;
 
 export default {
 
   getRootContainer() {
-    return BlueprintBackend.getRootContainer();
+    return Backend.getRootContainer();
   },
 
   render(element: any, container: any, callback?: () => void | null | undefined) {
@@ -46,7 +46,7 @@ export default {
       throw new Error('Cannot enable method trace after initial render.');
     }
 
-    __preferredRenderer = BlueprintTracedRenderer;
+    __preferredRenderer = TracedRenderer;
   },
 
 };
