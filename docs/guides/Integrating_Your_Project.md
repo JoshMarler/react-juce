@@ -32,7 +32,7 @@ our JUCE project.
 
 ## Native Code
 
-Because we've already added the Blueprint module to our Projucer project, we can jump straight into the code on the native side. Part of the native Blueprint API is a particularly important class called `blueprint::ReactApplicationRoot`. This class is mostly just a `juce::Component`, and in that way you should think about using it the same way you might use a `juce::Slider` in your application.
+Because we've already added the Blueprint module to our Projucer project, we can jump straight into the code on the native side. Part of the native Blueprint API is a particularly important class called `reactjuce::ReactApplicationRoot`. This class is mostly just a `juce::Component`, and in that way you should think about using it the same way you might use a `juce::Slider` in your application.
 
 For example, let's suppose that we have our `MainComponent` or our `AudioProcessorPluginEditor` at the top of our project:
 
@@ -54,7 +54,7 @@ private:
 };
 ```
 
-Adding the `blueprint::ReactApplicationRoot` is easy, and should be familiar if you've worked with `juce::Component`s before:
+Adding the `reactjuce::ReactApplicationRoot` is easy, and should be familiar if you've worked with `juce::Component`s before:
 
 ```cpp
 class MainComponent   : public Component
@@ -79,7 +79,7 @@ public:
 
 private:
     //==============================================================================
-    blueprint::ReactApplicationRoot appRoot;
+    reactjuce::ReactApplicationRoot appRoot;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
@@ -121,7 +121,7 @@ public:
 
 private:
     //==============================================================================
-    blueprint::ReactApplicationRoot appRoot;
+    reactjuce::ReactApplicationRoot appRoot;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

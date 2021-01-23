@@ -47,15 +47,15 @@ auto result = engine->invoke("myFun", (int) myValue);
 
 ## Custom Native View
 Now the other option is to define a totally custom native view, and register it with React.
-To do this, you can make your own C++ class that inherits `blueprint::View`, and override the necessary methods.
-Basically, a `blueprint::View` is just a `juce::Component` with some extra goodies.
+To do this, you can make your own C++ class that inherits `reactjuce::View`, and override the necessary methods.
+Basically, a `reactjuce::View` is just a `juce::Component` with some extra goodies.
 
 For greater detail, see [Custom Native Components](Custom_Native_Components.md), but for a brief example, see below.
 
 ### Example
 
 ```cpp
-class MyCoolView : public blueprint::View {
+class MyCoolView : public reactjuce::View {
   void paint(juce::Graphics& g) override {
     // Do your own paint routine like usual.
     // You can also treat this whole class instance like your normal juce::Components. Add children, `addAndMakeVisible`,
