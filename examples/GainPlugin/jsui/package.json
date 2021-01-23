@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@babel/runtime-corejs3": "^7.11.2",
-    "react-juce": "^0.2.9",
+    "react-juce": "^0.2.10",
     "file-loader": "6.1.0",
     "react": "^16.13.1"
   },
