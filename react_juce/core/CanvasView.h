@@ -12,7 +12,7 @@
 #include "View.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
     /** The CanvasContext class is a C++ implementation/binding for the
      *  HTML Canvas API's CanvasRenderingContext2D object.
@@ -84,7 +84,7 @@ namespace blueprint
         ~CanvasContext() = default;
 
         /** Set the size of the CanvasContext. This is akin to setting the width and height attributes
-         *  on a HTML <canvas> element. If you have a blueprint::View or a juce::Component that wished
+         *  on a HTML <canvas> element. If you have a View or a juce::Component that wished
          *  to render a CanvasContext you should ensure CanvasContext::setSize() is called from the
          *  View/Component's resized function.
          */

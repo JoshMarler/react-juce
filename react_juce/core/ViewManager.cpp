@@ -16,7 +16,7 @@
 #include "TextShadowView.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     namespace

@@ -12,7 +12,7 @@
 #include <unordered_map>
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     //==============================================================================

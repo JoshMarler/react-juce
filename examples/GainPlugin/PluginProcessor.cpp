@@ -180,7 +180,7 @@ AudioProcessorEditor* GainPluginAudioProcessor::createEditor()
     File sourceDir = File(GAINPLUGIN_SOURCE_DIR);
     File bundle = sourceDir.getChildFile("jsui/build/js/main.js");
 
-    auto* editor = new blueprint::GenericEditor(*this, bundle);
+    auto* editor = new reactjuce::GenericEditor(*this, bundle);
 
     editor->setResizable(true, true);
     editor->setResizeLimits(400, 240, 400 * 2, 240 * 2);

@@ -24,7 +24,7 @@ namespace
 
 }
 
-namespace blueprint
+namespace reactjuce
 {
     //==============================================================================
     void ImageView::setProperty(const juce::Identifier& name, const juce::var& value) 

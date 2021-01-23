@@ -10,7 +10,7 @@
 #include "ScrollView.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
     namespace detail
     {

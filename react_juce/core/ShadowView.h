@@ -15,7 +15,7 @@
 #define BP_SPREAD_SETTER_PERCENT(setter) setter, setter##Percent
 #define BP_SPREAD_SETTER_AUTO(setter) BP_SPREAD_SETTER_PERCENT(setter), setter##Auto
 
-namespace blueprint
+namespace reactjuce
 {
 
     struct BoundsAnimator : public juce::Timer {

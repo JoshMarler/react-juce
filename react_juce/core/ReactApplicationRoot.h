@@ -15,7 +15,7 @@
 #include "ViewManager.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     //==============================================================================

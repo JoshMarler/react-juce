@@ -12,7 +12,7 @@
 #include <map>
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     // Internally we use a juce::Uuid for uniquely identifying views, but we

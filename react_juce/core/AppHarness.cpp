@@ -10,7 +10,7 @@
 #include "AppHarness.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     //==============================================================================

@@ -15,7 +15,7 @@
 #include "ShadowView.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
     /**
      * ViewManager manages the set of Views held by a "root" View/ReactApplicationRoot instance.

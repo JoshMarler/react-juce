@@ -10,19 +10,19 @@
 #include "View.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     namespace detail
     {
-        static juce::var getMouseEventRelatedTarget(const juce::MouseEvent& e, const blueprint::View& view)
+        static juce::var getMouseEventRelatedTarget(const juce::MouseEvent& e, const View& view)
         {
             juce::Component *topParent              = view.getTopLevelComponent();
             const juce::MouseEvent topRelativeEvent = e.getEventRelativeTo(topParent);
 
             juce::Component *componentUnderMouse = topParent->getComponentAt(topRelativeEvent.x, topRelativeEvent.y);
 
-            if (auto v = dynamic_cast<blueprint::View*>(componentUnderMouse))
+            if (auto v = dynamic_cast<View*>(componentUnderMouse))
                 return v->getViewId();
 
             // return null relatedTarget if event occurred from a non-View component.
@@ -30,7 +30,7 @@ namespace blueprint
         }
 
         /** A little helper for DynamicObject construction. */
-        static juce::var makeViewEventObject (const juce::NamedValueSet& props, const blueprint::View& view)
+        static juce::var makeViewEventObject (const juce::NamedValueSet& props, const View& view)
         {
             auto* o = new juce::DynamicObject();
 
@@ -45,7 +45,7 @@ namespace blueprint
         }
 
         /** Another little helper for DynamicObject construction. */
-        static juce::var makeViewEventObject (const juce::MouseEvent& me, const blueprint::View &view)
+        static juce::var makeViewEventObject (const juce::MouseEvent& me, const View &view)
         {
             // TODO: Get all of it!
             return makeViewEventObject({
@@ -58,7 +58,7 @@ namespace blueprint
         }
 
         /** And another little helper for DynamicObject construction. */
-        static juce::var makeViewEventObject (const juce::KeyPress& ke, const blueprint::View &view)
+        static juce::var makeViewEventObject (const juce::KeyPress& ke, const View &view)
         {
             // TODO: Get all of it!
             return makeViewEventObject({

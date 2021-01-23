@@ -9,7 +9,7 @@
 
 #pragma once
 
-namespace blueprint
+namespace reactjuce
 {
     namespace detail
     {

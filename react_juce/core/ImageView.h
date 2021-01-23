@@ -12,7 +12,7 @@
 #include "View.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
     //==============================================================================
     /** The ImageView class is a core view for drawing images within Blueprint's

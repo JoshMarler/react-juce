@@ -10,7 +10,7 @@
 #include "GenericEditor.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     //==============================================================================

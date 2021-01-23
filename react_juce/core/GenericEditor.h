@@ -13,7 +13,7 @@
 #include "ReactApplicationRoot.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     //==============================================================================

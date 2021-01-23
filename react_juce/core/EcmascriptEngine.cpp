@@ -87,7 +87,7 @@
 #include "EcmascriptEngine.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     namespace detail

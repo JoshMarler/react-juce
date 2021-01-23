@@ -14,7 +14,7 @@
 #include "ReactApplicationRoot.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     /** The AppHarness is a simple class which composes over your ReactApplicationRoot

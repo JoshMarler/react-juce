@@ -13,7 +13,7 @@
 #include "View.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     //==============================================================================

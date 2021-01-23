@@ -10,7 +10,7 @@
 #include "ReactApplicationRoot.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     ReactApplicationRoot::ReactApplicationRoot(std::shared_ptr<EcmascriptEngine> ee)

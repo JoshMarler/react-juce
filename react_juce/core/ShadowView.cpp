@@ -10,7 +10,7 @@
 #include "ShadowView.h"
 
 
-namespace blueprint
+namespace reactjuce
 {
 
     namespace
