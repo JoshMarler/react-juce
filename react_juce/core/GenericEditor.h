@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    blueprint_GenericEditor.h
+    GenericEditor.h
     Created: 3 Nov 2019 4:47:39pm
 
   ==============================================================================
@@ -17,22 +17,22 @@ namespace blueprint
 {
 
     //==============================================================================
-    /** The BlueprintGenericEditor is a default AudioProcessorEditor with preinstalled functionality
-     *  for working with Blueprint.
+    /** The Editor is a default AudioProcessorEditor with preinstalled functionality
+     *  for working with React.
      *
      *  It automatically manages a ReactApplicationRoot, registers some native methods
      *  and properties for interfacing with the editor, and provides some helpful
      *  development tools.
      */
-    class BlueprintGenericEditor
+    class GenericEditor
         : public juce::AudioProcessorEditor
         , public juce::AudioProcessorParameter::Listener
         , public juce::Timer
     {
     public:
         //==============================================================================
-        BlueprintGenericEditor (juce::AudioProcessor&, const juce::File&);
-        ~BlueprintGenericEditor() override;
+        GenericEditor (juce::AudioProcessor&, const juce::File&);
+        ~GenericEditor() override;
 
         //==============================================================================
         /** Implement the AudioProcessorParameter::Listener interface. */
@@ -63,7 +63,7 @@ namespace blueprint
 
         // We keep a map of the parameter IDs and their associated parameter pointers
         // to have a quick lookup in beforeBundleEvaluated where lambdas are called
-        // with a param ID 
+        // with a param ID
         std::map<juce::String, juce::AudioProcessorParameter*> parameters;
 
         //==============================================================================
@@ -86,7 +86,7 @@ namespace blueprint
         std::vector<ParameterReadout> paramReadouts;
 
         //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlueprintGenericEditor)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GenericEditor)
     };
 
 }

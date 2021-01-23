@@ -41,9 +41,12 @@
  #pragma clang diagnostic ignored "-Wunused-parameter"
  #pragma clang diagnostic ignored "-Wused-but-marked-unused"
  #pragma clang diagnostic ignored "-Wformat-nonliteral"
+ #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #pragma clang diagnostic ignored "-Wshadow"
  #if __clang_major__ > 10
   #pragma clang diagnostic ignored "-Wc++98-compat-extra-semi"
   #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+  #pragma clang diagnostic ignored "-Wshorten-64-to-32"
  #else
   #pragma clang diagnostic ignored "-Wconversion"
  #endif
@@ -150,7 +153,7 @@ namespace blueprint
     {
         Pimpl() { reset(); }
 
-        ~Pimpl()
+        ~Pimpl() override
         {
             // NB: Explicitly stopping the timer so as to avoid any late calls to derefenrencing a (cleaned up) context.
             stopTimer();

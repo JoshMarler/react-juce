@@ -23,7 +23,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
             0.8,
             String(),
             AudioProcessorParameter::genericParameter,
-            [](float value, int maxLength) {
+            [](float value, int /* maxLength */) {
                 return String(Decibels::gainToDecibels(value), 1) + "dB";
             },
             nullptr
@@ -44,10 +44,6 @@ GainPluginAudioProcessor::GainPluginAudioProcessor()
                        .withInput  ("Input",  AudioChannelSet::stereo(), true)
                        .withOutput ("Output", AudioChannelSet::stereo(), true)),
        params(*this, nullptr, JucePlugin_Name, createParameterLayout())
-{
-}
-
-GainPluginAudioProcessor::~GainPluginAudioProcessor()
 {
 }
 
@@ -100,21 +96,12 @@ int GainPluginAudioProcessor::getCurrentProgram()
     return 0;
 }
 
-void GainPluginAudioProcessor::setCurrentProgram (int index)
-{
-}
-
-const String GainPluginAudioProcessor::getProgramName (int index)
-{
-    return {};
-}
-
-void GainPluginAudioProcessor::changeProgramName (int index, const String& newName)
-{
-}
+void GainPluginAudioProcessor::setCurrentProgram (int /* index */) {}
+const String GainPluginAudioProcessor::getProgramName (int /* index */) { return {}; }
+void GainPluginAudioProcessor::changeProgramName (int /* index */, const String& /* newName */) {}
 
 //==============================================================================
-void GainPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void GainPluginAudioProcessor::prepareToPlay (double sampleRate, int /* samplesPerBlock */)
 {
     gain.reset(sampleRate, 0.02);
 }
@@ -149,7 +136,7 @@ bool GainPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 }
 #endif
 
-void GainPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
+void GainPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& /* midiMessages */)
 {
     ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
@@ -165,7 +152,7 @@ void GainPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
         buffer.clear (i, 0, buffer.getNumSamples());
 
     // Our intense dsp processing
-    gain.setValue(*params.getRawParameterValue("MainGain"));
+    gain.setTargetValue(*params.getRawParameterValue("MainGain"));
     gain.applyGain(buffer, buffer.getNumSamples());
 
     if (auto *muteParam  = dynamic_cast<AudioParameterBool*>(params.getParameter("MainMute")))
@@ -184,16 +171,16 @@ bool GainPluginAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* GainPluginAudioProcessor::createEditor()
 {
-    // The GainPlugin example uses the BlueprintGenericEditor, which is a default
-    // AudioProcessorEditor included in Blueprint that will automatically bootstrap
+    // The GainPlugin example uses the GenericEditor, which is a default
+    // AudioProcessorEditor provided that will automatically bootstrap
     // your React root, install some native method hooks for parameter interaction
     // if you provide an AudioProcessorValueTreeState, and manage hot reloading
-    // of the source bundle. You can always start with the BlueprintGenericEditor
+    // of the source bundle. You can always start with the GenericEditor
     // then switch to a custom editor when you need more explicit control.
     File sourceDir = File(GAINPLUGIN_SOURCE_DIR);
     File bundle = sourceDir.getChildFile("jsui/build/js/main.js");
 
-    auto* editor = new blueprint::BlueprintGenericEditor(*this, bundle);
+    auto* editor = new blueprint::GenericEditor(*this, bundle);
 
     editor->setResizable(true, true);
     editor->setResizeLimits(400, 240, 400 * 2, 240 * 2);
@@ -204,14 +191,14 @@ AudioProcessorEditor* GainPluginAudioProcessor::createEditor()
 }
 
 //==============================================================================
-void GainPluginAudioProcessor::getStateInformation (MemoryBlock& destData)
+void GainPluginAudioProcessor::getStateInformation (MemoryBlock& /* destData */)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 }
 
-void GainPluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void GainPluginAudioProcessor::setStateInformation (const void* /* data */, int /* sizeInBytes */)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
