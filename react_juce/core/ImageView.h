@@ -24,8 +24,8 @@ namespace reactjuce
         //==============================================================================
         static inline juce::Identifier sourceProp    = "source";
         static inline juce::Identifier placementProp = "placement";
-        static inline juce::Identifier onloadProp    = "onLoad";  // TODO: implement
-        static inline juce::Identifier onerrorProp   = "onError"; // TODO: implement
+        static inline juce::Identifier onloadProp    = "onLoad";
+        static inline juce::Identifier onerrorProp   = "onError";
 
         //==============================================================================
         ImageView() = default;
@@ -38,8 +38,9 @@ namespace reactjuce
     private:
         //==============================================================================
         void downloadImageAsync(const juce::String& source);
-        void sendOnErrorCallback();
-        void setDrawableImage(const juce::Image& image);
+        void sendOnLoadCallback();
+        void sendOnErrorCallback(const juce::String& message);
+        void setDrawableImage(const juce::Image& image, const int sourceHash);
         juce::Image loadImageFromFileURL(const juce::URL& url) const;
         juce::Image loadImageFromDataURL(const juce::String& source) const;
         std::unique_ptr<juce::ImageFileFormat> prepareImageFormat(const juce::String& mimeType) const;
