@@ -38,19 +38,25 @@ namespace reactjuce
         TextView() = default;
 
         //==============================================================================
-        /** Assembles a Font from the current node properties. */
-        juce::Font getFont()
+        /** Assembles a Font from properties. */
+        static juce::Font getFont(const juce::NamedValueSet &_props)
         {
-            float fontHeight = props.getWithDefault(fontSizeProp, 12.0f);
-            int textStyleFlags = props.getWithDefault(fontStyleProp, 0);
+            float fontHeight = _props.getWithDefault(fontSizeProp, 12.0f);
+            int textStyleFlags = _props.getWithDefault(fontStyleProp, 0);
 
             juce::Font f (fontHeight);
 
-            if (props.contains(fontFamilyProp))
-                f = juce::Font (props[fontFamilyProp], fontHeight, textStyleFlags);
+            if (_props.contains(fontFamilyProp))
+                f = juce::Font (_props[fontFamilyProp], fontHeight, textStyleFlags);
 
-            f.setExtraKerningFactor(props.getWithDefault(kerningFactorProp, 0.0));
+            f.setExtraKerningFactor(_props.getWithDefault(kerningFactorProp, 0.0));
             return f;
+        }
+
+        /** Assembles a Font from the current node properties. */
+        juce::Font getFont()
+        {
+            return getFont(props);
         }
 
         /** Constructs a TextLayout from all the children string values. */
