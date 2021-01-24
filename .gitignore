@@ -13,6 +13,9 @@ build
 examples/TestRunner/Builds
 examples/**/build
 
+# For vim users
+*.swp
+
 ._*
 *.mode1v3
 *.pbxuser
