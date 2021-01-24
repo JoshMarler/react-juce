@@ -36,9 +36,10 @@ export default {
     }
 
     // Update the root Container
-    // TODO: callback in __preferredRenderer.updateContainer is not optional.
-    // @ts-ignore
-    return __preferredRenderer.updateContainer(element, container._rootContainer, null, callback);
+    return __preferredRenderer.updateContainer(element, container._rootContainer, null,
+      // TODO: callback in __preferredRenderer.updateContainer is not optional.
+      // @ts-ignore
+      callback);
   },
 
   enableMethodTrace() {
