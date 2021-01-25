@@ -81,6 +81,7 @@
     #include "core/GenericEditor.cpp"
 #endif
 
+#include "core/CanvasView.cpp"
 #include "core/ReactApplicationRoot.cpp"
 #include "core/ShadowView.cpp"
 #include "core/TextShadowView.cpp"

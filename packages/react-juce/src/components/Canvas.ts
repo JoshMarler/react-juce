@@ -1,66 +1,164 @@
 import React, { Component } from 'react';
 
-export function bindCanvasContextProperties(ctx: any) {
-  Object.defineProperty(ctx, 'fillStyle', {
-    enumerable: false,
-    configurable: false,
-    get: function() {
-      return 'Not Supported';
-    },
-    set: function(value) {
-      this.__setFillStyle(value);
-    }
-  });
+// TODO: Need to explicitly bind this to members?
+export class CanvasRenderingContext {
+  private _drawCommands: any[];
 
-  Object.defineProperty(ctx, 'strokeStyle', {
-    enumerable: false,
-    configurable: false,
-    get: function() {
-      return 'Not Supported';
-    },
-    set: function(value) {
-      this.__setStrokeStyle(value);
-    }
-  });
+  constructor() {
+    this._drawCommands = [];
+  }
 
-  Object.defineProperty(ctx, 'lineWidth', {
-    enumerable: false,
-    configurable: false,
-    get: function() {
-      return 'Not Supported';
-    },
-    set: function(value) {
-      this.__setLineWidth(value);
-    }
-  });
+  reset() {
+    this._drawCommands = [];
+  }
 
-  Object.defineProperty(ctx, 'font', {
-    enumerable: false,
-    configurable: false,
-    get: function() {
-      return 'Not Supported';
-    },
-    set: function(value) {
-      this.__setFont(value);
-    }
-  });
+  getDrawCommands(): any[] {
+    return this._drawCommands;
+  }
 
-  Object.defineProperty(ctx, 'textAlign', {
-    enumerable: false,
-    configurable: false,
-    get: function() {
-      return 'Not Supported';
-    },
-    set: function(value) {
-      this.__setTextAlign(value);
-    }
-  });
+  //================================================================================
+  // Properties
+  //
+  // TODO: Once color string prop PR in switch fontStyle/strokeStyle to
+  //       colors.colorStringToAlphaHex(value)
+  //
+  // TODO: Support fillStyle/strokeStyle pattern.
+  // TODO: Support fillStyle/strokeStyle gradient.
+  set fillStyle(value: string) {
+    this._drawCommands.push(['setFillStyle', value]);
+  }
+
+  set strokeStyle(value: string) {
+    this._drawCommands.push(['setStrokeStyle', value]);
+  }
+
+  set lineWidth(value: number) {
+    this._drawCommands.push(['setLineWidth', value]);
+  }
+
+  set font(value: string) {
+    this._drawCommands.push(['setFont', value]);
+  }
+
+  set textAlign(value: string) {
+    this._drawCommands.push(['setTextAlign', value]);
+  }
+
+  //================================================================================
+  // Rect functions
+  fillRect(x: number, y: number, width: number, height: number): void {
+    this._drawCommands.push(['fillRect', x, y, width, height]);
+  }
+
+  strokeRect(x: number, y: number, width: number, height: number): void {
+    this._drawCommands.push(['strokeRect', x, y, width, height]);
+  }
+
+  strokeRoundedRect(x: number, y: number, width: number, height: number, cornerSize: number): void {
+    this._drawCommands.push(['strokeRoundedRect', x, y, width, height, cornerSize]);
+  }
+
+  fillRoundedRect(x: number, y: number, width: number, height: number, cornerSize: number): void {
+    this._drawCommands.push(['fillRoundedRect', x, y, width, height, cornerSize]);
+  }
+
+  clearRect(x: number, y: number, width: number, height: number): void {
+    this._drawCommands.push(['clearRect', x, y, width, height]);
+  }
+
+  //================================================================================
+  // Path functions
+  //
+  // TODO: Should we split things out into CanvasRenderingContextPath
+  //       so things like close()/stroke() are more obvious when looking at API.
+  //       If you look at the ts type definitions for CanvasRenderingContext2D
+  //       CanvasRenderingContext2D is composed of other objects like CanvasRenderingContextPath
+  //       which contains all path methods. What is the best way to do this in JS and share
+  //       a drawCommands instance?
+  beginPath(): void {
+    this._drawCommands.push(['beginPath']);
+  }
+
+  lineTo(x: number, y: number): void {
+    this._drawCommands.push(['lineTo', x, y]);
+  }
+
+  moveTo(x: number, y: number): void {
+    this._drawCommands.push(['moveTo', x, y]);
+  }
+
+  arc(x: number, y: number, radius: number, startAngle: number, endAngle: number): void {
+    //TODO: Add support for optional antiClockWise?: boolean arg
+    this._drawCommands.push(['arc', x, y, radius, startAngle, endAngle]);
+  }
+
+  quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): void {
+    this._drawCommands.push(['quadraticCurveTo', cpx, cpy, x, y]);
+  }
+
+  closePath(): void {
+    this._drawCommands.push(['close']);
+  }
+
+  stroke(): void {
+    this._drawCommands.push(['stroke']);
+  }
+
+  fill(): void {
+    this._drawCommands.push(['fill']);
+  }
+
+  //================================================================================
+  // Transform functions
+  rotate(angle: number): void {
+    this._drawCommands.push(['rotate', angle]);
+  }
+
+  translate(x: number, y: number): void {
+    this._drawCommands.push(['translate', x, y]);
+  }
+
+  setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void {
+    this._drawCommands.push(['setTransform', a, b, c, d, e, f]);
+  }
+
+  resetTransform(): void {
+    this._drawCommands.push(['resetTransform']);
+  }
+
+  //================================================================================
+  // Image functions
+  //
+  //TODO: Add support for other drawImage overloads.
+  //      Currently only support SVG string. What is correct
+  //      type to use here?
+  drawImage(image: string, dx: number, dy: number): void {
+      this._drawCommands.push(['drawImage', image, dx, dy]);
+  }
+
+  //================================================================================
+  // Text functions
+  strokeText(text: string, x: number, y: number, maxWidth?: number): void {
+    if (maxWidth === undefined)
+      this._drawCommands.push(['strokeText', text, x, y]);
+    else
+      this._drawCommands.push(['strokeText', text, x, y, maxWidth]);
+  }
+
+  fillText(text: string, x: number, y: number, maxWidth?: number): void {
+    if (maxWidth === undefined)
+      this._drawCommands.push(['fillText', text, x, y]);
+    else
+      this._drawCommands.push(['fillText', text, x, y, maxWidth]);
+  }
+
+  //================================================================================
 }
 
 export interface CanvasProps {
+  onDraw: (ctx: CanvasRenderingContext) => void;
   onMeasure?: (e: any) => void;
-  onDraw: (ctx: CanvasRenderingContext2D) => void;
-  autoclear?: boolean;
+  stateful?: boolean;
 }
 
 interface CanvasState {
@@ -69,9 +167,12 @@ interface CanvasState {
 }
 
 export class Canvas extends Component<CanvasProps, CanvasState> {
+  private _ctx: CanvasRenderingContext;
+
   constructor(props: CanvasProps) {
     super(props);
 
+    this._ctx = new CanvasRenderingContext();
     this._onMeasure = this._onMeasure.bind(this);
     this._onDraw = this._onDraw.bind(this);
 
@@ -92,25 +193,22 @@ export class Canvas extends Component<CanvasProps, CanvasState> {
     }
   }
 
-  _onDraw(ctx: CanvasRenderingContext2D) {
+  _onDraw(): any[] {
     if (typeof this.props.onDraw === 'function') {
-      bindCanvasContextProperties(ctx);
+      this._ctx.reset();
 
-      if (this.props.autoclear) {
-        ctx.clearRect(0, 0, this.state.width, this.state.height);
-      }
-
-      this.props.onDraw(ctx);
+      this.props.onDraw(this._ctx);
+      return this._ctx.getDrawCommands();
     }
+
+    return [];
   }
 
   render() {
-    //TODO: Check whether need to use below arrow function for "this" binding
-    //      is a bug in duktape. Possible this only occurs on linux. Does not
-    //      appear to occur on mac.
     return React.createElement('CanvasView', Object.assign({}, this.props, {
-      onDraw: (ctx: CanvasRenderingContext2D) => { this._onDraw(ctx) },
+      onDraw: () => { return this._onDraw(); },
       onMeasure: (e: any) => { this._onMeasure(e)}
     }), this.props.children);
   }
 }
+

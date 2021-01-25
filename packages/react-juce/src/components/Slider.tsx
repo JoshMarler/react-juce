@@ -1,7 +1,7 @@
 import React, {Component, PropsWithChildren} from 'react';
 import invariant from 'invariant';
 
-import {Canvas} from './Canvas';
+import {Canvas, CanvasRenderingContext} from './Canvas';
 import {View} from './View';
 import {SyntheticMouseEvent} from '../lib/SyntheticEvents';
 
@@ -36,7 +36,7 @@ const _rotaryGestureMap = (mouseDownX: number,
 
 const _drawLinearHorizontalSlider = (trackColor: string,
                                      fillColor: string) => {
-  return (ctx: CanvasRenderingContext2D,
+  return (ctx: CanvasRenderingContext,
           width: number,
           height: number,
           value: number): void => {
@@ -62,7 +62,7 @@ const _drawLinearHorizontalSlider = (trackColor: string,
 
 const _drawLinearVerticalSlider = (trackColor: string,
                                    fillColor: string) => {
-  return (ctx: CanvasRenderingContext2D,
+  return (ctx: CanvasRenderingContext,
           width: number,
           height: number,
           value: number): void => {
@@ -148,7 +148,7 @@ export interface SliderProps {
   sensitivity?: number
   onChange?: (value: number) => void
   onDraw?: (
-    ctx: CanvasRenderingContext2D,
+    ctx: CanvasRenderingContext,
     width: number,
     height: number,
     value: number
@@ -277,7 +277,7 @@ export class Slider extends Component<PropsWithChildren<SliderProps | any>, Slid
     }
   }
 
-  _onDraw(ctx: CanvasRenderingContext2D) {
+  _onDraw(ctx: CanvasRenderingContext) {
     const value = this.props.hasOwnProperty('value') ? this.props.value : this.state.value;
 
     if (typeof this.props.onDraw === 'function') {
@@ -298,7 +298,7 @@ export class Slider extends Component<PropsWithChildren<SliderProps | any>, Slid
         onMouseDown={this._onMouseDown}
         onMouseDrag={this._onMouseDrag}
       >
-        <Canvas autoclear={true} onDraw={this._onDraw} {...styles.canvas} />
+        <Canvas onDraw={this._onDraw} {...styles.canvas} />
         {this.props.children}
       </View>
     )
