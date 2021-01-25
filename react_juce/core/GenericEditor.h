@@ -47,6 +47,9 @@ namespace reactjuce
         /** Override the component interface. */
         void resized() override;
         void paint (juce::Graphics&) override;
+        
+        /** Public getter to access appRoot instance */
+        ReactApplicationRoot& getReactAppRoot() { return appRoot; }
 
     private:
         //==============================================================================

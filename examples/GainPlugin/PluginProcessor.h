@@ -15,7 +15,7 @@
 //==============================================================================
 /**
 */
-class GainPluginAudioProcessor  : public AudioProcessor
+class GainPluginAudioProcessor  : public AudioProcessor, public Timer
 {
 public:
     //==============================================================================
@@ -59,8 +59,10 @@ public:
 
 private:
     //==============================================================================
+    reactjuce::ReactApplicationRoot* appRoot;
     AudioProcessorValueTreeState params;
     LinearSmoothedValue<float> gain;
+    std::atomic<float> gainPeakValue;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GainPluginAudioProcessor)
