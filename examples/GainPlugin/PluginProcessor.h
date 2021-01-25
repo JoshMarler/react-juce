@@ -56,6 +56,8 @@ public:
 
     //==============================================================================
     AudioProcessorValueTreeState& getValueTreeState() { return params; }
+    
+    void timerCallback() override;
 
 private:
     //==============================================================================
