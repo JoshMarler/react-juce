@@ -10,7 +10,7 @@
   "types": "dist/index.d.ts",
   "files": [
     "dist/index.js",
-    "types": "dist/index.d.ts"
+    "dist/index.d.ts"
   ],
   "author": "Nick Thompson",
   "devDependencies": {
