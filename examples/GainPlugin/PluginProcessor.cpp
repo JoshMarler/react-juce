@@ -166,6 +166,9 @@ void GainPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
         if (muted)
             buffer.applyGain(0.0f);
     }
+    
+    // Read current block gain peak value
+    gainPeakValue = buffer.getMagnitude (0, buffer.getNumSamples());
 }
 
 //==============================================================================
