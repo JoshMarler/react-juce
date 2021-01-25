@@ -747,10 +747,10 @@ namespace reactjuce
                                 }
 
                                 // Clean the result and the stash off the top of the stack
+                                juce::var result = readVarFromDukStack(sharedContext, -1);
                                 duk_pop_2(rawPtr);
 
-                                // Callbacks don't really need return args?
-                                return juce::var();
+                                return result;
                             }
                         };
 
