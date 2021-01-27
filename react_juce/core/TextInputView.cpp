@@ -161,50 +161,8 @@ namespace blueprint
         const int just = props.getWithDefault(justificationProp, 1);
         textInput.setJustification(just);
 
-        juce::String hexBackgroundColor = props.getWithDefault(backgroundColorProp, "00000000");
-        juce::Colour backgroundColour = juce::Colour::fromString(hexBackgroundColor);
-        textInput.setColour(juce::TextEditor::ColourIds::backgroundColourId, backgroundColour);
-
-        if (name == outlineColorProp)
-        {
-            if (!value.isString())
-                throw std::invalid_argument("Invalid prop value. Prop \'outline-color\' must be a color string.");
-            juce::String hexOutlineColor = value;
-            juce::Colour outlineColor = juce::Colour::fromString(hexOutlineColor);
-            textInput.setColour(juce::TextEditor::ColourIds::outlineColourId, outlineColor);
-        }
-        if (name == focusedOutlineColorProp)
-        {
-            if (!value.isString())
-                throw std::invalid_argument("Invalid prop value. Prop \'focused-outline-color\' must be a color string.");
-            juce::String hexFocusedOutlineColor = value;
-            juce::Colour focusedOutlineColor = juce::Colour::fromString(hexFocusedOutlineColor);
-            textInput.setColour(juce::TextEditor::ColourIds::focusedOutlineColourId, focusedOutlineColor);
-        }
-        if (name == highlightedTextColorProp)
-        {
-            if (!value.isString())
-                throw std::invalid_argument("Invalid prop value. Prop \'highlighted-text-color\' must be a color string.");
-            juce::String hexHighlightedTextColor = value;
-            juce::Colour highlightedTextColor = juce::Colour::fromString(hexHighlightedTextColor);
-            textInput.setColour(juce::TextEditor::ColourIds::highlightedTextColourId, highlightedTextColor);
-        }
-        if (name == highlightColorProp)
-        {
-            if (!value.isString())
-                throw std::invalid_argument("Invalid prop value. Prop \'highlight-color\' must be a color string.");
-            juce::String hexHighlightColor = value;
-            juce::Colour highlightColor = juce::Colour::fromString(hexHighlightColor);
-            textInput.setColour(juce::TextEditor::ColourIds::highlightColourId, highlightColor);
-        }
-        if (name == caretColorProp)
-        {
-            if (!value.isString())
-                throw std::invalid_argument("Invalid prop value. Prop \'caret-color\' must be a color string.");
-            juce::String hexCaretColor = value;
-            juce::Colour caretColor = juce::Colour::fromString(hexCaretColor);
-            textInput.setColour(juce::CaretComponent::ColourIds::caretColourId, caretColor);
-        }
+        if (isTextEditorColorProp(name))
+            setTextEditorColorProp(name, value);
     }
 
     void TextInputView::resized()
@@ -217,4 +175,33 @@ namespace blueprint
     {
         return TextView::getFont(props);
     }
+
+    bool TextInputView::isTextEditorColorProp(const juce::Identifier &textEditorColorProp)
+    {
+        auto it = textEditorColourIdsByProp.find(textEditorColorProp);
+        bool found = (it != textEditorColourIdsByProp.end());
+        return found;
+    }
+
+    void TextInputView::setTextEditorColorProp(const juce::Identifier &textEditorColorProp, const juce::var &value)
+    {
+        if (!value.isString())
+        {
+            std::string propName = textEditorColorProp.toString().toStdString();
+            std::string message = "Invalid prop value. Prop \'" + propName + "\' must be a color string.";
+            throw std::invalid_argument(message);
+        }
+        juce::String hexColor = value;
+        juce::Colour color = juce::Colour::fromString(hexColor);
+        textInput.setColour(textEditorColourIdsByProp.at(textEditorColorProp), color);
+    }
+
+    const std::map<juce::Identifier, int> TextInputView::textEditorColourIdsByProp = {
+        { backgroundColorProp,      juce::TextEditor::ColourIds::backgroundColourId },
+        { outlineColorProp,         juce::TextEditor::ColourIds::outlineColourId },
+        { focusedOutlineColorProp,  juce::TextEditor::ColourIds::focusedOutlineColourId },
+        { highlightedTextColorProp, juce::TextEditor::ColourIds::highlightedTextColourId },
+        { highlightColorProp,       juce::TextEditor::ColourIds::highlightColourId },
+        { caretColorProp,           juce::CaretComponent::ColourIds::caretColourId }
+    };
 }

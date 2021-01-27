@@ -106,9 +106,12 @@ namespace blueprint
     private:
         //==============================================================================
         juce::Font getFont();
+        static bool isTextEditorColorProp(const juce::Identifier &textEditorColorProp);
+        void setTextEditorColorProp(const juce::Identifier &textEditorColorProp, const juce::var &value);
 
         //==============================================================================
         TextInput textInput;
+        static const std::map<juce::Identifier, int> textEditorColourIdsByProp;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextInputView)
