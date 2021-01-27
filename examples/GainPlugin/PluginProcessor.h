@@ -61,7 +61,6 @@ public:
 
 private:
     //==============================================================================
-    reactjuce::ReactApplicationRoot* appRoot;
     AudioProcessorValueTreeState params;
     LinearSmoothedValue<float> gain;
     std::atomic<float> gainPeakValue;

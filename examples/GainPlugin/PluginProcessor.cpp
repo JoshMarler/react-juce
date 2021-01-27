@@ -195,8 +195,6 @@ AudioProcessorEditor* GainPluginAudioProcessor::createEditor()
     editor->getConstrainer()->setFixedAspectRatio(400.0 / 240.0);
     editor->setSize (400, 240);
     
-    // Get appRoot reference created by GenericEditor in order to dispatch events
-    appRoot = &editor->getReactAppRoot();
     // Start timer to dispatch gainPeakValues event to update Meter values
     Timer::startTimer(100);
 
@@ -205,12 +203,15 @@ AudioProcessorEditor* GainPluginAudioProcessor::createEditor()
 
 void GainPluginReactAudioProcessor::timerCallback()
 {
-    // Dispatch gainPeakValues event used by Meter React component
-    appRoot->dispatchEvent(
-        "gainPeakValues",
-        static_cast<float>(gainPeakValue),
-        static_cast<float>(gainPeakValue)
-    );
+    if (auto* editor = dynamic_cast<reactjuce::GenericEditor*>(getActiveEditor()))
+    {
+        // Dispatch gainPeakValues event used by Meter React component
+        editor->getReactAppRoot().dispatchEvent(
+            "gainPeakValues",
+            static_cast<float>(gainPeakValue),
+            static_cast<float>(gainPeakValue)
+        );
+    }
 }
 
 //==============================================================================
