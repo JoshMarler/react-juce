@@ -13,14 +13,7 @@ namespace reactjuce
 {
     namespace detail
     {
-        static juce::var makeErrorObject(const juce::String& errorName, const juce::String& errorMessage)
-        {
-            auto* o = new juce::DynamicObject();
-
-            o->setProperty("name", errorName);
-            o->setProperty("message", errorMessage);
-
-            return juce::var(o);
-        }
+        // Constructs a generic error object to pass through to JS
+        juce::var makeErrorObject(const juce::String& errorName, const juce::String& errorMessage);
     }
 }
