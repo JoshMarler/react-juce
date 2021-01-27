@@ -1,6 +1,6 @@
 {
   "name": "react-juce",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "Write cross-platform native apps with React.js and JUCE.",
   "repository": {
     "type": "git",
