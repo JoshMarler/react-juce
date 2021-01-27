@@ -15,7 +15,7 @@
 //==============================================================================
 /**
 */
-class GainPluginAudioProcessor  : public AudioProcessor, public Timer
+class GainPluginAudioProcessor  : public AudioProcessor, public juce::Timer
 {
 public:
     //==============================================================================
