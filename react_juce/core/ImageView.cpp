@@ -35,56 +35,34 @@ namespace reactjuce
         {
             const juce::String source = value.toString();
             const int sourceHash      = juce::DefaultHashFunctions::generateHash(source, 1024);
-            const juce::URL sourceURL = source;
 
             // No need to recalculate the image if it's already in the ImageCache.
             const juce::Image& cachedImage = juce::ImageCache::getFromHashCode(sourceHash);
             if (cachedImage.isValid())
+                return setDrawableImage(cachedImage, sourceHash);
+
+            try
             {
-                setDrawableImage(cachedImage, sourceHash);
+                const juce::URL sourceURL = source;
+
+                // Web images are downloaded in a separate thread to avoid blocking.
+                if (isWellFormedURL(sourceURL) && sourceURL.isProbablyAWebsiteURL(sourceURL.toString(false)))
+                    return downloadImageAsync(source); 
+                    
+                if (sourceURL.isLocalFile())
+                    return setDrawableImage(loadImageFromFileURL(sourceURL), sourceHash);
+                    
+                if (source.startsWith("data:image/")) // juce::URL does not currently handle Data URLs
+                    return setDrawableImage(loadImageFromDataURL(source), sourceHash);
+
+                // Last case left, possibly SVG/Image data.
+                return setDrawableData(source);
             }
-            else
+            catch (const std::exception& l)
             {
-                try
-                {
-                    if (isWellFormedURL(sourceURL))
-                    {
-                        // Web images are downloaded in a separate thread to avoid blocking.
-                        if (sourceURL.isProbablyAWebsiteURL(sourceURL.toString(false)))
-                        {
-                            downloadImageAsync(source); 
-                        }
-                        else if (sourceURL.isLocalFile())
-                        {
-                            setDrawableImage(loadImageFromFileURL(sourceURL), sourceHash);
-                        }
-                        else
-                        {
-                            const juce::String errorString = "Unsupported image URL: " + source;
-                            throw std::logic_error(errorString.toStdString());
-                        }
-                    }
-                    else if (source.startsWith("data:image/")) // juce::URL does not currently handle Data URLs
-                    {
-                        setDrawableImage(loadImageFromDataURL(source), sourceHash);
-                    }
-                    else // If not a URL treat source prop as inline SVG/Image data
-                    {
-                        drawable = std::unique_ptr<juce::Drawable>(
-                            juce::Drawable::createFromImageData(
-                                source.toRawUTF8(),
-                                source.getNumBytesAsUTF8()
-                            )
-                        );
-                        sendOnLoadCallback();
-                    }
-                }
-                catch (const std::exception& l)
-                {
-                    // Every image format can throw an exception that we catch here
-                    // to send an onError callback to the React component.
-                    sendOnErrorCallback(juce::String(l.what()));
-                }
+                // Every image format can throw an exception that we catch here
+                // to send an onError callback to the React component.
+                return sendOnErrorCallback(juce::String(l.what()));
             }
         }
     }
@@ -139,6 +117,27 @@ namespace reactjuce
         drawableImg->setImage(image);
         drawable = std::move(drawableImg);
 
+        repaint();
+        sendOnLoadCallback();
+    }
+
+    void ImageView::setDrawableData(const juce::String& source)
+    {
+        // If not a URL treat source prop as inline SVG/Image data
+        drawable = std::unique_ptr<juce::Drawable>(
+            juce::Drawable::createFromImageData(
+                source.toRawUTF8(),
+                source.getNumBytesAsUTF8()
+            )
+        );
+
+        if (drawable == nullptr)
+        {
+            const juce::String errorString = "Unsupported image URL: " + source;
+            throw std::logic_error(errorString.toStdString());
+        }
+        
+        repaint();
         sendOnLoadCallback();
     }
 
@@ -158,12 +157,12 @@ namespace reactjuce
         {
             appRoot->getThreadPool().addJob([this, source] ()
             {
+                shouldDownloadImage = false;
                 juce::MemoryBlock mb;
 
                 // Did we reach the URL?
                 if (!juce::URL(source).readEntireBinaryStream(mb)) 
                 {
-                    shouldDownloadImage = true;
                     juce::MessageManager::callAsync([this]() { 
                         sendOnErrorCallback("Could not reach URL"); 
                     });
@@ -181,9 +180,6 @@ namespace reactjuce
                         {
                             auto sourceHash = juce::DefaultHashFunctions::generateHash(source, 1024);
                             setDrawableImage(image, sourceHash);
-                            repaint();
-
-                            shouldDownloadImage = false;
                         }
                     });
                 }

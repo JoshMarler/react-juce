@@ -41,6 +41,7 @@ namespace reactjuce
         void sendOnLoadCallback();
         void sendOnErrorCallback(const juce::String& message);
         void setDrawableImage(const juce::Image& image, const int sourceHash);
+        void setDrawableData(const juce::String& source);
         juce::Image loadImageFromFileURL(const juce::URL& url) const;
         juce::Image loadImageFromDataURL(const juce::String& source) const;
         std::unique_ptr<juce::ImageFileFormat> prepareImageFormat(const juce::String& mimeType) const;
