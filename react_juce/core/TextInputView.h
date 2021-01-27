@@ -36,7 +36,7 @@ namespace blueprint
     {
     public:
         //==============================================================================
-        explicit TextInput(const juce::NamedValueSet *_props)
+        explicit TextInput(const juce::NamedValueSet &_props)
             :
             props(_props),
             controlled(false),
@@ -61,7 +61,7 @@ namespace blueprint
         void invokeChangeEventIfNeeded();
 
         //==============================================================================
-        const juce::NamedValueSet *props;
+        const juce::NamedValueSet &props;
         bool controlled;
         bool insertedAsControlledValue;
 
@@ -84,10 +84,10 @@ namespace blueprint
         static const inline juce::Identifier colorProp = "color";
         static const inline juce::Identifier justificationProp = "justification";
 
-        static inline juce::Identifier placeholderProp = "placeholder";
-        static inline juce::Identifier placeholderColorProp = "placeholder-color";
-        static inline juce::Identifier maxlengthProp = "maxlength";
-        static inline juce::Identifier readonly = "readonly";
+        static const inline juce::Identifier placeholderProp = "placeholder";
+        static const inline juce::Identifier placeholderColorProp = "placeholder-color";
+        static const inline juce::Identifier maxlengthProp = "maxlength";
+        static const inline juce::Identifier readonly = "readonly";
 
         static const inline juce::Identifier outlineColorProp = "outline-color";
         static const inline juce::Identifier focusedOutlineColorProp = "focused-outline-color";
@@ -95,13 +95,12 @@ namespace blueprint
         static const inline juce::Identifier highlightColorProp = "highlight-color";
         static const inline juce::Identifier caretColorProp = "caret-color";
 
-        static inline juce::Identifier onInputProp = "onInput";
-        static inline juce::Identifier onChangeProp = "onChange";
+        static const inline juce::Identifier onInputProp = "onInput";
+        static const inline juce::Identifier onChangeProp = "onChange";
 
         //==============================================================================
         TextInputView();
         void setProperty(const juce::Identifier &name, const juce::var &value) override;
-        void paint(juce::Graphics &g) override;
         void resized() override;
 
     private:

@@ -39,17 +39,17 @@ namespace reactjuce
 
         //==============================================================================
         /** Assembles a Font from properties. */
-        static juce::Font getFont(const juce::NamedValueSet &_props)
+        static juce::Font getFont(const juce::NamedValueSet &fontProps)
         {
-            float fontHeight = _props.getWithDefault(fontSizeProp, 12.0f);
-            int textStyleFlags = _props.getWithDefault(fontStyleProp, 0);
+            const float fontHeight = fontProps.getWithDefault(fontSizeProp, 12.0f);
+            const int textStyleFlags = fontProps.getWithDefault(fontStyleProp, 0);
 
             juce::Font f (fontHeight);
 
-            if (_props.contains(fontFamilyProp))
-                f = juce::Font (_props[fontFamilyProp], fontHeight, textStyleFlags);
+            if (fontProps.contains(fontFamilyProp))
+                f = juce::Font (fontProps[fontFamilyProp], fontHeight, textStyleFlags);
 
-            f.setExtraKerningFactor(_props.getWithDefault(kerningFactorProp, 0.0));
+            f.setExtraKerningFactor(fontProps.getWithDefault(kerningFactorProp, 0.0));
             return f;
         }
 

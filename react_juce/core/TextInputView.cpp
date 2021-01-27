@@ -64,11 +64,11 @@ namespace blueprint
         }
 
         // Invoke JavaScript's `input` event.
-        if ((*props).contains(TextInputView::onInputProp) && (*props)[TextInputView::onInputProp].isMethod())
+        if (props.contains(TextInputView::onInputProp) && props[TextInputView::onInputProp].isMethod())
         {
             std::array<juce::var, 1> args{{detail::makeInputEventObject(newValue)}};
             juce::var::NativeFunctionArgs nfArgs(juce::var(), args.data(), static_cast<int>(args.size()));
-            std::invoke((*props)[TextInputView::onInputProp].getNativeFunction(), nfArgs);
+            std::invoke(props[TextInputView::onInputProp].getNativeFunction(), nfArgs);
         }
 
         dirty = true;
@@ -97,11 +97,11 @@ namespace blueprint
         if (dirty)
         {
             // Invoke JavaScript's `change` event.
-            if ((*props).contains(TextInputView::onChangeProp) && (*props)[TextInputView::onChangeProp].isMethod())
+            if (props.contains(TextInputView::onChangeProp) && props[TextInputView::onChangeProp].isMethod())
             {
                 std::array<juce::var, 1> args{{detail::makeChangeEventObject(getText())}};
                 juce::var::NativeFunctionArgs nfArgs(juce::var(), args.data(), static_cast<int>(args.size()));
-                std::invoke((*props)[TextInputView::onChangeProp].getNativeFunction(), nfArgs);
+                std::invoke(props[TextInputView::onChangeProp].getNativeFunction(), nfArgs);
             }
             dirty = false;
         }
@@ -110,7 +110,7 @@ namespace blueprint
     //==============================================================================
 
     TextInputView::TextInputView()
-        : textInput(&props)
+        : textInput(props)
     {
         addAndMakeVisible(textInput);
         textInput.addListener(&textInput);
@@ -158,7 +158,7 @@ namespace blueprint
         juce::Colour colour = juce::Colour::fromString(hexColor);
         textInput.applyColourToAllText(colour);
 
-        int just = props.getWithDefault(justificationProp, 1);
+        const int just = props.getWithDefault(justificationProp, 1);
         textInput.setJustification(just);
 
         juce::String hexBackgroundColor = props.getWithDefault(backgroundColorProp, "00000000");
@@ -207,15 +207,10 @@ namespace blueprint
         }
     }
 
-    void TextInputView::paint(juce::Graphics &g)
-    {
-        View::paint(g);
-    }
-
     void TextInputView::resized()
     {
         View::resized();
-        textInput.setBounds(0, 0, getWidth(), getHeight());
+        textInput.setBounds(getLocalBounds());
     }
 
     juce::Font TextInputView::getFont()
