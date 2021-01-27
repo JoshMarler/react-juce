@@ -1,22 +1,15 @@
-import AnimatedFlexBoxExample from './AnimatedFlexBox';
-import Label from './Label';
-import Meter from './Meter';
-import ParameterToggleButton from './ParameterToggleButton'
-import ParameterSlider from './ParameterSlider'
+import AnimatedFlexBoxExample from "./AnimatedFlexBox";
+import Label from "./Label";
+import Meter from "./Meter";
+import ParameterToggleButton from "./ParameterToggleButton";
+import ParameterSlider from "./ParameterSlider";
 
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
-import {
-  Canvas,
-  Image,
-  Text,
-  View,
-  Slider,
-} from 'react-juce';
-
+import { Canvas, Image, Text, View, Slider } from "react-juce";
 
 function animatedDraw(ctx) {
-  let now = (Date.now() / 10);
+  let now = Date.now() / 10;
   let width = now % 100;
   let red = Math.sqrt(width / 100) * 255;
   let hex = Math.floor(red).toString(16);
@@ -28,15 +21,13 @@ function animatedDraw(ctx) {
 }
 
 // Example of callback for image onLoad/onError
-function imageLoaded()
-{
-    console.log("Image is loaded!");
+function imageLoaded() {
+  console.log("Image is loaded!");
 }
 
-function imageError(error)
-{
-    console.log(error.name);
-    console.log(error.message);
+function imageError(error) {
+  console.log(error.name);
+  console.log(error.message);
 }
 
 class App extends Component {
@@ -45,13 +36,13 @@ class App extends Component {
     this._onMuteToggled = this._onMuteToggled.bind(this);
 
     this.state = {
-      muted: false
-    }
+      muted: false,
+    };
   }
 
   _onMuteToggled(toggled) {
     this.setState({
-      muted: toggled
+      muted: toggled,
     });
   }
 
@@ -63,20 +54,26 @@ class App extends Component {
     //   </View>
     // );
 
-    const muteBackgroundColor = this.state.muted ? 'ff66FDCF' : 'ff17191f';
-    const muteTextColor = this.state.muted ? 'ff17191f' : 'ff66FDCF';
+    const muteBackgroundColor = this.state.muted ? "ff66FDCF" : "ff17191f";
+    const muteTextColor = this.state.muted ? "ff17191f" : "ff66FDCF";
 
-    const sliderFillColor  = 'ff66FDCF';
-    const sliderTrackColor = 'ff626262';
+    const sliderFillColor = "ff66FDCF";
+    const sliderTrackColor = "ff626262";
 
-    const logo_url = "https://raw.githubusercontent.com/nick-thompson/blueprint/master/examples/GainPlugin/jsui/src/logo.png";
+    const logo_url =
+      "https://raw.githubusercontent.com/nick-thompson/blueprint/master/examples/GainPlugin/jsui/src/logo.png";
     //const logo_png = require('./logo.png');
     //const logo_svg = require('./logo.svg');
 
     return (
       <View {...styles.container}>
         <View {...styles.content}>
-          <Image source={logo_url} onLoad={imageLoaded} onError={imageError} {...styles.logo} />
+          <Image
+            source={logo_url}
+            onLoad={imageLoaded}
+            onError={imageError}
+            {...styles.logo}
+          />
           <ParameterSlider
             paramId="MainGain"
             onDraw={Slider.drawRotary(sliderTrackColor, sliderFillColor)}
@@ -85,7 +82,7 @@ class App extends Component {
           >
             <Label paramId="MainGain" {...styles.label} />
           </ParameterSlider>
-          <Meter {...styles.meter} />	
+          <Meter {...styles.meter} />
           <Canvas {...styles.canvas} animate={true} onDraw={animatedDraw} />
           <ParameterToggleButton
             paramId="MainMute"
@@ -105,41 +102,41 @@ class App extends Component {
 
 const styles = {
   container: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'ff17191f',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: "100%",
+    height: "100%",
+    backgroundColor: "ff17191f",
+    justifyContent: "center",
+    alignItems: "center",
   },
   content: {
     flex: 1.0,
-    flexDirection: 'column',
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    flexDirection: "column",
+    justifyContent: "space-around",
+    alignItems: "center",
     padding: 24.0,
     maxWidth: 600,
     aspectRatio: 400.0 / 240.0,
   },
   logo: {
     flex: 0.0,
-    width: '80%',
+    width: "80%",
     aspectRatio: 281.6 / 35.0,
     placement: Image.PlacementFlags.centred,
   },
   knob: {
     minWidth: 100.0,
     minHeight: 100.0,
-    width: '55%',
-    height: '55%',
+    width: "55%",
+    height: "55%",
     marginTop: 15,
     marginBottom: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   label: {
     flex: 1.0,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     interceptClickEvents: false,
   },
   meter: {
@@ -154,22 +151,22 @@ const styles = {
     marginTop: 10,
   },
   mute_button: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 5.0,
     borderWidth: 2.0,
-    borderColor: 'ff66FDCF',
+    borderColor: "ff66FDCF",
     marginTop: 10,
     minWidth: 30.0,
     minHeight: 30.0,
-    width: '20%',
-    height: '17.5%',
+    width: "20%",
+    height: "17.5%",
   },
   mute_button_text: {
     fontSize: 20.0,
     lineSpacing: 1.6,
     fontStyle: Text.FontStyleFlags.bold,
-  }
+  },
 };
 
 export default App;

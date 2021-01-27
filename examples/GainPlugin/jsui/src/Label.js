@@ -1,10 +1,5 @@
-import React, { Component } from 'react';
-import {
-  EventBridge,
-  Text,
-  View,
-} from 'react-juce';
-
+import React, { Component } from "react";
+import { EventBridge, Text, View } from "react-juce";
 
 class Label extends Component {
   constructor(props) {
@@ -13,19 +8,31 @@ class Label extends Component {
     this._onParameterValueChange = this._onParameterValueChange.bind(this);
 
     this.state = {
-      label: '',
+      label: "",
     };
   }
 
   componentDidMount() {
-    EventBridge.addListener('parameterValueChange', this._onParameterValueChange);
+    EventBridge.addListener(
+      "parameterValueChange",
+      this._onParameterValueChange
+    );
   }
 
   componentWillUnmount() {
-    EventBridge.removeListener('parameterValueChange', this._onParameterValueChange);
+    EventBridge.removeListener(
+      "parameterValueChange",
+      this._onParameterValueChange
+    );
   }
 
-  _onParameterValueChange(index, paramId, defaultValue, currentValue, stringValue) {
+  _onParameterValueChange(
+    index,
+    paramId,
+    defaultValue,
+    currentValue,
+    stringValue
+  ) {
     if (paramId === this.props.paramId) {
       this.setState({
         label: stringValue,
@@ -36,9 +43,7 @@ class Label extends Component {
   render() {
     return (
       <View {...this.props}>
-        <Text {...styles.labelText}>
-          {this.state.label}
-        </Text>
+        <Text {...styles.labelText}>{this.state.label}</Text>
       </View>
     );
   }
@@ -46,7 +51,7 @@ class Label extends Component {
 
 const styles = {
   labelText: {
-    color: 'ff626262',
+    color: "ff626262",
     fontSize: 16.0,
     lineSpacing: 1.6,
   },

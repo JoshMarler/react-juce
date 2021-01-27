@@ -8,12 +8,12 @@ The most fundamental of the core React-JUCE components, `View` is a container th
 ## Example
 
 ```js
-import React, { Component } from 'react';
-import { View } from 'react-juce';
+import React, { Component } from "react";
+import { View } from "react-juce";
 
 function App(props) {
   return (
-    <View {...styles.outer} onMouseDown={(e) => console.log('Mouse event!', e)}>
+    <View {...styles.outer} onMouseDown={(e) => console.log("Mouse event!", e)}>
       <View {...styles.inner} />
     </View>
   );
@@ -21,17 +21,17 @@ function App(props) {
 
 const styles = {
   outer: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'ff17191f',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: "100%",
+    height: "100%",
+    backgroundColor: "ff17191f",
+    justifyContent: "center",
+    alignItems: "center",
   },
   inner: {
-    width: '25%',
-    height: '25%',
-    backgroundColor: 'ffa7191f',
-  }
+    width: "25%",
+    height: "25%",
+    backgroundColor: "ffa7191f",
+  },
 };
 ```
 
@@ -43,9 +43,9 @@ A callback which will be invoked any time the `View`'s layout calculation change
 The callback should accept a single argument, a [SyntheticEvent](Events.md) object holding
 a `width` and `height` property reflecting the new size of the `View`.
 
-| Type | Required | Supported |
-| -- | -- | -- |
-| function | No | Yes: Non-Standard |
+| Type     | Required | Supported         |
+| -------- | -------- | ----------------- |
+| function | No       | Yes: Non-Standard |
 
 #### onMouseDown
 
@@ -53,9 +53,9 @@ A callback which will be invoked in response to a mouse button down event on the
 underlying native component. The callback should accept a single argument, a [SyntheticMouseEvent](Events.md)
 object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent).
 
-| Type | Required | Supported |
-| -- | -- | -- |
-| function | No | Partial: Standard |
+| Type     | Required | Supported         |
+| -------- | -------- | ----------------- |
+| function | No       | Partial: Standard |
 
 #### onMouseUp
 
@@ -63,9 +63,9 @@ A callback which will be invoked in response to a mouse button up event on the
 underlying native component. The callback should accept a single argument, a [SyntheticMouseEvent](Events.md)
 object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent).
 
-| Type | Required | Supported |
-| -- | -- | -- |
-| function | No | Partial: Standard |
+| Type     | Required | Supported         |
+| -------- | -------- | ----------------- |
+| function | No       | Partial: Standard |
 
 #### onMouseEnter
 
@@ -73,9 +73,9 @@ A callback which will be invoked in response to a mouse entering the local bound
 The callback should accept a single argument, a `SyntheticMouseEvent`
 object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent).
 
-| Type | Required | Supported |
-| -- | -- | -- |
-| function | No | Partial: Standard |
+| Type     | Required | Supported         |
+| -------- | -------- | ----------------- |
+| function | No       | Partial: Standard |
 
 #### onMouseLeave
 
@@ -83,9 +83,9 @@ A callback which will be invoked in response to a mouse leaving the local bounds
 The callback should accept a single argument, a `SyntheticMouseEvent`
 object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent).
 
-| Type | Required | Supported |
-| -- | -- | -- |
-| function | No | Partial: Standard |
+| Type     | Required | Supported         |
+| -------- | -------- | ----------------- |
+| function | No       | Partial: Standard |
 
 #### onMouseDoubleClick
 
@@ -93,9 +93,9 @@ A callback which will be invoked in response to a mouse button double click on t
 underlying native component. The callback should accept a single argument, a [SyntheticMouseEvent](Events.md)
 object similar in interface to [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent).
 
-| Type | Required | Supported |
-| -- | -- | -- |
-| function | No | Partial: Standard |
+| Type     | Required | Supported         |
+| -------- | -------- | ----------------- |
+| function | No       | Partial: Standard |
 
 #### onKeyPress
 
@@ -103,9 +103,9 @@ A callback which will be invoked in response to a key press event while the
 underlying native component has focus. The callback should accept a single argument, a [SyntheticKeyboardEvent](Events.md)
 object similar in interface to [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent).
 
-| Type | Required | Supported |
-| -- | -- | -- |
-| function | No | Partial: Standard |
+| Type     | Required | Supported         |
+| -------- | -------- | ----------------- |
+| function | No       | Partial: Standard |
 
 ## Styles
 

@@ -1,5 +1,5 @@
-import ParameterValueStore from './ParameterValueStore';
-import React, { Component } from 'react';
+import ParameterValueStore from "./ParameterValueStore";
+import React, { Component } from "react";
 import { Button } from "react-juce";
 
 class ParameterToggleButton extends Component {
@@ -11,24 +11,30 @@ class ParameterToggleButton extends Component {
     this._handleLeave = this._handleLeave.bind(this);
     this._onParameterValueChange = this._onParameterValueChange.bind(this);
 
-    const paramState = ParameterValueStore.getParameterState(this.props.paramId);
+    const paramState = ParameterValueStore.getParameterState(
+      this.props.paramId
+    );
 
-    const initialDefaultValue = typeof  paramState.defaultValue === 'number' ?
-      paramState.defaultValue : 0.0;
+    const initialDefaultValue =
+      typeof paramState.defaultValue === "number"
+        ? paramState.defaultValue
+        : 0.0;
 
-    const initialValue = typeof paramState.currentValue === 'number' ?
-      paramState.currentValue : 0.0;
+    const initialValue =
+      typeof paramState.currentValue === "number"
+        ? paramState.currentValue
+        : 0.0;
 
-    this.defaultBorderColor = 'ff66FDCF';
-    this.hoverBorderColor = 'ff66CFFD';
+    this.defaultBorderColor = "ff66FDCF";
+    this.hoverBorderColor = "ff66CFFD";
 
     this.state = {
       defaultValue: initialDefaultValue,
       value: initialValue,
-      borderColor: this.defaultBorderColor
+      borderColor: this.defaultBorderColor,
     };
 
-    if (typeof this.props.onToggled === 'function') {
+    if (typeof this.props.onToggled === "function") {
       this.props.onToggled(initialValue !== 0.0);
     }
   }
@@ -48,37 +54,41 @@ class ParameterToggleButton extends Component {
   }
 
   _handleClick(e) {
-    const newValue = this.state.value === 0.0 ? 1.0 : 0.0
+    const newValue = this.state.value === 0.0 ? 1.0 : 0.0;
 
     this.setState({
-      value: newValue
+      value: newValue,
     });
 
-    if (typeof this.props.paramId === 'string' && this.props.paramId.length > 0) {
+    if (
+      typeof this.props.paramId === "string" &&
+      this.props.paramId.length > 0
+    ) {
       global.beginParameterChangeGesture(this.props.paramId);
       global.setParameterValueNotifyingHost(this.props.paramId, newValue);
       global.endParameterChangeGesture(this.props.paramId);
     }
 
-    if (typeof this.props.onToggled === 'function') {
+    if (typeof this.props.onToggled === "function") {
       this.props.onToggled(newValue !== 0.0);
     }
   }
 
   _handleEnter(e) {
     this.setState({
-      borderColor: this.hoverBorderColor
+      borderColor: this.hoverBorderColor,
     });
   }
 
   _handleLeave(e) {
     this.setState({
-      borderColor: this.defaultBorderColor
+      borderColor: this.defaultBorderColor,
     });
   }
 
   _onParameterValueChange(paramId) {
-    const shouldUpdate = typeof this.props.paramId === 'string' &&
+    const shouldUpdate =
+      typeof this.props.paramId === "string" &&
       this.props.paramId.length > 0 &&
       this.props.paramId === paramId;
 
@@ -93,7 +103,7 @@ class ParameterToggleButton extends Component {
         value: newValue,
       });
 
-      if (typeof this.props.onToggled === 'function') {
+      if (typeof this.props.onToggled === "function") {
         this.props.onToggled(newValue !== 0.0);
       }
     }
@@ -103,12 +113,17 @@ class ParameterToggleButton extends Component {
     const { parameterId, onToggled, ...other } = this.props;
 
     return (
-      <Button {...other} borderColor={this.state.borderColor} onClick={this._handleClick} onMouseEnter={this._handleEnter} onMouseLeave={this._handleLeave}>
+      <Button
+        {...other}
+        borderColor={this.state.borderColor}
+        onClick={this._handleClick}
+        onMouseEnter={this._handleEnter}
+        onMouseLeave={this._handleLeave}
+      >
         {this.props.children}
       </Button>
-    )
+    );
   }
 }
 
 export default ParameterToggleButton;
-

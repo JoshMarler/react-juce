@@ -1,11 +1,5 @@
-import React, { Component } from 'react';
-import {
-  EventBridge,
-  Image,
-  Text,
-  View,
-} from 'react-juce';
-
+import React, { Component } from "react";
+import { EventBridge, Image, Text, View } from "react-juce";
 
 class Meter extends Component {
   constructor(props) {
@@ -23,11 +17,11 @@ class Meter extends Component {
   }
 
   componentDidMount() {
-    EventBridge.addListener('gainPeakValues', this._onMeterValues);
+    EventBridge.addListener("gainPeakValues", this._onMeterValues);
   }
 
   componentWillUnmount() {
-    EventBridge.removeListener('gainPeakValues', this._onMeterValues);
+    EventBridge.removeListener("gainPeakValues", this._onMeterValues);
   }
 
   _onMeterValues(lcPeak, rcPeak) {
@@ -77,11 +71,14 @@ class Meter extends Component {
   }
 
   render() {
-    const {lcPeak, rcPeak, width, height} = this.state;
+    const { lcPeak, rcPeak, width, height } = this.state;
 
     return (
       <View {...this.props} onMeasure={this._onMeasure}>
-        <Image {...styles.canvas} source={this._renderVectorGraphics(lcPeak, rcPeak, width, height)} />
+        <Image
+          {...styles.canvas}
+          source={this._renderVectorGraphics(lcPeak, rcPeak, width, height)}
+        />
       </View>
     );
   }
@@ -90,9 +87,9 @@ class Meter extends Component {
 const styles = {
   canvas: {
     flex: 1.0,
-    height: '100%',
-    width: '100%',
-    position: 'absolute',
+    height: "100%",
+    width: "100%",
+    position: "absolute",
     left: 0.0,
     top: 0.0,
     interceptClickEvents: false,

@@ -16,6 +16,7 @@ were installed via `EcmascriptEngine::registerNativeMethod` or by assigning a va
 from the global object, and looking that value up or invoking it on the C++ side with `EcmascriptEngine::evaluateInline` or `EcmascriptEngine::invoke`.
 
 ### Example
+
 ```cpp
 // From C++
 engine->registerNativeProperty("world", "Hello!");
@@ -27,8 +28,8 @@ engine->registerNativeMethod("sayHello", [this](juce::var::NativeFunctionArgs co
 
 ```js
 // Then, from js
-console.log('Hello', global.world);
-global.sayHello('World!');
+console.log("Hello", global.world);
+global.sayHello("World!");
 ```
 
 And similarly, in the other direction:
@@ -46,6 +47,7 @@ auto result = engine->invoke("myFun", (int) myValue);
 ```
 
 ## Custom Native View
+
 Now the other option is to define a totally custom native view, and register it with React.
 To do this, you can make your own C++ class that inherits `reactjuce::View`, and override the necessary methods.
 Basically, a `reactjuce::View` is just a `juce::Component` with some extra goodies.
@@ -106,6 +108,6 @@ function MyCoolView(props) {
 
 // Now I can use it elsewhere in JSX...
 function MyApp(props) {
-  return (<MyCoolView {...props} />);
+  return <MyCoolView {...props} />;
 }
 ```

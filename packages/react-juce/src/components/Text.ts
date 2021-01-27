@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
 export function Text(props: any) {
-  return React.createElement('Text', props, props.children);
+  return React.createElement("Text", props, props.children);
 }
 
 Text.WordWrap = {

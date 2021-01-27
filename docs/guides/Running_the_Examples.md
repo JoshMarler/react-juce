@@ -30,7 +30,7 @@ $ cd examples/GainPlugin/Source/jsui/
 ```
 
 The `jsui/` directory here is the top level directory of all the
-React.js application code that we used to build the example interface. 
+React.js application code that we used to build the example interface.
 We use a build step managed by npm to compile all of our application javascript
 into a single file that can be easily loaded up in the native app:
 

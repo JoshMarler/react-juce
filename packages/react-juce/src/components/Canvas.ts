@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
 // TODO: Need to explicitly bind this to members?
 export class CanvasRenderingContext {
@@ -25,45 +25,71 @@ export class CanvasRenderingContext {
   // TODO: Support fillStyle/strokeStyle pattern.
   // TODO: Support fillStyle/strokeStyle gradient.
   set fillStyle(value: string) {
-    this._drawCommands.push(['setFillStyle', value]);
+    this._drawCommands.push(["setFillStyle", value]);
   }
 
   set strokeStyle(value: string) {
-    this._drawCommands.push(['setStrokeStyle', value]);
+    this._drawCommands.push(["setStrokeStyle", value]);
   }
 
   set lineWidth(value: number) {
-    this._drawCommands.push(['setLineWidth', value]);
+    this._drawCommands.push(["setLineWidth", value]);
   }
 
   set font(value: string) {
-    this._drawCommands.push(['setFont', value]);
+    this._drawCommands.push(["setFont", value]);
   }
 
   set textAlign(value: string) {
-    this._drawCommands.push(['setTextAlign', value]);
+    this._drawCommands.push(["setTextAlign", value]);
   }
 
   //================================================================================
   // Rect functions
   fillRect(x: number, y: number, width: number, height: number): void {
-    this._drawCommands.push(['fillRect', x, y, width, height]);
+    this._drawCommands.push(["fillRect", x, y, width, height]);
   }
 
   strokeRect(x: number, y: number, width: number, height: number): void {
-    this._drawCommands.push(['strokeRect', x, y, width, height]);
+    this._drawCommands.push(["strokeRect", x, y, width, height]);
   }
 
-  strokeRoundedRect(x: number, y: number, width: number, height: number, cornerSize: number): void {
-    this._drawCommands.push(['strokeRoundedRect', x, y, width, height, cornerSize]);
+  strokeRoundedRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    cornerSize: number
+  ): void {
+    this._drawCommands.push([
+      "strokeRoundedRect",
+      x,
+      y,
+      width,
+      height,
+      cornerSize,
+    ]);
   }
 
-  fillRoundedRect(x: number, y: number, width: number, height: number, cornerSize: number): void {
-    this._drawCommands.push(['fillRoundedRect', x, y, width, height, cornerSize]);
+  fillRoundedRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    cornerSize: number
+  ): void {
+    this._drawCommands.push([
+      "fillRoundedRect",
+      x,
+      y,
+      width,
+      height,
+      cornerSize,
+    ]);
   }
 
   clearRect(x: number, y: number, width: number, height: number): void {
-    this._drawCommands.push(['clearRect', x, y, width, height]);
+    this._drawCommands.push(["clearRect", x, y, width, height]);
   }
 
   //================================================================================
@@ -76,54 +102,67 @@ export class CanvasRenderingContext {
   //       which contains all path methods. What is the best way to do this in JS and share
   //       a drawCommands instance?
   beginPath(): void {
-    this._drawCommands.push(['beginPath']);
+    this._drawCommands.push(["beginPath"]);
   }
 
   lineTo(x: number, y: number): void {
-    this._drawCommands.push(['lineTo', x, y]);
+    this._drawCommands.push(["lineTo", x, y]);
   }
 
   moveTo(x: number, y: number): void {
-    this._drawCommands.push(['moveTo', x, y]);
+    this._drawCommands.push(["moveTo", x, y]);
   }
 
-  arc(x: number, y: number, radius: number, startAngle: number, endAngle: number): void {
+  arc(
+    x: number,
+    y: number,
+    radius: number,
+    startAngle: number,
+    endAngle: number
+  ): void {
     //TODO: Add support for optional antiClockWise?: boolean arg
-    this._drawCommands.push(['arc', x, y, radius, startAngle, endAngle]);
+    this._drawCommands.push(["arc", x, y, radius, startAngle, endAngle]);
   }
 
   quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): void {
-    this._drawCommands.push(['quadraticCurveTo', cpx, cpy, x, y]);
+    this._drawCommands.push(["quadraticCurveTo", cpx, cpy, x, y]);
   }
 
   closePath(): void {
-    this._drawCommands.push(['close']);
+    this._drawCommands.push(["close"]);
   }
 
   stroke(): void {
-    this._drawCommands.push(['stroke']);
+    this._drawCommands.push(["stroke"]);
   }
 
   fill(): void {
-    this._drawCommands.push(['fill']);
+    this._drawCommands.push(["fill"]);
   }
 
   //================================================================================
   // Transform functions
   rotate(angle: number): void {
-    this._drawCommands.push(['rotate', angle]);
+    this._drawCommands.push(["rotate", angle]);
   }
 
   translate(x: number, y: number): void {
-    this._drawCommands.push(['translate', x, y]);
+    this._drawCommands.push(["translate", x, y]);
   }
 
-  setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void {
-    this._drawCommands.push(['setTransform', a, b, c, d, e, f]);
+  setTransform(
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    e: number,
+    f: number
+  ): void {
+    this._drawCommands.push(["setTransform", a, b, c, d, e, f]);
   }
 
   resetTransform(): void {
-    this._drawCommands.push(['resetTransform']);
+    this._drawCommands.push(["resetTransform"]);
   }
 
   //================================================================================
@@ -133,23 +172,21 @@ export class CanvasRenderingContext {
   //      Currently only support SVG string. What is correct
   //      type to use here?
   drawImage(image: string, dx: number, dy: number): void {
-      this._drawCommands.push(['drawImage', image, dx, dy]);
+    this._drawCommands.push(["drawImage", image, dx, dy]);
   }
 
   //================================================================================
   // Text functions
   strokeText(text: string, x: number, y: number, maxWidth?: number): void {
     if (maxWidth === undefined)
-      this._drawCommands.push(['strokeText', text, x, y]);
-    else
-      this._drawCommands.push(['strokeText', text, x, y, maxWidth]);
+      this._drawCommands.push(["strokeText", text, x, y]);
+    else this._drawCommands.push(["strokeText", text, x, y, maxWidth]);
   }
 
   fillText(text: string, x: number, y: number, maxWidth?: number): void {
     if (maxWidth === undefined)
-      this._drawCommands.push(['fillText', text, x, y]);
-    else
-      this._drawCommands.push(['fillText', text, x, y, maxWidth]);
+      this._drawCommands.push(["fillText", text, x, y]);
+    else this._drawCommands.push(["fillText", text, x, y, maxWidth]);
   }
 
   //================================================================================
@@ -178,23 +215,23 @@ export class Canvas extends Component<CanvasProps, CanvasState> {
 
     this.state = {
       width: 0,
-      height: 0
+      height: 0,
     };
   }
 
   _onMeasure(e: any) {
     this.setState({
       width: e.width,
-      height: e.height
+      height: e.height,
     });
 
-    if (typeof this.props.onMeasure === 'function') {
+    if (typeof this.props.onMeasure === "function") {
       this.props.onMeasure(e);
     }
   }
 
   _onDraw(): any[] {
-    if (typeof this.props.onDraw === 'function') {
+    if (typeof this.props.onDraw === "function") {
       this._ctx.reset();
 
       this.props.onDraw(this._ctx);
@@ -205,10 +242,17 @@ export class Canvas extends Component<CanvasProps, CanvasState> {
   }
 
   render() {
-    return React.createElement('CanvasView', Object.assign({}, this.props, {
-      onDraw: () => { return this._onDraw(); },
-      onMeasure: (e: any) => { this._onMeasure(e)}
-    }), this.props.children);
+    return React.createElement(
+      "CanvasView",
+      Object.assign({}, this.props, {
+        onDraw: () => {
+          return this._onDraw();
+        },
+        onMeasure: (e: any) => {
+          this._onMeasure(e);
+        },
+      }),
+      this.props.children
+    );
   }
 }
-

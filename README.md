@@ -1,4 +1,5 @@
 # Blueprint
+
 > Write cross-platform native apps with React.js and JUCE
 
 Blueprint is a hybrid JavaScript/C++ framework that enables a [React.js](https://reactjs.org/) frontend for a [JUCE](http://juce.com/) application or plugin. It provides an embedded, ES5 JavaScript engine via [Duktape](http://duktape.org/), native hooks for rendering the React component tree to `juce::Component` instances, and a flexbox layout engine via [Yoga](https://yogalayout.com/).
@@ -11,24 +12,26 @@ For more information, see the introductory blog post here: [Blueprint: A JUCE Re
 to a 1.0 release.
 
 **Anticipated Breaking Changes**
-* We'll be renaming Blueprint to react-juce before beta (#34)
-* ~~Updating the examples and `npm init` template to point to npm instead of the local package~~
-* ~~`ReactApplicationRoot::evaluate` and `ReactApplicationRoot::evaluateFile` (#115)~~
-* ~~Refactoring the hot reloader and decoupling the EcmascriptEngine from ReactApplicationRoot (#65)~~
+
+- We'll be renaming Blueprint to react-juce before beta (#34)
+- ~~Updating the examples and `npm init` template to point to npm instead of the local package~~
+- ~~`ReactApplicationRoot::evaluate` and `ReactApplicationRoot::evaluateFile` (#115)~~
+- ~~Refactoring the hot reloader and decoupling the EcmascriptEngine from ReactApplicationRoot (#65)~~
 
 ## Resources
 
-* Documentation: [Blueprint Docs & Getting Started](https://docs.react-juce.dev)
-* Discussions: [GitHub Discussions](https://github.com/nick-thompson/blueprint/discussions)
-* Community: [The Audio Programmer Discord Server](https://discord.gg/3H4wwVf49v)
-    * Join the `#blueprint` channel and say hi!
+- Documentation: [Blueprint Docs & Getting Started](https://docs.react-juce.dev)
+- Discussions: [GitHub Discussions](https://github.com/nick-thompson/blueprint/discussions)
+- Community: [The Audio Programmer Discord Server](https://discord.gg/3H4wwVf49v)
+  - Join the `#blueprint` channel and say hi!
 
 ## Maintainers
 
-* [@nick-thompson](https://github.com/nick-thompson)
-* [@joshmarler](https://github.com/JoshMarler)
+- [@nick-thompson](https://github.com/nick-thompson)
+- [@joshmarler](https://github.com/JoshMarler)
 
 ## Examples
+
 Blueprint is a young project, but already it provides the framework on which the entire user interface for [Creative Intent's Remnant](https://www.creativeintent.co/product/remnant) plugin is built.
 
 ![Creative Intent Remnant: Screenshot](https://github.com/nick-thompson/blueprint/blob/master/RemnantScreenShot.jpg)
@@ -38,6 +41,7 @@ below for building and running the demo plugin. If you have a project written wi
 love to showcase your work.
 
 ## Contributing
+
 See [CONTRIBUTING.md](https://github.com/nick-thompson/blueprint/blob/master/CONTRIBUTING.md)
 
 ## License

@@ -3,9 +3,9 @@ import { TMacroCall } from "./types";
 // don't try too hard, we don't need to support qouted strings containing commas etc.
 export const splitArgs = (a: string) => {
   const argArray = a.trim().split(/\s*,\s*/);
-  if (argArray.length === 1 && argArray[0] === '') return [];
+  if (argArray.length === 1 && argArray[0] === "") return [];
   return argArray;
-}
+};
 
 export const getMacroCalls = (s: string): TMacroCall[] => {
   const macroMatcher = String.raw`([a-zA-Z0-9]+)\(([^)]*)\)`;
