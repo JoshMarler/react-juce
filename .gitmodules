@@ -4,3 +4,6 @@
 [submodule "yoga"]
 	path = react_juce/yoga
 	url = ../../facebook/yoga.git
+[submodule "quickjs"]
+	path = react_juce/quickjs
+	url = ../../bellard/quickjs.git

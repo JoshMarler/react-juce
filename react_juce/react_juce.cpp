@@ -75,7 +75,12 @@
 #endif
 
 #include "core/AppHarness.cpp"
+
+#ifdef REACTJUCE_USE_QUICKJS
+#include "core/EcmascriptEngine_quickjs.cpp"
+#else
 #include "core/EcmascriptEngine.cpp"
+#endif
 
 #if JUCE_MODULE_AVAILABLE_juce_audio_processors
     #include "core/GenericEditor.cpp"

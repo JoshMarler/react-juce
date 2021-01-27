@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 project(GainPlugin VERSION 0.1.0)
 
+# Apparently this has to come before any `add_executable` calls
+link_directories(${CMAKE_SOURCE_DIR}/react_juce/quickjs/)
+
 # `juce_add_plugin` adds a static library target with the name passed as the first argument.
 # This target is a normal CMake target, but has a lot of extra properties set
 # up by default. As well as this shared code static library, this function adds targets for each of
@@ -50,6 +53,7 @@ target_include_directories(GainPlugin PRIVATE react_juce/)
 target_compile_definitions(GainPlugin
     PUBLIC
     GAINPLUGIN_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+    REACTJUCE_USE_QUICKJS=1
     JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
     JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
     JUCE_VST3_CAN_REPLACE_VST2=0)
@@ -70,4 +74,5 @@ target_link_libraries(GainPlugin PRIVATE
     juce::juce_audio_utils
     juce::juce_graphics
     juce::juce_gui_basics
-    react_juce)
+    react_juce
+    quickjs)

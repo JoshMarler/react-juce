@@ -149,11 +149,11 @@ namespace reactjuce
         /** Detaches the from the current debug session/attachment. */
         void debuggerDetach();
 
-    private:
         //==============================================================================
         struct Pimpl;
         std::unique_ptr<Pimpl> mPimpl;
 
+    private:
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EcmascriptEngine)
     };

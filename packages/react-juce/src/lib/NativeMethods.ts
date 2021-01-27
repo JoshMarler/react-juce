@@ -24,6 +24,8 @@ if (process.env.NODE_ENV !== "production") {
         console.warn(
           `WARNING: Attempt to access undefined native method ${target}`
         );
+
+        return {};
       };
     },
   });
