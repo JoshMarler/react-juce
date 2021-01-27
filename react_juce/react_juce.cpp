@@ -89,3 +89,4 @@
 #include "core/ViewManager.cpp"
 #include "core/ScrollView.cpp"
 #include "core/ImageView.cpp"
+#include "core/Utils.cpp"
