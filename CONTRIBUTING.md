@@ -10,7 +10,11 @@ We'd love to see you get involved with Blueprint! Here are our current working g
 - Priority will be established by way of labels
 - Timelines will be established by way of milestones
 
-Finally, we don't yet have a coding style guideline, so please try to adhere to the style you see in the codebase. We will aim to get some tooling involved
+# Style Guide
+
+For javascript, typescript, markdown and yaml we enforce default [prettier](https://prettier.io/) formatting via a pipeline check. You can set up your IDE to format automatically, instantiate our formatting pre-commit hook by running `npm i && npx husky install` in the top-level directory, or ad-hoc by running `npm run beautify`.
+
+On the C++ side, we don't yet have a coding style guideline, so please try to adhere to the style you see in the codebase. We will aim to get some tooling involved
 soon to ameliorate that situation!
 
 ## Thank you
