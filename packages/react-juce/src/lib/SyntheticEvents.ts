@@ -1,9 +1,9 @@
 import { Instance } from "./Backend";
 
 export class SyntheticEvent {
-  public  bubbles: boolean;
-  public  defaultPrevented: boolean;
-  public  target: Instance;
+  public bubbles: boolean;
+  public defaultPrevented: boolean;
+  public target: Instance;
   private _internal: any;
 
   constructor(props: any) {
@@ -61,20 +61,19 @@ export default {
   isMouseEventHandler(key: string): boolean {
     const k = key.toLowerCase();
 
-    return k === 'onmousedown' ||
-      k == 'onmouseup' ||
-      k == 'onmouseenter' ||
-      k == 'onmouseleave' ||
-      k == 'onmousedrag' ||
-      k == 'onmouseclick';
+    return (
+      k === "onmousedown" ||
+      k == "onmouseup" ||
+      k == "onmouseenter" ||
+      k == "onmouseleave" ||
+      k == "onmousedrag" ||
+      k == "onmouseclick"
+    );
   },
 
   isKeyboardEventHandler(key: string): boolean {
     const k = key.toLowerCase();
 
-    return k === 'onkeydown' ||
-      k == 'onkeyup' ||
-      k == 'onkeypress';
-  }
-}
-
+    return k === "onkeydown" || k == "onkeyup" || k == "onkeypress";
+  },
+};

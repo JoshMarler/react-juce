@@ -1,21 +1,21 @@
-import React, { Component, PropsWithChildren, ReactElement } from 'react';
+import React, { Component, PropsWithChildren, ReactElement } from "react";
 
 import { ViewInstance } from "../lib/Backend";
-import { ScrollView, ScrollEvent } from './ScrollView';
+import { ScrollView, ScrollEvent } from "./ScrollView";
 
-import invariant from 'invariant';
+import invariant from "invariant";
 
 type ListViewState = {
-  scrollTopPosition: number,
-  width: number,
-  height: number,
-}
+  scrollTopPosition: number;
+  width: number;
+  height: number;
+};
 
 type VirtualPositions = {
-  innerHeight: number,
-  startIndex: number,
-  endIndex: number,
-}
+  innerHeight: number;
+  startIndex: number;
+  endIndex: number;
+};
 
 /**
  * ScrollParams is passed to ListView's scrollToIndex
@@ -31,8 +31,8 @@ type VirtualPositions = {
  *                    the center of the ListView.
  */
 export interface ScrollParams {
-  index: number,
-  offset: number
+  index: number;
+  offset: number;
 }
 
 /**
@@ -48,11 +48,10 @@ export interface ScrollParams {
  *                        ListView.
  */
 export interface ListViewProps {
-  data: any[],
-  renderItem: (any) => ReactElement,
-  itemHeight: number,
+  data: any[];
+  renderItem: (any) => ReactElement;
+  itemHeight: number;
 }
-
 
 /**
  * A lightweight "virtualised list" implementation that allows for
@@ -91,7 +90,10 @@ export interface ListViewProps {
  * />
  *
  */
-export class ListView extends Component<PropsWithChildren<ListViewProps | any>, ListViewState> {
+export class ListView extends Component<
+  PropsWithChildren<ListViewProps | any>,
+  ListViewState
+> {
   private _ref: React.RefObject<ViewInstance>;
 
   constructor(props: PropsWithChildren<ListViewProps | any>) {
@@ -99,7 +101,9 @@ export class ListView extends Component<PropsWithChildren<ListViewProps | any>, 
     this._ref = React.createRef();
 
     this._onMeasure = this._onMeasure.bind(this);
-    this._calculateVirtualPositions = this._calculateVirtualPositions.bind(this);
+    this._calculateVirtualPositions = this._calculateVirtualPositions.bind(
+      this
+    );
     this._setScrollTopPosition = this._setScrollTopPosition.bind(this);
     this.scrollToIndex = this.scrollToIndex.bind(this);
 
@@ -113,55 +117,65 @@ export class ListView extends Component<PropsWithChildren<ListViewProps | any>, 
   _onMeasure(e: any): void {
     this.setState({
       width: e.width,
-      height: e.height
+      height: e.height,
     });
   }
 
   _calculateVirtualPositions(): VirtualPositions {
-    const totalItems  = this.props.data.length;
+    const totalItems = this.props.data.length;
     const innerHeight = this.props.itemHeight * totalItems;
 
     invariant(
       this.props.itemHeight > 0,
-      'Zero or negative itemHeight passed to ListView'
+      "Zero or negative itemHeight passed to ListView"
     );
 
     // Pad num rendered items by 1 so we always render the same number of items
     // which allows us to use a fixed key value on each item in the list.
     const numItems = Math.floor(this.state.height / this.props.itemHeight) + 1;
 
-    const startIndex = Math.floor(this.state.scrollTopPosition / this.props.itemHeight);
-    const endIndex   = Math.min(totalItems - 1, Math.floor(startIndex + numItems));
+    const startIndex = Math.floor(
+      this.state.scrollTopPosition / this.props.itemHeight
+    );
+    const endIndex = Math.min(
+      totalItems - 1,
+      Math.floor(startIndex + numItems)
+    );
 
     return {
       innerHeight: innerHeight,
       startIndex: startIndex,
-      endIndex: endIndex
-    }
+      endIndex: endIndex,
+    };
   }
 
   _setScrollTopPosition(e: ScrollEvent): void {
     this.setState({
-      scrollTopPosition: e.scrollTop
+      scrollTopPosition: e.scrollTop,
     });
 
-    if (typeof this.props.onScroll === 'function') {
+    if (typeof this.props.onScroll === "function") {
       this.props.onScroll(e);
     }
   }
 
   scrollToIndex(scrollParams: ScrollParams) {
-    invariant(scrollParams.index >= 0 && scrollParams.index <= this.props.data.length,
-              "scrollParams.index must be between 0 and props.data.length");
+    invariant(
+      scrollParams.index >= 0 && scrollParams.index <= this.props.data.length,
+      "scrollParams.index must be between 0 and props.data.length"
+    );
 
-    invariant(scrollParams.offset >= 0.0 && scrollParams.offset <= 1.0,
-              "scrollParams.offset must be normalised between 0.0 and 1.0");
+    invariant(
+      scrollParams.offset >= 0.0 && scrollParams.offset <= 1.0,
+      "scrollParams.offset must be normalised between 0.0 and 1.0"
+    );
 
     const numItems = Math.floor(this.state.height / this.props.itemHeight);
 
     const xPos = 0;
-    let   yPos = (this.props.itemHeight * scrollParams.index) -
-                 (this.props.itemHeight * numItems * scrollParams.offset);
+    let yPos =
+      this.props.itemHeight * scrollParams.index -
+      this.props.itemHeight * numItems * scrollParams.offset;
 
     const scrollViewInstance = this._ref ? this._ref.current : null;
 
@@ -181,15 +195,11 @@ export class ListView extends Component<PropsWithChildren<ListViewProps | any>, 
     // components inside a juce::Viewport.
     for (let i = positions.startIndex; i <= positions.endIndex; ++i) {
       items.push(
-        this.props.renderItem(
-          this.props.data[i],
-          i,
-          {
-            position: 'absolute',
-            top: this.props.itemHeight * i,
-            key: positions.endIndex - i,
-          }
-        )
+        this.props.renderItem(this.props.data[i], i, {
+          position: "absolute",
+          top: this.props.itemHeight * i,
+          key: positions.endIndex - i,
+        })
       );
     }
 
@@ -200,19 +210,21 @@ export class ListView extends Component<PropsWithChildren<ListViewProps | any>, 
         onScroll={this._setScrollTopPosition}
         viewRef={this._ref}
       >
-        <ScrollView.ContentView {...styles.scrollViewContent} height={positions.innerHeight}>
+        <ScrollView.ContentView
+          {...styles.scrollViewContent}
+          height={positions.innerHeight}
+        >
           {items}
         </ScrollView.ContentView>
       </ScrollView>
-    )
+    );
   }
 }
 
 const styles = {
   scrollViewContent: {
-    'flex-direction': 'column',
-    'flex': 1.0,
-    'flex-shrink': 0.0,
-  }
-}
-
+    "flex-direction": "column",
+    flex: 1.0,
+    "flex-shrink": 0.0,
+  },
+};

@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
 export function Image(props: any) {
-  return React.createElement('Image', props, props.children);
+  return React.createElement("Image", props, props.children);
 }
 
 Image.PlacementFlags = {

@@ -1,8 +1,8 @@
-import MethodTracer from './MethodTracer';
-import ReactReconciler from 'react-reconciler';
-import Backend, {ViewInstance, RawTextViewInstance} from './Backend';
+import MethodTracer from "./MethodTracer";
+import ReactReconciler from "react-reconciler";
+import Backend, { ViewInstance, RawTextViewInstance } from "./Backend";
 
-import invariant from 'invariant';
+import invariant from "invariant";
 
 type HostContext = {
   isInTextParent: boolean;
@@ -32,13 +32,15 @@ const HostConfig = {
 
   /** Provides the context for rendering a child element.
    */
-  getChildHostContext(parentHostContext: HostContext,
-                      elementType: string,
-                      rootContainerInstance: ViewInstance): HostContext {
-    const isInTextParent = parentHostContext.isInTextParent ||
-      elementType === 'Text';
+  getChildHostContext(
+    parentHostContext: HostContext,
+    elementType: string,
+    rootContainerInstance: ViewInstance
+  ): HostContext {
+    const isInTextParent =
+      parentHostContext.isInTextParent || elementType === "Text";
 
-    return {isInTextParent};
+    return { isInTextParent };
   },
 
   prepareForCommit: (...args: any) => {},
@@ -63,27 +65,35 @@ const HostConfig = {
   },
 
   /** Create a new DOM node. */
-  createInstance(elementType: string,
-                 props: any,
-                 rootContainerInstance: ViewInstance,
-                 hostContext: HostContext,
-                 internalInstanceHandle: any): ViewInstance {
+  createInstance(
+    elementType: string,
+    props: any,
+    rootContainerInstance: ViewInstance,
+    hostContext: HostContext,
+    internalInstanceHandle: any
+  ): ViewInstance {
     invariant(
       !hostContext.isInTextParent,
-      'Nesting elements inside of <Text> is currently not supported.'
+      "Nesting elements inside of <Text> is currently not supported."
     );
 
-    return Backend.createViewInstance(elementType, props, rootContainerInstance);
+    return Backend.createViewInstance(
+      elementType,
+      props,
+      rootContainerInstance
+    );
   },
 
   /** Create a new text node. */
-  createTextInstance(text: string,
-                     rootContainerInstance: ViewInstance,
-                     hostContext: HostContext,
-                     internalInstanceHandle: any): RawTextViewInstance {
+  createTextInstance(
+    text: string,
+    rootContainerInstance: ViewInstance,
+    hostContext: HostContext,
+    internalInstanceHandle: any
+  ): RawTextViewInstance {
     invariant(
       hostContext.isInTextParent,
-      'Raw text strings must be rendered within a <Text> element.'
+      "Raw text strings must be rendered within a <Text> element."
     );
 
     return Backend.createTextViewInstance(text, rootContainerInstance);
@@ -98,12 +108,14 @@ const HostConfig = {
    *  this method will be called to finalize the node. We take this opportunity
    *  to propagate relevant properties to the node.
    */
-  finalizeInitialChildren(instance: ViewInstance,
-                          elementType: string,
-                          props: any,
-                          rootContainerInstance: ViewInstance): void {
-    Object.keys(props).forEach(function(propKey) {
-      if (propKey !== 'children') {
+  finalizeInitialChildren(
+    instance: ViewInstance,
+    elementType: string,
+    props: any,
+    rootContainerInstance: ViewInstance
+  ): void {
+    Object.keys(props).forEach(function (propKey) {
+      if (propKey !== "children") {
         instance.setProperty(propKey, props[propKey]);
       }
     });
@@ -113,15 +125,17 @@ const HostConfig = {
    *  properties that need to be updated. This is more-or-less an opportunity
    *  for us to diff our props before propagating.
    */
-  prepareUpdate(domElement: any,
-                elementType: string,
-                oldProps: any,
-                newProps: any,
-                rootContainerInstance: ViewInstance,
-                hostContext: HostContext) {
+  prepareUpdate(
+    domElement: any,
+    elementType: string,
+    oldProps: any,
+    newProps: any,
+    rootContainerInstance: ViewInstance,
+    hostContext: HostContext
+  ) {
     // The children prop will be handled separately via the tree update.
-    let {children: oldChildren, ...op} = oldProps;
-    let {children: newChildren, ...np} = newProps;
+    let { children: oldChildren, ...op } = oldProps;
+    let { children: newChildren, ...np } = newProps;
 
     // We construct a new payload of property values that are either new or
     // have changed for this element.
@@ -139,13 +153,15 @@ const HostConfig = {
   /** Following from `prepareUpdate` above, this is our opportunity to apply
    *  the update payload to a given instance.
    */
-  commitUpdate(instance: ViewInstance,
-               updatePayload: any,
-               elementType: string,
-               oldProps: any,
-               newProps: any,
-               internalInstanceHandle: any): void {
-    Object.keys(updatePayload).forEach(function(propKey:string): void {
+  commitUpdate(
+    instance: ViewInstance,
+    updatePayload: any,
+    elementType: string,
+    oldProps: any,
+    newProps: any,
+    internalInstanceHandle: any
+  ): void {
+    Object.keys(updatePayload).forEach(function (propKey: string): void {
       instance.setProperty(propKey, updatePayload[propKey]);
     });
   },
@@ -153,18 +169,24 @@ const HostConfig = {
   /** Similar to the previous method, this is our opportunity to apply text
    *  updates to a given instance.
    */
-  commitTextUpdate(instance: RawTextViewInstance, oldText: string, newText: string): void {
-    if (typeof newText === 'string' && oldText !== newText) {
+  commitTextUpdate(
+    instance: RawTextViewInstance,
+    oldText: string,
+    newText: string
+  ): void {
+    if (typeof newText === "string" && oldText !== newText) {
       instance.setTextValue(newText);
     }
   },
 
   /** TODO
    */
-  commitMount(instance: ViewInstance,
-              type: string,
-              newProps: any,
-              internalInstanceHandle: any): void {
+  commitMount(
+    instance: ViewInstance,
+    type: string,
+    newProps: any,
+    internalInstanceHandle: any
+  ): void {
     // Noop
   },
 
@@ -176,20 +198,27 @@ const HostConfig = {
   /** Append a child to a parent container.
    *  TODO: Not really sure how this is different from the above.
    */
-  appendChildToContainer(parentContainer: ViewInstance, child: ViewInstance): void {
+  appendChildToContainer(
+    parentContainer: ViewInstance,
+    child: ViewInstance
+  ): void {
     parentContainer.appendChild(child);
   },
 
   /** Inserts a child node into a parent's children array, just before the
    *  second given child node.
    */
-  insertBefore(parentInstance: ViewInstance,
-               child: ViewInstance,
-               beforeChild: ViewInstance): void {
+  insertBefore(
+    parentInstance: ViewInstance,
+    child: ViewInstance,
+    beforeChild: ViewInstance
+  ): void {
     let index = parentInstance.getChildIndex(beforeChild);
 
     if (index < 0)
-      throw new Error('Failed to find child instance for insertBefore operation.');
+      throw new Error(
+        "Failed to find child instance for insertBefore operation."
+      );
 
     parentInstance.insertChild(child, index);
   },
@@ -200,13 +229,17 @@ const HostConfig = {
   },
 
   /** Remove a child from a parent container. */
-  removeChildFromContainer(parentContainer: ViewInstance, child: ViewInstance): void {
+  removeChildFromContainer(
+    parentContainer: ViewInstance,
+    child: ViewInstance
+  ): void {
     parentContainer.removeChild(child);
   },
-
 };
 
 //TODO: Applied ts-ignore here as TS complains about missing functions on HostConfig
 //@ts-ignore
 export default ReactReconciler(HostConfig);
-export const TracedRenderer = ReactReconciler(new Proxy(HostConfig, MethodTracer));
+export const TracedRenderer = ReactReconciler(
+  new Proxy(HostConfig, MethodTracer)
+);

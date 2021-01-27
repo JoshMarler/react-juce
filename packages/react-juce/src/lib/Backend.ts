@@ -1,10 +1,11 @@
-import { all as allCssProps } from 'known-css-properties';
-import camelCase from 'camelcase';
-import NativeMethods from './NativeMethods';
-import SyntheticEvents,
-       { SyntheticMouseEvent,
-         SyntheticKeyboardEvent } from './SyntheticEvents'
-import { macroPropertyGetters } from './MacroProperties';
+import { all as allCssProps } from "known-css-properties";
+import camelCase from "camelcase";
+import NativeMethods from "./NativeMethods";
+import SyntheticEvents, {
+  SyntheticMouseEvent,
+  SyntheticKeyboardEvent,
+} from "./SyntheticEvents";
+import { macroPropertyGetters } from "./MacroProperties";
 
 //TODO: Keep this union or introduce a common base class ViewInstanceBase?
 export type Instance = ViewInstance | RawTextViewInstance;
@@ -24,7 +25,7 @@ export class ViewInstance {
   private _id: string;
   private _type: string;
   public _children: Instance[];
-  public _props:  any = null;
+  public _props: any = null;
   public _parent: any = null;
 
   constructor(id: string, type: string, props?: any, parent?: ViewInstance) {
@@ -86,7 +87,7 @@ export class ViewInstance {
     if (index >= 0) {
       this._children.splice(index, 1);
 
-    __viewRegistry.delete(childInstance.getViewId());
+      __viewRegistry.delete(childInstance.getViewId());
 
       //@ts-ignore
       return NativeMethods.removeChild(this._id, childInstance._id);
@@ -110,26 +111,26 @@ export class ViewInstance {
     // If a property is not present on the ViewInstance object
     // we assume the caller is attempting to access/invoke a
     // native View method.
-    if (propKey === 'viewRef') {
+    if (propKey === "viewRef") {
       value.current = new Proxy(this, {
-        get: function(target, prop, receiver) {
+        get: function (target, prop, receiver) {
           if (prop in target) {
             return target[prop];
           }
 
-          return function(...args) {
+          return function (...args) {
             //@ts-ignore
             return NativeMethods.invokeViewMethod(target._id, prop, ...args);
           };
-        }
+        },
       });
 
       return;
     }
 
     if (macroPropertyGetters.hasOwnProperty(propKey)) {
+      //@ts-ignore
       for (const [k, v] of macroPropertyGetters[propKey](value))
-        //@ts-ignore
         NativeMethods.setViewProperty(this._id, k, v);
       return;
     }
@@ -148,8 +149,7 @@ export class ViewInstance {
 
       // A ViewInstance may hold RawTextViewInstances but a
       // RawTextViewInstance contains no children.
-      if (child instanceof ViewInstance && child.contains(node))
-        return true;
+      if (child instanceof ViewInstance && child.contains(node)) return true;
     }
 
     return false;
@@ -159,12 +159,12 @@ export class ViewInstance {
 export class RawTextViewInstance {
   private _id: string;
   private _text: string;
-  public  _parent: ViewInstance;
+  public _parent: ViewInstance;
 
   constructor(id: string, text: string, parent: ViewInstance) {
-    this._id     = id;
-    this._text   = text;
-    this._parent = parent
+    this._id = id;
+    this._text = text;
+    this._parent = parent;
   }
 
   getViewId(): string {
@@ -183,22 +183,26 @@ export class RawTextViewInstance {
 }
 
 function __getRootContainer(): ViewInstance {
-  if (__rootViewInstance !== null)
-    return __rootViewInstance;
+  if (__rootViewInstance !== null) return __rootViewInstance;
 
   //@ts-ignore
   const id = NativeMethods.getRootInstanceId();
-  __rootViewInstance = new ViewInstance(id, 'View');
+  __rootViewInstance = new ViewInstance(id, "View");
 
   return __rootViewInstance;
 }
 
 function __hasFunctionProp(view: ViewInstance, prop: string) {
-   return view._props.hasOwnProperty(prop) &&
-          typeof view._props[prop] === 'function';
+  return (
+    view._props.hasOwnProperty(prop) && typeof view._props[prop] === "function"
+  );
 }
 
-function __callEventHandlerIfPresent(view: Instance, eventType: string, event: any) {
+function __callEventHandlerIfPresent(
+  view: Instance,
+  eventType: string,
+  event: any
+) {
   if (view instanceof ViewInstance && __hasFunctionProp(view, eventType)) {
     view._props[eventType](event);
   }
@@ -210,13 +214,16 @@ function __bubbleEvent(view: Instance, eventType: string, event: any): void {
     // Some events may not bubble or have bubble defined. i.e. onMeasure
     __callEventHandlerIfPresent(view, eventType, event);
 
-    if (event.bubbles)
-      __bubbleEvent(view._parent, eventType, event);
+    if (event.bubbles) __bubbleEvent(view._parent, eventType, event);
   }
 }
 
 //@ts-ignore
-NativeMethods.dispatchViewEvent = function dispatchEvent(viewId: string, eventType: string, event: any) {
+NativeMethods.dispatchViewEvent = function dispatchEvent(
+  viewId: string,
+  eventType: string,
+  event: any
+) {
   if (__viewRegistry.hasOwnProperty(viewId)) {
     const instance = __viewRegistry[viewId];
 
@@ -225,7 +232,10 @@ NativeMethods.dispatchViewEvent = function dispatchEvent(viewId: string, eventTy
       event.target = __viewRegistry[event.target];
     }
 
-    if (event.relatedTarget && __viewRegistry.hasOwnProperty(event.relatedTarget)) {
+    if (
+      event.relatedTarget &&
+      __viewRegistry.hasOwnProperty(event.relatedTarget)
+    ) {
       event.relatedTarget = __viewRegistry[event.relatedTarget];
     }
 
@@ -255,13 +265,17 @@ NativeMethods.dispatchViewEvent = function dispatchEvent(viewId: string, eventTy
 
     __bubbleEvent(instance, eventType, event);
   }
-}
+};
 
 export default {
   getRootContainer(): ViewInstance {
     return __getRootContainer();
   },
-  createViewInstance(viewType: string, props: any, parentInstance: ViewInstance): ViewInstance {
+  createViewInstance(
+    viewType: string,
+    props: any,
+    parentInstance: ViewInstance
+  ): ViewInstance {
     //@ts-ignore
     const id = NativeMethods.createViewInstance(viewType);
     const instance = new ViewInstance(id, viewType, props, parentInstance);
@@ -271,7 +285,7 @@ export default {
   },
   createTextViewInstance(text: string, parentInstance: ViewInstance) {
     //@ts-ignore
-    const id       = NativeMethods.createTextViewInstance(text);
+    const id = NativeMethods.createTextViewInstance(text);
     const instance = new RawTextViewInstance(id, text, parentInstance);
 
     __viewRegistry[id] = instance;

@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
-import { View } from './View'
-import { SyntheticMouseEvent } from '../lib/SyntheticEvents'
+import { View } from "./View";
+import { SyntheticMouseEvent } from "../lib/SyntheticEvents";
 import { ViewInstance } from "../lib/Backend";
 
 //TODO: Once ViewProps work is complete we can probably
@@ -15,8 +15,8 @@ export interface ButtonProps {
 }
 
 type ButtonState = {
-  down: boolean
-}
+  down: boolean;
+};
 
 /**
  * A simple Button component which can be used as a building block
@@ -56,35 +56,35 @@ export class Button extends Component<ButtonProps, ButtonState> {
     this._ref = React.createRef();
 
     this.state = {
-      down: false
-    }
+      down: false,
+    };
   }
 
   handleDown = (e: SyntheticMouseEvent): void => {
-    if (typeof this.props.onMouseDown === 'function')
+    if (typeof this.props.onMouseDown === "function")
       this.props.onMouseDown.call(null, e);
 
     this.setState({
-      down: true
+      down: true,
     });
-  }
+  };
 
   handleUp = (e: SyntheticMouseEvent): void => {
-    if (typeof this.props.onMouseUp === 'function')
+    if (typeof this.props.onMouseUp === "function")
       this.props.onMouseUp.call(null, e);
 
     this.setState({
-      down: false
+      down: false,
     });
 
-    if (typeof this.props.onClick === 'function') {
+    if (typeof this.props.onClick === "function") {
       const instance = this._ref ? this._ref.current : null;
 
       if (instance && instance.contains(e.relatedTarget)) {
         this.props.onClick(e);
       }
     }
-  }
+  };
 
   render = () => {
     const { onMouseDown, onMouseUp, onClick, ...other } = this.props;
@@ -101,6 +101,5 @@ export class Button extends Component<ButtonProps, ButtonState> {
         {this.props.children}
       </View>
     );
-  }
+  };
 }
-

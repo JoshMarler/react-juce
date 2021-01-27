@@ -1,46 +1,55 @@
-import React, {Component, PropsWithChildren} from 'react';
-import invariant from 'invariant';
+import React, { Component, PropsWithChildren } from "react";
+import invariant from "invariant";
 
-import {Canvas, CanvasRenderingContext} from './Canvas';
-import {View} from './View';
-import {SyntheticMouseEvent} from '../lib/SyntheticEvents';
+import { Canvas, CanvasRenderingContext } from "./Canvas";
+import { View } from "./View";
+import { SyntheticMouseEvent } from "../lib/SyntheticEvents";
 
 // Some simple helpers for slider drag gesture -> value mapping
-const _linearHorizontalGestureMap = (mouseDownX: number,
-                                     mouseDownY: number,
-                                     sensitivity: number,
-                                     valueAtDragStart: number,
-                                     dragEvent: SyntheticMouseEvent): number => {
+const _linearHorizontalGestureMap = (
+  mouseDownX: number,
+  mouseDownY: number,
+  sensitivity: number,
+  valueAtDragStart: number,
+  dragEvent: SyntheticMouseEvent
+): number => {
   const dx = dragEvent.x - mouseDownX;
   return Math.max(0.0, Math.min(1.0, valueAtDragStart + dx * sensitivity));
-}
+};
 
-const _linearVerticalGestureMap = (mouseDownX: number,
-                                   mouseDownY: number,
-                                   sensitivity: number,
-                                   valueAtDragStart: number,
-                                   dragEvent: SyntheticMouseEvent): number => {
+const _linearVerticalGestureMap = (
+  mouseDownX: number,
+  mouseDownY: number,
+  sensitivity: number,
+  valueAtDragStart: number,
+  dragEvent: SyntheticMouseEvent
+): number => {
   const dy = dragEvent.y - mouseDownY;
   return Math.max(0.0, Math.min(1.0, valueAtDragStart - dy * sensitivity));
-}
+};
 
-const _rotaryGestureMap = (mouseDownX: number,
-                           mouseDownY: number,
-                           sensitivity: number,
-                           valueAtDragStart: number,
-                           dragEvent: SyntheticMouseEvent): number => {
+const _rotaryGestureMap = (
+  mouseDownX: number,
+  mouseDownY: number,
+  sensitivity: number,
+  valueAtDragStart: number,
+  dragEvent: SyntheticMouseEvent
+): number => {
   const dx = dragEvent.x - mouseDownX;
   const dy = mouseDownY - dragEvent.y;
-  return Math.max(0.0, Math.min(1.0, valueAtDragStart + (dx + dy) * sensitivity));
-}
+  return Math.max(
+    0.0,
+    Math.min(1.0, valueAtDragStart + (dx + dy) * sensitivity)
+  );
+};
 
-const _drawLinearHorizontalSlider = (trackColor: string,
-                                     fillColor: string) => {
-  return (ctx: CanvasRenderingContext,
-          width: number,
-          height: number,
-          value: number): void => {
-
+const _drawLinearHorizontalSlider = (trackColor: string, fillColor: string) => {
+  return (
+    ctx: CanvasRenderingContext,
+    width: number,
+    height: number,
+    value: number
+  ): void => {
     const lineWidth = 2.0;
 
     const x = 0 + lineWidth / 2;
@@ -57,16 +66,16 @@ const _drawLinearHorizontalSlider = (trackColor: string,
 
     ctx.fillRect(x, y, fillWidth, height);
     ctx.strokeRect(x, y, width, height);
-  }
-}
+  };
+};
 
-const _drawLinearVerticalSlider = (trackColor: string,
-                                   fillColor: string) => {
-  return (ctx: CanvasRenderingContext,
-          width: number,
-          height: number,
-          value: number): void => {
-
+const _drawLinearVerticalSlider = (trackColor: string, fillColor: string) => {
+  return (
+    ctx: CanvasRenderingContext,
+    width: number,
+    height: number,
+    value: number
+  ): void => {
     const lineWidth = 2.0;
 
     const x = 0 + lineWidth / 2;
@@ -84,17 +93,19 @@ const _drawLinearVerticalSlider = (trackColor: string,
 
     ctx.fillRect(x, fillY, width, fillHeight);
     ctx.strokeRect(x, y, width, height);
-  }
-}
+  };
+};
 
-function _drawArc(ctx,
-                  centerX,
-                  centerY,
-                  radius,
-                  arcSize,
-                  startAngle,
-                  endAngle,
-                  lineWidth) {
+function _drawArc(
+  ctx,
+  centerX,
+  centerY,
+  radius,
+  arcSize,
+  startAngle,
+  endAngle,
+  lineWidth
+) {
   const deltaX = centerX;
   const deltaY = centerY;
 
@@ -103,28 +114,29 @@ function _drawArc(ctx,
   ctx.lineWidth = lineWidth;
 
   ctx.beginPath();
-  ctx.moveTo(centerX - (lineWidth / 2), 0);
-  ctx.arc(centerX - (lineWidth / 2), centerY - (lineWidth / 2), radius, startAngle, endAngle);
+  ctx.moveTo(centerX - lineWidth / 2, 0);
+  ctx.arc(
+    centerX - lineWidth / 2,
+    centerY - lineWidth / 2,
+    radius,
+    startAngle,
+    endAngle
+  );
 
   ctx.translate(deltaX, deltaY);
   ctx.rotate(rotateAngle);
   ctx.translate(-deltaX, -deltaY);
 
   ctx.stroke();
-  ctx.resetTransform()
+  ctx.resetTransform();
 }
 
-const _drawRotarySlider = (trackColor,
-                           fillColor) => {
-  return (ctx,
-          width,
-          height,
-          value) => {
-
+const _drawRotarySlider = (trackColor, fillColor) => {
+  return (ctx, width, height, value) => {
     const lineWidth = 3;
     const arcSize = 0.8;
 
-    const radius = Math.min(width, height) * 0.5 - (lineWidth / 2);
+    const radius = Math.min(width, height) * 0.5 - lineWidth / 2;
 
     const centerX = width / 2;
     const centerY = height / 2;
@@ -133,40 +145,58 @@ const _drawRotarySlider = (trackColor,
     const strokeEnd = 2 * Math.PI * arcSize;
 
     const fillStart = -(2.5 * Math.PI * arcSize);
-    const fillEnd = fillStart + (value * (2 * Math.PI * arcSize));
+    const fillEnd = fillStart + value * (2 * Math.PI * arcSize);
 
     ctx.strokeStyle = trackColor;
-    _drawArc(ctx, centerX, centerY, radius, arcSize, strokeStart, strokeEnd, lineWidth);
+    _drawArc(
+      ctx,
+      centerX,
+      centerY,
+      radius,
+      arcSize,
+      strokeStart,
+      strokeEnd,
+      lineWidth
+    );
 
     ctx.strokeStyle = fillColor;
-    _drawArc(ctx, centerX, centerY, radius, arcSize, fillStart, fillEnd, lineWidth);
-  }
-}
+    _drawArc(
+      ctx,
+      centerX,
+      centerY,
+      radius,
+      arcSize,
+      fillStart,
+      fillEnd,
+      lineWidth
+    );
+  };
+};
 
 export interface SliderProps {
-  value?: number
-  sensitivity?: number
-  onChange?: (value: number) => void
+  value?: number;
+  sensitivity?: number;
+  onChange?: (value: number) => void;
   onDraw?: (
     ctx: CanvasRenderingContext,
     width: number,
     height: number,
     value: number
-  ) => void
+  ) => void;
   mapDragGestureToValue?: (
     mouseDownX: number,
     mouseDownY: number,
     sensitivity: number,
     valueAtDragStart: number,
     dragEvent: SyntheticMouseEvent
-  ) => number
+  ) => number;
 }
 
 type SliderState = {
-  width: number,
-  height: number,
-  value: number
-}
+  width: number;
+  height: number;
+  value: number;
+};
 
 /**
  * A generic slider component which can be used as a building block for more complex
@@ -194,7 +224,10 @@ type SliderState = {
  * />
  *
  */
-export class Slider extends Component<PropsWithChildren<SliderProps | any>, SliderState> {
+export class Slider extends Component<
+  PropsWithChildren<SliderProps | any>,
+  SliderState
+> {
   static linearHorizontalGestureMap = _linearHorizontalGestureMap;
   static linearVerticalGestureMap = _linearVerticalGestureMap;
   static rotaryGestureMap = _rotaryGestureMap;
@@ -209,9 +242,9 @@ export class Slider extends Component<PropsWithChildren<SliderProps | any>, Slid
 
   static defaultProps = {
     sensitivity: 1 / 200,
-    onDraw: _drawRotarySlider('ff626262', 'ff66FDCF'),
-    mapDragGestureToValue: _rotaryGestureMap
-  }
+    onDraw: _drawRotarySlider("ff626262", "ff66FDCF"),
+    mapDragGestureToValue: _rotaryGestureMap,
+  };
 
   constructor(props: PropsWithChildren<SliderProps | any>) {
     super(props);
@@ -224,24 +257,26 @@ export class Slider extends Component<PropsWithChildren<SliderProps | any>, Slid
     this.state = {
       width: 0,
       height: 0,
-      value: 0.0
+      value: 0.0,
     };
   }
 
   _onMeasure(e: any) {
     this.setState({
       width: e.width,
-      height: e.height
+      height: e.height,
     });
   }
 
   _onMouseDown(e: SyntheticMouseEvent) {
-    this._valueAtDragStart = this.props.hasOwnProperty('value') ? this.props.value : this.state.value;
+    this._valueAtDragStart = this.props.hasOwnProperty("value")
+      ? this.props.value
+      : this.state.value;
 
     this._mouseDownX = e.x;
     this._mouseDownY = e.y;
 
-    if (typeof this.props.onMouseDown === 'function') {
+    if (typeof this.props.onMouseDown === "function") {
       this.props.onMouseDown(e);
     }
   }
@@ -249,8 +284,8 @@ export class Slider extends Component<PropsWithChildren<SliderProps | any>, Slid
   _onMouseDrag(e: SyntheticMouseEvent) {
     let value = 0.0;
 
-    if (typeof this.props.mapDragGestureToValue !== 'function') {
-      invariant(false, 'Invalid gesture mapping function supplied.');
+    if (typeof this.props.mapDragGestureToValue !== "function") {
+      invariant(false, "Invalid gesture mapping function supplied.");
       return;
     }
 
@@ -262,31 +297,28 @@ export class Slider extends Component<PropsWithChildren<SliderProps | any>, Slid
       e
     );
 
-    if (!this.props.hasOwnProperty('value')) {
+    if (!this.props.hasOwnProperty("value")) {
       this.setState({
-        value: value
+        value: value,
       });
     }
 
-    if (typeof this.props.onChange === 'function') {
+    if (typeof this.props.onChange === "function") {
       this.props.onChange(value);
     }
 
-    if (typeof this.props.onMouseDrag === 'function') {
+    if (typeof this.props.onMouseDrag === "function") {
       this.props.onMouseDrag(e);
     }
   }
 
   _onDraw(ctx: CanvasRenderingContext) {
-    const value = this.props.hasOwnProperty('value') ? this.props.value : this.state.value;
+    const value = this.props.hasOwnProperty("value")
+      ? this.props.value
+      : this.state.value;
 
-    if (typeof this.props.onDraw === 'function') {
-      return this.props.onDraw(
-        ctx,
-        this.state.width,
-        this.state.height,
-        value
-      );
+    if (typeof this.props.onDraw === "function") {
+      return this.props.onDraw(ctx, this.state.width, this.state.height, value);
     }
   }
 
@@ -301,15 +333,15 @@ export class Slider extends Component<PropsWithChildren<SliderProps | any>, Slid
         <Canvas onDraw={this._onDraw} {...styles.canvas} />
         {this.props.children}
       </View>
-    )
+    );
   }
 }
 
 const styles = {
   canvas: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
+    width: "100%",
+    height: "100%",
+    position: "absolute",
     interceptClickEvents: false,
-  }
-}
+  },
+};

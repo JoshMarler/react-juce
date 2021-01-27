@@ -7,18 +7,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
-        registry-url: 'https://npm.pkg.github.com'
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+          registry-url: "https://npm.pkg.github.com"
 
-    - name: Install dependencies
-      working-directory: ${{runner.workspace}}/blueprint/packages/react-juce
-      run: npm ci
+      - name: Install dependencies
+        working-directory: ${{runner.workspace}}/blueprint/packages/react-juce
+        run: npm ci
 
-    - name: Build react-juce
-      working-directory: ${{runner.workspace}}/blueprint/packages/react-juce
-      run: npm run build
+      - name: Build react-juce
+        working-directory: ${{runner.workspace}}/blueprint/packages/react-juce
+        run: npm run build

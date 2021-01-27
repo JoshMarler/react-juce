@@ -1,11 +1,11 @@
 module.exports = {
-  entry: './src/index.js',
+  entry: "./src/index.js",
   output: {
-    path: __dirname + '/build/js',
-    filename: 'main.js',
+    path: __dirname + "/build/js",
+    filename: "main.js",
     sourceMapFilename: "[file].map",
-     devtoolModuleFilenameTemplate: info =>
-    `webpack:///${info.absoluteResourcePath.replace(/\\/g, '/')}`
+    devtoolModuleFilenameTemplate: (info) =>
+      `webpack:///${info.absoluteResourcePath.replace(/\\/g, "/")}`,
   },
   devtool: "source-map",
   module: {
@@ -13,13 +13,13 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: ['babel-loader']
+        use: ["babel-loader"],
       },
       {
         test: /\.svg$/,
         exclude: /node_modules/,
-        use: ['svg-inline-loader']
+        use: ["svg-inline-loader"],
       },
-    ]
+    ],
   },
 };
