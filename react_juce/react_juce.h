@@ -89,6 +89,7 @@
  #pragma GCC diagnostic ignored "-Wsign-conversion"
  #pragma GCC diagnostic ignored "-Wswitch-enum"
  #pragma GCC diagnostic ignored "-Wunused-parameter"
+ #pragma GCC diagnostic ignored  "-Wpedantic"
 #endif
 
 #include "yoga/yoga/log.h"
