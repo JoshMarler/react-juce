@@ -199,11 +199,11 @@ namespace reactjuce
             if (v.isBool() && !v)
                 return JS_FALSE;
             if (v.isInt())
-                return JS_NewInt32(ctx, (int32_t) v);
+                return JS_NewInt32(ctx, static_cast<juce::int32>(v));
             if (v.isInt64())
-                return JS_NewInt64(ctx, (int64_t) v);
+                return JS_NewInt64(ctx, static_cast<juce::int64>(v));
             if (v.isDouble())
-                return JS_NewFloat64(ctx, (double) v);
+                return JS_NewFloat64(ctx, static_cast<double>(v));
             if (v.isString())
                 return JS_NewString(ctx, v.toString().toRawUTF8());
             if (v.isArray())

@@ -9,6 +9,8 @@
 
 #include "View.h"
 
+#include <climits>
+
 
 namespace reactjuce
 {
