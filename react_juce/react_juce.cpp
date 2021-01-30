@@ -49,6 +49,7 @@
  #pragma GCC diagnostic ignored "-Wswitch-enum"
  #pragma GCC diagnostic ignored "-Wunused-variable"
  #pragma GCC diagnostic ignored "-Wredundant-decls"
+ #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
 #include "react_juce.h"

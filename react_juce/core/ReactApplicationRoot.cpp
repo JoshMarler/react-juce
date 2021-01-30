@@ -124,6 +124,21 @@ namespace reactjuce
         }
     }
 
+    juce::var ReactApplicationRoot::evaluateBytecode(const juce::File &code)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+
+        try
+        {
+            return engine->evaluateBytecode(code);
+        }
+        catch (const EcmascriptEngine::Error& err)
+        {
+            handleRuntimeError(err);
+            return juce::var();
+        }
+    }
+
     //==============================================================================
     void ReactApplicationRoot::registerViewType(const juce::String& typeId, ViewManager::ViewFactory f)
     {

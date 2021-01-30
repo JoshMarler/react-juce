@@ -71,6 +71,13 @@ namespace reactjuce
          */
         juce::var evaluate(const juce::File& bundle);
 
+        /** Overload for evaluating precompiled bytecode file in engines which support this.
+         *
+         * Provides default error handling to display the red screen with error
+         * message and stack trace.
+         */
+        juce::var evaluateBytecode(const juce::File &code);
+
         /** Install a custom view type into the view manager. */
         void registerViewType(const juce::String& typeId, ViewManager::ViewFactory f);
 

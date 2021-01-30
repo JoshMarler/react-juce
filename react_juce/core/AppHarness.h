@@ -34,11 +34,15 @@ namespace reactjuce
     {
     public:
         //==============================================================================
-        AppHarness(ReactApplicationRoot& _appRoot);
+        explicit AppHarness(ReactApplicationRoot& _appRoot);
 
         //==============================================================================
+        /** Add JS bundle file to be watched/managed by the AppHarness.  */
         void watch (const juce::File& f);
         void watch (const std::vector<juce::File>& fs);
+
+        void watchBytecode (const juce::File& f);
+        void watchBytecode (const std::vector<juce::File>& fs);
 
         /** Run the initial evaluation step and then watch for file changes. */
         void start();
@@ -218,8 +222,12 @@ namespace reactjuce
 
     private:
         //==============================================================================
-        ReactApplicationRoot& appRoot;
-        std::unique_ptr<FileWatcher> fileWatcher;
+        void handleFilesChanged();
+
+        //==============================================================================
+        ReactApplicationRoot&                  appRoot;
+        std::unique_ptr<FileWatcher>           fileWatcher;
+        std::unordered_map<juce::String, bool> sourceFileTypeMap;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppHarness)

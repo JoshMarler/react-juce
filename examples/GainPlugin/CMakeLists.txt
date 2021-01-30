@@ -48,7 +48,7 @@ target_include_directories(GainPlugin PRIVATE react_juce/)
 # definitions will be visible both to your code, and also the JUCE module code, so for new
 # definitions, pick unique names that are unlikely to collide! This is a standard CMake command.
 target_compile_definitions(GainPlugin
-    PUBLIC
+    PRIVATE
     GAINPLUGIN_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
     JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
     JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call

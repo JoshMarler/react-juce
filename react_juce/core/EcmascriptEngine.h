@@ -67,6 +67,17 @@ namespace reactjuce
         juce::var evaluateInline (const juce::String& code);
         juce::var evaluate (const juce::File& code);
 
+        /**
+         * An evaluate overload for engines which support loading precompiled
+         * JS bytecode.
+         * @param code The precompiled bytecode filed to evaluate.
+         * @return juce::var result of the evaluation
+         * @throws EcmascriptEngine::Error in the event of an evaluation error
+         *         or when called on an engine instance which does not support
+         *         loading of precompiled bytecode.
+         */
+        juce::var evaluateBytecode(const juce::File &code);
+
         //==============================================================================
         /** Registers a native method by the given name in the global namespace. */
         void registerNativeMethod (const juce::String&, juce::var::NativeFunction fn);

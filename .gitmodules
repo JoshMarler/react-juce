@@ -4,3 +4,6 @@
 [submodule "yoga"]
 	path = react_juce/yoga
 	url = ../../facebook/yoga.git
+[submodule "react_juce/hermes"]
+	path = react_juce/hermes
+	url = ../../facebook/hermes.git

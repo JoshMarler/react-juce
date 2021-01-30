@@ -50,7 +50,13 @@ namespace reactjuce
 
         // Set up the file watching and kick off the initial render
         harness.watch(bundleFile);
+
+#if JUCE_DEBUG
+        // We only want to watch for compile changes in debug mode.
         harness.start();
+#else
+        harness.once();
+#endif
 
         // Add ReactApplicationRoot as child component
         addAndMakeVisible(appRoot);
