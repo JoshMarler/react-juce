@@ -34,46 +34,35 @@ namespace reactjuce
         if (name == sourceProp)
         {
             const juce::String source = value.toString();
-            const juce::URL    sourceURL = source;
+            const int sourceHash      = juce::DefaultHashFunctions::generateHash(source, 1024);
 
-            if (isWellFormedURL(sourceURL))
+            // No need to recalculate the image if it's already in the ImageCache.
+            const juce::Image& cachedImage = juce::ImageCache::getFromHashCode(sourceHash);
+            if (cachedImage.isValid())
+                return setDrawableImage(cachedImage, sourceHash);
+
+            try
             {
+                const juce::URL sourceURL = source;
+
                 // Web images are downloaded in a separate thread to avoid blocking.
-                if (sourceURL.isProbablyAWebsiteURL(sourceURL.toString(false)))
-                {
-                    const auto sourceHash = juce::DefaultHashFunctions::generateHash(source, 1024);
-                    const auto& cachedImage = juce::ImageCache::getFromHashCode(sourceHash);
-                    if (cachedImage.isValid())
-                    {
-                        setDrawableImage(cachedImage);
-                    }
-                    else
-                    {
-                        downloadImageAsync(source);
-                    }
-                }
-                else if (sourceURL.isLocalFile())
-                {
-                    setDrawableImage(loadImageFromFileURL(sourceURL));
-                }
-                else
-                {
-                    const juce::String errorString = "Unsupported image URL: " + source;
-                    throw std::logic_error(errorString.toStdString());
-                }
+                if (isWellFormedURL(sourceURL) && sourceURL.isProbablyAWebsiteURL(sourceURL.toString(false)))
+                    return downloadImageAsync(source); 
+                    
+                if (sourceURL.isLocalFile())
+                    return setDrawableImage(loadImageFromFileURL(sourceURL), sourceHash);
+                    
+                if (source.startsWith("data:image/")) // juce::URL does not currently handle Data URLs
+                    return setDrawableImage(loadImageFromDataURL(source), sourceHash);
+
+                // Last case left, possibly SVG/Image data.
+                return setDrawableData(source);
             }
-            else if (source.startsWith("data:image/")) // juce::URL does not currently handle Data URLs
+            catch (const std::exception& l)
             {
-                setDrawableImage(loadImageFromDataURL(source));
-            }
-            else // If not a URL treat source prop as inline SVG/Image data
-            {
-                drawable = std::unique_ptr<juce::Drawable>(
-                    juce::Drawable::createFromImageData(
-                        source.toRawUTF8(),
-                        source.getNumBytesAsUTF8()
-                    )
-                );
+                // Every image format can throw an exception that we catch here
+                // to send an onError callback to the React component.
+                return sendOnErrorCallback(juce::String(l.what()));
             }
         }
     }
@@ -99,6 +88,60 @@ namespace reactjuce
     }
 
     //==============================================================================
+    void ImageView::sendOnLoadCallback()
+    {
+        // Notify JS that image is loaded.
+        if (props.contains(onloadProp) && props[onloadProp].isMethod())
+            std::invoke(props[onloadProp].getNativeFunction(), juce::var::NativeFunctionArgs(juce::var(), {}, 0));
+    }
+
+    //==============================================================================
+    void ImageView::sendOnErrorCallback(const juce::String& message)
+    {
+        // Send an error callback to JS.
+        if (props.contains(onerrorProp) && props[onerrorProp].isMethod())
+        {
+            std::vector<juce::var> jsArgs{ {detail::makeErrorObject("ImageViewError", message)} };
+            juce::var::NativeFunctionArgs nfArgs(juce::var(), jsArgs.data(), static_cast<int>(jsArgs.size()));
+            std::invoke(props[onerrorProp].getNativeFunction(), nfArgs);
+        }
+    }
+
+    //==============================================================================
+    void ImageView::setDrawableImage(const juce::Image& image, const int sourceHash)
+    {
+        // Add the freshly retrieved image to the cache.
+        juce::ImageCache::addImageToCache(image, sourceHash);
+
+        auto drawableImg = std::make_unique<juce::DrawableImage>();
+        drawableImg->setImage(image);
+        drawable = std::move(drawableImg);
+
+        repaint();
+        sendOnLoadCallback();
+    }
+
+    void ImageView::setDrawableData(const juce::String& source)
+    {
+        // If not a URL treat source prop as inline SVG/Image data
+        drawable = std::unique_ptr<juce::Drawable>(
+            juce::Drawable::createFromImageData(
+                source.toRawUTF8(),
+                source.getNumBytesAsUTF8()
+            )
+        );
+
+        if (drawable == nullptr)
+        {
+            const juce::String errorString = "Unsupported image URL: " + source;
+            throw std::logic_error(errorString.toStdString());
+        }
+        
+        repaint();
+        sendOnLoadCallback();
+    }
+
+    //==============================================================================
     void ImageView::parentHierarchyChanged()
     {
         if (shouldDownloadImage)
@@ -114,13 +157,15 @@ namespace reactjuce
         {
             appRoot->getThreadPool().addJob([this, source] ()
             {
+                shouldDownloadImage = false;
                 juce::MemoryBlock mb;
 
                 // Did we reach the URL?
                 if (!juce::URL(source).readEntireBinaryStream(mb)) 
                 {
-                    shouldDownloadImage = true;
-                    juce::MessageManager::callAsync([this]() { sendOnErrorCallback(); });
+                    juce::MessageManager::callAsync([this]() { 
+                        sendOnErrorCallback("Could not reach URL"); 
+                    });
                     return;
                 }
 
@@ -129,25 +174,21 @@ namespace reactjuce
                 {
                     juce::MessageManager::callAsync([this, image, source]()
                     {
-                        // Add the freshly downloaded image to the cache.
-                        auto sourceHash = juce::DefaultHashFunctions::generateHash(source, 1024);
-                        juce::ImageCache::addImageToCache(image, sourceHash);
-
                         // At this point, there may be multiple downloads happening at the same time,
                         // so we need to be sure the one that's just finished matches the current sourceProp.
                         if (source == props[sourceProp].toString())
                         {
-                            setDrawableImage(image);
-                            repaint();
-
-                            shouldDownloadImage = false;
+                            auto sourceHash = juce::DefaultHashFunctions::generateHash(source, 1024);
+                            setDrawableImage(image, sourceHash);
                         }
                     });
                 }
                 else
                 {
                     // The URL was valid but was not pointing to a valid image.
-                    juce::MessageManager::callAsync([this]() { sendOnErrorCallback(); });
+                    juce::MessageManager::callAsync([this]() { 
+                        sendOnErrorCallback("The URL was not pointing to a valid image"); 
+                    });
                 }
             });
         }
@@ -156,30 +197,6 @@ namespace reactjuce
             // It will be called later on parentHierarchyChanged.
             shouldDownloadImage = true;
         }
-    }
-
-    //==============================================================================
-    void ImageView::sendOnErrorCallback()
-    {
-        // Send an error callback to JS.
-        if (props.contains(onerrorProp) && props[onerrorProp].isMethod())
-        {
-            std::vector<juce::var> jsArgs{ {detail::makeErrorObject("ImageViewError", "Failed to load image resource")} };
-            juce::var::NativeFunctionArgs nfArgs(juce::var(), jsArgs.data(), static_cast<int>(jsArgs.size()));
-            std::invoke(props[onerrorProp].getNativeFunction(), nfArgs);
-        }
-    }
-
-    //==============================================================================
-    void ImageView::setDrawableImage(const juce::Image& image)
-    {
-        auto drawableImg = std::make_unique<juce::DrawableImage>();
-        drawableImg->setImage(image);
-        drawable = std::move(drawableImg);
-
-        // Notify JS that image is loaded.
-        if (props.contains(onloadProp) && props[onloadProp].isMethod())
-            std::invoke(props[onloadProp].getNativeFunction(), juce::var::NativeFunctionArgs(juce::var(), {}, 0));
     }
 
     //==============================================================================
