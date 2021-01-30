@@ -130,6 +130,37 @@ namespace reactjuce
         }
 
         //==============================================================================
+        juce::var invoke(const juce::String& name, const std::vector<juce::var>& vargs)
+        {
+            auto funcVal = JS_Eval(ctx, name.toRawUTF8(), name.getNumBytesAsUTF8(), "<input>", JS_EVAL_TYPE_GLOBAL);
+
+            if (JS_IsException(funcVal))
+            {
+                auto ex = JS_GetException(ctx);
+                auto msg = JS_GetPropertyStr(ctx, ex, "message");
+                auto stack = JS_GetPropertyStr(ctx, ex, "stack");
+
+                throw EcmascriptEngine::Error(JS_ToCString(ctx, msg), JS_ToCString(ctx, stack));
+            }
+
+            if (JS_IsFunction(ctx, funcVal))
+            {
+                std::vector<JSValue> jsArgs;
+
+                for (size_t i = 0; i < vargs.size(); ++i)
+                    jsArgs.push_back(varToJSValue(ctx, vargs[i]));
+
+                auto thisVal = JS_NULL;
+                auto ret = JS_Call(ctx, funcVal, thisVal, (int) jsArgs.size(), jsArgs.data());
+
+                // JS_Free ret? thisVal?
+                return JSValueToVar(ctx, ret);
+            }
+
+            throw EcmascriptEngine::Error("Trying to invoke a non-function.", "No stack to show.");
+        }
+
+        //==============================================================================
         JSValue setTimeout(JSContext* ctx, JSValueConst thisVal, int argc, JSValueConst* argv)
         {
             if (argc < 1)
@@ -424,7 +455,7 @@ namespace reactjuce
     //==============================================================================
     juce::var EcmascriptEngine::invoke (const juce::String& name, const std::vector<juce::var>& vargs)
     {
-        return juce::var("Not Implemented");
+        return mPimpl->invoke(name, vargs);
     }
 
     void EcmascriptEngine::reset() {}
