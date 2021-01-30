@@ -37,14 +37,13 @@ namespace blueprint
     public:
         //==============================================================================
         explicit TextInput(const juce::NamedValueSet &_props)
-            :
-            props(_props),
-            controlled(false),
-            insertedAsControlledValue(false),
-            dirty(false),
-            maxLength(INT_MAX),
-            placeholderText(),
-            placeholderColour(juce::Colours::black) {}
+            : props(_props)
+            , controlled(false)
+            , insertedAsControlledValue(false)
+            , dirty(false)
+            , maxLength(INT_MAX)
+            , placeholderText()
+            , placeholderColour(juce::Colours::black) {}
 
         void insertTextAtCaret(const juce::String &textToInsert) override;
         void setControlled(bool _controlled) { controlled = _controlled; }
@@ -99,13 +98,19 @@ namespace blueprint
         static const inline juce::Identifier onChangeProp = "onChange";
 
         //==============================================================================
-        TextInputView();
+        TextInputView()
+            : textInput(props)
+        {
+            addAndMakeVisible(textInput);
+            textInput.addListener(&textInput);
+            textInput.setPopupMenuEnabled(false);
+        }
         void setProperty(const juce::Identifier &name, const juce::var &value) override;
         void resized() override;
 
     private:
         //==============================================================================
-        juce::Font getFont();
+        juce::Font getFont() const;
         static bool isTextEditorColorProp(const juce::Identifier &textEditorColorProp);
         void setTextEditorColorProp(const juce::Identifier &textEditorColorProp, const juce::var &value);
 

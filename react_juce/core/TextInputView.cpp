@@ -55,9 +55,9 @@ namespace blueprint
 
     void TextInput::insertTextAtCaret(const juce::String &textToInsert)
     {
-        juce::String currentValue = getText();
+        const juce::String currentValue = getText();
         juce::TextEditor::insertTextAtCaret(textToInsert);
-        juce::String newValue = getText();
+        const juce::String newValue = getText();
         if (currentValue == newValue)
         {
             return;
@@ -109,14 +109,6 @@ namespace blueprint
 
     //==============================================================================
 
-    TextInputView::TextInputView()
-        : textInput(props)
-    {
-        addAndMakeVisible(textInput);
-        textInput.addListener(&textInput);
-        textInput.setPopupMenuEnabled(false);
-    }
-
     void TextInputView::setProperty(const juce::Identifier &name, const juce::var &value)
     {
         View::setProperty(name, value);
@@ -124,29 +116,37 @@ namespace blueprint
         {
             if (!value.isString())
                 throw std::invalid_argument("Invalid prop value. Prop \'value\' must be a string.");
+
             textInput.setControlled(true);
             textInput.setControlledValue(value);
         }
+
         if (name == placeholderProp)
         {
             if (!value.isString())
                 throw std::invalid_argument("Invalid prop value. Prop \'placeholder\' must be a string.");
+
             textInput.setPlaceholderText(value);
         }
+
         if (name == placeholderColorProp)
         {
             if (!value.isString())
                 throw std::invalid_argument("Invalid prop value. Prop \'placeholder-color\' must be a color string.");
-            juce::String hexPlaceholderColor = value;
-            juce::Colour placeholderColor = juce::Colour::fromString(hexPlaceholderColor);
+
+            const juce::String hexPlaceholderColor = value;
+            const juce::Colour placeholderColor = juce::Colour::fromString(hexPlaceholderColor);
             textInput.setPlaceholderColour(placeholderColor);
         }
+
         if (name == maxlengthProp)
         {
             if (!value.isDouble())
               throw std::invalid_argument("Invalid prop value. Prop \'maxlength\' must be a number.");
+
             textInput.setMaxLength(value);
         }
+
         if (name == readonly)
         {
             textInput.setReadOnly(value);
@@ -154,8 +154,8 @@ namespace blueprint
 
         textInput.applyFontToAllText(getFont());
 
-        juce::String hexColor = props.getWithDefault(colorProp, "ff000000");
-        juce::Colour colour = juce::Colour::fromString(hexColor);
+        const juce::String hexColor = props.getWithDefault(colorProp, "ff000000");
+        const juce::Colour colour = juce::Colour::fromString(hexColor);
         textInput.applyColourToAllText(colour);
 
         const int just = props.getWithDefault(justificationProp, 1);
@@ -171,28 +171,28 @@ namespace blueprint
         textInput.setBounds(getLocalBounds());
     }
 
-    juce::Font TextInputView::getFont()
+    juce::Font TextInputView::getFont() const
     {
         return TextView::getFont(props);
     }
 
     bool TextInputView::isTextEditorColorProp(const juce::Identifier &textEditorColorProp)
     {
-        auto it = textEditorColourIdsByProp.find(textEditorColorProp);
-        bool found = (it != textEditorColourIdsByProp.end());
-        return found;
+        const auto it = textEditorColourIdsByProp.find(textEditorColorProp);
+        return it != textEditorColourIdsByProp.end();
     }
 
     void TextInputView::setTextEditorColorProp(const juce::Identifier &textEditorColorProp, const juce::var &value)
     {
         if (!value.isString())
         {
-            std::string propName = textEditorColorProp.toString().toStdString();
-            std::string message = "Invalid prop value. Prop \'" + propName + "\' must be a color string.";
+            const std::string propName = textEditorColorProp.toString().toStdString();
+            const std::string message = "Invalid prop value. Prop \'" + propName + "\' must be a color string.";
             throw std::invalid_argument(message);
         }
-        juce::String hexColor = value;
-        juce::Colour color = juce::Colour::fromString(hexColor);
+
+        const juce::String hexColor = value;
+        const juce::Colour color = juce::Colour::fromString(hexColor);
         textInput.setColour(textEditorColourIdsByProp.at(textEditorColorProp), color);
     }
 
