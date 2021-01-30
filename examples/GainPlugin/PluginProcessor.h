@@ -20,6 +20,7 @@ class GainPluginAudioProcessor  : public AudioProcessor, private Timer
 public:
     //==============================================================================
     GainPluginAudioProcessor();
+    ~GainPluginAudioProcessor() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;

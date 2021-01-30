@@ -49,7 +49,7 @@ GainPluginAudioProcessor::GainPluginAudioProcessor()
 
 GainPluginAudioProcessor::~GainPluginAudioProcessor()
 {
-    Timer::stopTimer();
+    stopTimer();
 }
 
 //==============================================================================
@@ -166,7 +166,7 @@ void GainPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
         if (muted)
             buffer.applyGain(0.0f);
     }
-    
+
     // Read current block gain peak value
     gainPeakValue = buffer.getMagnitude (0, buffer.getNumSamples());
 }
@@ -194,14 +194,14 @@ AudioProcessorEditor* GainPluginAudioProcessor::createEditor()
     editor->setResizeLimits(400, 240, 400 * 2, 240 * 2);
     editor->getConstrainer()->setFixedAspectRatio(400.0 / 240.0);
     editor->setSize (400, 240);
-    
+
     // Start timer to dispatch gainPeakValues event to update Meter values
-    Timer::startTimer(100);
+    startTimer(100);
 
     return editor;
 }
 
-void GainPluginReactAudioProcessor::timerCallback()
+void GainPluginAudioProcessor::timerCallback()
 {
     if (auto* editor = dynamic_cast<reactjuce::GenericEditor*>(getActiveEditor()))
     {
