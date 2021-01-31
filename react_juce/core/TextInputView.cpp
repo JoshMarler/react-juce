@@ -29,31 +29,31 @@ namespace blueprint
         }
     }
 
-    void TextInput::setControlledValue(const juce::String &value)
+    void TextInputView::TextInput::setControlledValue(const juce::String &value)
     {
         insertedAsControlledValue = true;
         setText(value);
     }
 
-    void TextInput::setMaxLength(int maxLen)
+    void TextInputView::TextInput::setMaxLength(int maxLen)
     {
         maxLength = maxLen;
         setInputRestrictions(maxLen);
     }
 
-    void TextInput::setPlaceholderText(const juce::String &text)
+    void TextInputView::TextInput::setPlaceholderText(const juce::String &text)
     {
         placeholderText = text;
         setTextToShowWhenEmpty(placeholderText, placeholderColour);
     }
 
-    void TextInput::setPlaceholderColour(const juce::Colour &colourToUse)
+    void TextInputView::TextInput::setPlaceholderColour(const juce::Colour &colourToUse)
     {
         placeholderColour = colourToUse;
         setTextToShowWhenEmpty(placeholderText, placeholderColour);
     }
 
-    void TextInput::insertTextAtCaret(const juce::String &textToInsert)
+    void TextInputView::TextInput::insertTextAtCaret(const juce::String &textToInsert)
     {
         const juce::String currentValue = getText();
         juce::TextEditor::insertTextAtCaret(textToInsert);
@@ -82,17 +82,17 @@ namespace blueprint
 
     //==============================================================================
 
-    void TextInput::textEditorReturnKeyPressed(juce::TextEditor &)
+    void TextInputView::TextInput::textEditorReturnKeyPressed(juce::TextEditor &)
     {
         invokeChangeEventIfNeeded();
     }
 
-    void TextInput::textEditorFocusLost(juce::TextEditor &)
+    void TextInputView::TextInput::textEditorFocusLost(juce::TextEditor &)
     {
         invokeChangeEventIfNeeded();
     }
 
-    void TextInput::invokeChangeEventIfNeeded()
+    void TextInputView::TextInput::invokeChangeEventIfNeeded()
     {
         if (dirty)
         {
