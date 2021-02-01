@@ -11,7 +11,7 @@
 
 #include "View.h"
 
-namespace blueprint
+namespace reactjuce
 {
     //==============================================================================
     /** The TextInputView class is a core view for text editor

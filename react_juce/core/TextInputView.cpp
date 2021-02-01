@@ -10,7 +10,7 @@
 #include "TextInputView.h"
 #include "TextView.h"
 
-namespace blueprint
+namespace reactjuce
 {
     namespace detail
     {
