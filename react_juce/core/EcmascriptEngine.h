@@ -150,10 +150,13 @@ namespace reactjuce
         void debuggerDetach();
 
         //==============================================================================
+        // Public type definition for the implementation details
         struct Pimpl;
-        std::unique_ptr<Pimpl> mPimpl;
 
     private:
+        //==============================================================================
+        std::unique_ptr<Pimpl> mPimpl;
+
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EcmascriptEngine)
     };

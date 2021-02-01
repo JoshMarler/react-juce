@@ -34,8 +34,8 @@ namespace reactjuce
         {
             using CallbackType = std::function<void(void)>;
 
-            FuncTimer(CallbackType&& cb, double interval)
-                : callback(std::move(cb))
+            FuncTimer(CallbackType&& cb, double interval, bool rpt)
+                : callback(std::move(cb)), repeats(rpt)
             {
                 timerId = nextTimerId++;
                 startTimer(interval);
@@ -49,9 +49,15 @@ namespace reactjuce
             void timerCallback() override
             {
                 std::invoke(callback);
+
+                // TODO: If we don't repeat, we also want to destroy this FuncTimer
+                // object... otherwise we just hold onto it forever
+                if (!repeats)
+                    stopTimer();
             }
 
             CallbackType callback;
+            bool repeats;
             int32_t timerId;
 
             static int32_t nextTimerId;
@@ -172,11 +178,12 @@ namespace reactjuce
                 args.push_back(JSValueToVar(ctx, argv[i]));
 
             double const interval = (double) args[1];
+            bool const repeats = 0;
 
             auto timer = std::make_unique<FuncTimer>([this, ctx_ = ctx, args = std::move(args)]() {
                 juce::var::NativeFunctionArgs jsArgs(juce::var::undefined(), args.data() + 2, static_cast<int>(args.size() - 2));
                 std::invoke(args[0].getNativeFunction(), jsArgs);
-            }, interval);
+            }, interval, repeats);
 
             auto timerId = timer->timerId;
             funcTimers.push_back(std::move(timer));
