@@ -13,6 +13,7 @@
 #include "ScrollView.h"
 #include "ScrollViewContentShadowView.h"
 #include "TextView.h"
+#include "TextInputView.h"
 #include "TextShadowView.h"
 
 
@@ -44,6 +45,7 @@ namespace reactjuce
         // Register the default view types
         registerViewType("View", GenericViewFactory<View, ShadowView>());
         registerViewType("Text", GenericViewFactory<TextView, TextShadowView>());
+        registerViewType("TextInput", GenericViewFactory<TextInputView, ShadowView>());
         registerViewType("CanvasView", GenericViewFactory<CanvasView, ShadowView>());
         registerViewType("Image", GenericViewFactory<ImageView, ShadowView>());
         registerViewType("ScrollView", GenericViewFactory<ScrollView, ShadowView>());
