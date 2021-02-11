@@ -29,7 +29,7 @@ namespace reactjuce
             if(colorVariant.isObject()) {
                 auto linearGradientObj = juce::JSON::parse(juce::JSON::toString(colorVariant));
                 int deg = linearGradientObj.getProperty("angle", juce::var());
-                double radians = deg * (M_PI/180);
+                double radians = deg * (juce::MathConstants<double>::pi / 180.0);
                 auto colorStops = linearGradientObj.getProperty("colours", juce::var()).getArray();
                 double maximumPercent = colorStops->getFirst().getProperty("position", juce::var());
                 double minimumPercent = colorStops->getFirst().getProperty("position", juce::var());
@@ -82,12 +82,12 @@ namespace reactjuce
                 int height = b.getHeight();
                 juce::Array<int> centerPoint{width/2, height/2};
                 auto getEdgePointsFromAngle = [](int width, int height, int deg){
-                    double twoPI = M_PI * 2;
-                    double theta = (360 - (deg + 270))  * M_PI / 180;
-                    while (theta < -M_PI) {
+                    double twoPI = juce::MathConstants<double>::twoPi;
+                    double theta = (360 - (deg + 270))  * juce::MathConstants<double>::pi / 180;
+                    while (theta < -juce::MathConstants<double>::pi) {
                         theta += twoPI;
                     }
-                    while (theta > M_PI) {
+                    while (theta > juce::MathConstants<double>::pi) {
                         theta -= twoPI;
                     }
                     double rectAtan = atan2(height, width);
@@ -95,9 +95,9 @@ namespace reactjuce
                     int region;
                     if ((theta > -rectAtan) && (theta <= rectAtan)) {
                         region = 1;
-                    } else if ((theta > rectAtan) && (theta <= (M_PI - rectAtan))) {
+                    } else if ((theta > rectAtan) && (theta <= (juce::MathConstants<double>::pi - rectAtan))) {
                         region = 2;
-                    } else if ((theta > (M_PI - rectAtan)) || (theta <= -(M_PI - rectAtan))) {
+                    } else if ((theta > (juce::MathConstants<double>::pi - rectAtan)) || (theta <= -(juce::MathConstants<double>::pi - rectAtan))) {
                         region = 3;
                     } else {
                         region = 4;
