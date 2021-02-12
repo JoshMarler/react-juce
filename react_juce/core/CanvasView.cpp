@@ -656,9 +656,12 @@ namespace reactjuce
         //      May require passing an optional scaleFactor
         //      arg through to draw commands.
         const auto bounds = getLocalBounds();
-        canvasImage = canvasImage.rescaled(bounds.getWidth(),
-                                           bounds.getHeight(),
-                                           juce::Graphics::highResamplingQuality);
+        if (bounds.getWidth() > 0 && bounds.getHeight() > 0)
+        {
+            canvasImage = canvasImage.rescaled(bounds.getWidth(),
+                                               bounds.getHeight(),
+                                               juce::Graphics::highResamplingQuality);
+        }
     }
 
     //==============================================================================
