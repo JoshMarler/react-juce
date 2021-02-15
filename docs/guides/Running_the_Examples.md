@@ -7,14 +7,14 @@ please start there!
 
 ![Gain Plugin example project user interface](../_media/gainplugin.jpg)
 
-Blueprint includes an extremely simple utility gain plugin to demonstrate the minimal
-code required for integrating Blueprint into a JUCE project. To get it running,
+React-JUCE includes an extremely simple utility gain plugin to demonstrate the minimal
+code required for integrating React-JUCE into a JUCE project. To get it running,
 we only need two steps: compiling the JavaScript bundle, and then compiling and
 running the native code.
 
 ### JavaScript Bundle
 
-All Blueprint projects have two components: we have the native code that knows how
+All React-JUCE projects have two components: we have the native code that knows how
 to mount the React application into our JUCE project and satisfy calls from React's
 reconciler, and then we have the React.js application code that we want to run in the
 native environment. In order to ease this handoff, we're using a tool in this
@@ -23,7 +23,7 @@ file. That single file is then the only thing we need to execute in the native
 environment.
 
 To get the GainPlugin up and running for the first time, we have to first perform
-that compilation step. So, from the root of the `Blueprint` git repository:
+that compilation step. So, from the root of the `React-JUCE` git repository:
 
 ```bash
 $ cd examples/GainPlugin/Source/jsui/
@@ -62,9 +62,9 @@ $ npm start
 
 This will first build your JavaScript bundle, then wait and watch your source files
 for changes. When it finds a change, it will pick that change up and incrementally
-rebuild your bundle. In turn, Blueprint will pick up the change to the bundle file
+rebuild your bundle. In turn, React-JUCE will pick up the change to the bundle file
 and redraw your interface.
 
 Now that you're up and running, take a minute to tweak the GainPlugin React
 application to get a sense of the workflow! When you're done, let's move on to
-the next step, [adding Blueprint to your own project](New_Project.md).
+the next step, [adding React-JUCE to your own project](New_Project.md).

@@ -4,7 +4,7 @@ This guide assumes you have some familiarity with [React.js](https://reactjs.org
 
 ## Dependencies
 
-To get started with Blueprint, you'll first need to install a few dependencies:
+To get started with React-JUCE, you'll first need to install a few dependencies:
 
 - [Node.js](https://nodejs.org/en/) v8.11.0+
 - [npm](https://www.npmjs.com/) v5.6.0+
@@ -12,8 +12,8 @@ To get started with Blueprint, you'll first need to install a few dependencies:
 - Xcode10.2+ (MacOS)
 - Visual Studio 2017+ (Windows)
 
-Once you have the dependencies installed, we need to clone the Blueprint repository
-itself. Blueprint's git repository contains necessary submodules, so we'll need to
+Once you have the dependencies installed, we need to clone the React-JUCE repository
+itself. React-JUCE's git repository contains necessary submodules, so we'll need to
 collect those as well, which we can do one of two ways:
 
 ```bash
