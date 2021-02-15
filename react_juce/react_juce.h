@@ -18,7 +18,7 @@
 
 #pragma once
 
-#define BLUEPRINT_H_INCLUDED
+#define REACTJUCE_H_INCLUDED
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
@@ -33,24 +33,6 @@
 
 #if ! JUCE_CXX17_IS_AVAILABLE
     #error "React-JUCE module requires a C++17 compatible toolchain!"
-#endif
-
-//==============================================================================
-/** Config: BLUEPRINT_COMPILE_UNIT_TESTS
-
-    If enabled, compiles Blueprint's unit tests in the application.
-*/
-#ifndef BLUEPRINT_COMPILE_UNIT_TESTS
-    #define BLUEPRINT_COMPILE_UNIT_TESTS 0
-#endif
-
-/** Config: BLUEPRINT_CREATE_GLOBAL_UNIT_TESTS
-
-    If enabled, instantiates unit tests globally.
-    You will want to disable this in console apps.
-*/
-#ifndef BLUEPRINT_CREATE_GLOBAL_UNIT_TESTS
-    #define BLUEPRINT_CREATE_GLOBAL_UNIT_TESTS BLUEPRINT_COMPILE_UNIT_TESTS
 #endif
 
 //==============================================================================
@@ -131,7 +113,3 @@
 #include "core/Utils.h"
 #include "core/View.h"
 #include "core/ViewManager.h"
-
-#if BLUEPRINT_COMPILE_UNIT_TESTS
-    #include "tests/EcmascriptEngineTests.h"
-#endif
