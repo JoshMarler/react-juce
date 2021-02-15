@@ -74,7 +74,7 @@ namespace reactjuce
         /** Install a custom view type into the view manager. */
         void registerViewType(const juce::String& typeId, ViewManager::ViewFactory f);
 
-        /** Dispatches an event through Blueprint's EventBridge. */
+        /** Dispatches an event through the EventBridge. */
         template <typename... T>
         void dispatchEvent (const juce::String& eventType, T... args)
         {
@@ -93,7 +93,7 @@ namespace reactjuce
             }
         }
 
-        /** Dispatches a view event through Blueprint's internal event replayer. */
+        /** Dispatches a view event through the internal event replayer. */
         template <typename... T>
         void dispatchViewEvent (T... args)
         {

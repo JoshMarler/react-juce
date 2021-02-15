@@ -16,8 +16,9 @@ namespace reactjuce
 {
 
     //==============================================================================
-    /** The ScrollView class is a core view for scrollable content within Blueprint's
-        layout system. It's basically a proxy component where the appendChild/removeChild
+    /** The ScrollView class is a core view for scrollable content.
+
+        This is basically a proxy component where the appendChild/removeChild
         methods delegate to a single child juce::Viewport.
      */
     class ScrollView : public View

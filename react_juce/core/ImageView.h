@@ -15,9 +15,7 @@
 namespace reactjuce
 {
     //==============================================================================
-    /** The ImageView class is a core view for drawing images within Blueprint's
-        layout system.
-     */
+    /** The ImageView class is a core view for rendering images from React. */
     class ImageView : public View
     {
     public:

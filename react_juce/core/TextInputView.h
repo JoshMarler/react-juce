@@ -15,9 +15,7 @@
 namespace reactjuce
 {
     //==============================================================================
-    /** The TextInputView class is a core view for text editor
-     * within Blueprint's layout system.
-     */
+    /** The TextInputView class is a core view for text editing. */
     class TextInputView : public View
     {
         //==============================================================================

@@ -17,7 +17,7 @@ namespace reactjuce
 
     //==============================================================================
     /** The TextView class is a core container abstraction for declaring text components
-        within Blueprint's layout system.
+        within the layout system.
      */
     class TextView : public View
     {
