@@ -243,7 +243,7 @@ duk_size_t duk_trans_socket_write_cb(void *udata, const char *buffer, duk_size_t
 
 	//TODO: Hacked the example implementation for now to avoid SIGPIPE errors terminating the
 	//      program when debug client terminates the tcp connection.
-	//      We should probably move this to a blueprint specific debug transport implementation at some point.
+	//      We should probably move this to a react-juce specific debug transport implementation at some point.
 	//      For more advanced users, it may be useful to allow a mechanism to easily override the
 	//      transport mechanism used for debugging. i.e. to allow debug over serial etc.
 	signal(SIGPIPE, SIG_IGN);

@@ -3742,7 +3742,7 @@ typedef struct duk_hthread duk_context;
 
 #if JUCE_DEBUG
 //TODO: We need a better system for allowing custom/user configured duk_config headers
-//      in blueprint. This set of inline change works for now to enable debugging support.
+//      in react-juce. This set of inline change works for now to enable debugging support.
 #define DUK_USE_INTERRUPT_COUNTER
 #define DUK_USE_DEBUGGER_SUPPORT
 #define DUK_USE_DEBUGGER_INSPECT

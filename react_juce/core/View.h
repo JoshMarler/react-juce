@@ -23,7 +23,7 @@ namespace reactjuce
     using ViewId = juce::int32;
 
     //==============================================================================
-    /** The View class is the core component abstraction for Blueprint's declarative
+    /** The View class is the core component abstraction for React-JUCE's declarative
         flex-based component composition.
      */
     class View : public juce::Component

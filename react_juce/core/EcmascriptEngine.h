@@ -128,7 +128,7 @@ namespace reactjuce
          *  method name may be any expression that leaves the target function on the
          *  top of the stack. For example:
          *
-         *  `invoke("BlueprintNative.dispatchViewEvent", args);`
+         *  `invoke("global.dispatchViewEvent", args);`
          *
          *  @returns juce::var result of the invocation
          *  @throws EcmascriptEngine::Error in the event of an error
@@ -141,7 +141,7 @@ namespace reactjuce
          *  method name may be any expression that leaves the target function on the
          *  top of the stack. For example:
          *
-         *  `invoke("BlueprintNative.dispatchViewEvent", "click");`
+         *  `invoke("global.dispatchViewEvent", "click");`
          *
          *  @returns juce::var result of the invocation
          *  @throws EcmascriptEngine::Error in the event of an error
