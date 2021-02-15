@@ -1,17 +1,17 @@
 # Introduction
 
-Blueprint is a hybrid JavaScript/C++ framework that enables a [React.js](https://reactjs.org/) frontend for a [JUCE](http://juce.com/) application or plugin. It provides an embedded, ECMAScript-compliant JavaScript engine via [Duktape](http://duktape.org/), native hooks for rendering the React component tree via `juce::Component` instances, and a flexbox layout engine via [Yoga](https://yogalayout.com/).
+React-JUCE is a hybrid JavaScript/C++ framework that enables a [React.js](https://reactjs.org/) frontend for a [JUCE](http://juce.com/) application or plugin. It provides an embedded, ECMAScript-compliant JavaScript engine via [Duktape](http://duktape.org/), native hooks for rendering the React component tree via `juce::Component` instances, and a flexbox layout engine via [Yoga](https://yogalayout.com/).
 
-For more information, see the introductory blog post here: [Blueprint: A JUCE Rendering Backend for React.js](https://nickwritesablog.com/blueprint-a-juce-rendering-backend-for-react-js)
+For more information, see the introductory blog post here: [React-JUCE: A JUCE Rendering Backend for React.js](https://nickwritesablog.com/blueprint-a-juce-rendering-backend-for-react-js)
 
 ## Examples
 
-Blueprint is a young project, but already it provides the framework on which the entire user interface for [Creative Intent's Remnant](https://www.creativeintent.co/product/remnant) plugin is built.
+React-JUCE is a young project, but already it provides the framework on which the entire user interface for [Creative Intent's Remnant](https://www.creativeintent.co/product/remnant) plugin is built.
 
 ![Creative Intent Remnant: Screenshot](_media/RemnantScreenShot.jpg)
 
 Besides that, you can check out the example code in the `examples/` directory. See the "Documentation" section
-below for building and running the demo plugin. If you have a project written with Blueprint that you want to share, get in touch! I would
+below for building and running the demo plugin. If you have a project written with React-JUCE that you want to share, get in touch! I would
 love to showcase your work.
 
 ## Contributing

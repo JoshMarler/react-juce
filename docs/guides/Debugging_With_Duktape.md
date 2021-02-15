@@ -4,22 +4,22 @@
 
 Note, there are known issues debugging on Windows. See [Known Issues](#known-issues)
 
-JS debugging support for Blueprint/Duktape is available via [Visual Studio Code](https://code.visualstudio.com/) using the [Duktape Debugger](https://marketplace.visualstudio.com/items?itemName=HaroldBrenes.duk-debug) extension.
+JS debugging support for React-JUCE/Duktape is available via [Visual Studio Code](https://code.visualstudio.com/) using the [Duktape Debugger](https://marketplace.visualstudio.com/items?itemName=HaroldBrenes.duk-debug) extension.
 Currently this is the only debug client known to support the use of source maps with Duktape.
-If you do become aware of other Duktape debug clients that may work well with Blueprint, please open an issue with details for us to investigate.
+If you do become aware of other Duktape debug clients that may work well with React-JUCE, please open an issue with details for us to investigate.
 
-Blueprint provides an implementation of the Duktape debugging interface via `EcmascriptEngine::debuggerAttach` and `EcmascriptEngine::debuggerDetach`.
+React-JUCE provides an implementation of the Duktape debugging interface via `EcmascriptEngine::debuggerAttach` and `EcmascriptEngine::debuggerDetach`.
 
 If you are using the `ReactApplicationRoot` class to host your React app/ui then you can enjoy a debugging experience similar to that of React Native.
 
 In debug builds with `JUCE_DEBUG` defined, ensure your editor has focus and use the `CTRL-d/CMD-d` command to trigger a call to `EcmascriptEngine::debuggerAttach`.
 This command blocks the UI and awaits connection from a debug client. You can then attach your debugger, continue execution and set breakpoints etc.
 
-To configure the Duktape debugger extension for use with Blueprint, you will need to do the following:
+To configure the Duktape debugger extension for use with React-JUCE, you will need to do the following:
 
 - Download/Add the Duktape debugger extension.
 
-- Ensure you have compiled Blueprint and your application/plugin in debug mode (with `JUCE_DEBUG` defined).
+- Ensure you have compiled React-JUCE and your application/plugin in debug mode (with `JUCE_DEBUG` defined).
 
 - Add a launch configuration for debugging your UI.
 
@@ -56,7 +56,7 @@ The following option should be added to the `output` key in your webpack config:
 You also need to ensure that your bundle is not minified, this can be achieved by building your JS bundle with `webpack --mode=development`.
 In the case of the `GainPlugin` example this can be achieved by running `npm run start` in `GainPlugin/jsui`.
 
-The `webpack.config.js` template provided by Blueprint enables all of this for you. See: [Starting a new Project](New_Project.md) for a project
+The `webpack.config.js` template provided by React-JUCE enables all of this for you. See: [Starting a new Project](New_Project.md) for a project
 template setup which includes debugger support. Project template files are available under `blueprint/packages/react-juce/template`.
 
 Example `webpack.config.js`:

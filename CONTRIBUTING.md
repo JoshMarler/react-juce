@@ -1,6 +1,6 @@
 # Contributing
 
-We'd love to see you get involved with Blueprint! Here are our current working guidelines, and we'll be updating and iterating on these as we go.
+We'd love to see you get involved with React-JUCE! Here are our current working guidelines, and we'll be updating and iterating on these as we go.
 
 - Have a question? Please open a Discussion topic, not an issue
 - Document every feature request, bugfix, or change with an issue
