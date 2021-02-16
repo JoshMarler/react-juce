@@ -28,6 +28,6 @@
 
 ## Have a Question?
 
-- [GitHub Discussions](https://github.com/nick-thompson/blueprint/discussions)
+- [GitHub Discussions](https://github.com/nick-thompson/react-juce/discussions)
 - [Discord Chatroom](https://discord.gg/3H4wwVf49v)
-- [Open an Issue](https://github.com/nick-thompson/blueprint/issues)
+- [Open an Issue](https://github.com/nick-thompson/react-juce/issues)

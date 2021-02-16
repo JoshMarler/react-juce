@@ -63,7 +63,7 @@ class App extends Component {
     const sliderTrackColor = "#626262";
 
     const logo_url =
-      "https://raw.githubusercontent.com/nick-thompson/blueprint/master/examples/GainPlugin/jsui/src/logo.png";
+      "https://raw.githubusercontent.com/nick-thompson/react-juce/master/examples/GainPlugin/jsui/src/logo.png";
     //const logo_png = require('./logo.png');
     //const logo_svg = require('./logo.svg');
 

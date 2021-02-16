@@ -47,7 +47,7 @@ const styles = {
 
 #### source
 
-The image source (either a remote URL ([#14](https://github.com/nick-thompson/blueprint/issues/14)), a local file resource, or a data uri).
+The image source (either a remote URL ([#14](https://github.com/nick-thompson/react-juce/issues/14)), a local file resource, or a data uri).
 
 | Type   | Required | Supported                                                                  |
 | ------ | -------- | -------------------------------------------------------------------------- |

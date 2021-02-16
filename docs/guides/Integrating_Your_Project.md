@@ -6,7 +6,7 @@ please start there!
 Ok, so you're ready to add some React.js to your JUCE project. Whether that's a totally new project or a preexisting project, getting React-JUCE involved is the same. If you're starting your project from scratch, I recommend running through the [Getting started with the Projucer](https://docs.juce.com/master/tutorial_new_projucer_project.html) tutorial on the JUCE website, if you haven't already.
 
 Now before we write any code, we have to add React-JUCE to our JUCE project. Fortunately, JUCE makes this super
-easy with the JUCE module format, and React-JUCE abides by that format. Follow along with the [Manage JUCE modules](https://docs.juce.com/master/tutorial_manage_projucer_project.html#tutorial_manage_projucer_project_managing_modules) section of the Projucer tutorial, wherein you'll need to add the React-JUCE module by pointing the Projucer to its location on disk. The actual React-JUCE JUCE module is located in the `blueprint` subdirectory of the root of the React-JUCE project.
+easy with the JUCE module format, and React-JUCE abides by that format. Follow along with the [Manage JUCE modules](https://docs.juce.com/master/tutorial_manage_projucer_project.html#tutorial_manage_projucer_project_managing_modules) section of the Projucer tutorial, wherein you'll need to add the React-JUCE module by pointing the Projucer to its location on disk. The actual React-JUCE JUCE module is located in the `react_juce` subdirectory of the root of the React-JUCE project.
 
 ## Template Generator
 
@@ -14,7 +14,7 @@ Next, the first thing we want to do here is write some React.js, so let's start 
 
 ```bash
 $ pwd
-/Users/nick/Dev/blueprint
+/Users/nick/Dev/react-juce
 $ cd packages/react-juce
 $ npm run init -- ~/MyProject/Source/jsui
 ```
