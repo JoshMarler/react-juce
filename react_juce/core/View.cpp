@@ -244,22 +244,59 @@ namespace reactjuce
     void View::mouseUp (const juce::MouseEvent& e)
     {
         dispatchViewEvent("onMouseUp", detail::makeViewEventObject(e, *this));
+
+        if (auto* parent = findParentComponentOfClass<ReactApplicationRoot>())
+            parent->mouseUp(e.getEventRelativeTo(parent));
     }
 
     void View::mouseEnter (const juce::MouseEvent& e)
     {
-        dispatchViewEvent("onMouseEnter", detail::makeViewEventObject(e, *this));
+        if (!wasMouseOver)
+        {
+            dispatchViewEvent("onMouseEnter", detail::makeViewEventObject(e, *this));
+        }
+
+        wasMouseOver = true;
     }
 
     void View::mouseExit (const juce::MouseEvent& e)
     {
-        dispatchViewEvent("onMouseLeave", detail::makeViewEventObject(e, *this));
+        if (!reallyContains(e.getPosition(), true))
+        {
+            if (wasMouseOver)
+            {
+                dispatchViewEvent("onMouseLeave", detail::makeViewEventObject(e, *this));
+            }
+
+            wasMouseOver = false;
+        } else {
+            wasMouseOver = true;
+        }
+    }
+
+    void View::checkMouseEnter(const juce::MouseEvent& e)
+    {
+        bool isMouseOverNow = reallyContains(e.getPosition(), true);
+
+        if (!wasMouseOver && isMouseOverNow){
+            mouseEnter(e);
+        } else if (wasMouseOver && !isMouseOverNow) {
+            mouseExit(e);
+        }
     }
 
     void View::mouseDrag (const juce::MouseEvent& e)
     {
         // TODO: mouseDrag isn't a dom event... is it?
         dispatchViewEvent("onMouseDrag", detail::makeViewEventObject(e, *this));
+
+        // mouseDrags are always dispatched to the component originaly clicked
+        // so send this up to the ReactApplicationRoot to check for necessary
+        // enter and leave events. Maybe this should ReactApplicationRoot should just
+        // be a mouseListener for all its children instead?
+        if (auto* parent = findParentComponentOfClass<ReactApplicationRoot>())
+            parent->mouseDrag(e.getEventRelativeTo(parent));
+
     }
 
     void View::mouseDoubleClick (const juce::MouseEvent& e)

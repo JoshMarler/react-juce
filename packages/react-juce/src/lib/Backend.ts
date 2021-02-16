@@ -276,6 +276,12 @@ NativeMethods.dispatchViewEvent = function dispatchEvent(
       return;
     }
 
+    // mouseEnter and mouseLeave events do not bubble
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event
+    if ((eventType === "onMouseEnter") || (eventType === "onMouseLeave")) {
+      event.stopPropagation();
+    }
+
     __bubbleEvent(instance, eventType, event);
   }
 };
