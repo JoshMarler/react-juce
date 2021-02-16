@@ -244,9 +244,6 @@ namespace reactjuce
     void View::mouseUp (const juce::MouseEvent& e)
     {
         dispatchViewEvent("onMouseUp", detail::makeViewEventObject(e, *this));
-
-        if (auto* parent = findParentComponentOfClass<ReactApplicationRoot>())
-            parent->mouseUp(e.getEventRelativeTo(parent));
     }
 
     void View::mouseEnter (const juce::MouseEvent& e)
