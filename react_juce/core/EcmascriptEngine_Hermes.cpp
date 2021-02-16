@@ -209,6 +209,9 @@ namespace reactjuce
             if (v.isInt())
                 return jsi::Value(static_cast<int>(v));
 
+            if (v.isInt64())
+                return jsi::Value(static_cast<double>(v));
+
             if (v.isDouble())
                 return jsi::Value(static_cast<double>(v));
 
