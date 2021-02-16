@@ -16,12 +16,12 @@ love to showcase your work.
 
 ## Contributing
 
-Yes, please! I would be very happy to welcome your involvement. Take a look at the [open issues](https://github.com/nick-thompson/blueprint/issues)
-or the [project tracker](https://github.com/nick-thompson/blueprint/projects/1) to see if there's outstanding work that you might
-be able to get started. Or feel free to propose an idea or offer feedback by [opening an issue](https://github.com/nick-thompson/blueprint/issues/new) as well.
+Yes, please! I would be very happy to welcome your involvement. Take a look at the [open issues](https://github.com/nick-thompson/react-juce/issues)
+or the [project tracker](https://github.com/nick-thompson/react-juce/projects/1) to see if there's outstanding work that you might
+be able to get started. Or feel free to propose an idea or offer feedback by [opening an issue](https://github.com/nick-thompson/react-juce/issues/new) as well.
 
 I don't have a formal style guide at the moment, so please try to match the present formatting in any code contributions.
 
 ## License
 
-See [LICENSE.md](https://github.com/nick-thompson/blueprint/blob/master/LICENSE.md)
+See [LICENSE.md](https://github.com/nick-thompson/react-juce/blob/master/LICENSE.md)

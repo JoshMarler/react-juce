@@ -17,19 +17,19 @@ itself. React-JUCE's git repository contains necessary submodules, so we'll need
 collect those as well, which we can do one of two ways:
 
 ```bash
-$ git clone --recurse-submodules git@github.com:nick-thompson/blueprint.git
+$ git clone --recurse-submodules git@github.com:nick-thompson/react-juce.git
 ```
 
 or
 
 ```bash
-$ git clone git@github.com:nick-thompson/blueprint.git
-$ cd blueprint
+$ git clone git@github.com:nick-thompson/react-juce.git
+$ cd react-juce
 $ git submodule update --init --recursive
 ```
 
 Note that the `git@github.com` prefix here indicates cloning via SSH. If you prefer
-to work with git via HTTPS you'll want to swap in `https://github.com/nick-thompson/blueprint.git`
+to work with git via HTTPS you'll want to swap in `https://github.com/nick-thompson/react-juce.git`
 in the above commands.
 
 At this point, we've got everything ready to get our project up and running. Let's

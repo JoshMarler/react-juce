@@ -21,7 +21,7 @@ to a 1.0 release.
 ## Resources
 
 - Documentation: [Docs & Getting Started](https://docs.react-juce.dev)
-- Discussions: [GitHub Discussions](https://github.com/nick-thompson/blueprint/discussions)
+- Discussions: [GitHub Discussions](https://github.com/nick-thompson/react-juce/discussions)
 - Community: [The Audio Programmer Discord Server](https://discord.gg/3H4wwVf49v)
   - Join the `#blueprint` channel and say hi!
 
@@ -34,7 +34,7 @@ to a 1.0 release.
 
 React-JUCE is a young project, but already it provides the framework on which the entire user interface for [Creative Intent's Remnant](https://www.creativeintent.co/product/remnant) plugin is built.
 
-![Creative Intent Remnant: Screenshot](https://github.com/nick-thompson/blueprint/blob/master/RemnantScreenShot.jpg)
+![Creative Intent Remnant: Screenshot](https://github.com/nick-thompson/react-juce/blob/master/RemnantScreenShot.jpg)
 
 Besides that, you can check out the example code in the `examples/` directory. See the "Documentation" section
 below for building and running the demo plugin. If you have a project written with React-JUCE that you want to share, get in touch! I would
@@ -42,8 +42,8 @@ love to showcase your work.
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/nick-thompson/blueprint/blob/master/CONTRIBUTING.md)
+See [CONTRIBUTING.md](https://github.com/nick-thompson/react-juce/blob/master/CONTRIBUTING.md)
 
 ## License
 
-See [LICENSE.md](https://github.com/nick-thompson/blueprint/blob/master/LICENSE.md)
+See [LICENSE.md](https://github.com/nick-thompson/react-juce/blob/master/LICENSE.md)

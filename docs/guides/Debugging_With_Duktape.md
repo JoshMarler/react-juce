@@ -57,7 +57,7 @@ You also need to ensure that your bundle is not minified, this can be achieved b
 In the case of the `GainPlugin` example this can be achieved by running `npm run start` in `GainPlugin/jsui`.
 
 The `webpack.config.js` template provided by React-JUCE enables all of this for you. See: [Starting a new Project](New_Project.md) for a project
-template setup which includes debugger support. Project template files are available under `blueprint/packages/react-juce/template`.
+template setup which includes debugger support. Project template files are available under `react-juce/packages/react-juce/template`.
 
 Example `webpack.config.js`:
 
@@ -121,7 +121,7 @@ To test debugging support using the `GainPlugin` example do the following:
 
 - Debugging support is currently experimental and issues may occur from time to time whilst we refine the experience.
 
-- At present there are some issues debugging duktape/blueprint under Windows. The vscode-duktape-debug extension requires a patch to resolve source map entries, without this patch setting breakpoints in source files fails. To obtain a version of the extension with this patch you can fetch https://github.com/JoshMarler/vscode-duktape-debug/tree/topic/fix-windows-debug-blueprint. To use this version of the extension run `npm install` in the `vscode-duktape-debug` root followed by `npm run compile`. You can then copy the contents of `vscode-duktape-debug/dist` to your vscode extensions directory which is usually under `.vscode` in your home folder. Copy the contents of `vscode-duktape-debug/dist` to `.vscode/extensions/haroldbrenes.duk-debug-0.5.6`. There are issues attaching the debugger with breakpoints already set in vscode on Windows. You will need to attach the debugger and then set breakpoints once attached.
+- At present there are some issues debugging duktape under Windows. The vscode-duktape-debug extension requires a patch to resolve source map entries, without this patch setting breakpoints in source files fails. To obtain a version of the extension with this patch you can fetch https://github.com/JoshMarler/vscode-duktape-debug/tree/topic/fix-windows-debug-blueprint. To use this version of the extension run `npm install` in the `vscode-duktape-debug` root followed by `npm run compile`. You can then copy the contents of `vscode-duktape-debug/dist` to your vscode extensions directory which is usually under `.vscode` in your home folder. Copy the contents of `vscode-duktape-debug/dist` to `.vscode/extensions/haroldbrenes.duk-debug-0.5.6`. There are issues attaching the debugger with breakpoints already set in vscode on Windows. You will need to attach the debugger and then set breakpoints once attached.
 
 ## Acknowledgements
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(blueprint VERSION 0.1.0)
+project(reactjuce VERSION 0.1.0)
 
 # Change this option to ON if you want to build the AudioPluginHost for example
 # (practical to debug the plugin processor directly from your IDE)
