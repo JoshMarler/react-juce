@@ -1,36 +1,47 @@
-/*
-  ==============================================================================
-
-    TextView.cpp
-    Created: 28 Nov 2018 3:27:27pm
-
-  ==============================================================================
-*/
-
 #include "TextShadowView.h"
+
+//TODO: Eventually we may switch this out based on some preprocessor
+//      flag just as we're doing with EcmascriptEngine.
+#include "TextShadowView_Yoga.cpp"
 
 
 namespace reactjuce
 {
 
     //==============================================================================
-    YGSize measureTextNode(YGNodeRef node, float width, YGMeasureMode /*widthMode*/, float /*height*/, YGMeasureMode /*heightMode*/) {
-        auto context = reinterpret_cast<TextShadowView*>(YGNodeGetContext(node));
-        auto view = dynamic_cast<TextView*>(context->getAssociatedView());
-
-        jassert (view != nullptr);
-
-        // TODO: This is a bit of an oversimplification. We have a YGMeasureMode which
-        // is one of three things, "undefined", "exact", or "at-most." Here we're kind of
-        // just ignoring that, and in cases like `white-space: nowrap;` we want to ignore it,
-        // but it would probably be good to get specific for each case.
-        // See https://github.com/facebook/yoga/pull/576/files
-        auto tl = view->getTextLayout(width);
-
-        return {
-            tl.getWidth(),
-            tl.getHeight()
-        };
+    TextShadowView::TextShadowView(View* _view)
+        : ShadowView(_view)
+    {
+        textShadowViewPimpl = std::make_unique<TextShadowViewPimpl>(*this);
     }
 
+    //==============================================================================
+    bool TextShadowView::setProperty (const juce::String& name, const juce::var& value)
+    {
+        const bool layoutPropertyWasSet = ShadowView::setProperty(name, value);
+
+        // For certain text properties we want Yoga to know that we need
+        // to measure again. For example, changing the font size.
+        if (name.compare("font-size") == 0)
+            markDirty();
+
+        return layoutPropertyWasSet;
+    }
+
+    //==============================================================================
+    void TextShadowView::addChild (ShadowView* childView, int index)
+    {
+        juce::ignoreUnused (index);
+        if (childView != nullptr)
+        {
+            throw std::logic_error("TextShadowView cannot take children.");
+        }
+    }
+    //==============================================================================
+    void TextShadowView::markDirty()
+    {
+        textShadowViewPimpl->markDirty();
+    }
+
+    //==============================================================================
 }

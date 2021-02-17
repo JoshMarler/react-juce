@@ -1,27 +1,18 @@
-/*
-  ==============================================================================
-
-    ShadowView.h
-    Created: 17 Apr 2019 8:38:37am
-
-  ==============================================================================
-*/
-
 #pragma once
 
 #include "View.h"
 
 
-#define BP_SPREAD_SETTER_PERCENT(setter) setter, setter##Percent
-#define BP_SPREAD_SETTER_AUTO(setter) BP_SPREAD_SETTER_PERCENT(setter), setter##Auto
-
 namespace reactjuce
 {
 
-    struct BoundsAnimator : public juce::Timer {
+    //==============================================================================
+    struct BoundsAnimator : public juce::Timer
+    {
         using StepCallback = std::function<void(juce::Rectangle<float>)>;
 
-        enum class EasingType {
+        enum class EasingType
+        {
             Linear,
             QuadraticIn,
             QuadraticOut,
@@ -36,8 +27,11 @@ namespace reactjuce
         int frameRate = 45;
         EasingType easingType = EasingType::Linear;
 
-        BoundsAnimator(double durationMs, int frameRateToUse, EasingType et,
-                       juce::Rectangle<float> startRect, juce::Rectangle<float> destRect,
+        BoundsAnimator(double durationMs,
+                       int frameRateToUse,
+                       EasingType et,
+                       juce::Rectangle<float> startRect,
+                       juce::Rectangle<float> destRect,
                        StepCallback cb)
             : start(startRect)
             , dest(destRect)
@@ -50,18 +44,21 @@ namespace reactjuce
             startTimerHz(45);
         }
 
-        ~BoundsAnimator() override {
+        ~BoundsAnimator() override
+        {
             stopTimer();
         }
 
         static constexpr float  lerp (float a, float b, double t)  { return a + (static_cast<float> (t) * (b - a)); }
 
-        void timerCallback() override {
+        void timerCallback() override
+        {
             auto now = juce::Time::getMillisecondCounterHiRes();
             double t = std::clamp((now - startTime) / duration, 0.0, 1.0);
 
             // Super helpful cheat sheet: https://gist.github.com/gre/1650294
-            switch (easingType) {
+            switch (easingType)
+            {
                 case EasingType::Linear:
                     break;
                 case EasingType::QuadraticIn:
@@ -77,7 +74,8 @@ namespace reactjuce
                     break;
             }
 
-            if (t >= 0.9999) {
+            if (t >= 0.9999)
+            {
                 callback(dest);
                 stopTimer();
                 return;
@@ -91,58 +89,6 @@ namespace reactjuce
             });
         }
     };
-
-    template <typename Setter, typename ...Args>
-    const auto getYogaNodeFloatSetter(Setter setter, Args... args) {
-      return [=](const juce::var& value, YGNodeRef node) {
-        if(value.isDouble()) {
-          setter(node, args..., (float) value);
-          return true;
-        }
-        return false;
-      };
-    }
-
-    template <typename Setter, typename SetterPercent, typename ...Args>
-    const auto getYogaNodeDimensionSetter(Setter setter, SetterPercent setterPercent, Args... args) {
-      return [=, floatSetter = getYogaNodeFloatSetter(setter, args...)](const juce::var& value, YGNodeRef node) {
-        if (floatSetter(value, node))
-          return true;
-        if (value.isString() && value.toString().contains("%"))
-        {
-          juce::String strVal = value.toString().retainCharacters("-1234567890.");
-          setterPercent(node, args..., strVal.getFloatValue());
-          return true;
-        }
-        setter(node, args..., YGUndefined);
-        return true;
-      };
-    }
-
-    template <typename Setter, typename SetterPercent, typename SetterAuto, typename ...Args>
-    const auto getYogaNodeDimensionAutoSetter(Setter setter, SetterPercent setterPercent, SetterAuto setterAuto, Args... args) {
-      return [=, nonAutoSetter = getYogaNodeDimensionSetter(setter, setterPercent, args...)](const juce::var& value, YGNodeRef node) {
-        if (value.isString() && value.toString() == "auto") {
-          setterAuto(node, args...);
-          return true;
-        }
-        return nonAutoSetter(value, node);
-      };
-    }
-
-    template <typename Setter, typename EnumMap>
-    const auto getYogaNodeEnumSetter(Setter setter, EnumMap &map) {
-      return [=](const juce::var& value, YGNodeRef node) {                       \
-        const auto val = map.find(value);
-        if(val == map.end()) {
-          // TODO catch further up to add the key at which we tried
-          // to set this enum property to the message and rethrow
-          throw std::invalid_argument("Invalid property: " + value.toString().toStdString());
-        }
-        setter(node, val->second);
-        return true;
-      };
-    }
 
     //==============================================================================
     /** The ShadowView class decouples layout constraints from the actual View instances
@@ -160,147 +106,54 @@ namespace reactjuce
         static const inline juce::Identifier layoutAnimatedProp = "layoutAnimated";
 
         //==============================================================================
-        ShadowView(View* _view) : view(_view)
-        {
-            YGConfigSetUseWebDefaults(YGConfigGetDefault(), true);
-            yogaNode = YGNodeNew();
-        }
-
-        virtual ~ShadowView()
-        {
-            YGNodeFree(yogaNode);
-        }
+        explicit ShadowView(View* _view);
+        virtual ~ShadowView();
 
         //==============================================================================
         /** Set a property on the shadow view. */
         virtual bool setProperty (const juce::String& name, const juce::var& newValue);
 
         /** Adds a child component behind the existing children. */
-        virtual void addChild (ShadowView* childView, int index = -1)
-        {
-            if (index == -1)
-            {
-                YGNodeInsertChild(yogaNode, childView->yogaNode, YGNodeGetChildCount(yogaNode));
-                children.push_back(childView);
-            }
-            else
-            {
-                jassert (juce::isPositiveAndNotGreaterThan(index, YGNodeGetChildCount(yogaNode)));
-
-                YGNodeInsertChild(yogaNode, childView->yogaNode, static_cast<uint32_t> (index));
-                children.insert(children.begin() + index, childView);
-            }
-        }
+        //TODO: Deal with default arg. Virtual functions shouldn't have them.
+        virtual void addChild (ShadowView* childView, int index = -1);
 
         /** Removes a child component from the children array. */
-        virtual void removeChild (ShadowView* childView)
-        {
-            auto it = std::find(children.begin(), children.end(), childView);
-
-            if (it != children.end())
-            {
-                YGNodeRemoveChild(yogaNode, childView->yogaNode);
-                children.erase(it);
-            }
-        }
+        virtual void removeChild (ShadowView* childView);
 
         //==============================================================================
         /** Returns a pointer to the View instance shadowed by this node. */
-        View* getAssociatedView() { return view; }
+        View* getAssociatedView();
 
+        //==============================================================================
         /** Returns the layout bounds held by the internal yogaNode. */
-        juce::Rectangle<float> getCachedLayoutBounds()
-        {
-            return {
-                YGNodeLayoutGetLeft(yogaNode),
-                YGNodeLayoutGetTop(yogaNode),
-                YGNodeLayoutGetWidth(yogaNode),
-                YGNodeLayoutGetHeight(yogaNode)
-            };
-        }
+        juce::Rectangle<float> getCachedLayoutBounds();
 
         /** Recursively computes the shadow tree layout. */
-        void computeViewLayout(const float width, const float height)
-        {
-            // Compute the new layout values
-            YGNodeCalculateLayout(yogaNode, width, height, YGDirectionInherit);
-        }
+        void computeViewLayout(float width, float height);
 
         /** Recursive traversal of the shadow tree, flushing layout bounds to
             the associated view components.
          */
-        virtual void flushViewLayout()
-        {
-#ifdef DEBUG
-            if (props.contains(debugProp))
-                YGNodePrint(yogaNode, (YGPrintOptions) (YGPrintOptionsLayout
-                                                        | YGPrintOptionsStyle
-                                                        | YGPrintOptionsChildren));
-#endif
-
-            if (props.contains(layoutAnimatedProp))
-            {
-                if (props[layoutAnimatedProp].isBool() && props[layoutAnimatedProp])
-                {
-                    // Default parameters
-                    return flushViewLayoutAnimated(50.0, 45, BoundsAnimator::EasingType::Linear);
-                }
-
-                if (props[layoutAnimatedProp].isObject())
-                {
-                    double const durationMs = props[layoutAnimatedProp].getProperty(durationProp, 50.0);
-                    double const frameRate = props[layoutAnimatedProp].getProperty(frameRateProp, 45);
-                    int const et = props[layoutAnimatedProp].getProperty(easingProp, 0);
-
-                    return flushViewLayoutAnimated(durationMs, static_cast<int> (frameRate), static_cast<BoundsAnimator::EasingType>(et));
-                }
-            }
-
-            view->setFloatBounds(getCachedLayoutBounds());
-            view->setBounds(getCachedLayoutBounds().toNearestInt());
-
-            for (auto& child : children)
-                child->flushViewLayout();
-        }
+        virtual void flushViewLayout();
 
         /** Recursive traversal of the shadow tree, flushing layout bounds to the
          *  associated view components smoothly over time. This recursive step allows
          *  an animation of a component subtree by just marking the parent as animated.
          */
-        virtual void flushViewLayoutAnimated(double const durationMs, int const frameRate, BoundsAnimator::EasingType const et)
-        {
-            auto viewCurrentBounds = view->getBounds().toFloat();
-            auto viewDestinationBounds = getCachedLayoutBounds();
-
-            animator = std::make_unique<BoundsAnimator>(
-                durationMs,
-                frameRate,
-                et,
-                viewCurrentBounds,
-                viewDestinationBounds,
-                [safeView = juce::Component::SafePointer(view)](auto && stepBounds) {
-                    if (auto* v = safeView.getComponent()) {
-                        v->setFloatBounds(stepBounds);
-                        v->setBounds(stepBounds.toNearestInt());
-                    }
-                }
-            );
-
-            for (auto& child : children) {
-                child->flushViewLayoutAnimated(durationMs, frameRate, et);
-            }
-        }
+        virtual void flushViewLayoutAnimated(double durationMs, int frameRate, BoundsAnimator::EasingType et);
 
     protected:
         //==============================================================================
-        YGNodeRef yogaNode;
-        View* view = nullptr;
-        juce::NamedValueSet props;
+        std::vector<ShadowView*>& getChildren();
 
-        std::unique_ptr<BoundsAnimator> animator;
-        std::vector<ShadowView*> children;
+        class ShadowViewPimpl;
+        ShadowViewPimpl& getShadowViewImpl();
 
     private:
+        //==============================================================================
+        std::unique_ptr<ShadowViewPimpl> shadowViewPimpl;
+        friend ShadowViewPimpl;
+
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShadowView)
     };
