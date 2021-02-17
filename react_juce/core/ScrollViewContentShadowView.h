@@ -31,19 +31,20 @@ namespace reactjuce
     {
     public:
         //==============================================================================
-        ScrollViewContentShadowView(View* _view)
+        explicit ScrollViewContentShadowView(View* _view)
             : ShadowView(_view) {}
 
         //==============================================================================
         void flushViewLayout() override
         {
-            auto pos = view->getPosition().toFloat();
-            auto bounds = getCachedLayoutBounds().withPosition(pos);
+            View      *v      = getAssociatedView();
+            const auto pos    = v->getPosition().toFloat();
+            const auto bounds = getCachedLayoutBounds().withPosition(pos);
 
-            view->setFloatBounds(bounds);
-            view->setBounds(bounds.toNearestInt());
+            v->setFloatBounds(bounds);
+            v->setBounds(bounds.toNearestInt());
 
-            for (auto& child : children)
+            for (auto& child : getChildren())
                 child->flushViewLayout();
         }
 
