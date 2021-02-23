@@ -21,7 +21,8 @@ function App(props) {
         onDraw={Slider.drawRotary}
         onMouseDown={props._onMouseDown}
         onMouseUp={props._onMouseUp}
-        onChange={props._onSliderValueChange}>
+        onChange={props._onSliderValueChange}
+      >
         <Text>Cutoff Frequency</Text>
       </Slider>
     </View>
@@ -48,8 +49,8 @@ const styles = {
 Sets the sensitivity of a mouse drag interaction as it relates to changing the slider value.
 The default value is `0.005`. Smaller numbers are less sensitive, larger numbers more sensitive.
 
-| Type     | Required | Supported                                                                                 |
-| -------- | -------- | ----------------------------------------------------------------------------------------- |
+| Type   | Required | Supported    |
+| ------ | -------- | ------------ |
 | number | No       | Non-Standard |
 
 #### value
@@ -59,8 +60,8 @@ Sets the current value of the slider.
 See React.js' notion of [controlled and uncontrolled components](https://reactjs.org/docs/forms.html#controlled-components). The `Slider`
 value property and `onChange` behavior follow this model.
 
-| Type     | Required | Supported                                                                                 |
-| -------- | -------- | ----------------------------------------------------------------------------------------- |
+| Type   | Required | Supported    |
+| ------ | -------- | ------------ |
 | number | No       | Non-Standard |
 
 #### onDraw
@@ -76,12 +77,12 @@ on the range [0, 1].
 Default drawing operations are provided as static members of the `Slider` class, which
 can be passed directly as the `onDraw` property:
 
-* `Slider.drawLinearHorizontal`
-* `Slider.drawLinearVertical`
-* `Slider.drawRotary` (Default)
+- `Slider.drawLinearHorizontal`
+- `Slider.drawLinearVertical`
+- `Slider.drawRotary` (Default)
 
-| Type     | Required | Supported                                                                                 |
-| -------- | -------- | ----------------------------------------------------------------------------------------- |
+| Type     | Required | Supported    |
+| -------- | -------- | ------------ |
 | function | No       | Non-Standard |
 
 #### onChange
@@ -89,8 +90,8 @@ can be passed directly as the `onDraw` property:
 A callback property which will be invoked when the slider's value changes. The callback should
 accept a single argument: a number on the range [0, 1].
 
-| Type     | Required | Supported                                                                                 |
-| -------- | -------- | ----------------------------------------------------------------------------------------- |
+| Type     | Required | Supported    |
+| -------- | -------- | ------------ |
 | function | No       | Non-Standard |
 
 #### mapDragGestureToValue
@@ -98,9 +99,9 @@ accept a single argument: a number on the range [0, 1].
 A callback property which will be invoked to map a drag gesture to a new slider value. This
 allows for customization of the drag behavior, for example:
 
-* Behavior that maps drags "up and to the right" as increasing in value, and "down and to the left" as decreasing.
-* Behavior that maps only rightward drag as increasing in value and leftward drag as decreasing invalue.
-* Behavior that maps only upwards drag as increasing in value and downwards drag as decreasing invalue.
+- Behavior that maps drags "up and to the right" as increasing in value, and "down and to the left" as decreasing.
+- Behavior that maps only rightward drag as increasing in value and leftward drag as decreasing invalue.
+- Behavior that maps only upwards drag as increasing in value and downwards drag as decreasing invalue.
 
 The callback should accept five arguments:
 `(mouseDownX, mouseDownY, sensitivity, valueAtDragStart, dragEvent)`. Respectively, these
@@ -111,12 +112,12 @@ and the current `SyntheticMouseEvent` for the drag operation.
 Default mapping operations are provided as static members of the `Slider` class, which
 can be passed directly as the `mapDragGestureToValue` property:
 
-* `Slider.linearHorizontalGestureMap`
-* `Slider.linearVerticalGestureMap`
-* `Slider.rotaryGestureMap` (Default)
+- `Slider.linearHorizontalGestureMap`
+- `Slider.linearVerticalGestureMap`
+- `Slider.rotaryGestureMap` (Default)
 
-| Type     | Required | Supported                                                                                 |
-| -------- | -------- | ----------------------------------------------------------------------------------------- |
+| Type     | Required | Supported    |
+| -------- | -------- | ------------ |
 | function | No       | Non-Standard |
 
 ## Styles
