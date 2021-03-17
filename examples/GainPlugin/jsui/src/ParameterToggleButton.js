@@ -64,9 +64,7 @@ class ParameterToggleButton extends Component {
       typeof this.props.paramId === "string" &&
       this.props.paramId.length > 0
     ) {
-      global.beginParameterChangeGesture(this.props.paramId);
       global.setParameterValueNotifyingHost(this.props.paramId, newValue);
-      global.endParameterChangeGesture(this.props.paramId);
     }
 
     if (typeof this.props.onToggled === "function") {
@@ -75,12 +73,14 @@ class ParameterToggleButton extends Component {
   }
 
   _handleEnter(e) {
+    global.beginParameterChangeGesture(this.props.paramId);
     this.setState({
       borderColor: this.hoverBorderColor,
     });
   }
 
   _handleLeave(e) {
+    global.endParameterChangeGesture(this.props.paramId);
     this.setState({
       borderColor: this.defaultBorderColor,
     });
