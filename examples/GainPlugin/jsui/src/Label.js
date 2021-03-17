@@ -1,53 +1,34 @@
-import React, { Component } from "react";
+import React, { useEffect, useState, useCallback, memo } from "react";
 import { EventBridge, Text, View } from "react-juce";
 
-class Label extends Component {
-  constructor(props) {
-    super(props);
+const Label = ({ paramId, ...props }) => {
+  const [text, setText] = useState("");
 
-    this._onParameterValueChange = this._onParameterValueChange.bind(this);
+  const onParameterValueChange = useCallback(
+    (index, changedParamId, defaultValue, currentValue, stringValue) => {
+      if (changedParamId === paramId) {
+        setText(stringValue);
+      }
+    },
+    [setText]
+  );
 
-    this.state = {
-      label: "",
+  useEffect(() => {
+    EventBridge.addListener("parameterValueChange", onParameterValueChange);
+    return () => {
+      EventBridge.removeListener(
+        "parameterValueChange",
+        onParameterValueChange
+      );
     };
-  }
+  }, [onParameterValueChange]);
 
-  componentDidMount() {
-    EventBridge.addListener(
-      "parameterValueChange",
-      this._onParameterValueChange
-    );
-  }
-
-  componentWillUnmount() {
-    EventBridge.removeListener(
-      "parameterValueChange",
-      this._onParameterValueChange
-    );
-  }
-
-  _onParameterValueChange(
-    index,
-    paramId,
-    defaultValue,
-    currentValue,
-    stringValue
-  ) {
-    if (paramId === this.props.paramId) {
-      this.setState({
-        label: stringValue,
-      });
-    }
-  }
-
-  render() {
-    return (
-      <View {...this.props}>
-        <Text {...styles.labelText}>{this.state.label}</Text>
-      </View>
-    );
-  }
-}
+  return (
+    <View {...props}>
+      <Text {...styles.labelText}>{text}</Text>
+    </View>
+  );
+};
 
 const styles = {
   labelText: {
@@ -57,4 +38,4 @@ const styles = {
   },
 };
 
-export default Label;
+export default memo(Label);
