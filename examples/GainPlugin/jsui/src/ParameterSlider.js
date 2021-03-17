@@ -1,90 +1,63 @@
-import React, { Component } from "react";
-import { Slider } from "react-juce";
+import React, { memo, useEffect, useCallback, useState } from "react";
+import { EventBridge, Slider } from "react-juce";
 
-import ParameterValueStore from "./ParameterValueStore";
+const ParameterSlider = ({ paramId, children, ...props }) => {
+  const [value, setValue] = useState(0.0);
 
-class ParameterSlider extends Component {
-  constructor(props) {
-    super(props);
+  const onParameterValueChange = useCallback(
+    (index, changedParamId, defaultValue, currentValue) => {
+      if (changedParamId === paramId) {
+        setValue(currentValue);
+      }
+    },
+    [setValue]
+  );
 
-    this._onMouseDown = this._onMouseDown.bind(this);
-    this._onMouseUp = this._onMouseUp.bind(this);
-    this._onSliderValueChange = this._onSliderValueChange.bind(this);
-    this._onParameterValueChange = this._onParameterValueChange.bind(this);
-
-    const paramState = ParameterValueStore.getParameterState(
-      this.props.paramId
-    );
-    const initialValue =
-      typeof paramState.currentValue === "number"
-        ? paramState.currentValue
-        : 0.0;
-
-    this.state = {
-      value: initialValue,
+  useEffect(() => {
+    EventBridge.addListener("parameterValueChange", onParameterValueChange);
+    return () => {
+      EventBridge.removeListener(
+        "parameterValueChange",
+        onParameterValueChange
+      );
     };
-  }
+  }, [onParameterValueChange]);
 
-  componentDidMount() {
-    ParameterValueStore.addListener(
-      ParameterValueStore.CHANGE_EVENT,
-      this._onParameterValueChange
-    );
-  }
+  const onMouseDown = useCallback(
+    (e) => {
+      global.beginParameterChangeGesture(paramId);
+    },
+    [paramId]
+  );
 
-  componentWillUnmount() {
-    ParameterValueStore.removeListener(
-      ParameterValueStore.CHANGE_EVENT,
-      this._onParameterValueChange
-    );
-  }
+  const onMouseUp = useCallback(
+    (e) => {
+      global.endParameterChangeGesture(paramId);
+    },
+    [paramId]
+  );
 
-  _onMouseDown(e) {
-    global.beginParameterChangeGesture(this.props.paramId);
-  }
+  const onSliderValueChange = useCallback(
+    (value) => {
+      global.setParameterValueNotifyingHost(paramId, value);
+    },
+    [paramId]
+  );
 
-  _onMouseUp(e) {
-    global.endParameterChangeGesture(this.props.paramId);
-  }
+  return (
+    <Slider
+      {...props}
+      value={value}
+      onMouseDown={onMouseDown}
+      onMouseUp={onMouseUp}
+      onChange={onSliderValueChange}
+    >
+      {children}
+    </Slider>
+  );
+};
 
-  _onSliderValueChange(value) {
-    if (
-      typeof this.props.paramId === "string" &&
-      this.props.paramId.length > 0
-    ) {
-      global.setParameterValueNotifyingHost(this.props.paramId, value);
-    }
-  }
+// TODO: PropTypes Validation
+// paramId should be required and has type of string
 
-  _onParameterValueChange(paramId) {
-    const shouldUpdate =
-      typeof this.props.paramId === "string" &&
-      this.props.paramId.length > 0 &&
-      this.props.paramId === paramId;
-
-    if (shouldUpdate) {
-      const state = ParameterValueStore.getParameterState(paramId);
-
-      this.setState({
-        defaultValue: state.defaultValue,
-        value: state.currentValue,
-      });
-    }
-  }
-
-  render() {
-    return (
-      <Slider
-        {...this.props}
-        value={this.state.value}
-        onMouseDown={this._onMouseDown}
-        onMouseUp={this._onMouseUp}
-        onChange={this._onSliderValueChange}
-      >
-        {this.props.children}
-      </Slider>
-    );
-  }
-}
-
-export default ParameterSlider;
+export default memo(ParameterSlider);
