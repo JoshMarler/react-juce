@@ -59,5 +59,6 @@ const ParameterSlider = ({ paramId, children, ...props }) => {
 
 // TODO: PropTypes Validation
 // paramId should be required and has type of string
+// https://www.npmjs.com/package/prop-types
 
 export default memo(ParameterSlider);
