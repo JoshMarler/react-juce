@@ -1,25 +1,30 @@
 import React, { memo, useCallback } from "react";
 import { Slider } from "react-juce";
+import {
+  beginParameterChangeGesture,
+  endParameterChangeGesture,
+  setParameterValueNotifyingHost,
+} from "./nativeMethods";
 
 const ParameterSlider = ({ value, paramId, children, ...props }) => {
   console.log("Slider rendered");
   const onMouseDown = useCallback(
     (e) => {
-      global.beginParameterChangeGesture(paramId);
+      beginParameterChangeGesture(paramId);
     },
     [paramId]
   );
 
   const onMouseUp = useCallback(
     (e) => {
-      global.endParameterChangeGesture(paramId);
+      endParameterChangeGesture(paramId);
     },
     [paramId]
   );
 
   const onSliderValueChange = useCallback(
     (value) => {
-      global.setParameterValueNotifyingHost(paramId, value);
+      setParameterValueNotifyingHost(paramId, value);
     },
     [paramId]
   );
