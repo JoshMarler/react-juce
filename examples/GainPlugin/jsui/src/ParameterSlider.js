@@ -1,28 +1,8 @@
-import React, { memo, useEffect, useCallback, useState } from "react";
-import { EventBridge, Slider } from "react-juce";
+import React, { memo, useCallback } from "react";
+import { Slider } from "react-juce";
 
-const ParameterSlider = ({ paramId, children, ...props }) => {
-  const [value, setValue] = useState(0.0);
-
-  const onParameterValueChange = useCallback(
-    (index, changedParamId, defaultValue, currentValue) => {
-      if (changedParamId === paramId) {
-        setValue(currentValue);
-      }
-    },
-    [setValue]
-  );
-
-  useEffect(() => {
-    EventBridge.addListener("parameterValueChange", onParameterValueChange);
-    return () => {
-      EventBridge.removeListener(
-        "parameterValueChange",
-        onParameterValueChange
-      );
-    };
-  }, [onParameterValueChange]);
-
+const ParameterSlider = ({ value, paramId, children, ...props }) => {
+  console.log("Slider rendered");
   const onMouseDown = useCallback(
     (e) => {
       global.beginParameterChangeGesture(paramId);

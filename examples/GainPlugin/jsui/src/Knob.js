@@ -1,27 +1,33 @@
-import React, { memo } from "react";
+import React from "react";
 import ParameterSlider from "./ParameterSlider";
 import { Slider } from "react-juce";
 import Label from "./Label";
+import { useParameter } from "./ParameterValueContext";
+import { View } from "react-juce";
 
 const sliderFillColor = "#66FDCF";
 const sliderTrackColor = "#626262";
 const drawRotary = Slider.drawRotary(sliderTrackColor, sliderFillColor);
 
 const Knob = ({ paramId }) => {
+  console.log("Knob rendered");
+  const { stringValue, currentValue } = useParameter(paramId);
   return (
-    <ParameterSlider
-      paramId={paramId}
-      onDraw={drawRotary}
-      mapDragGestureToValue={Slider.rotaryGestureMap}
-      {...styles.slider}
-    >
-      <Label paramId={paramId} {...styles.label} />
-    </ParameterSlider>
+    <View {...styles.container}>
+      <ParameterSlider
+        paramId={paramId}
+        value={currentValue}
+        onDraw={drawRotary}
+        mapDragGestureToValue={Slider.rotaryGestureMap}
+        {...styles.slider}
+      />
+      <Label value={stringValue} {...styles.label} />
+    </View>
   );
 };
 
 const styles = {
-  slider: {
+  container: {
     minWidth: 100.0,
     minHeight: 100.0,
     width: "55%",
@@ -31,11 +37,18 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
   },
+  slider: {
+    width: "100%",
+    height: "100%",
+  },
   label: {
+    width: "100%",
+    height: "100%",
     flex: 1.0,
     justifyContent: "center",
     alignItems: "center",
     interceptClickEvents: false,
+    position: "absolute",
   },
 };
-export default memo(Knob);
+export default Knob;

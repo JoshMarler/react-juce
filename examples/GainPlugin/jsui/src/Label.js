@@ -1,31 +1,11 @@
-import React, { useEffect, useState, useCallback, memo } from "react";
-import { EventBridge, Text, View } from "react-juce";
+import React, { memo } from "react";
+import { Text, View } from "react-juce";
 
-const Label = ({ paramId, ...props }) => {
-  const [text, setText] = useState("");
-
-  const onParameterValueChange = useCallback(
-    (index, changedParamId, defaultValue, currentValue, stringValue) => {
-      if (changedParamId === paramId) {
-        setText(stringValue);
-      }
-    },
-    [setText]
-  );
-
-  useEffect(() => {
-    EventBridge.addListener("parameterValueChange", onParameterValueChange);
-    return () => {
-      EventBridge.removeListener(
-        "parameterValueChange",
-        onParameterValueChange
-      );
-    };
-  }, [onParameterValueChange]);
-
+const Label = ({ value, ...props }) => {
+  console.log("Label rendered");
   return (
     <View {...props}>
-      <Text {...styles.labelText}>{text}</Text>
+      <Text {...styles.labelText}>{value}</Text>
     </View>
   );
 };
