@@ -7,26 +7,17 @@ import {
 } from "./nativeMethods";
 
 const ParameterSlider = ({ value, paramId, children, ...props }) => {
-  const onMouseDown = useCallback(
-    (e) => {
-      beginParameterChangeGesture(paramId);
-    },
-    [paramId]
-  );
+  const onMouseDown = (e) => {
+    beginParameterChangeGesture(paramId);
+  };
 
-  const onMouseUp = useCallback(
-    (e) => {
-      endParameterChangeGesture(paramId);
-    },
-    [paramId]
-  );
+  const onMouseUp = (e) => {
+    endParameterChangeGesture(paramId);
+  };
 
-  const onSliderValueChange = useCallback(
-    (value) => {
-      setParameterValueNotifyingHost(paramId, value);
-    },
-    [paramId]
-  );
+  const onSliderValueChange = (value) => {
+    setParameterValueNotifyingHost(paramId, value);
+  };
 
   return (
     <Slider
