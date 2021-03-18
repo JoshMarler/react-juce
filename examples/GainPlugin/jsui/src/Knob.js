@@ -10,7 +10,6 @@ const sliderTrackColor = "#626262";
 const drawRotary = Slider.drawRotary(sliderTrackColor, sliderFillColor);
 
 const Knob = ({ paramId }) => {
-  console.log("Knob rendered");
   const { stringValue, currentValue } = useParameter(paramId);
   return (
     <View {...styles.container}>

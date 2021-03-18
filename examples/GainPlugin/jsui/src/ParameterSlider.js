@@ -7,7 +7,6 @@ import {
 } from "./nativeMethods";
 
 const ParameterSlider = ({ value, paramId, children, ...props }) => {
-  console.log("Slider rendered");
   const onMouseDown = useCallback(
     (e) => {
       beginParameterChangeGesture(paramId);

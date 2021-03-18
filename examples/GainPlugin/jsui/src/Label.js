@@ -2,7 +2,6 @@ import React, { memo } from "react";
 import { Text, View } from "react-juce";
 
 const Label = ({ value, ...props }) => {
-  console.log("Label rendered");
   return (
     <View {...props}>
       <Text {...styles.labelText}>{value}</Text>
