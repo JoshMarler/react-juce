@@ -45,7 +45,7 @@ export const ParameterValueProvider = ({ children }) => {
         },
       }));
     },
-    [setParams]
+    []
   );
   useEffect(() => {
     EventBridge.addListener("parameterValueChange", onParameterValueChange);
