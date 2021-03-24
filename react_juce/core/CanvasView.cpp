@@ -611,6 +611,11 @@ namespace reactjuce
             if (!shouldAnimate && isTimerRunning())
                 stopTimer();
         }
+        
+        if (name == statefulProp && props[statefulProp])
+        {
+            resized();
+        }
     }
 
     //==============================================================================
@@ -652,15 +657,18 @@ namespace reactjuce
     {
         View::resized();
 
-        //TODO: Fix image scalling for retina displays.
-        //      May require passing an optional scaleFactor
-        //      arg through to draw commands.
-        const auto bounds = getLocalBounds();
-        if (bounds.getWidth() > 0 && bounds.getHeight() > 0)
+        if (props.contains(statefulProp) && props[statefulProp])
         {
-            canvasImage = canvasImage.rescaled(bounds.getWidth(),
-                                               bounds.getHeight(),
-                                               juce::Graphics::highResamplingQuality);
+            //TODO: Fix image scalling for retina displays.
+            //      May require passing an optional scaleFactor
+            //      arg through to draw commands.
+            const auto bounds = getLocalBounds();
+            if (bounds.getWidth() > 0 && bounds.getHeight() > 0)
+            {
+                canvasImage = canvasImage.rescaled(bounds.getWidth(),
+                                                   bounds.getHeight(),
+                                                   juce::Graphics::highResamplingQuality);
+            }
         }
     }
 
