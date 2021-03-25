@@ -39,6 +39,7 @@ export const ParameterValueProvider = ({ children }) => {
       setParams((prevParams) => ({
         ...prevParams,
         [changedParamId]: {
+          index,
           defaultValue,
           currentValue,
           stringValue,
