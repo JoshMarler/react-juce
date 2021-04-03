@@ -392,46 +392,67 @@ namespace reactjuce
         //==============================================================================
         void registerNativeProperty(const juce::String &name, const juce::var &value)
         {
-            runtime->global().setProperty(*runtime, name.toRawUTF8(), varToJSIValue(value, *runtime));
+            try
+            {
+                runtime->global().setProperty(*runtime, name.toRawUTF8(), varToJSIValue(value, *runtime));
+            }
+            catch (const jsi::JSIException &e)
+            {
+                throw Error(e.what());
+            }
         }
 
         void registerNativeProperty(const juce::String &target, const juce::String &name, const juce::var &value)
         {
-            auto obj = runtime->global().getPropertyAsObject(*runtime, target.toRawUTF8());
-            obj.setProperty(*runtime, name.toRawUTF8(), varToJSIValue(value, *runtime));
+            try
+            {
+                auto obj = runtime->global().getPropertyAsObject(*runtime, target.toRawUTF8());
+                obj.setProperty(*runtime, name.toRawUTF8(), varToJSIValue(value, *runtime));
+            }
+            catch (const jsi::JSIException &e)
+            {
+                throw Error(e.what());
+            }
         }
 
         //==============================================================================
         //TODO: We can probably improve on this by refining the invoke API
         juce::var invoke(const juce::String &name, const std::vector<juce::var> &vargs)
         {
-            juce::StringArray accessors;
-            accessors.addTokens(name.trim(), ".", "");
-            accessors.removeEmptyStrings();
-
-            jsi::Value prop = runtime->global();
-
-            for (auto &p : accessors)
+            try
             {
-                if (prop.isObject())
+                juce::StringArray accessors;
+                accessors.addTokens(name.trim(), ".", "");
+                accessors.removeEmptyStrings();
+
+                jsi::Value prop = runtime->global();
+
+                for (auto &p : accessors)
                 {
-                    jsi::Object obj = prop.getObject(*runtime);
-                    prop = obj.getProperty(*runtime, p.toRawUTF8());
+                    if (prop.isObject())
+                    {
+                        jsi::Object obj = prop.getObject(*runtime);
+                        prop = obj.getProperty(*runtime, p.toRawUTF8());
+                    }
                 }
+
+                auto func = prop.getObject(*runtime).asFunction(*runtime);
+
+                std::vector<jsi::Value> jsiArgs;
+                for (auto &v : vargs)
+                {
+                    jsiArgs.push_back(varToJSIValue(v, *runtime));
+                }
+
+                const jsi::Value *argsPtr = jsiArgs.data();
+                jsi::Value result = func.call(*runtime, argsPtr, jsiArgs.size());
+
+                return jsiValueToVar(result, *runtime);
             }
-
-            auto func = prop.getObject(*runtime).asFunction(*runtime);
-
-            std::vector<jsi::Value> jsiArgs;
-            for (auto &v : vargs)
+            catch(const jsi::JSIException &e)
             {
-                jsiArgs.push_back(varToJSIValue(v, *runtime));
+                throw Error(e.what());
             }
-
-            const jsi::Value *argsPtr = jsiArgs.data();
-            jsi::Value result = func.call(*runtime, argsPtr, jsiArgs.size());
-
-            return jsiValueToVar(result, *runtime);
         }
 
         //==============================================================================
