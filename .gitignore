@@ -13,6 +13,12 @@ build
 examples/TestRunner/Builds
 examples/**/build
 
+# For VSCode users
+*.code-workspace
+
+# For JetBrains users
+.idea
+
 # For vim users
 *.swp
 

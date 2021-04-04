@@ -1,6 +1,11 @@
 import ParameterValueStore from "./ParameterValueStore";
 import React, { Component } from "react";
 import { Button } from "react-juce";
+import {
+  beginParameterChangeGesture,
+  endParameterChangeGesture,
+  setParameterValueNotifyingHost,
+} from "./nativeMethods";
 
 class ParameterToggleButton extends Component {
   constructor(props) {
@@ -64,9 +69,7 @@ class ParameterToggleButton extends Component {
       typeof this.props.paramId === "string" &&
       this.props.paramId.length > 0
     ) {
-      global.beginParameterChangeGesture(this.props.paramId);
-      global.setParameterValueNotifyingHost(this.props.paramId, newValue);
-      global.endParameterChangeGesture(this.props.paramId);
+      setParameterValueNotifyingHost(this.props.paramId, newValue);
     }
 
     if (typeof this.props.onToggled === "function") {
@@ -75,12 +78,14 @@ class ParameterToggleButton extends Component {
   }
 
   _handleEnter(e) {
+    beginParameterChangeGesture(this.props.paramId);
     this.setState({
       borderColor: this.hoverBorderColor,
     });
   }
 
   _handleLeave(e) {
+    endParameterChangeGesture(this.props.paramId);
     this.setState({
       borderColor: this.defaultBorderColor,
     });

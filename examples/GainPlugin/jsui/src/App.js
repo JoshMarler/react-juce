@@ -1,12 +1,9 @@
-import AnimatedFlexBoxExample from "./AnimatedFlexBox";
-import Label from "./Label";
+// import AnimatedFlexBoxExample from "./AnimatedFlexBox";
 import Meter from "./Meter";
+import Knob from "./Knob";
 import ParameterToggleButton from "./ParameterToggleButton";
-import ParameterSlider from "./ParameterSlider";
-
 import React, { Component } from "react";
-
-import { Canvas, Image, Text, View, Slider } from "react-juce";
+import { Canvas, Image, Text, View } from "react-juce";
 
 function animatedDraw(ctx) {
   let now = Date.now() / 10;
@@ -59,9 +56,6 @@ class App extends Component {
       ? "#17191f"
       : "hsla(162, 97%, 70%, 1)";
 
-    const sliderFillColor = "#66FDCF";
-    const sliderTrackColor = "#626262";
-
     const logo_url =
       "https://raw.githubusercontent.com/nick-thompson/react-juce/master/examples/GainPlugin/jsui/src/logo.png";
     //const logo_png = require('./logo.png');
@@ -76,14 +70,7 @@ class App extends Component {
             onError={imageError}
             {...styles.logo}
           />
-          <ParameterSlider
-            paramId="MainGain"
-            onDraw={Slider.drawRotary(sliderTrackColor, sliderFillColor)}
-            mapDragGestureToValue={Slider.rotaryGestureMap}
-            {...styles.knob}
-          >
-            <Label paramId="MainGain" {...styles.label} />
-          </ParameterSlider>
+          <Knob paramId="MainGain" />
           <Meter {...styles.meter} />
           <Canvas {...styles.canvas} animate={true} onDraw={animatedDraw} />
           <ParameterToggleButton
@@ -125,22 +112,6 @@ const styles = {
     width: "80%",
     aspectRatio: 281.6 / 35.0,
     placement: Image.PlacementFlags.centred,
-  },
-  knob: {
-    minWidth: 100.0,
-    minHeight: 100.0,
-    width: "55%",
-    height: "55%",
-    marginTop: 15,
-    marginBottom: 15,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  label: {
-    flex: 1.0,
-    justifyContent: "center",
-    alignItems: "center",
-    interceptClickEvents: false,
   },
   meter: {
     flex: 0.0,
