@@ -11,7 +11,7 @@ if (NOT DEFINED REACTJUCE_JS_LIBRARY)
 endif()
 
 # Set this to OFF in your CPMAddPackage if you're including this as a library.
-option(REACTJUCE_INCLUDE_JUCE "" ON)
+option(REACTJUCE_INCLUDE_JUCE "Include JUCE" ON)
 
 if (REACTJUCE_INCLUDE_JUCE)
   add_subdirectory(ext/juce)
@@ -55,7 +55,7 @@ elseif (REACTJUCE_JS_LIBRARY STREQUAL "DUKTAPE")
 endif()
 
 # Set this to OFF in your CPMAddPackage if you're including this as a library.
-option(REACTJUCE_BUILD_EXAMPLES ON)
+option(REACTJUCE_BUILD_EXAMPLES "Build examples" ON)
 
 if (REACTJUCE_BUILD_EXAMPLES)
     # If you want to create new projects, you can init them in the examples folder
