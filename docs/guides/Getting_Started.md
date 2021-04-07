@@ -24,7 +24,7 @@ CPMAddPackage(
   NAME react_juce
   GITHUB_REPOSITORY nick-thompson/react-juce
   GIT_TAG origin/master
-  OPTIONS 
+  OPTIONS
     "REACTJUCE_INCLUDE_JUCE OFF" "REACTJUCE_BUILD_EXAMPLES OFF"
 )
 ```
@@ -50,7 +50,6 @@ After that, the `reactjuce` namespace will be available, so you can use classes 
 `reactjuce::GenericEditor`. The gain plugin included in this repo has some example
 code that should help you understand how to plug some react code into your plugin or
 app.
-
 
 ## Building this repo
 
