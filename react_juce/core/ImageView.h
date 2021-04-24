@@ -39,17 +39,18 @@ namespace reactjuce
         void sendOnLoadCallback();
         void sendOnErrorCallback(const juce::String& message);
         void setDrawableImage(const juce::Image& image, const int sourceHash);
+        void setDrawableSVG(const juce::File& svgFile);
         void setDrawableData(const juce::String& source);
-        juce::Image loadImageFromFileURL(const juce::URL& url) const;
+        juce::Image loadImageFromFile(const juce::File& imageFile) const;
         juce::Image loadImageFromDataURL(const juce::String& source) const;
         std::unique_ptr<juce::ImageFileFormat> prepareImageFormat(const juce::String& mimeType) const;
 
         //==============================================================================
         std::unique_ptr<juce::Drawable> drawable;
-        
+
         // To manage the download thread
         bool shouldDownloadImage{ false };
-        
+
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageView)
     };
