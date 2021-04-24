@@ -27,7 +27,7 @@ namespace
 namespace reactjuce
 {
     //==============================================================================
-    void ImageView::setProperty(const juce::Identifier& name, const juce::var& value) 
+    void ImageView::setProperty(const juce::Identifier& name, const juce::var& value)
     {
         View::setProperty(name, value);
 
@@ -47,15 +47,22 @@ namespace reactjuce
 
                 // Web images are downloaded in a separate thread to avoid blocking.
                 if (isWellFormedURL(sourceURL) && sourceURL.isProbablyAWebsiteURL(sourceURL.toString(false)))
-                    return downloadImageAsync(source); 
-                    
+                    return downloadImageAsync(source);
+
                 if (sourceURL.isLocalFile())
-                    return setDrawableImage(loadImageFromFileURL(sourceURL), sourceHash);
-                    
+                {
+                    const juce::File imageFile = sourceURL.getLocalFile();
+
+                    if (imageFile.getFileExtension() == ".svg")
+                        return setDrawableSVG(imageFile);
+                    else
+                        return setDrawableImage(loadImageFromFile(imageFile), sourceHash);
+                }
+
                 if (source.startsWith("data:image/")) // juce::URL does not currently handle Data URLs
                     return setDrawableImage(loadImageFromDataURL(source), sourceHash);
 
-                // Last case left, possibly SVG/Image data.
+                // Last case left, raw Image data.
                 return setDrawableData(source);
             }
             catch (const std::exception& l)
@@ -121,6 +128,27 @@ namespace reactjuce
         sendOnLoadCallback();
     }
 
+    void ImageView::setDrawableSVG(const juce::File& svgFile)
+    {
+        if (!svgFile.existsAsFile())
+        {
+            const juce::String errorString = "SVG file does not exist: " + svgFile.getFullPathName();
+            throw std::logic_error(errorString.toStdString());
+        }
+
+        drawable = std::unique_ptr<juce::Drawable>(
+                juce::Drawable::createFromSVGFile(svgFile));
+
+        if (drawable == nullptr)
+        {
+            const juce::String errorString = "Invalid SVG file: " + svgFile.getFullPathName();
+            throw std::logic_error(errorString.toStdString());
+        }
+
+        repaint();
+        sendOnLoadCallback();
+    }
+
     void ImageView::setDrawableData(const juce::String& source)
     {
         // If not a URL treat source prop as inline SVG/Image data
@@ -136,7 +164,7 @@ namespace reactjuce
             const juce::String errorString = "Unsupported image URL: " + source;
             throw std::logic_error(errorString.toStdString());
         }
-        
+
         repaint();
         sendOnLoadCallback();
     }
@@ -161,16 +189,16 @@ namespace reactjuce
                 juce::MemoryBlock mb;
 
                 // Did we reach the URL?
-                if (!juce::URL(source).readEntireBinaryStream(mb)) 
+                if (!juce::URL(source).readEntireBinaryStream(mb))
                 {
-                    juce::MessageManager::callAsync([this]() { 
-                        sendOnErrorCallback("Could not reach URL"); 
+                    juce::MessageManager::callAsync([this]() {
+                        sendOnErrorCallback("Could not reach URL");
                     });
                     return;
                 }
 
                 auto image = juce::ImageFileFormat::loadFrom(mb.getData(), mb.getSize());
-                if (image.isValid()) 
+                if (image.isValid())
                 {
                     juce::MessageManager::callAsync([this, image, source]()
                     {
@@ -186,8 +214,8 @@ namespace reactjuce
                 else
                 {
                     // The URL was valid but was not pointing to a valid image.
-                    juce::MessageManager::callAsync([this]() { 
-                        sendOnErrorCallback("The URL was not pointing to a valid image"); 
+                    juce::MessageManager::callAsync([this]() {
+                        sendOnErrorCallback("The URL was not pointing to a valid image");
                     });
                 }
             });
@@ -200,10 +228,8 @@ namespace reactjuce
     }
 
     //==============================================================================
-    juce::Image ImageView::loadImageFromFileURL(const juce::URL& url) const
+    juce::Image ImageView::loadImageFromFile(const juce::File& imageFile) const
     {
-        const juce::File imageFile = url.getLocalFile();
-
         if (!imageFile.existsAsFile())
         {
             const juce::String errorString = "Image file does not exist: " + imageFile.getFullPathName();
