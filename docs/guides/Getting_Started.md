@@ -33,4 +33,4 @@ to work with git via HTTPS you'll want to swap in `https://github.com/nick-thomp
 in the above commands.
 
 At this point, we've got everything ready to get our project up and running. Let's
-move on to the next step, [running the demo plugin](Running_the_Example.md).
+move on to the next step, [running the demo plugin](Running_the_Examples.md).
