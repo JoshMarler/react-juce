@@ -103,6 +103,7 @@ namespace reactjuce
         /** Invokes an "exported" native method on the View instance */
         juce::var invokeMethod(const juce::String &method, const juce::var::NativeFunctionArgs &args);
 
+        void checkMouseEnter(const juce::MouseEvent& e);
     protected:
         //==============================================================================
         /** Exports/Registers a method on this View instance so it may be called
@@ -114,11 +115,12 @@ namespace reactjuce
         //==============================================================================
         juce::NamedValueSet props;
         juce::Rectangle<float> cachedFloatBounds;
-
     private:
         //==============================================================================
         juce::Uuid _viewId;
         juce::Identifier _refId;
+        bool wasMouseOver = false;
+
 
         std::unordered_map<juce::String, juce::var::NativeFunction> nativeMethods;
 

@@ -63,6 +63,29 @@ namespace reactjuce
         bool keyPressed(const juce::KeyPress& key) override;
 #endif
 
+        juce::Component* componentUnderMouse;
+
+        void mouseDrag(const juce::MouseEvent &e) override {
+            auto* newComponentUnderMouse = getComponentAt(e.x, e.y);
+
+            if (componentUnderMouse != newComponentUnderMouse){
+                // The old target may need a mouseLeave event now
+                if (componentUnderMouse != nullptr) {
+                    if (auto v = dynamic_cast<View*>(componentUnderMouse)){
+                        v->checkMouseEnter(e.getEventRelativeTo(v));
+                    }
+                }
+
+                // The new target may need a mouseEnter event now
+                if (auto v = dynamic_cast<View*>(newComponentUnderMouse)){
+                    v->checkMouseEnter(e.getEventRelativeTo(v));
+                }
+
+            }
+
+            componentUnderMouse = newComponentUnderMouse;
+        }
+
         //==============================================================================
         /** Evaluates a javascript bundle file in the EcmascriptEngine.
          *
