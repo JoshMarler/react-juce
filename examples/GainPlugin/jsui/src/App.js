@@ -77,9 +77,9 @@ class App extends Component {
           <ParameterToggleButton
             paramId="MainMute"
             onToggled={this._onMuteToggled}
-            styles={styles.mute_button}
+              styles={[styles.mute_button, { backgroundColor: muteBackgroundColor }]}
           >
-            <Text styles={styles.mute_button_text}>
+              <Text styles={[styles.mute_button_text, { color: muteTextColor }]}>
               MUTE
             </Text>
           </ParameterToggleButton>

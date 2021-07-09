@@ -87,12 +87,9 @@ namespace reactjuce
     {
         const auto& [view, shadow] = getViewHandle(viewId);
 
-        if (name == "styles")
+        auto parseStyleObj = [=] (const juce::var &obj)
         {
-            const StyleSheetID id = value;
-
-            std::cout << "set styles using id: " << id << std::endl;
-
+            const StyleSheetID id = obj;
             auto it = styleSheets.find(id);
 
             if (it != styleSheets.end())
@@ -104,9 +101,25 @@ namespace reactjuce
                     //TODO: We'll likely change this to some internal
                     //      setStyleProperty on View which isn't directly
                     //      exposed to our react renderer implemenation.
-                    std::cout << "setViewProperty: " << nv.name.toString() << " : " << nv.value.toString() << std::endl;
                     setViewProperty(viewId, nv.name.toString(), nv.value);
                 }
+            }
+        };
+
+        if (name == "styles")
+        {
+            if (value.isArray())
+            {
+                auto *arr = value.getArray();
+
+                for (juce::var styleSheetObj : *arr)
+                {
+                    parseStyleObj(styleSheetObj);
+                }
+            }
+            else
+            {
+                parseStyleObj(value);
             }
         }
         else
