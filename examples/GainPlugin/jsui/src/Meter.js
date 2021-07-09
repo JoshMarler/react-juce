@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { EventBridge, Image, Text, View } from "react-juce";
+import { EventBridge, Image, Text, View, StyleSheet } from "react-juce";
 
 class Meter extends Component {
   constructor(props) {
@@ -76,7 +76,7 @@ class Meter extends Component {
     return (
       <View {...this.props} onMeasure={this._onMeasure}>
         <Image
-          {...styles.canvas}
+          styles={styles.canvas}
           source={this._renderVectorGraphics(lcPeak, rcPeak, width, height)}
         />
       </View>
@@ -84,7 +84,7 @@ class Meter extends Component {
   }
 }
 
-const styles = {
+const styles = StyleSheet.create({
   canvas: {
     flex: 1.0,
     height: "100%",
@@ -94,6 +94,6 @@ const styles = {
     top: 0.0,
     interceptClickEvents: false,
   },
-};
+});
 
 export default Meter;

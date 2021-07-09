@@ -1,12 +1,9 @@
-import { all as allCssProps } from "known-css-properties";
-import camelCase from "camelcase";
 import NativeMethods from "./NativeMethods";
+
 import SyntheticEvents, {
   SyntheticMouseEvent,
   SyntheticKeyboardEvent,
 } from "./SyntheticEvents";
-import { macroPropertyGetters } from "./MacroProperties";
-import Colors from "./MacroProperties/Colors";
 
 //TODO: Keep this union or introduce a common base class ViewInstanceBase?
 export type Instance = ViewInstance | RawTextViewInstance;
@@ -15,12 +12,6 @@ let __rootViewInstance: ViewInstance | null = null;
 let __viewRegistry: Map<string, Instance> = new Map<string, Instance>();
 let __lastMouseDownViewId: string | null = null;
 
-// get any css properties not beginning with a "-",
-// and build a map from any camelCase versions to
-// the hyphenated version
-const cssPropsMap = allCssProps
-  .filter((s) => !s.startsWith("-") && s.includes("-"))
-  .reduce((acc, v) => Object.assign(acc, { [camelCase(v)]: v }), {});
 
 export class ViewInstance {
   private _id: string;
@@ -96,19 +87,6 @@ export class ViewInstance {
   }
 
   setProperty(propKey: string, value: any): any {
-    // if the supplied propkey is a camelCase equivalent
-    // of a css prop, first convert it to kebab-case
-    propKey = cssPropsMap[propKey] || propKey;
-
-    // convert provided color string to alpha-hex code for JUCE
-    let nativeValue;
-    if (Colors.isColorProperty(propKey)) {
-      value = Colors.colorStringToAlphaHex(value);
-      if (value.startsWith("linear-gradient")) {
-        nativeValue = Colors.convertLinearGradientStringToNativeObject(value);
-      }
-    }
-
     this._props = Object.assign({}, this._props, {
       [propKey]: value,
     });
@@ -138,18 +116,8 @@ export class ViewInstance {
       return;
     }
 
-    if (macroPropertyGetters.hasOwnProperty(propKey)) {
-      //@ts-ignore
-      for (const [k, v] of macroPropertyGetters[propKey](value))
-        NativeMethods.setViewProperty(this._id, k, v);
-      return;
-    }
     //@ts-ignore
-    return NativeMethods.setViewProperty(
-      this._id,
-      propKey,
-      nativeValue ? nativeValue : value
-    );
+    return NativeMethods.setViewProperty(this._id, propKey, value);
   }
 
   contains(node: Instance): boolean {

@@ -6,6 +6,7 @@ import Backend from "./lib/Backend";
 import Renderer, { TracedRenderer } from "./lib/Renderer";
 
 export { default as EventBridge } from "./lib/EventBridge";
+export { default as StyleSheet  } from "./lib/Stylesheet";
 
 export * from "./components/View";
 export * from "./components/ScrollView";

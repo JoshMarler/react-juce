@@ -10,6 +10,7 @@
 #pragma once
 
 #include <map>
+#include <unordered_map>
 
 #include "View.h"
 #include "ShadowView.h"
@@ -17,6 +18,8 @@
 
 namespace reactjuce
 {
+    using StyleSheetID = juce::int32;
+
     /**
      * ViewManager manages the set of Views held by a "root" View/ReactApplicationRoot instance.
      *
@@ -81,6 +84,8 @@ namespace reactjuce
          **/
         juce::var invokeViewMethod(ViewId viewId, const juce::String &method, const juce::var::NativeFunctionArgs &args);
 
+        juce::var createStyleSheet(const juce::var& value);
+
         //==============================================================================
     private:
         void enumerateChildViewIds (std::vector<ViewId>& ids, View* v);
@@ -96,9 +101,10 @@ namespace reactjuce
         /** Helper function to return refId of the root view */
         juce::Identifier getRootViewRefId();
 
-        ViewId                                        rootId;
-        std::map<ViewId, std::unique_ptr<View>>       viewTable;
-        std::map<ViewId, std::unique_ptr<ShadowView>> shadowViewTable;
-        std::map<juce::String, ViewFactory>           viewFactories;
+        ViewId                                                rootId;
+        std::map<ViewId, std::unique_ptr<View>>               viewTable;
+        std::map<ViewId, std::unique_ptr<ShadowView>>         shadowViewTable;
+        std::map<juce::String, ViewFactory>                   viewFactories;
+        std::unordered_map<StyleSheetID, juce::NamedValueSet> styleSheets;
     };
 }

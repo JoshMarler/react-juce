@@ -87,11 +87,36 @@ namespace reactjuce
     {
         const auto& [view, shadow] = getViewHandle(viewId);
 
-        // ShadowView::setProperty returns true when a layout prop
-        // has been set.  Otherwise set on the view and repaint
-        if(!shadow->setProperty(name, value)) {
-          view->setProperty(name, value);
-          view->repaint();
+        if (name == "styles")
+        {
+            const StyleSheetID id = value;
+
+            std::cout << "set styles using id: " << id << std::endl;
+
+            auto it = styleSheets.find(id);
+
+            if (it != styleSheets.end())
+            {
+                juce::NamedValueSet &style = it->second;
+
+                for (auto &nv : style)
+                {
+                    //TODO: We'll likely change this to some internal
+                    //      setStyleProperty on View which isn't directly
+                    //      exposed to our react renderer implemenation.
+                    std::cout << "setViewProperty: " << nv.name.toString() << " : " << nv.value.toString() << std::endl;
+                    setViewProperty(viewId, nv.name.toString(), nv.value);
+                }
+            }
+        }
+        else
+        {
+            // ShadowView::setProperty returns true when a layout prop
+            // has been set.  Otherwise set on the view and repaint
+            if(!shadow->setProperty(name, value)) {
+              view->setProperty(name, value);
+              view->repaint();
+            }
         }
     }
 
@@ -233,6 +258,28 @@ namespace reactjuce
             return view->invokeMethod(method, args);
 
         throw std::logic_error("Caller attempted to invoke method on non-existent View instance");
+    }
+
+    juce::var ViewManager::createStyleSheet(const juce::var& value)
+    {
+        jassert(value.isObject());
+
+        juce::DynamicObject::Ptr res = new juce::DynamicObject();
+
+        auto obj = value.getDynamicObject();
+
+        for (auto &nv : obj->getProperties())
+        {
+            jassert(nv.value.isObject());
+
+            const StyleSheetID id = juce::DefaultHashFunctions::generateHash(juce::Uuid(), INT_MAX);
+            styleSheets[id] = nv.value.getDynamicObject()->getProperties();
+
+            std::cout << "ViewManager::createStyleSheet - returning subobject name id pair: " << "{ " << nv.name.toString() << ", " << id << " }" << std::endl;
+            res->setProperty(nv.name, juce::var(id));
+        }
+
+        return juce::var(res.get());
     }
 
     std::pair<View*, ShadowView*> ViewManager::getViewHandle (ViewId viewId)

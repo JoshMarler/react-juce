@@ -191,6 +191,10 @@ namespace reactjuce
             auto c = juce::Colour::fromString(colorString);
             float borderWidth = props[borderWidthProp];
 
+            auto myAreaRect = getLocalBounds();
+            auto xPos = myAreaRect.getX();
+            auto yPos = myAreaRect.getY();
+
             // Note this little bounds trick. When a Path is stroked, the line width extends
             // outwards in both directions from the coordinate line. If the coordinate
             // line is the exact bounding box then the component clipping makes the corners

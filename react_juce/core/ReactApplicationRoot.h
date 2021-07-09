@@ -50,6 +50,7 @@ namespace reactjuce
         juce::var removeChild (const ViewId parentId, const ViewId childId);
         juce::var getRootInstanceId();
         juce::var resetAfterCommit();
+        juce::var createStyleSheet(const juce::var &value);
 
         //==============================================================================
         /** Override the default resized behavior. */

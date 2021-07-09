@@ -3,7 +3,7 @@ import Meter from "./Meter";
 import Knob from "./Knob";
 import ParameterToggleButton from "./ParameterToggleButton";
 import React, { Component } from "react";
-import { Canvas, Image, Text, View } from "react-juce";
+import { Canvas, Image, Text, View, StyleSheet } from "react-juce";
 
 function animatedDraw(ctx) {
   let now = Date.now() / 10;
@@ -44,7 +44,7 @@ class App extends Component {
   render() {
     // Uncomment here to watch the animated flex box example in action
     // return (
-    //   <View {...styles.container}>
+    //   <View styles={styles.container}>
     //     <AnimatedFlexBoxExample />
     //   </View>
     // );
@@ -56,30 +56,30 @@ class App extends Component {
       ? "#17191f"
       : "hsla(162, 97%, 70%, 1)";
 
-    const logo_url =
-      "https://raw.githubusercontent.com/nick-thompson/react-juce/master/examples/GainPlugin/jsui/src/logo.png";
-    //const logo_png = require('./logo.png');
-    //const logo_svg = require('./logo.svg');
+    //const logo_url =
+    //  "https://raw.githubusercontent.com/nick-thompson/react-juce/master/examples/GainPlugin/jsui/src/logo.png";
+    const logo_png = require('./logo.png');
+      //const logo_svg = require('./logo.svg');
+      //
 
     return (
-      <View {...styles.container}>
-        <View {...styles.content}>
-          <Image
-            source={logo_url}
-            onLoad={imageLoaded}
-            onError={imageError}
-            {...styles.logo}
-          />
+      <View styles={styles.container}>
+          <View styles={styles.content}>
+            <Image
+                source={logo_png}
+                onLoad={imageLoaded}
+                onError={imageError}
+                styles={styles.logo}
+            />
           <Knob paramId="MainGain" />
-          <Meter {...styles.meter} />
-          <Canvas {...styles.canvas} animate={true} onDraw={animatedDraw} />
+          <Meter styles={styles.meter} />
+          <Canvas styles={styles.canvas} animate={true} onDraw={animatedDraw} />
           <ParameterToggleButton
             paramId="MainMute"
             onToggled={this._onMuteToggled}
-            background-color={muteBackgroundColor}
-            {...styles.mute_button}
+            styles={styles.mute_button}
           >
-            <Text color={muteTextColor} {...styles.mute_button_text}>
+            <Text styles={styles.mute_button_text}>
               MUTE
             </Text>
           </ParameterToggleButton>
@@ -89,7 +89,7 @@ class App extends Component {
   }
 }
 
-const styles = {
+const styles = StyleSheet.create({
   container: {
     width: "100%",
     height: "100%",
@@ -141,6 +141,6 @@ const styles = {
     lineSpacing: 1.6,
     fontStyle: Text.FontStyleFlags.bold,
   },
-};
+});
 
 export default App;

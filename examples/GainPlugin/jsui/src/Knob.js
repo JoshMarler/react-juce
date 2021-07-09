@@ -3,7 +3,7 @@ import ParameterSlider from "./ParameterSlider";
 import { Slider } from "react-juce";
 import Label from "./Label";
 import { useParameter } from "./ParameterValueContext";
-import { View } from "react-juce";
+import { View, StyleSheet } from "react-juce";
 
 const sliderFillColor = "#66FDCF";
 const sliderTrackColor = "#626262";
@@ -12,20 +12,21 @@ const drawRotary = Slider.drawRotary(sliderTrackColor, sliderFillColor);
 const Knob = ({ paramId }) => {
   const { stringValue, currentValue } = useParameter(paramId);
   return (
-    <View {...styles.container}>
+    <View styles={styles.container}>
       <ParameterSlider
         paramId={paramId}
         value={currentValue}
         onDraw={drawRotary}
         mapDragGestureToValue={Slider.rotaryGestureMap}
-        {...styles.slider}
+        styles={styles.slider}
+
       />
-      <Label value={stringValue} {...styles.label} />
+      <Label value={stringValue} styles={styles.label} />
     </View>
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   container: {
     minWidth: 100.0,
     minHeight: 100.0,
@@ -49,5 +50,6 @@ const styles = {
     interceptClickEvents: false,
     position: "absolute",
   },
-};
+});
+
 export default Knob;
