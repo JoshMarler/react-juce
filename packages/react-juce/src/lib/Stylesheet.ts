@@ -13,9 +13,7 @@ const cssPropsMap = allCssProps
   .filter((s) => !s.startsWith("-") && s.includes("-"))
   .reduce((acc, v) => Object.assign(acc, { [camelCase(v)]: v }), {});
 
-//TODO: Add interface and type parameter of create function.
-//TODO: Add compose(), flatten().
-//TODO: Style prop on View must allow for an array of styles objects
+//TODO: Add interface types
 export default {
     create(stylesObj) {
         // TODO: Will be another instance of our
@@ -32,7 +30,7 @@ export default {
                 // of a css prop, first convert it to kebab-case.
                 propKey = cssPropsMap[propKey] || propKey;
 
-                // convert provided color string to alpha-hex code for JUCE
+                // Convert provided color string to alpha-hex code for JUCE.
                 if (Colors.isColorProperty(propKey)) {
                   value = Colors.colorStringToAlphaHex(value);
                   if (value.startsWith("linear-gradient")) {
@@ -47,7 +45,6 @@ export default {
                 }
 
                 nativeSubObj[propKey] = value;
-
             }
 
             nativeStyles[subObj] = nativeSubObj;
@@ -55,5 +52,11 @@ export default {
 
         //@ts-ignore
         return NativeMethods.createStyleSheet(nativeStyles);
+    },
+    cx(...args) {
+        return args.map((a) => {
+            if (a !== false)
+                return a;
+        })
     }
 }
