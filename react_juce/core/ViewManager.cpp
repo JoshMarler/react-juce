@@ -113,9 +113,7 @@ namespace reactjuce
                 auto *arr = value.getArray();
 
                 for (juce::var styleSheetObj : *arr)
-                {
                     parseStyleObj(styleSheetObj);
-                }
             }
             else
             {
@@ -288,7 +286,6 @@ namespace reactjuce
             const StyleSheetID id = juce::DefaultHashFunctions::generateHash(juce::Uuid(), INT_MAX);
             styleSheets[id] = nv.value.getDynamicObject()->getProperties();
 
-            std::cout << "ViewManager::createStyleSheet - returning subobject name id pair: " << "{ " << nv.name.toString() << ", " << id << " }" << std::endl;
             res->setProperty(nv.name, juce::var(id));
         }
 
