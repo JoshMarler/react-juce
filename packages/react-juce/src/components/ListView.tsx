@@ -137,10 +137,8 @@ export class ListView extends Component<
     const startIndex = Math.floor(
       this.state.scrollTopPosition / this.props.itemHeight
     );
-    const endIndex = Math.min(
-      totalItems - 1,
-      Math.floor(startIndex + numItems)
-    );
+
+    const endIndex = Math.min(totalItems - 1, startIndex + numItems);
 
     return {
       innerHeight: innerHeight,
@@ -193,14 +191,16 @@ export class ListView extends Component<
     // so that we simply re-render the existing views/components rather than
     // replacing them. This stops issues occuring when dynamically adding and removing
     // components inside a juce::Viewport.
-    for (let i = positions.startIndex; i <= positions.endIndex; ++i) {
-      items.push(
-        this.props.renderItem(this.props.data[i], i, {
-          position: "absolute",
-          top: this.props.itemHeight * i,
-          key: positions.endIndex - i,
-        })
-      );
+    if (this.state.height > 0) {
+      for (let i = positions.startIndex; i <= positions.endIndex; ++i) {
+        items.push(
+          this.props.renderItem(this.props.data[i], i, {
+            position: "absolute",
+            top: this.props.itemHeight * i,
+            key: positions.endIndex - i,
+          })
+        );
+      }
     }
 
     return (
@@ -223,8 +223,8 @@ export class ListView extends Component<
 
 const styles = {
   scrollViewContent: {
-    "flex-direction": "column",
+    flexDirection: "column",
     flex: 1.0,
-    "flex-shrink": 0.0,
+    flexShrink: 0.0,
   },
 };
