@@ -267,8 +267,11 @@ namespace reactjuce
                 if (maps.find(source) == maps.end())
                     maps.insert({source, std::make_unique<SourceMap>(source, juce::File(source + ".map"))});
                 const auto newloc = maps[source]->translate(line, col);
+                juce::String file = newloc.file;
+                if (file.startsWith("webpack:///"))
+                    file = newloc.file.replaceFirstOccurrenceOf("webpack:///", "");
 
-                res += juce::String(m.prefix().str()) + "(" + newloc.file + ":" + juce::String(newloc.line) + ":" + juce::String(newloc.col) + ")";
+                res += juce::String(m.prefix().str()) + "(" + file + ":" + juce::String(newloc.line) + ":" + juce::String(newloc.col) + ")";
                 s = m.suffix();
             }
             return res + s;
