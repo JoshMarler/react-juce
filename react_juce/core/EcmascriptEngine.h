@@ -10,7 +10,7 @@
 #pragma once
 
 #include <unordered_map>
-
+#include <vector>
 
 namespace reactjuce
 {
@@ -187,18 +187,32 @@ namespace reactjuce
     public:
         struct Location
         {
-            juce::String file;
+            const juce::String& file;
             int line;
             int col;
         };
 
-        SourceMap(const juce::String &source, const juce::File &map);
+        SourceMap(const juce::String& source, const juce::String& map);
+        SourceMap(const juce::String& source, const juce::File& map);
         ~SourceMap() = default;
 
         Location translate(int line, int col) const;
 
     private:
+        struct Segment
+        {
+            int segStartCol = 0;
+            int origSourceId = 0;
+            int origStartLine = 0;
+            int origStartCol = 0;
+            bool gotSourceMap = false;
+        };
+
+        bool LoadMap(const juce::String& map);
+
         bool mapLoaded;
         juce::String sourcePath;
+        std::vector<juce::String> sources;
+        std::vector<std::vector<Segment>> mappings;
     };
 }
