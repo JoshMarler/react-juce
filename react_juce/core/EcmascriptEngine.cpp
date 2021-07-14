@@ -96,4 +96,16 @@ namespace reactjuce
         mPimpl->debuggerDetach();
     }
 
+    //==============================================================================
+    SourceMap::SourceMap(const juce::String &source, const juce::File &map)
+        : mapLoaded(false)
+        , sourcePath(source)
+    {
+    }
+
+    SourceMap::Location SourceMap::translate(int line, int col) const
+    {
+        SourceMap::Location res = { sourcePath, line, col };
+        return res;
+    }
 }

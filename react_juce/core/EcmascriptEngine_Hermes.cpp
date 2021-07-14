@@ -1,3 +1,5 @@
+#include <regex>
+
 #include "EcmascriptEngine.h"
 
 #if _MSC_VER
@@ -248,6 +250,31 @@ namespace reactjuce
         }
 
         //==============================================================================
+        juce::String sourceMapError(const juce::String &err, const juce::File &code)
+        {
+            std::unordered_map<juce::String, std::unique_ptr<SourceMap>> maps;
+            std::string s = err.toStdString();
+            juce::String res;
+            const std::regex fileRef("\\((.*):([0-9]+):([0-9]+)\\)", std::regex_constants::ECMAScript);
+            std::smatch m;
+
+            while (std::regex_search(s, m, fileRef))
+            {
+                const juce::String source = m[1].str();
+                const int line = std::stoi(m[2].str());
+                const int col = std::stoi(m[3].str());
+
+                if (maps.find(source) == maps.end())
+                    maps.insert({source, std::make_unique<SourceMap>(source, juce::File(source + ".map"))});
+                const auto newloc = maps[source]->translate(line, col);
+
+                res += juce::String(m.prefix().str()) + "(" + newloc.file + ":" + juce::String(newloc.line) + ":" + juce::String(newloc.col) + ")";
+                s = m.suffix();
+            }
+            return res + s;
+        }
+
+        //==============================================================================
     }
 
     //==============================================================================
@@ -366,7 +393,7 @@ namespace reactjuce
             }
             catch (const jsi::JSIException &e)
             {
-                throw Error(e.what());
+                throw Error(sourceMapError(e.what(), code));
             }
         }
 
@@ -385,7 +412,7 @@ namespace reactjuce
             }
             catch (const jsi::JSIException &e)
             {
-                throw Error(e.what());
+                throw Error(sourceMapError(e.what(), code));
             }
         }
 

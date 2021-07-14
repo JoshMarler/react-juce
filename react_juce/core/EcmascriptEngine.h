@@ -178,4 +178,27 @@ namespace reactjuce
         return invoke(name, vargs);
     }
 
+    //==============================================================================
+    /** Utility helper class for Ecmascript implementations. Read a SourceMap and
+     *  provide translations to original source location.
+     */
+    class SourceMap
+    {
+    public:
+        struct Location
+        {
+            juce::String file;
+            int line;
+            int col;
+        };
+
+        SourceMap(const juce::String &source, const juce::File &map);
+        ~SourceMap() = default;
+
+        Location translate(int line, int col) const;
+
+    private:
+        bool mapLoaded;
+        juce::String sourcePath;
+    };
 }
