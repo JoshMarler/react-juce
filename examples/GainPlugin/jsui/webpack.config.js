@@ -1,3 +1,5 @@
+const webpack = require("webpack");
+
 module.exports = {
   entry: "./src/index.js",
   output: {
@@ -7,6 +9,8 @@ module.exports = {
     devtoolModuleFilenameTemplate: (info) =>
       `webpack:///${info.absoluteResourcePath.replace(/\\/g, "/")}`,
   },
+  // Required for duktape to ensure webpack chunk do not contain arrow functions
+  target: ["web", "es5"],
   devtool: "source-map",
   module: {
     rules: [
@@ -34,4 +38,9 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      "process.env.NODE_DEBUG": JSON.stringify(process.env.NODE_DEBUG),
+    }),
+  ],
 };

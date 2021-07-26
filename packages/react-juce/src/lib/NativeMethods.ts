@@ -15,8 +15,8 @@ if (process.env.NODE_ENV !== "production") {
         target.hasOwnProperty(propKey) &&
         typeof target[propKey] === "function"
       ) {
-        return function __NativeMethodWrapper__(...args: any): void {
-          target[propKey].call(null, ...args);
+        return function __NativeMethodWrapper__(...args: any): any {
+          return target[propKey].call(null, ...args);
         };
       }
 

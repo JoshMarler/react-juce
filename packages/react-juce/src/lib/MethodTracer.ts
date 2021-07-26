@@ -1,6 +1,6 @@
 //@ts-nocheck
 
-import { inspect } from "util";
+var inspect = require("object-inspect");
 
 /** An object to be used as an ES6 Proxy handler to trace method calls and
     undefined property accesses on the target object.
@@ -19,7 +19,7 @@ export default {
         console.log(
           "MethodTrace Stub:",
           propKey,
-          ...args.map(function (arg) {
+          ...args.map((arg) => {
             return inspect(arg, { depth: 1 });
           })
         );
@@ -31,7 +31,7 @@ export default {
         console.log(
           "MethodTrace:",
           propKey,
-          ...args.map(function (arg) {
+          ...args.map((arg) => {
             return inspect(arg, { depth: 1 });
           })
         );
