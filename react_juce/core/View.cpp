@@ -12,6 +12,161 @@
 
 #include <climits>
 
+namespace {
+    enum BorderEdge
+    {
+        TOP = 0,
+        RIGHT,
+        BOTTOM,
+        LEFT
+    };
+
+    float getResolvedFloatProperty (const juce::var& val, float axisLength)
+    {
+        float ret;
+
+        if (val.isString() && val.toString().trim().endsWithChar('%'))
+        {
+            float pctVal = val.toString().retainCharacters("-1234567890.").getFloatValue();
+            ret = axisLength * (pctVal / 100.0f);
+        }
+        else
+            ret = static_cast<float>(val);
+
+        return ret;
+    }
+
+    // Generate a path for a single border edge. With a path offset of
+    // 0, the path runs along the inner edge of the lines we draw, so it
+    // can be used to build a clip region for the content inside the border.
+    // The path offset pulls it out; we set that to half the line width to
+    // get a path in the middle of the line suitable to stroke to draw the border.
+    juce::Path makeEdgePath(BorderEdge edge, float width, float pathOffset, float prevWidth, float nextWidth, float startRadius, float endRadius, float borderWidth, float borderHeight)
+    {
+        juce::Path res;
+        const auto Pi = juce::MathConstants<float>::pi;
+        juce::Point<float> lineStart;
+        juce::Point<float> lineEnd;
+
+        if (startRadius > 0)
+        {
+            switch(edge)
+            {
+            case BorderEdge::TOP:
+                res.addCentredArc(prevWidth + startRadius, width + startRadius,
+                                  startRadius + pathOffset, startRadius + pathOffset,
+                                  0,
+                                  1.75 * Pi, 2.0 * Pi,
+                                  true);
+                break;
+            case BorderEdge::RIGHT:
+                res.addCentredArc(borderWidth - width - startRadius, prevWidth + startRadius,
+                                  startRadius + pathOffset, startRadius + pathOffset,
+                                  0,
+                                  0.25 * Pi, 0.5 * Pi,
+                                  true);
+                break;
+            case BorderEdge::BOTTOM:
+                res.addCentredArc(borderWidth - prevWidth - startRadius, borderHeight - width  - startRadius,
+                                  startRadius + pathOffset, startRadius + pathOffset,
+                                  0,
+                                  0.75 * Pi, Pi,
+                                  true);
+                break;
+            case BorderEdge::LEFT:
+                res.addCentredArc(width + startRadius, borderHeight - prevWidth - startRadius,
+                                  startRadius + pathOffset, startRadius + pathOffset,
+                                  0,
+                                  1.25 * Pi, 1.5 * Pi,
+                                  true);
+                break;
+            }
+        }
+
+        switch(edge)
+        {
+        case BorderEdge::TOP:
+            lineStart = juce::Point<float>(prevWidth + startRadius, width - pathOffset);
+            break;
+        case BorderEdge::RIGHT:
+            lineStart = juce::Point<float>(borderWidth - width + pathOffset, prevWidth + startRadius);
+            break;
+        case BorderEdge::BOTTOM:
+            lineStart = juce::Point<float>(borderWidth - prevWidth - startRadius, borderHeight - width + pathOffset);
+            break;
+        case BorderEdge::LEFT:
+            lineStart = juce::Point<float>(width - pathOffset, borderHeight - prevWidth - startRadius);
+            break;
+        }
+
+        if (endRadius > 0)
+        {
+            switch(edge)
+            {
+            case BorderEdge::TOP:
+                res.addCentredArc(borderWidth - nextWidth - endRadius, width + endRadius,
+                                  endRadius + pathOffset, endRadius + pathOffset,
+                                  0,
+                                  0, 0.25 * Pi,
+                                  true);
+                lineEnd = juce::Point<float>(borderWidth - prevWidth - endRadius, width - pathOffset);
+                break;
+            case BorderEdge::RIGHT:
+                res.addCentredArc(borderWidth - width - endRadius, borderHeight - nextWidth - endRadius,
+                                  endRadius + pathOffset, endRadius + pathOffset,
+                                  0,
+                                  0.5 * Pi, 0.75 * Pi,
+                                  true);
+                lineEnd = juce::Point<float>(borderWidth - width + pathOffset, borderHeight - nextWidth - endRadius);
+                break;
+            case BorderEdge::BOTTOM:
+                res.addCentredArc(nextWidth + endRadius, borderHeight - width - endRadius,
+                                  endRadius + pathOffset, endRadius + pathOffset,
+                                  0,
+                                  Pi, 1.25 * Pi,
+                                  true);
+                lineEnd = juce::Point<float>(width + endRadius, borderHeight - width + pathOffset);
+                break;
+            case BorderEdge::LEFT:
+                res.addCentredArc(width + endRadius, nextWidth + endRadius,
+                                  endRadius + pathOffset, endRadius + pathOffset,
+                                  0,
+                                  1.5 * Pi, 1.75 * Pi,
+                                  true);
+                lineEnd = juce::Point<float>(width - pathOffset, nextWidth + endRadius);
+                break;
+            }
+        }
+        else
+        {
+            // When joining no-radius corners, a browser will mitre the corners.
+            // For simplicity, we're taking an easier route - if we have a corner
+            // with two non-zero width borders, a designated border always 'wins'.
+            // The top border draw the top right corner, the right border the
+            // bottom right corner etc.
+            switch(edge)
+            {
+            case BorderEdge::TOP:
+                lineEnd = juce::Point<float>(borderWidth, width - pathOffset);
+                break;
+            case BorderEdge::RIGHT:
+                lineEnd = juce::Point<float>(borderWidth - width + pathOffset, borderHeight);
+                break;
+            case BorderEdge::BOTTOM:
+                lineEnd = juce::Point<float>(0, borderHeight - width + pathOffset);
+                break;
+            case BorderEdge::LEFT:
+                lineEnd = juce::Point<float>(width - pathOffset, 0);
+                break;
+            }
+        }
+
+        res.startNewSubPath(lineStart);
+        res.lineTo(lineEnd);
+
+        return res;
+    }
+}
 
 namespace reactjuce
 {
@@ -144,39 +299,19 @@ namespace reactjuce
     }
 
     //==============================================================================
-    float View::getResolvedLengthProperty (const juce::String& name, float axisLength)
-    {
-        float ret = 0;
-
-        if (props.contains(name))
-        {
-            const auto& v = props[name];
-
-            if (v.isString() && v.toString().trim().endsWithChar('%'))
-            {
-                float pctVal = v.toString().retainCharacters("-1234567890.").getFloatValue();
-                ret = axisLength * (pctVal / 100.0f);
-            }
-            else
-            {
-                ret = (float) v;
-            }
-        }
-
-        return ret;
-    }
-
     void View::paint (juce::Graphics& g)
     {
         if (props.contains(borderPathProp))
         {
             juce::Path p = juce::Drawable::parseSVGPath(props[borderPathProp].toString());
 
-            if (props.contains(borderColorProp))
+            if (props.contains(borderInfoProp))
             {
-                juce::StringRef colorString = props[borderColorProp].toString();
+                juce::StringRef colorString = props[borderInfoProp]["color"][0].toString();
                 juce::Colour c = juce::Colour::fromString(colorString);
-                float borderWidth = props.getWithDefault(borderWidthProp, 1.0);
+                float borderWidth = props[borderInfoProp]["width"][0];
+                if (borderWidth == 0)
+                    borderWidth = 1.0;
 
                 g.setColour(c);
                 g.strokePath(p, juce::PathStrokeType(borderWidth));
@@ -184,27 +319,71 @@ namespace reactjuce
 
             g.reduceClipRegion(p);
         }
-        else if (props.contains(borderColorProp) && props.contains(borderWidthProp))
+        else if (props.contains(borderInfoProp))
         {
-            juce::Path border;
-            juce::StringRef colorString = props[borderColorProp].toString();
-            auto c = juce::Colour::fromString(colorString);
-            float borderWidth = props[borderWidthProp];
+            auto borderBounds = getLocalBounds().toFloat();
+            auto borderWidth = borderBounds.getWidth();
+            auto borderHeight = borderBounds.getHeight();
+            auto minWidthHeight = juce::jmin(borderWidth, borderHeight);
+            float widths[LEFT + 1];
+            float radii[LEFT + 1];
+            juce::StringRef colors[LEFT + 1];
 
-            // Note this little bounds trick. When a Path is stroked, the line width extends
-            // outwards in both directions from the coordinate line. If the coordinate
-            // line is the exact bounding box then the component clipping makes the corners
-            // appear to have different radii on the interior and exterior of the box.
-            auto borderBounds = getLocalBounds().toFloat().reduced(borderWidth * 0.5f);
-            auto width  = borderBounds.getWidth();
-            auto height = borderBounds.getHeight();
-            auto minLength = juce::jmin(width, height);
-            float borderRadius = getResolvedLengthProperty(borderRadiusProp.toString(), minLength);
+            for (int edgeNo = TOP; edgeNo <= LEFT; ++edgeNo)
+            {
+                widths[edgeNo] = props[borderInfoProp]["width"][edgeNo];
+                colors[edgeNo] = props[borderInfoProp]["color"][edgeNo].toString();
+                radii[edgeNo] = getResolvedFloatProperty(props[borderInfoProp]["radius"][edgeNo], minWidthHeight);
+            }
 
-            border.addRoundedRectangle(borderBounds, borderRadius);
-            g.setColour(c);
-            g.strokePath(border, juce::PathStrokeType(borderWidth));
-            g.reduceClipRegion(border);
+            // Path and stroke the border edges.
+            for (int edgeNo = TOP; edgeNo <= LEFT; ++edgeNo)
+            {
+                float width = widths[edgeNo];
+                if (width == 0)
+                    continue;
+
+                int prevEdgeNo = edgeNo == TOP ? LEFT : edgeNo - 1;
+                int nextEdgeNo = edgeNo == LEFT ? TOP : edgeNo + 1;
+                float prevWidth = widths[prevEdgeNo];
+                float nextWidth = widths[nextEdgeNo];
+                float startRadius = radii[edgeNo];
+                float endRadius = radii[nextEdgeNo];
+
+                juce::Path p = makeEdgePath(static_cast<BorderEdge>(edgeNo),
+                                            width, width / 2,
+                                            prevWidth, nextWidth,
+                                            startRadius, endRadius,
+                                            borderWidth, borderHeight);
+
+                auto color = juce::Colour::fromString(colors[edgeNo]);
+                g.setColour(color);
+                g.strokePath(p, juce::PathStrokeType(width));
+            }
+
+            // Path the clip region.
+            juce::Path clip;
+            for (int edgeNo = TOP; edgeNo <= LEFT; ++edgeNo)
+            {
+                float width = widths[edgeNo];
+                if (width == 0)
+                    continue;
+
+                int prevEdgeNo = edgeNo == TOP ? LEFT : edgeNo - 1;
+                int nextEdgeNo = edgeNo == LEFT ? TOP : edgeNo + 1;
+                float prevWidth = widths[prevEdgeNo];
+                float nextWidth = widths[nextEdgeNo];
+                float startRadius = radii[edgeNo];
+                float endRadius = radii[nextEdgeNo];
+
+                juce::Path p = makeEdgePath(static_cast<BorderEdge>(edgeNo),
+                                            width, 0,
+                                            prevWidth, nextWidth,
+                                            startRadius, endRadius,
+                                            borderWidth, borderHeight);
+                clip.addPath(p);
+            }
+            g.reduceClipRegion(clip);
         }
 
         if (props.contains(backgroundColorProp))
@@ -304,6 +483,6 @@ namespace reactjuce
         if (it != nativeMethods.end())
             return it->second(args);
 
-        throw std::logic_error("Caller attempted to invoke a non-existent View method");
+        throw std::logic_error(std::string("Caller attempted to invoke a non-existent View method ") + method.toStdString());
     }
 }
