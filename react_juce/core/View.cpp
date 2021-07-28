@@ -328,12 +328,14 @@ namespace reactjuce
             float widths[LEFT + 1];
             float radii[LEFT + 1];
             juce::StringRef colors[LEFT + 1];
+            juce::StringRef styles[LEFT + 1];
 
             for (int edgeNo = TOP; edgeNo <= LEFT; ++edgeNo)
             {
-                widths[edgeNo] = props[borderInfoProp]["width"][edgeNo];
                 colors[edgeNo] = props[borderInfoProp]["color"][edgeNo].toString();
                 radii[edgeNo] = getResolvedFloatProperty(props[borderInfoProp]["radius"][edgeNo], minWidthHeight);
+                styles[edgeNo] = props[borderInfoProp]["style"][edgeNo].toString();
+                widths[edgeNo] = props[borderInfoProp]["width"][edgeNo];
             }
 
             // Path and stroke the border edges.
@@ -358,7 +360,21 @@ namespace reactjuce
 
                 auto color = juce::Colour::fromString(colors[edgeNo]);
                 g.setColour(color);
-                g.strokePath(p, juce::PathStrokeType(width));
+                auto strokeType = juce::PathStrokeType(width);
+                juce::Path strokedPath;
+                if (styles[edgeNo] == juce::String("dotted"))
+                {
+                    float dash[] = { 1.0, 1.0 };
+                    strokeType.createDashedStroke(strokedPath, p, dash, 2);
+                }
+                else if (styles[edgeNo] == juce::String("dashed"))
+                {
+                    float dash[] = { 4.0, 1.0 };
+                    strokeType.createDashedStroke(strokedPath, p, dash, 2);
+                }
+                else
+                    strokeType.createStrokedPath(strokedPath, p);
+                g.fillPath(strokedPath);
             }
 
             // Path the clip region.
