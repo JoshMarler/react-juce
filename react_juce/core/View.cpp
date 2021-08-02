@@ -45,8 +45,6 @@ namespace {
     {
         juce::Path res;
         const auto Pi = juce::MathConstants<float>::pi;
-        juce::Point<float> lineStart;
-        juce::Point<float> lineEnd;
 
         if (startRadius > 0)
         {
@@ -82,21 +80,23 @@ namespace {
                 break;
             }
         }
-
-        switch(edge)
+        else
         {
-        case BorderEdge::TOP:
-            lineStart = juce::Point<float>(prevWidth + startRadius, width - pathOffset);
-            break;
-        case BorderEdge::RIGHT:
-            lineStart = juce::Point<float>(borderWidth - width + pathOffset, prevWidth + startRadius);
-            break;
-        case BorderEdge::BOTTOM:
-            lineStart = juce::Point<float>(borderWidth - prevWidth - startRadius, borderHeight - width + pathOffset);
-            break;
-        case BorderEdge::LEFT:
-            lineStart = juce::Point<float>(width - pathOffset, borderHeight - prevWidth - startRadius);
-            break;
+            switch(edge)
+            {
+            case BorderEdge::TOP:
+                res.startNewSubPath(prevWidth + startRadius, width - pathOffset);
+                break;
+            case BorderEdge::RIGHT:
+                res.startNewSubPath(borderWidth - width + pathOffset, prevWidth + startRadius);
+                break;
+            case BorderEdge::BOTTOM:
+                res.startNewSubPath(borderWidth - prevWidth - startRadius, borderHeight - width + pathOffset);
+                break;
+            case BorderEdge::LEFT:
+                res.startNewSubPath(width - pathOffset, borderHeight - prevWidth - startRadius);
+                break;
+            }
         }
 
         if (endRadius > 0)
@@ -107,33 +107,25 @@ namespace {
                 res.addCentredArc(borderWidth - nextWidth - endRadius, width + endRadius,
                                   endRadius + pathOffset, endRadius + pathOffset,
                                   0,
-                                  0, 0.25 * Pi,
-                                  true);
-                lineEnd = juce::Point<float>(borderWidth - prevWidth - endRadius, width - pathOffset);
+                                  0, 0.25 * Pi);
                 break;
             case BorderEdge::RIGHT:
                 res.addCentredArc(borderWidth - width - endRadius, borderHeight - nextWidth - endRadius,
                                   endRadius + pathOffset, endRadius + pathOffset,
                                   0,
-                                  0.5 * Pi, 0.75 * Pi,
-                                  true);
-                lineEnd = juce::Point<float>(borderWidth - width + pathOffset, borderHeight - nextWidth - endRadius);
+                                  0.5 * Pi, 0.75 * Pi);
                 break;
             case BorderEdge::BOTTOM:
                 res.addCentredArc(nextWidth + endRadius, borderHeight - width - endRadius,
                                   endRadius + pathOffset, endRadius + pathOffset,
                                   0,
-                                  Pi, 1.25 * Pi,
-                                  true);
-                lineEnd = juce::Point<float>(width + endRadius, borderHeight - width + pathOffset);
+                                  Pi, 1.25 * Pi);
                 break;
             case BorderEdge::LEFT:
                 res.addCentredArc(width + endRadius, nextWidth + endRadius,
                                   endRadius + pathOffset, endRadius + pathOffset,
                                   0,
-                                  1.5 * Pi, 1.75 * Pi,
-                                  true);
-                lineEnd = juce::Point<float>(width - pathOffset, nextWidth + endRadius);
+                                  1.5 * Pi, 1.75 * Pi);
                 break;
             }
         }
@@ -147,22 +139,19 @@ namespace {
             switch(edge)
             {
             case BorderEdge::TOP:
-                lineEnd = juce::Point<float>(borderWidth, width - pathOffset);
+                res.lineTo(borderWidth, width - pathOffset);
                 break;
             case BorderEdge::RIGHT:
-                lineEnd = juce::Point<float>(borderWidth - width + pathOffset, borderHeight);
+                res.lineTo(borderWidth - width + pathOffset, borderHeight);
                 break;
             case BorderEdge::BOTTOM:
-                lineEnd = juce::Point<float>(0, borderHeight - width + pathOffset);
+                res.lineTo(0, borderHeight - width + pathOffset);
                 break;
             case BorderEdge::LEFT:
-                lineEnd = juce::Point<float>(width - pathOffset, 0);
+                res.lineTo(width - pathOffset, 0);
                 break;
             }
         }
-
-        res.startNewSubPath(lineStart);
-        res.lineTo(lineEnd);
 
         return res;
     }
