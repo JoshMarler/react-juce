@@ -51,29 +51,37 @@ namespace {
             switch(edge)
             {
             case BorderEdge::TOP:
-                res.addCentredArc(prevWidth + startRadius, width + startRadius,
-                                  startRadius + pathOffset, startRadius + pathOffset,
+                res.addCentredArc(juce::jmin(prevWidth + startRadius, borderWidth / 2),
+                                  juce::jmin(width + startRadius, borderHeight / 2),
+                                  juce::jmin(startRadius, borderWidth / 2 - pathOffset) + pathOffset,
+                                  juce::jmin(startRadius, borderHeight / 2 - pathOffset) + pathOffset,
                                   0,
                                   1.75 * Pi, 2.0 * Pi,
                                   true);
                 break;
             case BorderEdge::RIGHT:
-                res.addCentredArc(borderWidth - width - startRadius, prevWidth + startRadius,
-                                  startRadius + pathOffset, startRadius + pathOffset,
+                res.addCentredArc(juce::jmax(borderWidth - width - startRadius, borderWidth / 2),
+                                  juce::jmin(prevWidth + startRadius, borderHeight / 2),
+                                  juce::jmin(startRadius, borderWidth / 2 - pathOffset) + pathOffset,
+                                  juce::jmin(startRadius, borderHeight / 2 - pathOffset) + pathOffset,
                                   0,
                                   0.25 * Pi, 0.5 * Pi,
                                   true);
                 break;
             case BorderEdge::BOTTOM:
-                res.addCentredArc(borderWidth - prevWidth - startRadius, borderHeight - width  - startRadius,
-                                  startRadius + pathOffset, startRadius + pathOffset,
+                res.addCentredArc(juce::jmax(borderWidth - prevWidth - startRadius, borderWidth / 2),
+                                  juce::jmax(borderHeight - width  - startRadius, borderHeight / 2),
+                                  juce::jmin(startRadius, borderWidth / 2 - pathOffset) + pathOffset,
+                                  juce::jmin(startRadius, borderHeight / 2 - pathOffset) + pathOffset,
                                   0,
                                   0.75 * Pi, Pi,
                                   true);
                 break;
             case BorderEdge::LEFT:
-                res.addCentredArc(width + startRadius, borderHeight - prevWidth - startRadius,
-                                  startRadius + pathOffset, startRadius + pathOffset,
+                res.addCentredArc(juce::jmin(width + startRadius, borderWidth / 2),
+                                  juce::jmax(borderHeight - prevWidth - startRadius, borderHeight / 2),
+                                  juce::jmin(startRadius, borderWidth / 2 - pathOffset) + pathOffset,
+                                  juce::jmin(startRadius, borderHeight / 2 - pathOffset) + pathOffset,
                                   0,
                                   1.25 * Pi, 1.5 * Pi,
                                   true);
@@ -104,26 +112,34 @@ namespace {
             switch(edge)
             {
             case BorderEdge::TOP:
-                res.addCentredArc(borderWidth - nextWidth - endRadius, width + endRadius,
-                                  endRadius + pathOffset, endRadius + pathOffset,
+                res.addCentredArc(juce::jmax(borderWidth - nextWidth - endRadius, borderWidth / 2),
+                                  juce::jmin(width + endRadius, borderHeight / 2),
+                                  juce::jmin(endRadius, borderWidth / 2 - pathOffset) + pathOffset,
+                                  juce::jmin(endRadius, borderHeight / 2 - pathOffset) + pathOffset,
                                   0,
                                   0, 0.25 * Pi);
                 break;
             case BorderEdge::RIGHT:
-                res.addCentredArc(borderWidth - width - endRadius, borderHeight - nextWidth - endRadius,
-                                  endRadius + pathOffset, endRadius + pathOffset,
+                res.addCentredArc(juce::jmax(borderWidth - width - endRadius, borderWidth / 2),
+                                  juce::jmax(borderHeight - nextWidth - endRadius, borderHeight / 2),
+                                  juce::jmin(endRadius, borderWidth / 2 - pathOffset) + pathOffset,
+                                  juce::jmin(endRadius, borderHeight / 2 - pathOffset) + pathOffset,
                                   0,
                                   0.5 * Pi, 0.75 * Pi);
                 break;
             case BorderEdge::BOTTOM:
-                res.addCentredArc(nextWidth + endRadius, borderHeight - width - endRadius,
-                                  endRadius + pathOffset, endRadius + pathOffset,
+                res.addCentredArc(juce::jmin(nextWidth + endRadius, borderWidth / 2),
+                                  juce::jmax(borderHeight - width - endRadius, borderHeight / 2),
+                                  juce::jmin(endRadius, borderWidth / 2 - pathOffset) + pathOffset,
+                                  juce::jmin(endRadius, borderHeight / 2 - pathOffset) + pathOffset,
                                   0,
                                   Pi, 1.25 * Pi);
                 break;
             case BorderEdge::LEFT:
-                res.addCentredArc(width + endRadius, nextWidth + endRadius,
-                                  endRadius + pathOffset, endRadius + pathOffset,
+                res.addCentredArc(juce::jmin(width + endRadius, borderWidth / 2),
+                                  juce::jmin(nextWidth + endRadius, borderHeight / 2),
+                                  juce::jmin(endRadius, borderWidth / 2 - pathOffset) + pathOffset,
+                                  juce::jmin(endRadius, borderHeight / 2 - pathOffset) + pathOffset,
                                   0,
                                   1.5 * Pi, 1.75 * Pi);
                 break;
