@@ -250,7 +250,7 @@ namespace reactjuce
         }
 
         //==============================================================================
-        juce::String sourceMapError(const juce::String &err, const juce::File &code)
+        juce::String sourceMapError(const juce::String &err)
         {
             std::unordered_map<juce::String, std::unique_ptr<SourceMap>> maps;
             std::string s = err.toStdString();
@@ -380,7 +380,7 @@ namespace reactjuce
             }
             catch (const jsi::JSIException &e)
             {
-                throw Error(e.what());
+                throw Error(sourceMapError(e.what()));
             }
         }
 
@@ -396,7 +396,7 @@ namespace reactjuce
             }
             catch (const jsi::JSIException &e)
             {
-                throw Error(sourceMapError(e.what(), code));
+                throw Error(sourceMapError(e.what()));
             }
         }
 
@@ -415,7 +415,7 @@ namespace reactjuce
             }
             catch (const jsi::JSIException &e)
             {
-                throw Error(sourceMapError(e.what(), code));
+                throw Error(sourceMapError(e.what()));
             }
         }
 
@@ -481,7 +481,7 @@ namespace reactjuce
             }
             catch(const jsi::JSIException &e)
             {
-                throw Error(e.what());
+                throw Error(sourceMapError(e.what()));
             }
         }
 
