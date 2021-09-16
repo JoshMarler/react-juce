@@ -1,4 +1,3 @@
-
 TextInput component imitates web's `<input type="text">`.
 https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text
 So it supports props like `placeholder`, `maxlength`, `onInput`, etc...

@@ -32,8 +32,6 @@ export interface TextInputProps {
   onInput?: (e: InputEvent) => void;
 }
 
-/**
- */
 export function TextInput(props: PropsWithChildren<TextInputProps | any>) {
   return React.createElement("TextInput", props, props.children);
 }
