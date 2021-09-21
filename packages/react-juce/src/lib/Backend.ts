@@ -7,9 +7,17 @@ import SyntheticEvents, {
 } from "./SyntheticEvents";
 import { macroPropertyGetters } from "./MacroProperties";
 import Colors from "./MacroProperties/Colors";
+import invariant from "invariant";
 
 //TODO: Keep this union or introduce a common base class ViewInstanceBase?
 export type Instance = ViewInstance | RawTextViewInstance;
+
+type BorderInfo = {
+  width: number[];
+  radius: string[];
+  color: string[];
+  style: string[];
+};
 
 let __rootViewInstance: ViewInstance | null = null;
 let __viewRegistry: Map<string, Instance> = new Map<string, Instance>();
@@ -26,15 +34,18 @@ const cssPropsMap = allCssProps
 const cssBorderStyles = ["dotted", "dashed", "solid"];
 
 // Parse combination border properties.
-function parseBorderSideProp(name: string, val: string | number, info: object) {
+function parseBorderSideProp(
+  name: string,
+  val: string | number,
+  info: string[] | number[]
+) {
   invariant(
     typeof val === "string" || typeof val === "number",
     name + " must be a string or a number"
   );
 
-  if (typeof val === "number")
-  {
-    info[0] = info[1] = info[2] = info[3] = val;
+  if (typeof val === "number") {
+    info[0] = info[1] = info[2] = info[3] = +val;
     return;
   }
 
@@ -87,7 +98,7 @@ function parseBorderProp(val: string, info: object) {
     if (cssBorderStyles.includes(val)) {
       bs[0] = bs[1] = bs[2] = bs[3] = val;
     } else if (numbers.includes(val.charAt(0))) {
-      bw[0] = bw[1] = bw[2] = bw[3] = val;
+      bw[0] = bw[1] = bw[2] = bw[3] = +val;
     } else {
       bc[0] = bc[1] = bc[2] = bc[3] = val;
     }
@@ -97,6 +108,7 @@ function parseBorderProp(val: string, info: object) {
 export class ViewInstance {
   private _id: string;
   private _type: string;
+  private _border: BorderInfo;
   public _children: Instance[];
   public _props: any = null;
   public _parent: any = null;
@@ -105,10 +117,10 @@ export class ViewInstance {
     this._id = id;
     this._type = type;
     this._border = {
-      "width":  [0, 0, 0, 0],
-      "radius": ["0", "0", "0", "0"],
-      "color":  ["", "", "", ""],
-      "style":  ["solid", "solid", "solid", "solid"],
+      width: [0, 0, 0, 0],
+      radius: ["0", "0", "0", "0"],
+      color: ["", "", "", ""],
+      style: ["solid", "solid", "solid", "solid"],
     };
     this._children = [];
     this._props = props;
@@ -226,7 +238,7 @@ export class ViewInstance {
     // Look for border properties and translate into our internal
     // border-info property.
     if (propKey.startsWith("border")) {
-      let gotBorderProp : boolean = true;
+      let gotBorderProp: boolean = true;
 
       switch (propKey) {
         case "border":
@@ -304,9 +316,9 @@ export class ViewInstance {
 
       invariant(
         cssBorderStyles.includes(this._border["style"][0]) &&
-        cssBorderStyles.includes(this._border["style"][1]) &&
-        cssBorderStyles.includes(this._border["style"][2]) &&
-        cssBorderStyles.includes(this._border["style"][3]),
+          cssBorderStyles.includes(this._border["style"][1]) &&
+          cssBorderStyles.includes(this._border["style"][2]) &&
+          cssBorderStyles.includes(this._border["style"][3]),
         "unknown border-style."
       );
 
