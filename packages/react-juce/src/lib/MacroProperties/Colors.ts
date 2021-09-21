@@ -1,7 +1,15 @@
 import ColorString from "color-string";
 import ColorNames from "color-name";
 
-const COLOR_PROPERTIES = ["border-color", "background-color", "color"];
+const COLOR_PROPERTIES = [
+  "border-color",
+  "border-top-color",
+  "border-bottom-color",
+  "border-left-color",
+  "border-right-color",
+  "background-color",
+  "color",
+];
 
 const isColorProperty = (propKey: string): boolean => {
   return COLOR_PROPERTIES.includes(propKey);
