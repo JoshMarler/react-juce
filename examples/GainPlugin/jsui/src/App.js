@@ -1,9 +1,9 @@
-// import AnimatedFlexBoxExample from "./AnimatedFlexBox";
+import AnimatedFlexBoxExample from "./AnimatedFlexBox";
 import Meter from "./Meter";
 import Knob from "./Knob";
 import ParameterToggleButton from "./ParameterToggleButton";
-import React, { Component } from "react";
-import { Canvas, Image, Text, View } from "react-juce";
+import React, { Component, useState } from "react";
+import { Canvas, Image, Text, View, StyleSheet } from "react-juce";
 
 function animatedDraw(ctx) {
   let now = Date.now() / 10;
@@ -25,71 +25,83 @@ function imageError(error) {
   console.log(error.message);
 }
 
+const ImageType = {
+    IMAGE_URL: "IMAGE_URL",
+    IMAGE_PNG: "IMAGE_PNG",
+    IMAGE_SVG: "IMAGE_SVG",
+}
+
+const MuteButton = () => {
+    const [muted, setMuted] = useState(false);
+
+    const muteButtonStyles = StyleSheet.cx(styles.mute_button, muted && styles.mute_button_active);
+    const muteTextStyles = StyleSheet.cx(styles.mute_button_text, muted && styles.mute_button_text_active);
+
+    return (
+      <ParameterToggleButton
+         paramId="MainMute"
+         onToggled={setMuted}
+         styles={muteButtonStyles}
+       >
+           <Text styles={muteTextStyles}>
+           MUTE
+         </Text>
+       </ParameterToggleButton>
+    )
+}
+
+const Logo = (props) => {
+    let logo = "";
+
+    switch(props.imageType) {
+        case ImageType.IMAGE_URL:
+            logo = "https://raw.githubusercontent.com/nick-thompson/react-juce/master/examples/GainPlugin/jsui/src/logo.png";
+        case ImageType.IMAGE_PNG:
+            logo = require("./logo.png");
+        case ImageType.IMAGE_SVG:
+        default:
+            logo = require("./logo.svg");
+    }
+
+    return (
+      <Image
+          source={logo}
+          onLoad={imageLoaded}
+          onError={imageError}
+          styles={styles.logo}
+      />
+    )
+}
+
+
 class App extends Component {
   constructor(props) {
     super(props);
-    this._onMuteToggled = this._onMuteToggled.bind(this);
-
-    this.state = {
-      muted: false,
-    };
-  }
-
-  _onMuteToggled(toggled) {
-    this.setState({
-      muted: toggled,
-    });
   }
 
   render() {
     // Uncomment here to watch the animated flex box example in action
-    // return (
-    //   <View {...styles.container}>
-    //     <AnimatedFlexBoxExample />
-    //   </View>
-    // );
-
-    const muteBackgroundColor = this.state.muted
-      ? "#66FDCF"
-      : "hsla(162, 97%, 70%, 0)";
-    const muteTextColor = this.state.muted
-      ? "#17191f"
-      : "hsla(162, 97%, 70%, 1)";
-
-    const logo_url =
-      "https://raw.githubusercontent.com/nick-thompson/react-juce/master/examples/GainPlugin/jsui/src/logo.png";
-    //const logo_png = require('./logo.png');
-    //const logo_svg = require('./logo.svg');
+    //return (
+    //  <View styles={styles.container}>
+    //    <AnimatedFlexBoxExample />
+    //  </View>
+    //);
 
     return (
-      <View {...styles.container}>
-        <View {...styles.content}>
-          <Image
-            source={logo_url}
-            onLoad={imageLoaded}
-            onError={imageError}
-            {...styles.logo}
-          />
+      <View styles={styles.container}>
+          <View styles={styles.content}>
+          <Logo />
           <Knob paramId="MainGain" />
-          <Meter {...styles.meter} />
-          <Canvas {...styles.canvas} animate={true} onDraw={animatedDraw} />
-          <ParameterToggleButton
-            paramId="MainMute"
-            onToggled={this._onMuteToggled}
-            background-color={muteBackgroundColor}
-            {...styles.mute_button}
-          >
-            <Text color={muteTextColor} {...styles.mute_button_text}>
-              MUTE
-            </Text>
-          </ParameterToggleButton>
+          <Meter styles={styles.meter} />
+          <Canvas styles={styles.canvas} animate={true} onDraw={animatedDraw} />
+          <MuteButton />
         </View>
       </View>
     );
   }
 }
 
-const styles = {
+const styles = StyleSheet.create({
   container: {
     width: "100%",
     height: "100%",
@@ -127,6 +139,7 @@ const styles = {
   mute_button: {
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#66FDCF",
     borderRadius: 5.0,
     borderWidth: 2.0,
     borderColor: "rgba(102, 253, 207, 1)",
@@ -136,11 +149,18 @@ const styles = {
     width: "20%",
     height: "17.5%",
   },
+  mute_button_active: {
+    backgroundColor: "hsla(162, 97%, 70%, 0)"
+  },
   mute_button_text: {
+    color: "#17191f",
     fontSize: 20.0,
     lineSpacing: 1.6,
     fontStyle: Text.FontStyleFlags.bold,
   },
-};
+  mute_button_text_active: {
+      color: "hsla(162, 97%, 70%, 1)"
+  },
+});
 
 export default App;

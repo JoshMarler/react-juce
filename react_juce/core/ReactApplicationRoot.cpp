@@ -77,6 +77,11 @@ namespace reactjuce
         return juce::var::undefined();
     }
 
+    juce::var ReactApplicationRoot::createStyleSheet(const juce::var &value)
+    {
+        return viewManager.createStyleSheet(value);
+    }
+
     //==============================================================================
     void ReactApplicationRoot::resized()
     {
@@ -213,6 +218,7 @@ namespace reactjuce
         addMethodBinding<2>(ns, "removeChild", &ReactApplicationRoot::removeChild);
         addMethodBinding<0>(ns, "getRootInstanceId", &ReactApplicationRoot::getRootInstanceId);
         addMethodBinding<0>(ns, "resetAfterCommit", &ReactApplicationRoot::resetAfterCommit);
+        addMethodBinding<1>(ns, "createStyleSheet", &ReactApplicationRoot::createStyleSheet);
     }
 
     juce::ThreadPool&  ReactApplicationRoot::getThreadPool()

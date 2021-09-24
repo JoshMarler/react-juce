@@ -1,40 +1,30 @@
 import React, { Component } from "react";
-import { View, Text } from "react-juce";
+import { View, Text, StyleSheet } from "react-juce";
+
+const Cell = (props) => (
+    <View styles={styles.cell}>
+      <Text styles={styles.text}>{props.text}</Text>
+    </View>
+)
 
 class AnimatedFlexBoxExample extends Component {
   render() {
     return (
-      <View {...styles.container}>
-        <View {...styles.cell}>
-          <Text {...styles.text}>Look at me, cell #1!</Text>
-        </View>
-        <View {...styles.cell}>
-          <Text {...styles.text}>Look at me, cell #2!</Text>
-        </View>
-        <View {...styles.cell}>
-          <Text {...styles.text}>Look at me, cell #3!</Text>
-        </View>
-        <View {...styles.cell}>
-          <Text {...styles.text}>Look at me, cell #4!</Text>
-        </View>
-        <View {...styles.cell}>
-          <Text {...styles.text}>Look at me, cell #5!</Text>
-        </View>
-        <View {...styles.cell}>
-          <Text {...styles.text}>Look at me, cell #6!</Text>
-        </View>
-        <View {...styles.cell}>
-          <Text {...styles.text}>Look at me, cell #7!</Text>
-        </View>
-        <View {...styles.cell}>
-          <Text {...styles.text}>Look at me, cell #8!</Text>
-        </View>
+      <View styles={styles.container}>
+        <Cell text="Look at me, cell #1!" />
+        <Cell text="Look at me, cell #2!" />
+        <Cell text="Look at me, cell #3!" />
+        <Cell text="Look at me, cell #4!" />
+        <Cell text="Look at me, cell #5!" />
+        <Cell text="Look at me, cell #6!" />
+        <Cell text="Look at me, cell #7!" />
+        <Cell text="Look at me, cell #8!" />
       </View>
     );
   }
 }
 
-const styles = {
+const styles = StyleSheet.create({
   container: {
     width: "100%",
     height: "100%",
@@ -63,6 +53,6 @@ const styles = {
     lineSpacing: 1.6,
     justification: Text.JustificationFlags.centred,
   },
-};
+});
 
 export default AnimatedFlexBoxExample;
