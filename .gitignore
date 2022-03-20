@@ -10,8 +10,6 @@
 .cache/
 
 build
-examples/TestRunner/Builds
-examples/**/build
 
 # For VSCode users
 *.code-workspace
@@ -97,3 +95,4 @@ extras/Projucer/JUCECompileEngine.dylib
 **/AAX_SDK_2p3p1/Libs/Debug
 **/AAX_SDK_2p3p1/Libs/Release
 **/AAX_SDK_2p3p1/Documentation
+hermes-build

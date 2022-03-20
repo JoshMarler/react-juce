@@ -12,7 +12,7 @@
     description:        Write cross-platform native apps with React.js and JUCE
     minimumCppStandard: 17
     dependencies:       juce_gui_basics
-    searchpaths:        ./ ./duktape/ ./duktape/src-noline/ ./yoga
+    searchpaths:        ./ ./yoga
    END_JUCE_MODULE_DECLARATION
 *******************************************************************************/
 

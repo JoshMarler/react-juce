@@ -16,9 +16,7 @@ namespace reactjuce
 {
 
     //==============================================================================
-    /** The EcmascriptEngine provides a flexible ECMAScript 5 compliant JavaScript engine
-     *  with an interface implemented by Duktape, but which may be implemented by one of
-     *  many embedded engines in the future.
+    /** The EcmascriptEngine provides a flexible ECMAScript 5 compliant JavaScript engine.
      */
     class EcmascriptEngine
     {
@@ -28,7 +26,7 @@ namespace reactjuce
         ~EcmascriptEngine();
 
         //==============================================================================
-        /** A helper struct for representing an error that occured within the Duktape
+        /** A helper struct for representing an error that occured within the JS
          *  engine.
          *
          *  We provide the JavaScript stack trace in the `stack` member.
@@ -47,7 +45,7 @@ namespace reactjuce
             juce::String context;
         };
 
-        /** A helper struct for representing an error that occured within the Duktape
+        /** A helper struct for representing an error that occured within the JS
          *  engine.
          *
          *  In the event this error is thrown, the engine is to be considered
@@ -150,7 +148,7 @@ namespace reactjuce
         juce::var invoke (const juce::String& name, T... args);
 
         //==============================================================================
-        /** Resets the internal Duktape context, clearing the value stack and destroying native callbacks. */
+        /** Resets the internal JS context, clearing the value stack and destroying native callbacks. */
         void reset();
 
         //==============================================================================

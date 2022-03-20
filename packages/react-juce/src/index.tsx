@@ -1,7 +1,3 @@
-/** Polyfill ES2015 data structures with core-js. */
-import "core-js/es6/set";
-import "core-js/es6/map";
-
 import Backend from "./lib/Backend";
 import Renderer, { TracedRenderer } from "./lib/Renderer";
 

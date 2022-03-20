@@ -62,4 +62,4 @@ export default App;
 
 ## Props
 
-**TODO**: Document props. See [the class](https://github.com/nick-thompson/react-juce/blob/master/packages/react-juce/src/components/TextInput.tsx#L11) for props in the meantime.
+**TODO**: Document props. See [the class](https://github.com/JoshMarler/react-juce/blob/master/packages/react-juce/src/components/TextInput.tsx#L11) for props in the meantime.

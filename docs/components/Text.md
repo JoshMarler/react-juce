@@ -2,7 +2,7 @@
 
 A React component for displaying text.
 
-Unlike React Native and React-DOM, `Text` does not yet support nesting ([#6](https://github.com/nick-thompson/react-juce/issues/6)), though
+Unlike React Native and React-DOM, `Text` does not yet support nesting ([#6](https://github.com/JoshMarler/react-juce/issues/6)), though
 it does happily support styling, and touch handling.
 
 ## Example

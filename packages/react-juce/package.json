@@ -4,7 +4,7 @@
   "description": "Write cross-platform native apps with React.js and JUCE.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nick-thompson/react-juce.git"
+    "url": "https://github.com/jmarler/react-juce.git"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,16 +15,12 @@
     "dist/components",
     "dist/src"
   ],
-  "author": "Nick Thompson",
+  "author": "Joshua Marler",
   "devDependencies": {
-    "@babel/cli": "^7.10.0",
-    "@babel/core": "^7.11.1",
-    "@babel/plugin-proposal-class-properties": "^7.11.0",
-    "@babel/plugin-transform-runtime": "^7.11.0",
-    "@babel/preset-env": "^7.11.0",
-    "@babel/preset-react": "^7.10.4",
-    "@babel/preset-typescript": "^7.10.4",
-    "@types/core-js": "^2.5.4",
+    "@babel/core": "^7.23.2",
+    "@babel/preset-typescript": "^7.23.2",
+    "@react-native/babel-preset": "^0.74.0",
+    "@tsconfig/react-native": "^3.0.2",
     "@types/invariant": "^2.2.33",
     "@types/node": "^14.6.4",
     "@types/react": "^16.9.41",
@@ -33,14 +29,12 @@
     "chalk": "^2.4.2",
     "fs-extra": "^8.1.0",
     "typescript": "^3.9.6",
-    "webpack": "^5.46.0",
-    "webpack-cli": "^4.7.2"
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@babel/runtime-corejs3": "^7.11.2",
     "camelcase": "^6.2.0",
     "color-string": "^1.5.4",
-    "core-js": "2.6.0",
     "invariant": "^2.2.4",
     "known-css-properties": "^0.20.0",
     "matrix-js": "^1.5.1",
@@ -52,6 +46,7 @@
   },
   "scripts": {
     "build": "webpack --mode=production",
+    "build-dev": "webpack --mode=development",
     "watch": "webpack --watch --mode=development",
     "init": "node scripts/init.js"
   }

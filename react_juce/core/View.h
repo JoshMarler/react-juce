@@ -18,7 +18,7 @@ namespace reactjuce
     // Internally we use a juce::Uuid for uniquely identifying views, but we
     // need that same identifier to make a transit through JavaScript land
     // and still match afterwards. So we map our Uuids into a signed 32-bit integer
-    // type and leave Duktape to perform the appropriate cast through JavaScript's
+    // type and leave the JS engine to perform the appropriate cast through JavaScript's
     // double-width "Number" type.
     using ViewId = juce::int32;
 
