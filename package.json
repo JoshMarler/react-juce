@@ -7,7 +7,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nick-thompson/react-juce.git"
+    "url": "git+https://github.com/JoshMarler/react-juce.git"
   },
   "devDependencies": {
     "husky": "^4.3.8",
