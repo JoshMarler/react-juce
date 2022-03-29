@@ -26,7 +26,7 @@ To get the GainPlugin up and running for the first time, we have to first perfor
 that compilation step. So, from the root of the `React-JUCE` git repository:
 
 ```bash
-$ cd examples/GainPlugin/Source/jsui/
+$ cd examples/GainPlugin/jsui/
 ```
 
 The `jsui/` directory here is the top level directory of all the
@@ -39,7 +39,7 @@ $ npm install
 $ npm run build
 ```
 
-At this point, you'll see an output file in `examples/GainPlugin/Source/jsui/build/js/`. That file location is important, because that's where the native code looks for executing the output file.
+At this point, you'll see an output file in `examples/GainPlugin/jsui/build/js/`. That file location is important, because that's where the native code looks for executing the output file.
 
 ### Native
 
