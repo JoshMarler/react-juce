@@ -56,7 +56,7 @@ The following option should be added to the `output` key in your webpack config:
 You also need to ensure that your bundle is not minified, this can be achieved by building your JS bundle with `webpack --mode=development`.
 In the case of the `GainPlugin` example this can be achieved by running `npm run start` in `GainPlugin/jsui`.
 
-The `webpack.config.js` template provided by React-JUCE enables all of this for you. See: [Starting a new Project](New_Project.md) for a project
+The `webpack.config.js` template provided by React-JUCE enables all of this for you. See: [Starting a new Project](Integrating_Your_Project.md) for a project
 template setup which includes debugger support. Project template files are available under `react-juce/packages/react-juce/template`.
 
 Example `webpack.config.js`:
