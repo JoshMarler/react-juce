@@ -5,12 +5,17 @@ project(reactjuce VERSION 0.1.0)
 # (practical to debug the plugin processor directly from your IDE)
 option(JUCE_BUILD_EXTRAS "Build JUCE Extras" OFF)
 
-
 # Change this option to set the JS Interpreter/Engine you wish to run React-JUCE against.
-set(REACTJUCE_JS_LIBRARY DUKTAPE CACHE STRING "The JS Engine to use: either HERMES or DUKTAPE")
+if (NOT DEFINED REACTJUCE_JS_LIBRARY)
+    set(REACTJUCE_JS_LIBRARY DUKTAPE CACHE STRING "The JS Engine to use: either HERMES or DUKTAPE")
+endif()
 
+# Set this to OFF in your CPMAddPackage if you're including this as a library.
+option(REACTJUCE_INCLUDE_JUCE "Include JUCE" ON)
 
-add_subdirectory(ext/juce)
+if (REACTJUCE_INCLUDE_JUCE)
+  add_subdirectory(ext/juce)
+endif()
 
 # Adding any custom modules you might have:
 juce_add_module(react_juce)
@@ -49,6 +54,11 @@ elseif (REACTJUCE_JS_LIBRARY STREQUAL "DUKTAPE")
     )
 endif()
 
-# If you want to create new projects, you can init them in the examples folder
-# and add them here with the add_subdirectory command
-add_subdirectory(examples/GainPlugin)
+# Set this to OFF in your CPMAddPackage if you're including this as a library.
+option(REACTJUCE_BUILD_EXAMPLES "Build examples" ON)
+
+if (REACTJUCE_BUILD_EXAMPLES)
+    # If you want to create new projects, you can init them in the examples folder
+    # and add them here with the add_subdirectory command
+    add_subdirectory(examples/GainPlugin)
+endif()
