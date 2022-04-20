@@ -13,7 +13,7 @@ to a 1.0 release.
 
 **Anticipated Breaking Changes**
 
-- We'll be renaming Blueprint to react-juce before beta (#34)
+- ~~We'll be renaming Blueprint to react-juce before beta (#34)~~
 - ~~Updating the examples and `npm init` template to point to npm instead of the local package~~
 - ~~`ReactApplicationRoot::evaluate` and `ReactApplicationRoot::evaluateFile` (#115)~~
 - ~~Refactoring the hot reloader and decoupling the EcmascriptEngine from ReactApplicationRoot (#65)~~
@@ -23,7 +23,7 @@ to a 1.0 release.
 - Documentation: [Docs & Getting Started](https://docs.react-juce.dev)
 - Discussions: [GitHub Discussions](https://github.com/nick-thompson/react-juce/discussions)
 - Community: [The Audio Programmer Discord Server](https://discord.gg/3H4wwVf49v)
-  - Join the `#blueprint` channel and say hi!
+  - Join the `#react-juce` channel and say hi!
 
 ## Maintainers
 
