@@ -10,7 +10,7 @@
 #pragma once
 
 #include <unordered_map>
-
+#include <vector>
 
 namespace reactjuce
 {
@@ -178,4 +178,41 @@ namespace reactjuce
         return invoke(name, vargs);
     }
 
+    //==============================================================================
+    /** Utility helper class for Ecmascript implementations. Read a SourceMap and
+     *  provide translations to original source location.
+     */
+    class SourceMap
+    {
+    public:
+        struct Location
+        {
+            const juce::String& file;
+            int line;
+            int col;
+        };
+
+        SourceMap(const juce::String& source, const juce::String& map);
+        SourceMap(const juce::String& source, const juce::File& map);
+        ~SourceMap() = default;
+
+        Location translate(int line, int col) const;
+
+    private:
+        struct Segment
+        {
+            int segStartCol = 0;
+            int origSourceId = 0;
+            int origStartLine = 0;
+            int origStartCol = 0;
+            bool gotSourceMap = false;
+        };
+
+        bool LoadMap(const juce::String& map);
+
+        bool mapLoaded;
+        juce::String sourcePath;
+        std::vector<juce::String> sources;
+        std::vector<std::vector<Segment>> mappings;
+    };
 }
