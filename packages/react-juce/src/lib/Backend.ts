@@ -7,9 +7,17 @@ import SyntheticEvents, {
 } from "./SyntheticEvents";
 import { macroPropertyGetters } from "./MacroProperties";
 import Colors from "./MacroProperties/Colors";
+import invariant from "invariant";
 
 //TODO: Keep this union or introduce a common base class ViewInstanceBase?
 export type Instance = ViewInstance | RawTextViewInstance;
+
+type BorderInfo = {
+  width: number[];
+  radius: string[];
+  color: string[];
+  style: string[];
+};
 
 let __rootViewInstance: ViewInstance | null = null;
 let __viewRegistry: Map<string, Instance> = new Map<string, Instance>();
@@ -22,9 +30,85 @@ const cssPropsMap = allCssProps
   .filter((s) => !s.startsWith("-") && s.includes("-"))
   .reduce((acc, v) => Object.assign(acc, { [camelCase(v)]: v }), {});
 
+// known CSS border styles for React Native
+const cssBorderStyles = ["dotted", "dashed", "solid"];
+
+// Parse combination border properties.
+function parseBorderSideProp(
+  name: string,
+  val: string | number,
+  info: string[] | number[]
+) {
+  invariant(
+    typeof val === "string" || typeof val === "number",
+    name + " must be a string or a number"
+  );
+
+  if (typeof val === "number") {
+    info[0] = info[1] = info[2] = info[3] = +val;
+    return;
+  }
+
+  const values = val.split(" ");
+
+  invariant(
+    values.length >= 1 && values.length <= 4,
+    "border-" + name + " should be a space separated string with 1 to 4 values."
+  );
+
+  switch (values.length) {
+    case 1:
+      info[0] = info[1] = info[2] = info[3] = values[0];
+      break;
+    case 2:
+      info[0] = info[2] = values[0];
+      info[1] = info[3] = values[1];
+      break;
+    case 3:
+      info[0] = values[0];
+      info[1] = info[3] = values[1];
+      info[2] = values[2];
+      break;
+    default:
+      info[0] = values[0];
+      info[1] = values[1];
+      info[2] = values[2];
+      info[3] = values[3];
+  }
+}
+
+function parseBorderProp(val: string, info: object) {
+  /*
+    Parameters can be in any order. So we need to recognised
+    which might be which.
+  */
+  const numbers = "0123456789.-+";
+  const values = val.split(" ");
+
+  invariant(
+    values.length >= 1 && values.length <= 3,
+    "border should be a space separated string with 1 to 3 values."
+  );
+
+  const bs = info["style"];
+  const bw = info["width"];
+  const bc = info["color"];
+
+  for (val of values) {
+    if (cssBorderStyles.includes(val)) {
+      bs[0] = bs[1] = bs[2] = bs[3] = val;
+    } else if (numbers.includes(val.charAt(0))) {
+      bw[0] = bw[1] = bw[2] = bw[3] = +val;
+    } else {
+      bc[0] = bc[1] = bc[2] = bc[3] = val;
+    }
+  }
+}
+
 export class ViewInstance {
   private _id: string;
   private _type: string;
+  private _border: BorderInfo;
   public _children: Instance[];
   public _props: any = null;
   public _parent: any = null;
@@ -32,6 +116,12 @@ export class ViewInstance {
   constructor(id: string, type: string, props?: any, parent?: ViewInstance) {
     this._id = id;
     this._type = type;
+    this._border = {
+      width: [0, 0, 0, 0],
+      radius: ["0", "0", "0", "0"],
+      color: ["", "", "", ""],
+      style: ["solid", "solid", "solid", "solid"],
+    };
     this._children = [];
     this._props = props;
     this._parent = parent;
@@ -144,6 +234,100 @@ export class ViewInstance {
         NativeMethods.setViewProperty(this._id, k, v);
       return;
     }
+
+    // Look for border properties and translate into our internal
+    // border-info property.
+    if (propKey.startsWith("border")) {
+      let gotBorderProp: boolean = true;
+
+      switch (propKey) {
+        case "border":
+          parseBorderProp(value, this._border);
+          break;
+
+        case "border-color":
+          parseBorderSideProp("color", value, this._border["color"]);
+          break;
+        case "border-top-color":
+          this._border["color"][0] = value;
+          break;
+        case "border-right-color":
+          this._border["color"][1] = value;
+          break;
+        case "border-bottom-color":
+          this._border["color"][2] = value;
+          break;
+        case "border-left-color":
+          this._border["color"][3] = value;
+          break;
+
+        case "border-radius":
+          parseBorderSideProp("radius", value, this._border["radius"]);
+          break;
+        case "border-top-left-radius":
+          this._border["radius"][0] = value;
+          break;
+        case "border-top-right-radius":
+          this._border["radius"][1] = value;
+          break;
+        case "border-bottom-right-radius":
+          this._border["radius"][2] = value;
+          break;
+        case "border-bottom-left-radius":
+          this._border["radius"][3] = value;
+          break;
+
+        case "border-style":
+          parseBorderSideProp("style", value, this._border["style"]);
+          break;
+        case "border-top-style":
+          this._border["style"][0] = value;
+          break;
+        case "border-right-style":
+          this._border["style"][1] = value;
+          break;
+        case "border-bottom-style":
+          this._border["style"][2] = value;
+          break;
+        case "border-left-style":
+          this._border["style"][3] = value;
+          break;
+
+        case "border-width":
+          parseBorderSideProp("width", value, this._border["width"]);
+          break;
+        case "border-top-width":
+          this._border["width"][0] = value;
+          break;
+        case "border-right-width":
+          this._border["width"][1] = value;
+          break;
+        case "border-bottom-width":
+          this._border["width"][2] = value;
+          break;
+        case "border-left-width":
+          this._border["width"][3] = value;
+          break;
+
+        default:
+          gotBorderProp = false;
+          break;
+      }
+
+      invariant(
+        cssBorderStyles.includes(this._border["style"][0]) &&
+          cssBorderStyles.includes(this._border["style"][1]) &&
+          cssBorderStyles.includes(this._border["style"][2]) &&
+          cssBorderStyles.includes(this._border["style"][3]),
+        "unknown border-style."
+      );
+
+      if (gotBorderProp) {
+        propKey = "border-info";
+        value = this._border;
+      }
+    }
+
     //@ts-ignore
     return NativeMethods.setViewProperty(
       this._id,

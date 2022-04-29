@@ -38,10 +38,8 @@ namespace reactjuce
 
         static const inline juce::Identifier backgroundColorProp      = "background-color";
 
-        static const inline juce::Identifier borderColorProp          = "border-color";
+        static const inline juce::Identifier borderInfoProp           = "border-info";
         static const inline juce::Identifier borderPathProp           = "border-path";
-        static const inline juce::Identifier borderRadiusProp         = "border-radius";
-        static const inline juce::Identifier borderWidthProp          = "border-width";
 
         //==============================================================================
         View() = default;
@@ -64,9 +62,6 @@ namespace reactjuce
         void setFloatBounds (juce::Rectangle<float> bounds);
 
         //==============================================================================
-        /** Resolves a property to a specific point value or 0 if not present. */
-        float getResolvedLengthProperty (const juce::String& name, float axisLength);
-
         /** Override the default Component method with default paint behaviors. */
         void paint (juce::Graphics& g) override;
 
