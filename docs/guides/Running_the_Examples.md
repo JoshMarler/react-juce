@@ -67,4 +67,4 @@ and redraw your interface.
 
 Now that you're up and running, take a minute to tweak the GainPlugin React
 application to get a sense of the workflow! When you're done, let's move on to
-the next step, [adding React-JUCE to your own project](New_Project.md).
+the next step, [adding React-JUCE to your own project](Integrating_Your_Project.md).
