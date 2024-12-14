@@ -1,16 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
 project(reactjuce VERSION 0.1.0)
 
-# Change this option to ON if you want to build the AudioPluginHost for example
-# (practical to debug the plugin processor directly from your IDE)
-option(JUCE_BUILD_EXTRAS "Build JUCE Extras" OFF)
 
 
 # Change this option to set the JS Interpreter/Engine you wish to run React-JUCE against.
 set(REACTJUCE_JS_LIBRARY DUKTAPE CACHE STRING "The JS Engine to use: either HERMES or DUKTAPE")
 
 
-add_subdirectory(ext/juce)
 
 # Adding any custom modules you might have:
 juce_add_module(react_juce)
