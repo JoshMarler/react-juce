@@ -1,9 +1,0 @@
-define: DUK_USE_BRANCH_HINTS
-introduced: 1.0.0
-default: true
-tags:
-  - portability
-description: >
-  Use branch hints if the compiler supports them.
-
-# XXX: Unused now, DUK_LIKELY and DUK_UNLIKELY are used instead.

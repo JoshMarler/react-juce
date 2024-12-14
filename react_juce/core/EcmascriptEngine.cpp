@@ -9,11 +9,7 @@
 
 #include "EcmascriptEngine.h"
 
-#if REACTJUCE_USE_HERMES
-    #include "EcmascriptEngine_Hermes.cpp"
-#elif REACTJUCE_USE_DUKTAPE
-    #include "EcmascriptEngine_Duktape.cpp"
-#endif
+#include "EcmascriptEngine_Hermes.cpp"
 
 
 namespace reactjuce
