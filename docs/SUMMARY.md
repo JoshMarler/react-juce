@@ -3,8 +3,7 @@
 ## Guides
 
 - [Getting Started](guides/Getting_Started.md)
-- [Running the Examples](guides/Running_the_Examples.md)
-- [Integrating Your Project](guides/Integrating_Your_Project.md)
+- [Setting Up Your Project](guides/Integrating_Your_Project.md)
 - [Debugging with Duktape](guides/Debugging_With_Duktape.md)
 - [Why Not React Native?](guides/Why_Not_React_Native.md)
 
@@ -23,11 +22,11 @@
 
 ## Native
 
+- [JS/C++ Interop](native/Interop.md)
 - [Custom Native Components](native/Custom_Native_Components.md)
-- [JS/Native Interop](native/Interop.md)
 
 ## Have a Question?
 
-- [GitHub Discussions](https://github.com/nick-thompson/react-juce/discussions)
+- [GitHub Discussions](https://github.com/JoshMarler/react-juce/discussions)
 - [Discord Chatroom](https://discord.gg/3H4wwVf49v)
-- [Open an Issue](https://github.com/nick-thompson/react-juce/issues)
+- [Open an Issue](https://github.com/JoshMarler/react-juce/issues)

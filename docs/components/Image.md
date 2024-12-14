@@ -19,7 +19,7 @@ import logoDataUri from "./logo.jpg";
 function App(props) {
   return (
     <View {...styles.outer} onMouseDown={(e) => console.log("Mouse event!", e)}>
-      <Image {...styles.image} source="file:///Users/nick/Documents/logo.jpg" />
+      <Image {...styles.image} source="file:///Users/jmarler/Documents/logo.jpg" />
       <Image {...styles.image} source={logoDataUri} />
     </View>
   );
@@ -47,7 +47,7 @@ const styles = {
 
 #### source
 
-The image source (either a remote URL ([#14](https://github.com/nick-thompson/react-juce/issues/14)), a local file resource, or a data uri).
+The image source (either a remote URL ([#14](https://github.com/JoshMarler/react-juce/issues/14)), a local file resource, or a data uri).
 
 | Type   | Required | Supported                                                                  |
 | ------ | -------- | -------------------------------------------------------------------------- |
