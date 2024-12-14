@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-var assert = require("assert");
-var chalk = require("chalk");
-var cp = require("child_process");
-var fs = require("fs-extra");
-var path = require("path");
+import assert from "assert";
+import { green, red, blue } from "chalk";
+import { exec } from "child_process";
+import { mkdirp, copy } from "fs-extra";
+import { resolve } from "path";
 
 var args = process.argv.slice(2);
 
@@ -13,46 +13,46 @@ assert(
   "Must provide a path to the directory in which to initialize the template."
 );
 
-var targetDir = path.resolve(args[0]);
-var packageDir = path.resolve(__dirname, "..");
-var templateDir = path.resolve(packageDir, "template");
+var targetDir = resolve(args[0]);
+var packageDir = resolve(__dirname, "..");
+var templateDir = resolve(packageDir, "template");
 
-console.log("Initializing a React-JUCE template in:", chalk.green(targetDir));
+console.log("Initializing a React-JUCE template in:", green(targetDir));
 console.log("Directory tree will be created if it does not exist.");
 
-fs.mkdirp(targetDir, function (err) {
+mkdirp(targetDir, function (err) {
   if (err) {
-    console.error(chalk.red(err));
+    console.error(red(err));
     process.exit(1);
   }
 
   console.log("[*] Copying template files");
 
-  fs.copy(templateDir, targetDir, function (err) {
+  copy(templateDir, targetDir, function (err) {
     if (err) {
-      console.error(chalk.red(err));
+      console.error(red(err));
       process.exit(1);
     }
 
     console.log("[*] Installing dependencies");
 
-    cp.exec("npm install", { cwd: targetDir }, function (err, stdout, stderr) {
+    exec("npm install", { cwd: targetDir }, function (err, _stdout, stderr) {
       if (err) {
-        console.error(chalk.red(err));
+        console.error(red(err));
         console.error(stderr);
         process.exit(1);
       }
 
       console.log();
       console.log(`
-${chalk.blue(
+${blue(
   "Success!"
-)} Initialized a React-JUCE template in ${chalk.green(targetDir)}
+)} Initialized a React-JUCE template in ${green(targetDir)}
 
 You can now get started by typing:
 
-${chalk.blue("cd")} ${args[0]}
-${chalk.blue("npm start")}
+${blue("cd")} ${args[0]}
+${blue("npm start")}
 
 Then adding the reactjuce::ReactApplicationRoot component to your project.
       `);

@@ -1,7 +1,3 @@
-/** Polyfill ES2015 data structures with core-js. */
-import "core-js/es6/set";
-import "core-js/es6/map";
-
 import Backend from "./lib/Backend";
 import Renderer, { TracedRenderer } from "./lib/Renderer";
 
@@ -35,11 +31,16 @@ export default {
 
     // Create a root Container if it doesnt exist
     if (!container._rootContainer) {
-      //TODO: Double check passing false for final param "hydrate correct"
+      // TODO (jmarler) Check what we should actually be sending here.
       container._rootContainer = __preferredRenderer.createContainer(
         container,
+        0,
+        null,
         false,
-        false
+        null,
+        '',
+        (e) => { console.log(`Recoverable error: ${e}`); },
+        null
       );
     }
 

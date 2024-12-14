@@ -19,7 +19,6 @@ module.exports = (env) => {
         amd: "react",
       },
     },
-    target: ["web", "es5"],
     devtool: "source-map",
     resolve: {
       extensions: [".ts", ".tsx", ".js"],

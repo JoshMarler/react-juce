@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, PropsWithChildren } from "react";
 
 import { View } from "./View";
 import { SyntheticMouseEvent } from "../lib/SyntheticEvents";
@@ -6,7 +6,7 @@ import { ViewInstance } from "../lib/Backend";
 
 //TODO: Once ViewProps work is complete we can probably
 //      remove this in favour of ViewProps.
-export interface ButtonProps {
+export interface ButtonProps extends PropsWithChildren {
   onClick: (e: SyntheticMouseEvent) => void;
   onMouseDown?: (e: SyntheticMouseEvent) => void;
   onMouseUp?: (e: SyntheticMouseEvent) => void;
